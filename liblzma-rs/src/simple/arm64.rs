@@ -199,7 +199,7 @@ pub unsafe extern "C" fn lzma_bcj_arm64_encode(
     mut buf: *mut u8,
     mut size: size_t,
 ) -> size_t {
-    start_offset = (start_offset & !(3 as c_uint)) as u32;
+    start_offset = (start_offset & !3u32) as u32;
     return arm64_code(NULL, start_offset, true_0 != 0, buf, size);
 }
 #[no_mangle]
@@ -216,6 +216,6 @@ pub unsafe extern "C" fn lzma_bcj_arm64_decode(
     mut buf: *mut u8,
     mut size: size_t,
 ) -> size_t {
-    start_offset = (start_offset & !(3 as c_uint)) as u32;
+    start_offset = (start_offset & !3u32) as u32;
     return arm64_code(NULL, start_offset, false_0 != 0, buf, size);
 }

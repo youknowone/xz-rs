@@ -31,7 +31,7 @@ pub union C2RustUnnamed_0 {
 }
 #[inline]
 unsafe extern "C" fn rotr_32(mut num: u32, mut amount: c_uint) -> u32 {
-    return num >> amount | num << (32 as c_uint).wrapping_sub(amount);
+    return num >> amount | num << 32u32.wrapping_sub(amount);
 }
 static mut SHA256_K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
@@ -854,7 +854,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 0 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 0 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(0 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[0u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(0 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 0 as c_int & 7 as c_int) as usize] = T
@@ -974,7 +974,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 2 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 2 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(2 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[2u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(2 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 2 as c_int & 7 as c_int) as usize] = T
@@ -1034,7 +1034,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 3 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 3 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(3 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[3u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(3 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 3 as c_int & 7 as c_int) as usize] = T
@@ -1094,7 +1094,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 4 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 4 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(4 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[4u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(4 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 4 as c_int & 7 as c_int) as usize] = T
@@ -1154,7 +1154,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 5 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 5 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(5 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[5u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(5 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 5 as c_int & 7 as c_int) as usize] = T
@@ -1214,7 +1214,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 6 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 6 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(6 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[6u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(6 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 6 as c_int & 7 as c_int) as usize] = T
@@ -1274,7 +1274,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 7 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 7 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(7 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[7u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(7 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 7 as c_int & 7 as c_int) as usize] = T
@@ -1334,7 +1334,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 8 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 8 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(8 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[8u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(8 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 8 as c_int & 7 as c_int) as usize] = T
@@ -1394,7 +1394,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 9 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 9 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(9 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[9u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(9 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 9 as c_int & 7 as c_int) as usize] = T
@@ -1457,7 +1457,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 10 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 10 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(10 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[10u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(10 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 10 as c_int & 7 as c_int) as usize] = T
@@ -1520,7 +1520,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 11 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 11 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(11 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[11u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(11 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 11 as c_int & 7 as c_int) as usize] = T
@@ -1583,7 +1583,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 12 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 12 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(12 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[12u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(12 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 12 as c_int & 7 as c_int) as usize] = T
@@ -1646,7 +1646,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 13 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 13 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(13 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[13u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(13 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 13 as c_int & 7 as c_int) as usize] = T
@@ -1709,7 +1709,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 14 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 14 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(14 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[14u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(14 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 14 as c_int & 7 as c_int) as usize] = T
@@ -1772,7 +1772,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                             & (T[(5 as c_int - 15 as c_int & 7 as c_int) as usize]
                                 ^ T[(6 as c_int - 15 as c_int & 7 as c_int) as usize]),
                 )
-                .wrapping_add(SHA256_K[(15 as c_uint).wrapping_add(j) as usize])
+                .wrapping_add(SHA256_K[15u32.wrapping_add(j) as usize])
                 .wrapping_add(W[(15 as c_int & 15 as c_int) as usize]),
             );
         T[(3 as c_int - 15 as c_int & 7 as c_int) as usize] = T
