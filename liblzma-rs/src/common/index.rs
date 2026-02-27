@@ -204,11 +204,11 @@ pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 #[inline]
-unsafe extern "C" fn bsr32(mut n: u32) -> u32 {
+extern "C" fn bsr32(mut n: u32) -> u32 {
     return n.leading_zeros() as i32 as u32 ^ 31 as u32;
 }
 #[inline]
-unsafe extern "C" fn ctz32(mut n: u32) -> u32 {
+extern "C" fn ctz32(mut n: u32) -> u32 {
     return n.trailing_zeros() as i32 as u32;
 }
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
@@ -218,20 +218,20 @@ pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
-unsafe extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
+extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
 }
 #[inline]
-unsafe extern "C" fn index_size_unpadded(
+extern "C" fn index_size_unpadded(
     mut count: lzma_vli,
     mut index_list_size: lzma_vli,
 ) -> lzma_vli {
-    return ((1 as u32).wrapping_add(lzma_vli_size(count)) as lzma_vli)
+    return ((1 as u32).wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
         .wrapping_add(index_list_size)
         .wrapping_add(4 as lzma_vli);
 }
 #[inline]
-unsafe extern "C" fn index_size(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
+extern "C" fn index_size(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
     return vli_ceil4(index_size_unpadded(count, index_list_size));
 }
 pub const INDEX_GROUP_SIZE: c_int = 512 as c_int;

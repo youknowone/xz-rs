@@ -119,24 +119,24 @@ pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 pub const INDEX_INDICATOR: c_int = 0 as c_int;
 #[inline]
-unsafe extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
+extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
 }
 #[inline]
-unsafe extern "C" fn index_size_unpadded(
+extern "C" fn index_size_unpadded(
     mut count: lzma_vli,
     mut index_list_size: lzma_vli,
 ) -> lzma_vli {
-    return ((1 as u32).wrapping_add(lzma_vli_size(count)) as lzma_vli)
+    return ((1 as u32).wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
         .wrapping_add(index_list_size)
         .wrapping_add(4 as lzma_vli);
 }
 #[inline]
-unsafe extern "C" fn index_size(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
+extern "C" fn index_size(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
     return vli_ceil4(index_size_unpadded(count, index_list_size));
 }
 #[inline]
-unsafe extern "C" fn index_stream_size(
+extern "C" fn index_stream_size(
     mut blocks_size: lzma_vli,
     mut count: lzma_vli,
     mut index_list_size: lzma_vli,

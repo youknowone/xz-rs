@@ -235,7 +235,7 @@ extern "C" fn lzma2_bound(mut uncompressed_size: u64) -> u64 {
     return uncompressed_size.wrapping_add(overhead);
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_block_buffer_bound64(mut uncompressed_size: u64) -> u64 {
+pub extern "C" fn lzma_block_buffer_bound64(mut uncompressed_size: u64) -> u64 {
     let mut lzma2_size: u64 = lzma2_bound(uncompressed_size);
     if lzma2_size == 0 {
         return 0;
@@ -244,7 +244,7 @@ pub unsafe extern "C" fn lzma_block_buffer_bound64(mut uncompressed_size: u64) -
     return (HEADERS_BOUND as u64).wrapping_add(lzma2_size);
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_block_buffer_bound(mut uncompressed_size: size_t) -> size_t {
+pub extern "C" fn lzma_block_buffer_bound(mut uncompressed_size: size_t) -> size_t {
     let mut ret: u64 = lzma_block_buffer_bound64(uncompressed_size as u64);
     return ret as size_t;
 }
