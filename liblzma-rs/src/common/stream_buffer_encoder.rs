@@ -141,14 +141,14 @@ pub const LZMA_VLI_MAX: lzma_vli = u64::MAX / 2;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_buffer_bound(mut uncompressed_size: size_t) -> size_t {
     let block_bound: size_t = lzma_block_buffer_bound(uncompressed_size) as size_t;
-    if block_bound == 0 as size_t {
-        return 0 as size_t;
+    if block_bound == 0 {
+        return 0;
     }
 
     // Match C: my_min(SIZE_MAX, LZMA_VLI_MAX) - block_bound < HEADERS_BOUND.
     let stream_bound_max: size_t = core::cmp::min(size_t::MAX, LZMA_VLI_MAX as size_t);
     if stream_bound_max.wrapping_sub(block_bound) < HEADERS_BOUND as size_t {
-        return 0 as size_t;
+        return 0;
     }
     return block_bound.wrapping_add(HEADERS_BOUND as size_t);
 }
@@ -165,7 +165,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
 ) -> lzma_ret {
     if filters.is_null()
         || check > LZMA_CHECK_ID_MAX
-        || in_0.is_null() && in_size != 0 as size_t
+        || in_0.is_null() && in_size != 0
         || out.is_null()
         || out_pos_ptr.is_null()
         || *out_pos_ptr > out_size
@@ -181,7 +181,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
     }
     out_size = out_size.wrapping_sub(LZMA_STREAM_HEADER_SIZE as size_t);
     let mut stream_flags: lzma_stream_flags = lzma_stream_flags {
-        version: 0 as u32,
+        version: 0,
         backward_size: 0,
         check: check,
         reserved_enum1: LZMA_RESERVED_ENUM,
@@ -204,7 +204,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
     }
     out_pos = out_pos.wrapping_add(LZMA_STREAM_HEADER_SIZE as size_t);
     let mut block: lzma_block = lzma_block {
-        version: 0 as u32,
+        version: 0,
         header_size: 0,
         check: check,
         compressed_size: 0,
@@ -235,7 +235,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
         reserved_bool7: 0,
         reserved_bool8: 0,
     };
-    if in_size > 0 as size_t {
+    if in_size > 0 {
         let ret_: lzma_ret = lzma_block_buffer_encode(
             &raw mut block,
             allocator,
@@ -254,7 +254,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
         return LZMA_MEM_ERROR;
     }
     let mut ret: lzma_ret = LZMA_OK;
-    if in_size > 0 as size_t {
+    if in_size > 0 {
         ret = lzma_index_append(
             i,
             allocator,

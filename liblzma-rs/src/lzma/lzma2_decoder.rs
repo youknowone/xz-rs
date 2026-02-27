@@ -270,7 +270,7 @@ unsafe extern "C" fn lzma2_decode(
             0 => {
                 let control: u32 = *in_0.offset(*in_pos as isize) as u32;
                 *in_pos = (*in_pos).wrapping_add(1);
-                if control == 0 as u32 {
+                if control == 0 {
                     return LZMA_STREAM_END;
                 }
                 if control >= 0xe0 as u32 || control == 1 as u32 {
@@ -377,7 +377,7 @@ unsafe extern "C" fn lzma2_decode(
                 if ret != LZMA_STREAM_END {
                     return ret;
                 }
-                if (*coder).compressed_size != 0 as size_t {
+                if (*coder).compressed_size != 0 {
                     return LZMA_DATA_ERROR;
                 }
                 (*coder).sequence = SEQ_CONTROL;
@@ -390,7 +390,7 @@ unsafe extern "C" fn lzma2_decode(
                     in_size,
                     &raw mut (*coder).compressed_size,
                 );
-                if (*coder).compressed_size != 0 as size_t {
+                if (*coder).compressed_size != 0 {
                     return LZMA_OK;
                 }
                 (*coder).sequence = SEQ_CONTROL;
@@ -454,7 +454,7 @@ unsafe extern "C" fn lzma2_decoder_init(
     (*coder).sequence = SEQ_CONTROL;
     (*coder).need_properties = true;
     (*coder).need_dictionary_reset =
-        (*options).preset_dict.is_null() || (*options).preset_dict_size == 0 as u32;
+        (*options).preset_dict.is_null() || (*options).preset_dict_size == 0;
     return lzma_lzma_decoder_create(&raw mut (*coder).lzma, allocator, options, lz_options);
 }
 #[no_mangle]
@@ -514,7 +514,7 @@ pub unsafe extern "C" fn lzma_lzma2_props_decode(
         (*opt).dict_size <<= u32::from(*props.offset(0)).wrapping_div(2).wrapping_add(11);
     }
     (*opt).preset_dict = ::core::ptr::null::<u8>();
-    (*opt).preset_dict_size = 0 as u32;
+    (*opt).preset_dict_size = 0;
     *options = opt as *mut c_void;
     return LZMA_OK;
 }

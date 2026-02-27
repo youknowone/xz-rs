@@ -314,7 +314,7 @@ unsafe extern "C" fn block_decode(
                         return LZMA_DATA_ERROR;
                     }
                 }
-                if !(*coder).ignore_check && out_used > 0 as size_t {
+                if !(*coder).ignore_check && out_used > 0 {
                     lzma_check_update(
                         &raw mut (*coder).check,
                         (*(*coder).block).check,
@@ -484,7 +484,7 @@ pub unsafe extern "C" fn lzma_block_decoder_init(
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -510,7 +510,7 @@ pub unsafe extern "C" fn lzma_block_decoder_init(
     } else {
         (*block).uncompressed_size
     };
-    (*coder).check_pos = 0 as size_t;
+    (*coder).check_pos = 0;
     lzma_check_init(&raw mut (*coder).check, (*block).check);
     (*coder).ignore_check = if (*block).version >= 1 as u32 {
         (*block).ignore_check as c_int != 0

@@ -160,7 +160,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -176,7 +176,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
     let mut opt: *const lzma_options_delta =
         (*filters.offset(0)).options as *const lzma_options_delta;
     (*coder).distance = (*opt).dist as size_t;
-    (*coder).pos = 0 as u8;
+    (*coder).pos = 0;
     memset(
         &raw mut (*coder).history as *mut u8 as *mut c_void,
         0 as c_int,

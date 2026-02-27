@@ -70,8 +70,8 @@ pub unsafe extern "C" fn lzma_check_size(mut type_0: lzma_check) -> u32 {
         return UINT32_MAX as u32;
     }
     static mut check_sizes: [u8; 16] = [
-        0 as u8, 4 as u8, 4 as u8, 4 as u8, 8 as u8, 8 as u8, 8 as u8, 16 as u8, 16 as u8,
-        16 as u8, 32 as u8, 32 as u8, 32 as u8, 64 as u8, 64 as u8, 64 as u8,
+        0, 4 as u8, 4 as u8, 4 as u8, 8 as u8, 8 as u8, 8 as u8, 16 as u8, 16 as u8, 16 as u8,
+        32 as u8, 32 as u8, 32 as u8, 64 as u8, 64 as u8, 64 as u8,
     ];
     return check_sizes[type_0 as usize] as u32;
 }
@@ -79,10 +79,10 @@ pub unsafe extern "C" fn lzma_check_size(mut type_0: lzma_check) -> u32 {
 pub unsafe extern "C" fn lzma_check_init(mut check: *mut lzma_check_state, mut type_0: lzma_check) {
     match type_0 {
         1 => {
-            (*check).state.crc32 = 0 as u32;
+            (*check).state.crc32 = 0;
         }
         4 => {
-            (*check).state.crc64 = 0 as u64;
+            (*check).state.crc64 = 0;
         }
         10 => {
             lzma_sha256_init(check);

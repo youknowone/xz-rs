@@ -52,7 +52,7 @@ pub unsafe extern "C" fn lzma_simple_props_decode(
     mut props: *const u8,
     mut props_size: size_t,
 ) -> lzma_ret {
-    if props_size == 0 as size_t {
+    if props_size == 0 {
         return LZMA_OK;
     }
     if props_size != 4 as size_t {
@@ -66,7 +66,7 @@ pub unsafe extern "C" fn lzma_simple_props_decode(
         return LZMA_MEM_ERROR;
     }
     (*opt).start_offset = read32le(props);
-    if (*opt).start_offset == 0 as u32 {
+    if (*opt).start_offset == 0 {
         lzma_free(opt as *mut c_void, allocator);
     } else {
         *options = opt as *mut c_void;

@@ -215,7 +215,7 @@ unsafe extern "C" fn index_decode(
                 if ret != LZMA_STREAM_END {
                     break;
                 }
-                (*coder).pos = 0 as size_t;
+                (*coder).pos = 0;
                 (*coder).sequence = SEQ_MEMUSAGE;
                 current_block = 7642845755631126846;
             }
@@ -233,7 +233,7 @@ unsafe extern "C" fn index_decode(
                     break;
                 }
                 ret = LZMA_OK;
-                (*coder).pos = 0 as size_t;
+                (*coder).pos = 0;
                 if (*coder).sequence == SEQ_UNPADDED {
                     if (*coder).unpadded_size < UNPADDED_SIZE_MIN as lzma_vli
                         || (*coder).unpadded_size > UNPADDED_SIZE_MAX as lzma_vli
@@ -275,7 +275,7 @@ unsafe extern "C" fn index_decode(
         }
         match current_block {
             8340016495055110192 => {
-                if (*coder).pos > 0 as size_t {
+                if (*coder).pos > 0 {
                     (*coder).pos = (*coder).pos.wrapping_sub(1);
                     let fresh1 = *in_pos;
                     *in_pos = (*in_pos).wrapping_add(1);
@@ -330,7 +330,7 @@ unsafe extern "C" fn index_decode(
         return LZMA_STREAM_END;
     }
     let in_used: size_t = (*in_pos).wrapping_sub(in_start);
-    if in_used > 0 as size_t {
+    if in_used > 0 {
         (*coder).crc32 = lzma_crc32(in_0.offset(in_start as isize), in_used, (*coder).crc32);
     }
     return ret;
@@ -352,7 +352,7 @@ unsafe extern "C" fn index_decoder_memconfig(
     let mut coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
     *memusage = lzma_index_memusage(1 as lzma_vli, (*coder).count);
     *old_memlimit = (*coder).memlimit;
-    if new_memlimit != 0 as u64 {
+    if new_memlimit != 0 {
         if new_memlimit < *memusage {
             return LZMA_MEMLIMIT_ERROR;
         }
@@ -379,8 +379,8 @@ unsafe extern "C" fn index_decoder_reset(
         memlimit
     };
     (*coder).count = 0 as lzma_vli;
-    (*coder).pos = 0 as size_t;
-    (*coder).crc32 = 0 as u32;
+    (*coder).pos = 0;
+    (*coder).crc32 = 0;
     return LZMA_OK;
 }
 #[no_mangle]
@@ -539,7 +539,7 @@ pub unsafe extern "C" fn lzma_index_buffer_decode(
         in_size,
         core::ptr::null_mut(),
         core::ptr::null_mut(),
-        0 as size_t,
+        0,
         LZMA_RUN,
     );
     if ret == LZMA_STREAM_END {

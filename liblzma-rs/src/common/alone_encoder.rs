@@ -347,7 +347,7 @@ unsafe extern "C" fn alone_encoder_init(
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -358,7 +358,7 @@ unsafe extern "C" fn alone_encoder_init(
         };
     }
     (*coder).sequence = SEQ_HEADER;
-    (*coder).header_pos = 0 as size_t;
+    (*coder).header_pos = 0;
     if lzma_lzma_lclppb_encode(options, &raw mut (*coder).header as *mut u8) {
         return LZMA_OPTIONS_ERROR;
     }

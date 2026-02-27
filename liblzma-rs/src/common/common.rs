@@ -168,7 +168,7 @@ pub unsafe extern "C" fn lzma_alloc(
     mut size: size_t,
     mut allocator: *const lzma_allocator,
 ) -> *mut c_void {
-    if size == 0 as size_t {
+    if size == 0 {
         size = 1 as size_t;
     }
     let mut ptr: *mut c_void = core::ptr::null_mut();
@@ -188,7 +188,7 @@ pub unsafe extern "C" fn lzma_alloc_zero(
     mut size: size_t,
     mut allocator: *const lzma_allocator,
 ) -> *mut c_void {
-    if size == 0 as size_t {
+    if size == 0 {
         size = 1 as size_t;
     }
     let mut ptr: *mut c_void = core::ptr::null_mut();
@@ -230,7 +230,7 @@ pub unsafe extern "C" fn lzma_bufcpy(
     } else {
         out_avail
     };
-    if copy_size > 0 as size_t {
+    if copy_size > 0 {
         memcpy(
             out.offset(*out_pos as isize) as *mut c_void,
             in_0.offset(*in_pos as isize) as *const c_void,
@@ -287,7 +287,7 @@ pub unsafe extern "C" fn lzma_next_end(
     mut next: *mut lzma_next_coder,
     mut allocator: *const lzma_allocator,
 ) {
-    if (*next).init != 0 as uintptr_t {
+    if (*next).init != 0 {
         if (*next).end.is_some() {
             (*next).end.expect("non-null function pointer")((*next).coder, allocator);
         } else {
@@ -296,7 +296,7 @@ pub unsafe extern "C" fn lzma_next_end(
         *next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -323,7 +323,7 @@ pub unsafe extern "C" fn lzma_strm_init(mut strm: *mut lzma_stream) -> lzma_ret 
         (*(*strm).internal).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -340,8 +340,8 @@ pub unsafe extern "C" fn lzma_strm_init(mut strm: *mut lzma_stream) -> lzma_ret 
     );
     (*(*strm).internal).sequence = ISEQ_RUN;
     (*(*strm).internal).allow_buf_error = false;
-    (*strm).total_in = 0 as u64;
-    (*strm).total_out = 0 as u64;
+    (*strm).total_in = 0;
+    (*strm).total_out = 0;
     return LZMA_OK;
 }
 #[no_mangle]
@@ -349,8 +349,8 @@ pub unsafe extern "C" fn lzma_code(
     mut strm: *mut lzma_stream,
     mut action: lzma_action,
 ) -> lzma_ret {
-    if (*strm).next_in.is_null() && (*strm).avail_in != 0 as size_t
-        || (*strm).next_out.is_null() && (*strm).avail_out != 0 as size_t
+    if (*strm).next_in.is_null() && (*strm).avail_in != 0
+        || (*strm).next_out.is_null() && (*strm).avail_out != 0
         || (*strm).internal.is_null()
         || (*(*strm).internal).next.code.is_none()
         || action > LZMA_FULL_BARRIER
@@ -362,9 +362,9 @@ pub unsafe extern "C" fn lzma_code(
         || !(*strm).reserved_ptr2.is_null()
         || !(*strm).reserved_ptr3.is_null()
         || !(*strm).reserved_ptr4.is_null()
-        || (*strm).reserved_int2 != 0 as u64
-        || (*strm).reserved_int3 != 0 as size_t
-        || (*strm).reserved_int4 != 0 as size_t
+        || (*strm).reserved_int2 != 0
+        || (*strm).reserved_int3 != 0
+        || (*strm).reserved_int4 != 0
         || (*strm).reserved_enum1 != LZMA_RESERVED_ENUM
         || (*strm).reserved_enum2 != LZMA_RESERVED_ENUM
     {
@@ -409,8 +409,8 @@ pub unsafe extern "C" fn lzma_code(
         5 => return LZMA_STREAM_END,
         6 | _ => return LZMA_PROG_ERROR,
     }
-    let mut in_pos: size_t = 0 as size_t;
-    let mut out_pos: size_t = 0 as size_t;
+    let mut in_pos: size_t = 0;
+    let mut out_pos: size_t = 0;
     let mut ret: lzma_ret = (*(*strm).internal)
         .next
         .code
@@ -425,12 +425,12 @@ pub unsafe extern "C" fn lzma_code(
         (*strm).avail_out,
         action,
     );
-    if in_pos > 0 as size_t {
+    if in_pos > 0 {
         (*strm).next_in = (*strm).next_in.offset(in_pos as isize);
         (*strm).avail_in = (*strm).avail_in.wrapping_sub(in_pos);
         (*strm).total_in = (*strm).total_in.wrapping_add(in_pos as u64);
     }
-    if out_pos > 0 as size_t {
+    if out_pos > 0 {
         (*strm).next_out = (*strm).next_out.offset(out_pos as isize);
         (*strm).avail_out = (*strm).avail_out.wrapping_sub(out_pos);
         (*strm).total_out = (*strm).total_out.wrapping_add(out_pos as u64);
@@ -439,7 +439,7 @@ pub unsafe extern "C" fn lzma_code(
     let mut current_block_49: u64;
     match ret {
         0 => {
-            if out_pos == 0 as size_t && in_pos == 0 as size_t {
+            if out_pos == 0 && in_pos == 0 {
                 if (*(*strm).internal).allow_buf_error {
                     ret = LZMA_BUF_ERROR;
                 } else {
@@ -541,10 +541,10 @@ pub unsafe extern "C" fn lzma_memusage(mut strm: *const lzma_stream) -> u64 {
             (*(*strm).internal).next.coder,
             &raw mut memusage,
             &raw mut old_memlimit,
-            0 as u64,
+            0,
         ) != LZMA_OK
     {
-        return 0 as u64;
+        return 0;
     }
     return memusage;
 }
@@ -562,10 +562,10 @@ pub unsafe extern "C" fn lzma_memlimit_get(mut strm: *const lzma_stream) -> u64 
             (*(*strm).internal).next.coder,
             &raw mut memusage,
             &raw mut old_memlimit,
-            0 as u64,
+            0,
         ) != LZMA_OK
     {
-        return 0 as u64;
+        return 0;
     }
     return old_memlimit;
 }
@@ -580,7 +580,7 @@ pub unsafe extern "C" fn lzma_memlimit_set(
     {
         return LZMA_PROG_ERROR;
     }
-    if new_memlimit == 0 as u64 {
+    if new_memlimit == 0 {
         new_memlimit = 1 as u64;
     }
     return (*(*strm).internal)

@@ -272,7 +272,7 @@ unsafe extern "C" fn reverse_seek(
     if (*coder).file_target_pos < (2 as c_int * LZMA_STREAM_HEADER_SIZE) as u64 {
         return LZMA_DATA_ERROR;
     }
-    (*coder).temp_pos = 0 as size_t;
+    (*coder).temp_pos = 0;
     if (*coder)
         .file_target_pos
         .wrapping_sub(LZMA_STREAM_HEADER_SIZE as u64)
@@ -298,8 +298,8 @@ unsafe extern "C" fn reverse_seek(
     return LZMA_OK;
 }
 unsafe extern "C" fn get_padding_size(mut buf: *const u8, mut buf_size: size_t) -> size_t {
-    let mut padding: size_t = 0 as size_t;
-    while buf_size > 0 as size_t && {
+    let mut padding: size_t = 0;
+    while buf_size > 0 && {
         buf_size = buf_size.wrapping_sub(1);
         *buf.offset(buf_size as isize) as c_int == 0 as c_int
     } {
@@ -333,7 +333,7 @@ unsafe extern "C" fn decode_index(
         in_size,
         core::ptr::null_mut(),
         core::ptr::null_mut(),
-        0 as size_t,
+        0,
         LZMA_RUN,
     ) as lzma_ret;
     (*coder).index_remaining = (*coder)
@@ -492,8 +492,8 @@ unsafe extern "C" fn file_info_decode(
                         .wrapping_sub((*coder).footer_flags.backward_size)
                         as size_t;
                 } else {
-                    (*coder).temp_pos = 0 as size_t;
-                    (*coder).temp_size = 0 as size_t;
+                    (*coder).temp_pos = 0;
+                    (*coder).temp_size = 0;
                     if seek_to_pos(coder, (*coder).file_target_pos, in_start, in_pos, in_size) {
                         return LZMA_SEEK_NEEDED;
                     }
@@ -504,7 +504,7 @@ unsafe extern "C" fn file_info_decode(
         }
         match current_block_142 {
             9376024032952078885 => {
-                let mut memused: u64 = 0 as u64;
+                let mut memused: u64 = 0;
                 if !(*coder).combined_index.is_null() {
                     memused = lzma_index_memused((*coder).combined_index);
                     if memused > (*coder).memlimit {
@@ -529,7 +529,7 @@ unsafe extern "C" fn file_info_decode(
         match current_block_142 {
             16203797167131938757 => {
                 let mut ret: lzma_ret = LZMA_OK;
-                if (*coder).temp_size != 0 as size_t {
+                if (*coder).temp_size != 0 {
                     ret = decode_index(
                         coder,
                         allocator,
@@ -565,7 +565,7 @@ unsafe extern "C" fn file_info_decode(
                     return LZMA_DATA_ERROR;
                 }
                 (*coder).file_target_pos = (*coder).file_target_pos.wrapping_sub(seek_amount);
-                if (*coder).file_target_pos == 0 as u64 {
+                if (*coder).file_target_pos == 0 {
                     (*coder).header_flags = (*coder).first_header_flags;
                     (*coder).sequence = SEQ_HEADER_COMPARE;
                     current_block_142 = 13014351284863956202;
@@ -574,7 +574,7 @@ unsafe extern "C" fn file_info_decode(
                     (*coder).file_target_pos = (*coder)
                         .file_target_pos
                         .wrapping_add(LZMA_STREAM_HEADER_SIZE as u64);
-                    if (*coder).temp_size != 0 as size_t
+                    if (*coder).temp_size != 0
                         && ((*coder).temp_size as lzma_vli)
                             .wrapping_sub((*coder).footer_flags.backward_size)
                             >= seek_amount
@@ -651,13 +651,13 @@ unsafe extern "C" fn file_info_decode(
                 }
                 (*coder).combined_index = (*coder).this_index;
                 (*coder).this_index = core::ptr::null_mut();
-                if (*coder).file_target_pos == 0 as u64 {
+                if (*coder).file_target_pos == 0 {
                     *(*coder).dest_index = (*coder).combined_index;
                     (*coder).combined_index = core::ptr::null_mut();
                     *in_pos = in_size;
                     return LZMA_STREAM_END;
                 }
-                (*coder).sequence = (if (*coder).temp_size > 0 as size_t {
+                (*coder).sequence = (if (*coder).temp_size > 0 {
                     SEQ_PADDING_DECODE as c_int
                 } else {
                     SEQ_PADDING_SEEK as c_int
@@ -674,8 +674,8 @@ unsafe extern "C" fn file_info_decoder_memconfig(
     mut new_memlimit: u64,
 ) -> lzma_ret {
     let mut coder: *mut lzma_file_info_coder = coder_ptr as *mut lzma_file_info_coder;
-    let mut combined_index_memusage: u64 = 0 as u64;
-    let mut this_index_memusage: u64 = 0 as u64;
+    let mut combined_index_memusage: u64 = 0;
+    let mut this_index_memusage: u64 = 0;
     if !(*coder).combined_index.is_null() {
         combined_index_memusage = lzma_index_memused((*coder).combined_index);
     }
@@ -690,18 +690,18 @@ unsafe extern "C" fn file_info_decoder_memconfig(
             (*coder).index_decoder.coder,
             &raw mut this_index_memusage,
             &raw mut dummy,
-            0 as u64,
+            0,
         ) != LZMA_OK
         {
             return LZMA_PROG_ERROR;
         }
     }
     *memusage = combined_index_memusage.wrapping_add(this_index_memusage);
-    if *memusage == 0 as u64 {
+    if *memusage == 0 {
         *memusage = lzma_index_memusage(1 as lzma_vli, 0 as lzma_vli);
     }
     *old_memlimit = (*coder).memlimit;
-    if new_memlimit != 0 as u64 {
+    if new_memlimit != 0 {
         if new_memlimit < *memusage {
             return LZMA_MEMLIMIT_ERROR;
         }
@@ -831,7 +831,7 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
         (*coder).index_decoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -844,8 +844,8 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
         (*coder).combined_index = core::ptr::null_mut();
     }
     (*coder).sequence = SEQ_MAGIC_BYTES;
-    (*coder).file_cur_pos = 0 as u64;
-    (*coder).file_target_pos = 0 as u64;
+    (*coder).file_cur_pos = 0;
+    (*coder).file_target_pos = 0;
     (*coder).file_size = file_size;
     lzma_index_end((*coder).this_index, allocator);
     (*coder).this_index = core::ptr::null_mut();
@@ -859,7 +859,7 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
     } else {
         memlimit
     };
-    (*coder).temp_pos = 0 as size_t;
+    (*coder).temp_pos = 0;
     (*coder).temp_size = LZMA_STREAM_HEADER_SIZE as size_t;
     return LZMA_OK;
 }

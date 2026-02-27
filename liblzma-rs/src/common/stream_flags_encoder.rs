@@ -77,7 +77,7 @@ unsafe extern "C" fn stream_flags_encode(
     if (*options).check > LZMA_CHECK_ID_MAX {
         return true;
     }
-    *out.offset(0) = 0 as u8;
+    *out.offset(0) = 0;
     *out.offset(1) = (*options).check as u8;
     return false;
 }
@@ -86,7 +86,7 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
     mut options: *const lzma_stream_flags,
     mut out: *mut u8,
 ) -> lzma_ret {
-    if (*options).version != 0 as u32 {
+    if (*options).version != 0 {
         return LZMA_OPTIONS_ERROR;
     }
     memcpy(
@@ -103,7 +103,7 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
     let crc: u32 = lzma_crc32(
         out.offset(::core::mem::size_of::<[u8; 6]>() as usize as isize),
         LZMA_STREAM_FLAGS_SIZE as size_t,
-        0 as u32,
+        0,
     ) as u32;
     write32le(
         out.offset(::core::mem::size_of::<[u8; 6]>() as usize as isize)
@@ -117,7 +117,7 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     mut options: *const lzma_stream_flags,
     mut out: *mut u8,
 ) -> lzma_ret {
-    if (*options).version != 0 as u32 {
+    if (*options).version != 0 {
         return LZMA_OPTIONS_ERROR;
     }
     if !is_backward_size_valid(options) {
@@ -136,7 +136,7 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     let crc: u32 = lzma_crc32(
         out.offset(4),
         (4 as c_int + LZMA_STREAM_FLAGS_SIZE) as size_t,
-        0 as u32,
+        0,
     ) as u32;
     write32le(out, crc);
     memcpy(

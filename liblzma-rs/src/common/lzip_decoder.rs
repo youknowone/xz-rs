@@ -301,9 +301,9 @@ unsafe extern "C" fn lzip_decode(
                     *in_pos = (*in_pos).wrapping_add(1);
                     (*coder).pos = (*coder).pos.wrapping_add(1);
                 }
-                (*coder).pos = 0 as size_t;
-                (*coder).crc32 = 0 as u32;
-                (*coder).uncompressed_size = 0 as u64;
+                (*coder).pos = 0;
+                (*coder).crc32 = 0;
+                (*coder).uncompressed_size = 0;
                 (*coder).member_size = ::core::mem::size_of::<[u8; 4]>() as u64;
                 (*coder).sequence = SEQ_VERSION;
                 current_block_80 = 11220331375136032509;
@@ -358,7 +358,7 @@ unsafe extern "C" fn lzip_decode(
                 let fracnum: u32 = ds >> 5;
                 if b2log < 12 as u32
                     || b2log > 29 as u32
-                    || b2log == 12 as u32 && fracnum > 0 as u32
+                    || b2log == 12 as u32 && fracnum > 0
                 {
                     return LZMA_DATA_ERROR;
                 }
@@ -409,7 +409,7 @@ unsafe extern "C" fn lzip_decode(
                 if ret_ != LZMA_OK {
                     return ret_;
                 }
-                (*coder).crc32 = 0 as u32;
+                (*coder).crc32 = 0;
                 (*coder).sequence = SEQ_LZMA_STREAM;
                 current_block_80 = 13394712405657322686;
             }
@@ -439,7 +439,7 @@ unsafe extern "C" fn lzip_decode(
                     .wrapping_add((*in_pos).wrapping_sub(in_start) as u64);
                 (*coder).uncompressed_size =
                     (*coder).uncompressed_size.wrapping_add(out_used as u64);
-                if !(*coder).ignore_check && out_used > 0 as size_t {
+                if !(*coder).ignore_check && out_used > 0 {
                     (*coder).crc32 =
                         lzma_crc32(out.offset(out_start as isize), out_used, (*coder).crc32);
                 }
@@ -450,7 +450,7 @@ unsafe extern "C" fn lzip_decode(
             }
             _ => {}
         }
-        let footer_size: size_t = (if (*coder).version == 0 as u32 {
+        let footer_size: size_t = (if (*coder).version == 0 {
             LZIP_V0_FOOTER_SIZE
         } else {
             LZIP_V1_FOOTER_SIZE
@@ -466,7 +466,7 @@ unsafe extern "C" fn lzip_decode(
         if (*coder).pos < footer_size {
             return LZMA_OK;
         }
-        (*coder).pos = 0 as size_t;
+        (*coder).pos = 0;
         (*coder).member_size = (*coder).member_size.wrapping_add(footer_size as u64);
         if !(*coder).ignore_check
             && (*coder).crc32
@@ -479,7 +479,7 @@ unsafe extern "C" fn lzip_decode(
         {
             return LZMA_DATA_ERROR;
         }
-        if (*coder).version > 0 as u32 {
+        if (*coder).version > 0 {
             if (*coder).member_size
                 != read64le((&raw mut (*coder).buffer as *mut u8).offset(12) as *mut u8)
             {
@@ -513,7 +513,7 @@ unsafe extern "C" fn lzip_decoder_memconfig(
     let mut coder: *mut lzma_lzip_coder = coder_ptr as *mut lzma_lzip_coder;
     *memusage = (*coder).memusage;
     *old_memlimit = (*coder).memlimit;
-    if new_memlimit != 0 as u64 {
+    if new_memlimit != 0 {
         if new_memlimit < (*coder).memusage {
             return LZMA_MEMLIMIT_ERROR;
         }
@@ -600,7 +600,7 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
         (*coder).lzma_decoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -617,11 +617,11 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
         memlimit
     };
     (*coder).memusage = LZMA_MEMUSAGE_BASE as u64;
-    (*coder).tell_any_check = flags & LZMA_TELL_ANY_CHECK as u32 != 0 as u32;
-    (*coder).ignore_check = flags & LZMA_IGNORE_CHECK as u32 != 0 as u32;
-    (*coder).concatenated = flags & LZMA_CONCATENATED as u32 != 0 as u32;
+    (*coder).tell_any_check = flags & LZMA_TELL_ANY_CHECK as u32 != 0;
+    (*coder).ignore_check = flags & LZMA_IGNORE_CHECK as u32 != 0;
+    (*coder).concatenated = flags & LZMA_CONCATENATED as u32 != 0;
     (*coder).first_member = true;
-    (*coder).pos = 0 as size_t;
+    (*coder).pos = 0;
     return LZMA_OK;
 }
 #[no_mangle]

@@ -268,7 +268,7 @@ unsafe extern "C" fn fill_window(
     memset(
         (*coder).mf.buffer.offset(write_pos as isize) as *mut c_void,
         0 as c_int,
-        0 as size_t,
+        0,
     );
     if ret == LZMA_STREAM_END {
         ret = LZMA_OK;
@@ -280,9 +280,9 @@ unsafe extern "C" fn fill_window(
             .write_pos
             .wrapping_sub((*coder).mf.keep_size_after);
     }
-    if (*coder).mf.pending > 0 as u32 && (*coder).mf.read_pos < (*coder).mf.read_limit {
+    if (*coder).mf.pending > 0 && (*coder).mf.read_pos < (*coder).mf.read_limit {
         let pending: u32 = (*coder).mf.pending;
-        (*coder).mf.pending = 0 as u32;
+        (*coder).mf.pending = 0;
         (*coder).mf.read_pos = (*coder).mf.read_pos.wrapping_sub(pending);
         (*coder).mf.skip.expect("non-null function pointer")(&raw mut (*coder).mf, pending);
     }
@@ -449,7 +449,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         (*mf).son = core::ptr::null_mut();
     }
     (*mf).depth = (*lz_options).depth;
-    if (*mf).depth == 0 as u32 {
+    if (*mf).depth == 0 {
         if is_bt {
             (*mf).depth = (16 as u32).wrapping_add((*mf).nice_len.wrapping_div(2 as u32));
         } else {
@@ -474,15 +474,15 @@ unsafe extern "C" fn lz_encoder_init(
         memset(
             (*mf).buffer.offset((*mf).size as isize) as *mut c_void,
             0 as c_int,
-            0 as size_t,
+            0,
         );
     }
     (*mf).offset = (*mf).cyclic_size;
-    (*mf).read_pos = 0 as u32;
-    (*mf).read_ahead = 0 as u32;
-    (*mf).read_limit = 0 as u32;
-    (*mf).write_pos = 0 as u32;
-    (*mf).pending = 0 as u32;
+    (*mf).read_pos = 0;
+    (*mf).read_ahead = 0;
+    (*mf).read_limit = 0;
+    (*mf).write_pos = 0;
+    (*mf).pending = 0;
     if (*mf).hash.is_null() {
         (*mf).hash = lzma_alloc_zero(
             ((*mf).hash_count as size_t).wrapping_mul(::core::mem::size_of::<u32>() as size_t),
@@ -506,8 +506,8 @@ unsafe extern "C" fn lz_encoder_init(
             ((*mf).hash_count as size_t).wrapping_mul(::core::mem::size_of::<u32>() as size_t),
         );
     }
-    (*mf).cyclic_pos = 0 as u32;
-    if !(*lz_options).preset_dict.is_null() && (*lz_options).preset_dict_size > 0 as u32 {
+    (*mf).cyclic_pos = 0;
+    if !(*lz_options).preset_dict.is_null() && (*lz_options).preset_dict_size > 0 {
         (*mf).write_pos = if (*lz_options).preset_dict_size < (*mf).size {
             (*lz_options).preset_dict_size
         } else {
@@ -551,8 +551,8 @@ pub unsafe extern "C" fn lzma_lz_encoder_memusage(mut lz_options: *const lzma_lz
         nice_len: 0,
         match_len_max: 0,
         action: LZMA_RUN,
-        hash_count: 0 as u32,
-        sons_count: 0 as u32,
+        hash_count: 0,
+        sons_count: 0,
     };
     if lz_encoder_prepare(
         &raw mut mf,
@@ -692,15 +692,15 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         (*coder).lz.options_update = None;
         (*coder).lz.set_out_limit = None;
         (*coder).mf.buffer = core::ptr::null_mut();
-        (*coder).mf.size = 0 as u32;
+        (*coder).mf.size = 0;
         (*coder).mf.hash = core::ptr::null_mut();
         (*coder).mf.son = core::ptr::null_mut();
-        (*coder).mf.hash_count = 0 as u32;
-        (*coder).mf.sons_count = 0 as u32;
+        (*coder).mf.hash_count = 0;
+        (*coder).mf.sons_count = 0;
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,

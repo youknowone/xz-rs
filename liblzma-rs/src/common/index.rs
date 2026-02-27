@@ -242,7 +242,7 @@ unsafe extern "C" fn index_tree_init(mut tree: *mut index_tree) {
     (*tree).root = core::ptr::null_mut();
     (*tree).leftmost = core::ptr::null_mut();
     (*tree).rightmost = core::ptr::null_mut();
-    (*tree).count = 0 as u32;
+    (*tree).count = 0;
 }
 unsafe extern "C" fn index_tree_node_end(
     mut node: *mut index_tree_node,
@@ -280,12 +280,12 @@ unsafe extern "C" fn index_tree_append(mut tree: *mut index_tree, mut node: *mut
     (*(*tree).rightmost).right = node;
     (*tree).rightmost = node;
     let mut up: u32 = (*tree).count ^ (1 as u32) << bsr32((*tree).count);
-    if up != 0 as u32 {
+    if up != 0 {
         up = ctz32((*tree).count).wrapping_add(2 as u32);
         loop {
             node = (*node).parent;
             up = up.wrapping_sub(1);
-            if !(up > 0 as u32) {
+            if !(up > 0) {
                 break;
             }
         }
@@ -379,7 +379,7 @@ unsafe extern "C" fn index_init_plain(mut allocator: *const lzma_allocator) -> *
         (*i).record_count = 0 as lzma_vli;
         (*i).index_list_size = 0 as lzma_vli;
         (*i).prealloc = INDEX_GROUP_SIZE as size_t;
-        (*i).checks = 0 as u32;
+        (*i).checks = 0;
     }
     return i;
 }
@@ -649,7 +649,7 @@ pub unsafe extern "C" fn lzma_index_append(
         if g.is_null() {
             return LZMA_MEM_ERROR;
         }
-        (*g).last = 0 as size_t;
+        (*g).last = 0;
         (*g).allocated = (*i).prealloc;
         (*i).prealloc = INDEX_GROUP_SIZE as size_t;
         (*g).node.uncompressed_base = uncompressed_base;
@@ -817,7 +817,7 @@ unsafe extern "C" fn index_dup_stream(
     (*destg).allocated = (*src).record_count as size_t;
     (*destg).last = (*src).record_count.wrapping_sub(1 as lzma_vli) as size_t;
     let mut srcg: *const index_group = (*src).groups.leftmost as *const index_group;
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     loop {
         memcpy(
             (&raw mut (*destg).records as *mut index_record).offset(i as isize) as *mut c_void,
@@ -919,7 +919,7 @@ unsafe extern "C" fn iter_set_info(mut iter: *mut lzma_index_iter) {
             .block
             .number_in_stream
             .wrapping_add((*stream).block_number_base);
-        (*iter).block.compressed_stream_offset = if record == 0 as size_t {
+        (*iter).block.compressed_stream_offset = if record == 0 {
             (*group).node.compressed_base
         } else {
             vli_ceil4(
@@ -928,7 +928,7 @@ unsafe extern "C" fn iter_set_info(mut iter: *mut lzma_index_iter) {
                 .unpadded_sum,
             )
         };
-        (*iter).block.uncompressed_stream_offset = if record == 0 as size_t {
+        (*iter).block.uncompressed_stream_offset = if record == 0 {
             (*group).node.uncompressed_base
         } else {
             (*(&raw const (*group).records as *const index_record)
@@ -970,7 +970,7 @@ pub unsafe extern "C" fn lzma_index_iter_init(
 pub unsafe extern "C" fn lzma_index_iter_rewind(mut iter: *mut lzma_index_iter) {
     (*iter).internal[ITER_STREAM as usize].p = ::core::ptr::null::<c_void>();
     (*iter).internal[ITER_GROUP as usize].p = ::core::ptr::null::<c_void>();
-    (*iter).internal[ITER_RECORD as usize].s = 0 as size_t;
+    (*iter).internal[ITER_RECORD as usize].s = 0;
     (*iter).internal[ITER_METHOD as usize].s = ITER_METHOD_NORMAL as size_t;
 }
 #[no_mangle]
@@ -1014,11 +1014,11 @@ pub unsafe extern "C" fn lzma_index_iter_next(
                 }
             }
             group = (*stream).groups.leftmost as *const index_group;
-            record = 0 as size_t;
+            record = 0;
         } else if !group.is_null() && record < (*group).last {
             record = record.wrapping_add(1);
         } else {
-            record = 0 as size_t;
+            record = 0;
             if !group.is_null() {
                 group = index_tree_next(&raw const (*group).node) as *const index_group;
             }
@@ -1038,7 +1038,7 @@ pub unsafe extern "C" fn lzma_index_iter_next(
         if !(mode == LZMA_INDEX_ITER_NONEMPTY_BLOCK) {
             break;
         }
-        if record == 0 as size_t {
+        if record == 0 {
             if !((*group).node.uncompressed_base
                 == (*(&raw const (*group).records as *const index_record).offset(0))
                     .uncompressed_sum)
@@ -1074,7 +1074,7 @@ pub unsafe extern "C" fn lzma_index_iter_locate(
     target = target.wrapping_sub((*stream).node.uncompressed_base);
     let mut group: *const index_group =
         index_tree_locate(&raw const (*stream).groups, target) as *const index_group;
-    let mut left: size_t = 0 as size_t;
+    let mut left: size_t = 0;
     let mut right: size_t = (*group).last;
     while left < right {
         let pos: size_t = left.wrapping_add(right.wrapping_sub(left).wrapping_div(2 as size_t));

@@ -112,7 +112,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
     let mut next: lzma_next_coder = lzma_next_coder_s {
         coder: core::ptr::null_mut(),
         id: LZMA_VLI_UNKNOWN as lzma_vli,
-        init: 0 as uintptr_t,
+        init: 0,
         code: None,
         end: None,
         get_progress: None,
@@ -148,7 +148,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
                 ret = LZMA_DATA_ERROR;
             } else {
                 let mut tmp: [u8; 1] = [0; 1];
-                let mut tmp_pos: size_t = 0 as size_t;
+                let mut tmp_pos: size_t = 0;
                 next.code.expect("non-null function pointer")(
                     next.coder,
                     allocator,

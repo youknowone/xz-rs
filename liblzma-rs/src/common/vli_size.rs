@@ -5,9 +5,9 @@ pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 #[no_mangle]
 pub unsafe extern "C" fn lzma_vli_size(mut vli: lzma_vli) -> u32 {
     if vli > LZMA_VLI_MAX as lzma_vli {
-        return 0 as u32;
+        return 0;
     }
-    let mut i: u32 = 0 as u32;
+    let mut i: u32 = 0;
     loop {
         vli >>= 7 as c_int;
         i = i.wrapping_add(1);

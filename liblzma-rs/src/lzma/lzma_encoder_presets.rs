@@ -53,7 +53,7 @@ pub unsafe extern "C" fn lzma_lzma_preset(
         return true as lzma_bool;
     }
     (*options).preset_dict = ::core::ptr::null::<u8>();
-    (*options).preset_dict_size = 0 as u32;
+    (*options).preset_dict_size = 0;
     (*options).lc = LZMA_LC_DEFAULT as u32;
     (*options).lp = LZMA_LP_DEFAULT as u32;
     (*options).pb = LZMA_PB_DEFAULT as u32;
@@ -64,7 +64,7 @@ pub unsafe extern "C" fn lzma_lzma_preset(
     (*options).dict_size = (1u32 << dict_pow2[level as usize] as c_int) as u32;
     if level <= 3 as u32 {
         (*options).mode = LZMA_MODE_FAST;
-        (*options).mf = (if level == 0 as u32 {
+        (*options).mf = (if level == 0 {
             LZMA_MF_HC3 as c_int
         } else {
             LZMA_MF_HC4 as c_int
@@ -86,14 +86,14 @@ pub unsafe extern "C" fn lzma_lzma_preset(
         } else {
             64 as c_int
         }) as u32;
-        (*options).depth = 0 as u32;
+        (*options).depth = 0;
     }
     if flags & LZMA_PRESET_EXTREME as u32 != 0 {
         (*options).mode = LZMA_MODE_NORMAL;
         (*options).mf = LZMA_MF_BT4;
         if level == 3 as u32 || level == 5 as u32 {
             (*options).nice_len = 192 as u32;
-            (*options).depth = 0 as u32;
+            (*options).depth = 0;
         } else {
             (*options).nice_len = 273 as u32;
             (*options).depth = 512 as u32;

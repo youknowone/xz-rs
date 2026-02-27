@@ -1063,7 +1063,7 @@ unsafe extern "C" fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mu
     loop {
         let fresh1 = size;
         size = size.wrapping_sub(1);
-        if !(fresh1 != 0 as size_t) {
+        if !(fresh1 != 0) {
             break;
         }
         let fresh2 = buf;

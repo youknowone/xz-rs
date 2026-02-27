@@ -130,7 +130,7 @@ unsafe extern "C" fn arm64_code(
 ) -> size_t {
     size &= !(3 as size_t);
     let mut i: size_t = 0;
-    i = 0 as size_t;
+    i = 0;
     while i < size {
         let mut pc: u32 = (now_pos as size_t).wrapping_add(i) as u32;
         let mut instr: u32 = read32le(buffer.offset(i as isize));
@@ -139,7 +139,7 @@ unsafe extern "C" fn arm64_code(
             instr = 0x94000000 as u32;
             pc >>= 2 as c_int;
             if !is_encoder {
-                pc = (0 as u32).wrapping_sub(pc);
+                pc = 0u32.wrapping_sub(pc);
             }
             instr |= src.wrapping_add(pc) & 0x3ffffff as u32;
             write32le(buffer.offset(i as isize), instr);
@@ -149,12 +149,12 @@ unsafe extern "C" fn arm64_code(
                 instr = (instr & 0x9000001f) as u32;
                 pc >>= 12 as c_int;
                 if !is_encoder {
-                    pc = (0 as u32).wrapping_sub(pc);
+                    pc = 0u32.wrapping_sub(pc);
                 }
                 let dest: u32 = src_0.wrapping_add(pc);
                 instr |= (dest & 3 as u32) << 29;
                 instr |= (dest & 0x3fffc as u32) << 3;
-                instr = (instr | ((0 as u32).wrapping_sub(dest & 0x20000 as u32) & 0xe00000 as u32))
+                instr = (instr | (0u32.wrapping_sub(dest & 0x20000 as u32) & 0xe00000 as u32))
                     as u32;
                 write32le(buffer.offset(i as isize), instr);
             }
@@ -174,7 +174,7 @@ unsafe extern "C" fn arm64_coder_init(
         allocator,
         filters,
         Some(arm64_code as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t),
-        0 as size_t,
+        0,
         4 as size_t,
         4 as u32,
         is_encoder,

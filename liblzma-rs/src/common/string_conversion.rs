@@ -193,7 +193,7 @@ unsafe extern "C" fn str_init(
     if (*str).buf.is_null() {
         return LZMA_MEM_ERROR;
     }
-    (*str).pos = 0 as size_t;
+    (*str).pos = 0;
     return LZMA_OK;
 }
 unsafe extern "C" fn str_free(mut str: *mut lzma_str, mut allocator: *const lzma_allocator) {
@@ -228,7 +228,7 @@ unsafe extern "C" fn str_append_str(mut str: *mut lzma_str, mut s: *const c_char
     (*str).pos = (*str).pos.wrapping_add(copy_size);
 }
 unsafe extern "C" fn str_append_u32(mut str: *mut lzma_str, mut v: u32, mut use_byte_suffix: bool) {
-    if v == 0 as u32 {
+    if v == 0 {
         str_append_str(str, b"0\0" as *const u8 as *const c_char);
     } else {
         static mut suffixes: [[c_char; 4]; 4] = unsafe {
@@ -239,9 +239,9 @@ unsafe extern "C" fn str_append_u32(mut str: *mut lzma_str, mut v: u32, mut use_
                 ::core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"GiB\0"),
             ]
         };
-        let mut suf: size_t = 0 as size_t;
+        let mut suf: size_t = 0;
         if use_byte_suffix {
-            while v & 1023 as u32 == 0 as u32
+            while v & 1023 as u32 == 0
                 && suf
                     < (::core::mem::size_of::<[[c_char; 4]; 4]>() as usize)
                         .wrapping_div(::core::mem::size_of::<[c_char; 4]>() as usize)
@@ -260,7 +260,7 @@ unsafe extern "C" fn str_append_u32(mut str: *mut lzma_str, mut v: u32, mut use_
             buf[pos as usize] =
                 ('0' as i32 as u32).wrapping_add(v.wrapping_rem(10 as u32)) as c_char;
             v = v.wrapping_div(10 as u32);
-            if !(v != 0 as u32) {
+            if !(v != 0) {
                 break;
             }
         }
@@ -284,7 +284,7 @@ static mut bcj_optmap: [option_map; 1] = unsafe {
         offset: 0 as c_ulong as u16,
         u: C2RustUnnamed_0 {
             range: C2RustUnnamed_1 {
-                min: 0 as u32,
+                min: 0,
                 max: UINT32_MAX as u32,
             },
         },
@@ -390,7 +390,7 @@ static mut lzma12_mode_map: [name_value_map; 3] = unsafe {
         },
         name_value_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
-            value: 0 as u32,
+            value: 0,
         },
     ]
 };
@@ -418,7 +418,7 @@ static mut lzma12_mf_map: [name_value_map; 6] = unsafe {
         },
         name_value_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
-            value: 0 as u32,
+            value: 0,
         },
     ]
 };
@@ -675,7 +675,7 @@ unsafe extern "C" fn parse_options(
             if name_len > NAME_LEN_MAX as size_t {
                 return b"Unknown option name\0" as *const u8 as *const c_char;
             }
-            let mut i: size_t = 0 as size_t;
+            let mut i: size_t = 0;
             loop {
                 if i == optmap_size {
                     return b"Unknown option name\0" as *const u8 as *const c_char;
@@ -693,7 +693,7 @@ unsafe extern "C" fn parse_options(
             }
             *str = equals_sign.offset(1);
             let value_len: size_t = name_eq_value_end.offset_from(*str) as c_long as size_t;
-            if value_len == 0 as size_t {
+            if value_len == 0 {
                 return b"Option value cannot be empty\0" as *const u8 as *const c_char;
             }
             if (*optmap.offset(i as isize)).type_0 as c_int == OPTMAP_TYPE_LZMA_PRESET as c_int {
@@ -709,7 +709,7 @@ unsafe extern "C" fn parse_options(
                         return b"Invalid option value\0" as *const u8 as *const c_char;
                     }
                     let mut map: *const name_value_map = (*optmap.offset(i as isize)).u.map;
-                    let mut j: size_t = 0 as size_t;
+                    let mut j: size_t = 0;
                     loop {
                         if (*map.offset(j as isize)).name[0] as c_int == '\0' as i32 {
                             return b"Invalid option value\0" as *const u8 as *const c_char;
@@ -734,7 +734,7 @@ unsafe extern "C" fn parse_options(
                         as *const c_char;
                 } else {
                     let mut p: *const c_char = *str;
-                    v = 0 as u32;
+                    v = 0;
                     loop {
                         if v > (UINT32_MAX as u32).wrapping_div(10 as u32) {
                             return b"Value out of range\0" as *const u8 as *const c_char;
@@ -846,7 +846,7 @@ unsafe extern "C" fn parse_filter(
     if name_len > NAME_LEN_MAX as size_t {
         return b"Unknown filter name\0" as *const u8 as *const c_char;
     }
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i
         < (::core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
             .wrapping_div(::core::mem::size_of::<C2RustUnnamed>() as usize)
@@ -948,12 +948,12 @@ unsafe extern "C" fn str_to_filters(
         *fresh1 = core::ptr::null_mut();
         return ::core::ptr::null::<c_char>();
     }
-    let only_xz: bool = flags & LZMA_STR_ALL_FILTERS as u32 == 0 as u32;
+    let only_xz: bool = flags & LZMA_STR_ALL_FILTERS as u32 == 0;
     let mut temp_filters: [lzma_filter; 5] = [lzma_filter {
         id: 0,
         options: core::ptr::null_mut(),
     }; 5];
-    let mut i_0: size_t = 0 as size_t;
+    let mut i_0: size_t = 0;
     loop {
         if i_0 == LZMA_FILTERS_MAX as size_t {
             errmsg = b"The maximum number of filters is four\0" as *const u8 as *const c_char;
@@ -1006,7 +1006,7 @@ unsafe extern "C" fn str_to_filters(
         15090052786889560393 => {
             temp_filters[i_0 as usize].id = LZMA_VLI_UNKNOWN as lzma_vli;
             temp_filters[i_0 as usize].options = core::ptr::null_mut();
-            if flags & LZMA_STR_NO_VALIDATION as u32 == 0 as u32 {
+            if flags & LZMA_STR_NO_VALIDATION as u32 == 0 {
                 let mut dummy: size_t = 0;
                 let ret: lzma_ret =
                     lzma_validate_chain(&raw mut temp_filters as *mut lzma_filter, &raw mut dummy)
@@ -1039,7 +1039,7 @@ unsafe extern "C" fn str_to_filters(
     loop {
         let fresh2 = i_0;
         i_0 = i_0.wrapping_sub(1);
-        if !(fresh2 > 0 as size_t) {
+        if !(fresh2 > 0) {
             break;
         }
         lzma_free(temp_filters[i_0 as usize].options, allocator);
@@ -1084,7 +1084,7 @@ unsafe extern "C" fn strfy_filter(
     mut optmap_count: size_t,
     mut filter_options: *const c_void,
 ) {
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i < optmap_count {
         if !((*optmap.offset(i as isize)).type_0 as c_int == OPTMAP_TYPE_LZMA_PRESET as c_int) {
             let mut v: u32 = 0;
@@ -1102,7 +1102,7 @@ unsafe extern "C" fn strfy_filter(
                     v = *(ptr as *const u32);
                 }
             }
-            if !(v == 0 as u32
+            if !(v == 0
                 && (*optmap.offset(i as isize)).flags as c_int & OPTMAP_NO_STRFY_ZERO != 0)
             {
                 str_append_str(dest, delimiter);
@@ -1114,7 +1114,7 @@ unsafe extern "C" fn strfy_filter(
                 str_append_str(dest, b"=\0" as *const u8 as *const c_char);
                 if (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_NAME_VALUE_MAP != 0 {
                     let mut map: *const name_value_map = (*optmap.offset(i as isize)).u.map;
-                    let mut j: size_t = 0 as size_t;
+                    let mut j: size_t = 0;
                     loop {
                         if (*map.offset(j as isize)).name[0] as c_int == '\0' as i32 {
                             str_append_str(dest, b"UNKNOWN\0" as *const u8 as *const c_char);
@@ -1179,21 +1179,21 @@ pub unsafe extern "C" fn lzma_str_from_filters(
     } else {
         b":\0" as *const u8 as *const c_char
     };
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while (*filters.offset(i as isize)).id != LZMA_VLI_UNKNOWN as lzma_vli {
         if i == LZMA_FILTERS_MAX as size_t {
             str_free(&raw mut dest, allocator);
             return LZMA_OPTIONS_ERROR;
         }
-        if i > 0 as size_t && flags & LZMA_STR_NO_SPACES as u32 == 0 {
+        if i > 0 && flags & LZMA_STR_NO_SPACES as u32 == 0 {
             str_append_str(&raw mut dest, b" \0" as *const u8 as *const c_char);
         }
         if flags & LZMA_STR_GETOPT_LONG as u32 != 0
-            || i > 0 as size_t && flags & LZMA_STR_NO_SPACES as u32 != 0
+            || i > 0 && flags & LZMA_STR_NO_SPACES as u32 != 0
         {
             str_append_str(&raw mut dest, b"--\0" as *const u8 as *const c_char);
         }
-        let mut j: size_t = 0 as size_t;
+        let mut j: size_t = 0;
         loop {
             if j == (::core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
                 .wrapping_div(::core::mem::size_of::<C2RustUnnamed>() as usize)
@@ -1278,7 +1278,7 @@ pub unsafe extern "C" fn lzma_str_list_filters(
         b":\0" as *const u8 as *const c_char
     };
     let mut first_filter_printed: bool = false;
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i
         < (::core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
             .wrapping_div(::core::mem::size_of::<C2RustUnnamed>() as usize)
@@ -1287,7 +1287,7 @@ pub unsafe extern "C" fn lzma_str_list_filters(
             && filter_id != filter_name_map[i as usize].id)
         {
             if !(filter_name_map[i as usize].id >= LZMA_FILTER_RESERVED_START as lzma_vli
-                && flags & LZMA_STR_ALL_FILTERS as u32 == 0 as u32
+                && flags & LZMA_STR_ALL_FILTERS as u32 == 0
                 && filter_id == LZMA_VLI_UNKNOWN as lzma_vli)
             {
                 if first_filter_printed {
@@ -1311,7 +1311,7 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                     } else {
                         filter_name_map[i as usize].strfy_decoder as c_int
                     }) as size_t;
-                    let mut j: size_t = 0 as size_t;
+                    let mut j: size_t = 0;
                     while j < end {
                         str_append_str(&raw mut dest, d);
                         d = b",\0" as *const u8 as *const c_char;
@@ -1329,9 +1329,9 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                             != 0
                         {
                             let mut m: *const name_value_map = (*optmap.offset(j as isize)).u.map;
-                            let mut k: size_t = 0 as size_t;
+                            let mut k: size_t = 0;
                             while (*m.offset(k as isize)).name[0] as c_int != '\0' as i32 {
-                                if k > 0 as size_t {
+                                if k > 0 {
                                     str_append_str(
                                         &raw mut dest,
                                         b"|\0" as *const u8 as *const c_char,
@@ -1469,7 +1469,7 @@ unsafe extern "C" fn run_static_initializers() {
             offset: 44 as c_ulong as u16,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
-                    min: 0 as u32,
+                    min: 0,
                     max: UINT32_MAX as u32,
                 },
             },

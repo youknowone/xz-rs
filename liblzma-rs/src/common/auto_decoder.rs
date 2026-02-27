@@ -235,7 +235,7 @@ unsafe extern "C" fn auto_decode(
                 out_size,
                 action,
             ) as lzma_ret;
-            if ret != LZMA_STREAM_END || (*coder).flags & LZMA_CONCATENATED as u32 == 0 as u32 {
+            if ret != LZMA_STREAM_END || (*coder).flags & LZMA_CONCATENATED as u32 == 0 {
                 return ret;
             }
             (*coder).sequence = SEQ_FINISH;
@@ -286,11 +286,11 @@ unsafe extern "C" fn auto_decoder_memconfig(
         *memusage = LZMA_MEMUSAGE_BASE as u64;
         *old_memlimit = (*coder).memlimit;
         ret = LZMA_OK;
-        if new_memlimit != 0 as u64 && new_memlimit < *memusage {
+        if new_memlimit != 0 && new_memlimit < *memusage {
             ret = LZMA_MEMLIMIT_ERROR;
         }
     }
-    if ret == LZMA_OK && new_memlimit != 0 as u64 {
+    if ret == LZMA_OK && new_memlimit != 0 {
         (*coder).memlimit = new_memlimit;
     }
     return ret;
@@ -373,7 +373,7 @@ unsafe extern "C" fn auto_decoder_init(
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,

@@ -115,12 +115,12 @@ unsafe extern "C" fn arm_code(
 ) -> size_t {
     size &= !(3 as size_t);
     let mut i: size_t = 0;
-    i = 0 as size_t;
+    i = 0;
     while i < size {
         if *buffer.offset(i.wrapping_add(3 as size_t) as isize) as c_int == 0xeb as c_int {
             let mut src: u32 = (*buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32) << 8
-                | *buffer.offset(i.wrapping_add(0 as size_t) as isize) as u32;
+                | *buffer.offset(i.wrapping_add(0) as isize) as u32;
             src <<= 2 as c_int;
             let mut dest: u32 = 0;
             if is_encoder {
@@ -134,7 +134,7 @@ unsafe extern "C" fn arm_code(
             dest >>= 2 as c_int;
             *buffer.offset(i.wrapping_add(2 as size_t) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(1 as size_t) as isize) = (dest >> 8) as u8;
-            *buffer.offset(i.wrapping_add(0 as size_t) as isize) = dest as u8;
+            *buffer.offset(i.wrapping_add(0) as isize) = dest as u8;
         }
         i = i.wrapping_add(4 as size_t);
     }
@@ -151,7 +151,7 @@ unsafe extern "C" fn arm_coder_init(
         allocator,
         filters,
         Some(arm_code as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t),
-        0 as size_t,
+        0,
         4 as size_t,
         4 as u32,
         is_encoder,

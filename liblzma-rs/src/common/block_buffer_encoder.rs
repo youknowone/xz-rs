@@ -221,7 +221,7 @@ pub const HEADERS_BOUND: c_int = 1 as c_int
     & !(3 as c_int);
 extern "C" fn lzma2_bound(mut uncompressed_size: u64) -> u64 {
     if uncompressed_size > COMPRESSED_SIZE_MAX as u64 {
-        return 0 as u64;
+        return 0;
     }
     let overhead: u64 = uncompressed_size
         .wrapping_add(LZMA2_CHUNK_MAX as u64)
@@ -230,15 +230,15 @@ extern "C" fn lzma2_bound(mut uncompressed_size: u64) -> u64 {
         .wrapping_mul(LZMA2_HEADER_UNCOMPRESSED as u64)
         .wrapping_add(1 as u64);
     if (COMPRESSED_SIZE_MAX as u64).wrapping_sub(overhead) < uncompressed_size {
-        return 0 as u64;
+        return 0;
     }
     return uncompressed_size.wrapping_add(overhead);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_buffer_bound64(mut uncompressed_size: u64) -> u64 {
     let mut lzma2_size: u64 = lzma2_bound(uncompressed_size);
-    if lzma2_size == 0 as u64 {
-        return 0 as u64;
+    if lzma2_size == 0 {
+        return 0;
     }
     lzma2_size = lzma2_size.wrapping_add(3 as u64) & !(3 as u64);
     return (HEADERS_BOUND as u64).wrapping_add(lzma2_size);
@@ -307,7 +307,7 @@ unsafe extern "C" fn block_encode_uncompressed(
     }
     (*block).filters = filters_orig;
     *out_pos = (*out_pos).wrapping_add((*block).header_size as size_t);
-    let mut in_pos: size_t = 0 as size_t;
+    let mut in_pos: size_t = 0;
     let mut control: u8 = 0x1 as u8;
     while in_pos < in_size {
         let fresh1 = *out_pos;
@@ -335,7 +335,7 @@ unsafe extern "C" fn block_encode_uncompressed(
     }
     let fresh4 = *out_pos;
     *out_pos = (*out_pos).wrapping_add(1);
-    *out.offset(fresh4 as isize) = 0 as u8;
+    *out.offset(fresh4 as isize) = 0;
     return LZMA_OK;
 }
 unsafe extern "C" fn block_encode_normal(
@@ -362,7 +362,7 @@ unsafe extern "C" fn block_encode_normal(
     let mut raw_encoder: lzma_next_coder = lzma_next_coder_s {
         coder: core::ptr::null_mut(),
         id: LZMA_VLI_UNKNOWN as lzma_vli,
-        init: 0 as uintptr_t,
+        init: 0,
         code: None,
         end: None,
         get_progress: None,
@@ -374,7 +374,7 @@ unsafe extern "C" fn block_encode_normal(
     let mut ret: lzma_ret =
         lzma_raw_encoder_init(&raw mut raw_encoder, allocator, (*block).filters);
     if ret == LZMA_OK {
-        let mut in_pos: size_t = 0 as size_t;
+        let mut in_pos: size_t = 0;
         ret = raw_encoder.code.expect("non-null function pointer")(
             raw_encoder.coder,
             allocator,
@@ -415,7 +415,7 @@ unsafe extern "C" fn block_buffer_encode(
     mut try_to_compress: bool,
 ) -> lzma_ret {
     if block.is_null()
-        || in_0.is_null() && in_size != 0 as size_t
+        || in_0.is_null() && in_size != 0
         || out.is_null()
         || out_pos.is_null()
         || *out_pos > out_size
@@ -462,10 +462,10 @@ unsafe extern "C" fn block_buffer_encode(
     while i & 3 as size_t != 0 {
         let fresh0 = *out_pos;
         *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh0 as isize) = 0 as u8;
+        *out.offset(fresh0 as isize) = 0;
         i = i.wrapping_add(1);
     }
-    if check_size > 0 as size_t {
+    if check_size > 0 {
         let mut check: lzma_check_state = lzma_check_state {
             buffer: C2RustUnnamed { u8_0: [0; 64] },
             state: C2RustUnnamed_0 { crc32: 0 },

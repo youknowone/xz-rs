@@ -32,7 +32,7 @@ pub unsafe extern "C" fn lzma_vli_encode(
     mut out_pos: *mut size_t,
     mut out_size: size_t,
 ) -> lzma_ret {
-    let mut vli_pos_internal: size_t = 0 as size_t;
+    let mut vli_pos_internal: size_t = 0;
     if vli_pos.is_null() {
         vli_pos = &raw mut vli_pos_internal;
         if *out_pos >= out_size {

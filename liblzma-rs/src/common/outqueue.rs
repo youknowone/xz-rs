@@ -160,7 +160,7 @@ pub unsafe extern "C" fn lzma_outq_init(
         free_one_cached_buffer(outq, allocator);
     }
     (*outq).bufs_limit = bufs_limit;
-    (*outq).read_pos = 0 as size_t;
+    (*outq).read_pos = 0;
     return LZMA_OK;
 }
 #[no_mangle]
@@ -214,8 +214,8 @@ pub unsafe extern "C" fn lzma_outq_get_buf(
     (*buf).worker = worker;
     (*buf).finished = false;
     (*buf).finish_ret = LZMA_STREAM_END;
-    (*buf).pos = 0 as size_t;
-    (*buf).decoder_in_pos = 0 as size_t;
+    (*buf).pos = 0;
+    (*buf).decoder_in_pos = 0;
     (*buf).unpadded_size = 0 as lzma_vli;
     (*buf).uncompressed_size = 0 as lzma_vli;
     (*outq).bufs_in_use = (*outq).bufs_in_use.wrapping_add(1);
@@ -241,7 +241,7 @@ pub unsafe extern "C" fn lzma_outq_read(
     mut unpadded_size: *mut lzma_vli,
     mut uncompressed_size: *mut lzma_vli,
 ) -> lzma_ret {
-    if (*outq).bufs_in_use == 0 as u32 {
+    if (*outq).bufs_in_use == 0 {
         return LZMA_OK;
     }
     let mut buf: *mut lzma_outbuf = (*outq).head;
@@ -264,7 +264,7 @@ pub unsafe extern "C" fn lzma_outq_read(
     }
     let finish_ret: lzma_ret = (*buf).finish_ret;
     move_head_to_cache(outq, allocator);
-    (*outq).read_pos = 0 as size_t;
+    (*outq).read_pos = 0;
     return finish_ret;
 }
 #[no_mangle]

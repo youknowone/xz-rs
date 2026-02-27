@@ -60,7 +60,7 @@ unsafe extern "C" fn is_backward_size_valid(mut options: *const lzma_stream_flag
 }
 #[no_mangle]
 pub static mut lzma_header_magic: [u8; 6] = [
-    0xfd as u8, 0x37 as u8, 0x7a as u8, 0x58 as u8, 0x5a as u8, 0 as u8,
+    0xfd as u8, 0x37 as u8, 0x7a as u8, 0x58 as u8, 0x5a as u8, 0,
 ];
 #[no_mangle]
 pub static mut lzma_footer_magic: [u8; 2] = [0x59 as u8, 0x5a as u8];
@@ -69,7 +69,7 @@ pub unsafe extern "C" fn lzma_stream_flags_compare(
     mut a: *const lzma_stream_flags,
     mut b: *const lzma_stream_flags,
 ) -> lzma_ret {
-    if (*a).version != 0 as u32 || (*b).version != 0 as u32 {
+    if (*a).version != 0 || (*b).version != 0 {
         return LZMA_OPTIONS_ERROR;
     }
     if (*a).check > LZMA_CHECK_ID_MAX || (*b).check > LZMA_CHECK_ID_MAX {

@@ -138,7 +138,7 @@ unsafe extern "C" fn copy_and_encode(
     mut size: size_t,
 ) {
     let distance: size_t = (*coder).distance;
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i < size {
         let tmp: u8 = (*coder).history
             [(distance.wrapping_add((*coder).pos as size_t) & 0xff as size_t) as usize];
@@ -155,7 +155,7 @@ unsafe extern "C" fn encode_in_place(
     mut size: size_t,
 ) {
     let distance: size_t = (*coder).distance;
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i < size {
         let tmp: u8 = (*coder).history
             [(distance.wrapping_add((*coder).pos as size_t) & 0xff as size_t) as usize];
@@ -188,7 +188,7 @@ unsafe extern "C" fn delta_encode(
         } else {
             out_avail
         };
-        if size > 0 as size_t {
+        if size > 0 {
             copy_and_encode(
                 coder,
                 in_0.offset(*in_pos as isize),
@@ -217,7 +217,7 @@ unsafe extern "C" fn delta_encode(
             action,
         );
         let size_0: size_t = (*out_pos).wrapping_sub(out_start);
-        if size_0 > 0 as size_t {
+        if size_0 > 0 {
             encode_in_place(coder, out.offset(out_start as isize), size_0);
         }
     }

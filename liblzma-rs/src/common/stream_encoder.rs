@@ -296,7 +296,7 @@ unsafe extern "C" fn stream_encode(
                 if (*coder).sequence == SEQ_STREAM_FOOTER {
                     return LZMA_STREAM_END;
                 }
-                (*coder).buffer_pos = 0 as size_t;
+                (*coder).buffer_pos = 0;
                 (*coder).sequence += 1;
             }
             1 => {
@@ -383,7 +383,7 @@ unsafe extern "C" fn stream_encode(
                     allocator,
                     ::core::ptr::null::<u8>(),
                     core::ptr::null_mut(),
-                    0 as size_t,
+                    0,
                     out,
                     out_pos,
                     out_size,
@@ -393,7 +393,7 @@ unsafe extern "C" fn stream_encode(
                     return ret_0;
                 }
                 let stream_flags: lzma_stream_flags = lzma_stream_flags {
-                    version: 0 as u32,
+                    version: 0,
                     backward_size: lzma_index_size((*coder).index),
                     check: (*coder).block_options.check,
                     reserved_enum1: LZMA_RESERVED_ENUM,
@@ -599,7 +599,7 @@ unsafe extern "C" fn stream_encoder_init(
         (*coder).block_encoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -611,7 +611,7 @@ unsafe extern "C" fn stream_encoder_init(
         (*coder).index_encoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -623,7 +623,7 @@ unsafe extern "C" fn stream_encoder_init(
         (*coder).index = core::ptr::null_mut();
     }
     (*coder).sequence = SEQ_STREAM_HEADER;
-    (*coder).block_options.version = 0 as u32;
+    (*coder).block_options.version = 0;
     (*coder).block_options.check = check;
     lzma_index_end((*coder).index, allocator);
     (*coder).index = lzma_index_init(allocator);
@@ -631,7 +631,7 @@ unsafe extern "C" fn stream_encoder_init(
         return LZMA_MEM_ERROR;
     }
     let mut stream_flags: lzma_stream_flags = lzma_stream_flags {
-        version: 0 as u32,
+        version: 0,
         backward_size: 0,
         check: check,
         reserved_enum1: LZMA_RESERVED_ENUM,
@@ -655,7 +655,7 @@ unsafe extern "C" fn stream_encoder_init(
     if ret_ != LZMA_OK {
         return ret_;
     }
-    (*coder).buffer_pos = 0 as size_t;
+    (*coder).buffer_pos = 0;
     (*coder).buffer_size = LZMA_STREAM_HEADER_SIZE as size_t;
     return stream_encoder_update(
         coder as *mut c_void,

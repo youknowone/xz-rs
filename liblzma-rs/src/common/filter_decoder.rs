@@ -519,7 +519,7 @@ static mut decoders: [lzma_filter_decoder; 12] = [
     },
 ];
 unsafe extern "C" fn decoder_find(mut id: lzma_vli) -> *const lzma_filter_decoder {
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i
         < (::core::mem::size_of::<[lzma_filter_decoder; 12]>() as usize)
             .wrapping_div(::core::mem::size_of::<lzma_filter_decoder>() as usize)
@@ -594,7 +594,7 @@ pub unsafe extern "C" fn lzma_properties_decode(
         return LZMA_OPTIONS_ERROR;
     }
     if (*fd).props_decode.is_none() {
-        return (if props_size == 0 as size_t {
+        return (if props_size == 0 {
             LZMA_OK as c_int
         } else {
             LZMA_OPTIONS_ERROR as c_int

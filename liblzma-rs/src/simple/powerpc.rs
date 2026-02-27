@@ -115,14 +115,13 @@ unsafe extern "C" fn powerpc_code(
 ) -> size_t {
     size &= !(3 as size_t);
     let mut i: size_t = 0;
-    i = 0 as size_t;
+    i = 0;
     while i < size {
         if *buffer.offset(i as isize) as c_int >> 2 == 0x12 as c_int
             && *buffer.offset(i.wrapping_add(3 as size_t) as isize) as c_int & 3 as c_int
                 == 1 as c_int
         {
-            let src: u32 = (*buffer.offset(i.wrapping_add(0 as size_t) as isize) as u32 & 3 as u32)
-                << 24
+            let src: u32 = (*buffer.offset(i.wrapping_add(0) as isize) as u32 & 3 as u32) << 24
                 | (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(3 as size_t) as isize) as u32 & !(3 as u32);
@@ -132,7 +131,7 @@ unsafe extern "C" fn powerpc_code(
             } else {
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
-            *buffer.offset(i.wrapping_add(0 as size_t) as isize) =
+            *buffer.offset(i.wrapping_add(0) as isize) =
                 (0x48 as u32 | dest >> 24 & 0x3 as u32) as u8;
             *buffer.offset(i.wrapping_add(1 as size_t) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(2 as size_t) as isize) = (dest >> 8) as u8;
@@ -158,7 +157,7 @@ unsafe extern "C" fn powerpc_coder_init(
         Some(
             powerpc_code as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t,
         ),
-        0 as size_t,
+        0,
         4 as size_t,
         4 as u32,
         is_encoder,

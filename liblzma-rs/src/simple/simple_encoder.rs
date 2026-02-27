@@ -39,7 +39,7 @@ pub unsafe extern "C" fn lzma_simple_props_size(
     mut options: *const c_void,
 ) -> lzma_ret {
     let opt: *const lzma_options_bcj = options as *const lzma_options_bcj;
-    *size = (if opt.is_null() || (*opt).start_offset == 0 as u32 {
+    *size = (if opt.is_null() || (*opt).start_offset == 0 {
         0 as c_int
     } else {
         4 as c_int
@@ -52,7 +52,7 @@ pub unsafe extern "C" fn lzma_simple_props_encode(
     mut out: *mut u8,
 ) -> lzma_ret {
     let opt: *const lzma_options_bcj = options as *const lzma_options_bcj;
-    if opt.is_null() || (*opt).start_offset == 0 as u32 {
+    if opt.is_null() || (*opt).start_offset == 0 {
         return LZMA_OK;
     }
     write32le(out, (*opt).start_offset);

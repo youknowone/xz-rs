@@ -153,7 +153,7 @@ unsafe extern "C" fn mf_avail(mut mf: *const lzma_mf) -> u32 {
 }
 #[inline]
 unsafe extern "C" fn mf_skip(mut mf: *mut lzma_mf, mut amount: u32) {
-    if amount != 0 as u32 {
+    if amount != 0 {
         (*mf).skip.expect("non-null function pointer")(mf, amount);
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
@@ -182,7 +182,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     let nice_len: u32 = (*mf).nice_len;
     let mut len_main: u32 = 0;
     let mut matches_count: u32 = 0;
-    if (*mf).read_ahead == 0 as u32 {
+    if (*mf).read_ahead == 0 {
         len_main = lzma_mf_find(
             mf,
             &raw mut matches_count,
@@ -207,9 +207,9 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
         *len_res = 1 as u32;
         return;
     }
-    let mut rep_len: u32 = 0 as u32;
-    let mut rep_index: u32 = 0 as u32;
-    let mut i: u32 = 0 as u32;
+    let mut rep_len: u32 = 0;
+    let mut rep_index: u32 = 0;
+    let mut i: u32 = 0;
     while i < REPS as u32 {
         let buf_back: *const u8 = buf.offset(-((*coder).reps[i as usize] as isize)).offset(-1);
         if !(*buf.offset(0) as c_int != *buf_back.offset(0) as c_int
@@ -237,7 +237,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
         mf_skip(mf, len_main.wrapping_sub(1 as u32));
         return;
     }
-    let mut back_main: u32 = 0 as u32;
+    let mut back_main: u32 = 0;
     if len_main >= 2 as u32 {
         back_main = (*coder).matches[matches_count.wrapping_sub(1 as u32) as usize].dist;
         while matches_count > 1 as u32
@@ -302,7 +302,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     } else {
         len_main.wrapping_sub(1 as u32)
     };
-    let mut i_0: u32 = 0 as u32;
+    let mut i_0: u32 = 0;
     while i_0 < REPS as u32 {
         if memcmp(
             buf as *const c_void,

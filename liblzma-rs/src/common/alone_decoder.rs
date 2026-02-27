@@ -260,7 +260,7 @@ unsafe extern "C" fn alone_decode(
                             return LZMA_FORMAT_ERROR;
                         }
                     }
-                    (*coder).pos = 0 as size_t;
+                    (*coder).pos = 0;
                     (*coder).sequence = SEQ_UNCOMPRESSED_SIZE;
                 }
                 *in_pos = (*in_pos).wrapping_add(1);
@@ -287,7 +287,7 @@ unsafe extern "C" fn alone_decode(
                         &raw mut (*coder).options as *const c_void,
                     )
                     .wrapping_add(LZMA_MEMUSAGE_BASE as u64);
-                    (*coder).pos = 0 as size_t;
+                    (*coder).pos = 0;
                     (*coder).sequence = SEQ_CODER_INIT;
                     current_block_42 = 14763689060501151050;
                 }
@@ -367,7 +367,7 @@ unsafe extern "C" fn alone_decoder_memconfig(
     let mut coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
     *memusage = (*coder).memusage;
     *old_memlimit = (*coder).memlimit;
-    if new_memlimit != 0 as u64 {
+    if new_memlimit != 0 {
         if new_memlimit < (*coder).memusage {
             return LZMA_MEMLIMIT_ERROR;
         }
@@ -458,7 +458,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -470,10 +470,10 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     }
     (*coder).sequence = SEQ_PROPERTIES;
     (*coder).picky = picky;
-    (*coder).pos = 0 as size_t;
-    (*coder).options.dict_size = 0 as u32;
+    (*coder).pos = 0;
+    (*coder).options.dict_size = 0;
     (*coder).options.preset_dict = ::core::ptr::null::<u8>();
-    (*coder).options.preset_dict_size = 0 as u32;
+    (*coder).options.preset_dict_size = 0;
     (*coder).uncompressed_size = 0 as lzma_vli;
     (*coder).memlimit = if 1 as u64 > memlimit {
         1 as u64

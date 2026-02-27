@@ -99,17 +99,13 @@ pub unsafe extern "C" fn lzma_raw_buffer_encode(
     mut out_pos: *mut size_t,
     mut out_size: size_t,
 ) -> lzma_ret {
-    if in_0.is_null() && in_size != 0 as size_t
-        || out.is_null()
-        || out_pos.is_null()
-        || *out_pos > out_size
-    {
+    if in_0.is_null() && in_size != 0 || out.is_null() || out_pos.is_null() || *out_pos > out_size {
         return LZMA_PROG_ERROR;
     }
     let mut next: lzma_next_coder = lzma_next_coder_s {
         coder: core::ptr::null_mut(),
         id: LZMA_VLI_UNKNOWN as lzma_vli,
-        init: 0 as uintptr_t,
+        init: 0,
         code: None,
         end: None,
         get_progress: None,
@@ -123,7 +119,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_encode(
         return ret_;
     }
     let out_start: size_t = *out_pos;
-    let mut in_pos: size_t = 0 as size_t;
+    let mut in_pos: size_t = 0;
     let mut ret: lzma_ret = next.code.expect("non-null function pointer")(
         next.coder,
         allocator,

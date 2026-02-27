@@ -273,7 +273,7 @@ unsafe extern "C" fn index_encode(
                     break;
                 }
                 ret = LZMA_OK;
-                (*coder).pos = 0 as size_t;
+                (*coder).pos = 0;
                 (*coder).sequence = SEQ_NEXT;
                 continue;
             }
@@ -291,11 +291,11 @@ unsafe extern "C" fn index_encode(
                 current_block = 10048703153582371463;
             }
             5 => {
-                if (*coder).pos > 0 as size_t {
+                if (*coder).pos > 0 {
                     (*coder).pos = (*coder).pos.wrapping_sub(1);
                     let fresh0 = *out_pos;
                     *out_pos = (*out_pos).wrapping_add(1);
-                    *out.offset(fresh0 as isize) = 0 as u8;
+                    *out.offset(fresh0 as isize) = 0;
                     continue;
                 } else {
                     (*coder).crc32 = lzma_crc32(
@@ -324,7 +324,7 @@ unsafe extern "C" fn index_encode(
                     break;
                 }
                 ret = LZMA_OK;
-                (*coder).pos = 0 as size_t;
+                (*coder).pos = 0;
                 (*coder).sequence += 1;
             }
             _ => {
@@ -346,7 +346,7 @@ unsafe extern "C" fn index_encode(
         }
     }
     let out_used: size_t = (*out_pos).wrapping_sub(out_start);
-    if out_used > 0 as size_t {
+    if out_used > 0 {
         (*coder).crc32 = lzma_crc32(out.offset(out_start as isize), out_used, (*coder).crc32);
     }
     return ret;
@@ -364,8 +364,8 @@ unsafe extern "C" fn index_encoder_reset(
     lzma_index_iter_init(&raw mut (*coder).iter, i);
     (*coder).sequence = SEQ_INDICATOR;
     (*coder).index = i;
-    (*coder).pos = 0 as size_t;
-    (*coder).crc32 = 0 as u32;
+    (*coder).pos = 0;
+    (*coder).crc32 = 0;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_encoder_init(
@@ -529,7 +529,7 @@ pub unsafe extern "C" fn lzma_index_buffer_encode(
         ::core::ptr::null::<lzma_allocator>(),
         ::core::ptr::null::<u8>(),
         core::ptr::null_mut(),
-        0 as size_t,
+        0,
         out,
         out_pos,
         out_size,

@@ -118,7 +118,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_decode(
     let mut stream_decoder: lzma_next_coder = lzma_next_coder_s {
         coder: core::ptr::null_mut(),
         id: LZMA_VLI_UNKNOWN as lzma_vli,
-        init: 0 as uintptr_t,
+        init: 0,
         code: None,
         end: None,
         get_progress: None,
@@ -160,7 +160,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_decode(
                     stream_decoder.coder,
                     memlimit,
                     &raw mut memusage,
-                    0 as u64,
+                    0,
                 );
             }
         }

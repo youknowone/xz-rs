@@ -171,8 +171,8 @@ pub unsafe extern "C" fn lzma_index_hash_init(
     (*index_hash).records.index_list_size = 0 as lzma_vli;
     (*index_hash).unpadded_size = 0 as lzma_vli;
     (*index_hash).uncompressed_size = 0 as lzma_vli;
-    (*index_hash).pos = 0 as size_t;
-    (*index_hash).crc32 = 0 as u32;
+    (*index_hash).pos = 0;
+    (*index_hash).crc32 = 0;
     lzma_check_init(&raw mut (*index_hash).blocks.check, LZMA_CHECK_SHA256);
     lzma_check_init(&raw mut (*index_hash).records.check, LZMA_CHECK_SHA256);
     return index_hash;
@@ -284,7 +284,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                     return LZMA_DATA_ERROR;
                 }
                 ret = LZMA_OK;
-                (*index_hash).pos = 0 as size_t;
+                (*index_hash).pos = 0;
                 (*index_hash).sequence = (if (*index_hash).remaining == 0 as lzma_vli {
                     SEQ_PADDING_INIT as c_int
                 } else {
@@ -303,7 +303,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                     break;
                 }
                 ret = LZMA_OK;
-                (*index_hash).pos = 0 as size_t;
+                (*index_hash).pos = 0;
                 if (*index_hash).sequence == SEQ_UNPADDED {
                     if (*index_hash).unpadded_size < UNPADDED_SIZE_MIN as lzma_vli
                         || (*index_hash).unpadded_size > UNPADDED_SIZE_MAX as lzma_vli
@@ -352,7 +352,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
         }
         match current_block {
             12753679906265593574 => {
-                if (*index_hash).pos > 0 as size_t {
+                if (*index_hash).pos > 0 {
                     (*index_hash).pos = (*index_hash).pos.wrapping_sub(1);
                     let fresh1 = *in_pos;
                     *in_pos = (*in_pos).wrapping_add(1);
@@ -409,7 +409,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
         return LZMA_STREAM_END;
     }
     let in_used: size_t = (*in_pos).wrapping_sub(in_start);
-    if in_used > 0 as size_t {
+    if in_used > 0 {
         (*index_hash).crc32 =
             lzma_crc32(in_0.offset(in_start as isize), in_used, (*index_hash).crc32);
     }

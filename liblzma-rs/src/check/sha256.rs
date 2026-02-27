@@ -585,7 +585,7 @@ pub unsafe extern "C" fn lzma_sha256_init(mut check: *mut lzma_check_state) {
         &raw const s as *const u32 as *const c_void,
         ::core::mem::size_of::<[u32; 8]>() as size_t,
     );
-    (*check).state.sha256.size = 0 as u64;
+    (*check).state.sha256.size = 0;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_sha256_update(
@@ -593,7 +593,7 @@ pub unsafe extern "C" fn lzma_sha256_update(
     mut size: size_t,
     mut check: *mut lzma_check_state,
 ) {
-    while size > 0 as size_t {
+    while size > 0 {
         let copy_start: size_t = ((*check).state.sha256.size & 0x3f as u64) as size_t;
         let mut copy_size: size_t = (64 as size_t).wrapping_sub(copy_start);
         if copy_size > size {
@@ -607,7 +607,7 @@ pub unsafe extern "C" fn lzma_sha256_update(
         buf = buf.offset(copy_size as isize);
         size = size.wrapping_sub(copy_size);
         (*check).state.sha256.size = (*check).state.sha256.size.wrapping_add(copy_size as u64);
-        if (*check).state.sha256.size & 0x3f as u64 == 0 as u64 {
+        if (*check).state.sha256.size & 0x3f as u64 == 0 {
             process(check);
         }
     }
@@ -621,11 +621,11 @@ pub unsafe extern "C" fn lzma_sha256_finish(mut check: *mut lzma_check_state) {
     while pos != (64 as c_int - 8 as c_int) as size_t {
         if pos == 64 as size_t {
             process(check);
-            pos = 0 as size_t;
+            pos = 0;
         }
         let fresh9 = pos;
         pos = pos.wrapping_add(1);
-        (*check).buffer.u8_0[fresh9 as usize] = 0 as u8;
+        (*check).buffer.u8_0[fresh9 as usize] = 0;
     }
     (*check).state.sha256.size = (*check).state.sha256.size.wrapping_mul(8 as u64);
     (*check).buffer.u64_0[7] = ((*check).state.sha256.size & 0xff as u64) << 56
@@ -637,7 +637,7 @@ pub unsafe extern "C" fn lzma_sha256_finish(mut check: *mut lzma_check_state) {
         | ((*check).state.sha256.size & 0xff000000000000 as u64) >> 40
         | ((*check).state.sha256.size & 0xff00000000000000 as u64) >> 56;
     process(check);
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i < 8 as size_t {
         (*check).buffer.u32_0[i as usize] = ((*check).state.sha256.state[i as usize] & 0xff) << 24
             | ((*check).state.sha256.state[i as usize] & 0xff00) << 8

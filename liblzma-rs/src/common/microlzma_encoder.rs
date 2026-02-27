@@ -324,7 +324,7 @@ unsafe extern "C" fn microlzma_encoder_init(
         (*coder).lzma = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,

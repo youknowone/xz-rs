@@ -144,17 +144,17 @@ unsafe extern "C" fn riscv_encode(
     mut size: size_t,
 ) -> size_t {
     if size < 8 as size_t {
-        return 0 as size_t;
+        return 0;
     }
     size = size.wrapping_sub(8 as size_t);
     let mut i: size_t = 0;
     let mut current_block_22: u64;
-    i = 0 as size_t;
+    i = 0;
     while i <= size {
         let mut inst: u32 = *buffer.offset(i as isize) as u32;
         if inst == 0xef as u32 {
             let b1: u32 = *buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32;
-            if !(b1 & 0xd as u32 != 0 as u32) {
+            if !(b1 & 0xd as u32 != 0) {
                 let b2: u32 = *buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32;
                 let b3: u32 = *buffer.offset(i.wrapping_add(3 as size_t) as isize) as u32;
                 let pc: u32 = now_pos.wrapping_add(i as u32);
@@ -228,7 +228,7 @@ pub unsafe extern "C" fn lzma_simple_riscv_encoder_init(
         Some(
             riscv_encode as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t,
         ),
-        0 as size_t,
+        0,
         8 as size_t,
         2 as u32,
         true,
@@ -251,17 +251,17 @@ unsafe extern "C" fn riscv_decode(
     mut size: size_t,
 ) -> size_t {
     if size < 8 as size_t {
-        return 0 as size_t;
+        return 0;
     }
     size = size.wrapping_sub(8 as size_t);
     let mut i: size_t = 0;
     let mut current_block_23: u64;
-    i = 0 as size_t;
+    i = 0;
     while i <= size {
         let mut inst: u32 = *buffer.offset(i as isize) as u32;
         if inst == 0xef as u32 {
             let b1: u32 = *buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32;
-            if !(b1 & 0xd as u32 != 0 as u32) {
+            if !(b1 & 0xd as u32 != 0) {
                 let b2: u32 = *buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32;
                 let b3: u32 = *buffer.offset(i.wrapping_add(3 as size_t) as isize) as u32;
                 let pc: u32 = now_pos.wrapping_add(i as u32);
@@ -334,7 +334,7 @@ pub unsafe extern "C" fn lzma_simple_riscv_decoder_init(
         Some(
             riscv_decode as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t,
         ),
-        0 as size_t,
+        0,
         8 as size_t,
         2 as u32,
         false,

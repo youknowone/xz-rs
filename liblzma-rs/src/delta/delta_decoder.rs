@@ -130,7 +130,7 @@ unsafe extern "C" fn decode_buffer(
     mut size: size_t,
 ) {
     let distance: size_t = (*coder).distance;
-    let mut i: size_t = 0 as size_t;
+    let mut i: size_t = 0;
     while i < size {
         let ref mut fresh0 = *buffer.offset(i as isize);
         *fresh0 = (*fresh0 as c_int
@@ -168,7 +168,7 @@ unsafe extern "C" fn delta_decode(
         action,
     ) as lzma_ret;
     let size: size_t = (*out_pos).wrapping_sub(out_start);
-    if size > 0 as size_t {
+    if size > 0 {
         decode_buffer(coder, out.offset(out_start as isize), size);
     }
     return ret;

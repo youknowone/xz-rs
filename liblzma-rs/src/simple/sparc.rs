@@ -115,7 +115,7 @@ unsafe extern "C" fn sparc_code(
 ) -> size_t {
     size &= !(3 as size_t);
     let mut i: size_t = 0;
-    i = 0 as size_t;
+    i = 0;
     while i < size {
         if *buffer.offset(i as isize) as c_int == 0x40 as c_int
             && *buffer.offset(i.wrapping_add(1 as size_t) as isize) as c_int & 0xc0 as c_int
@@ -124,7 +124,7 @@ unsafe extern "C" fn sparc_code(
                 && *buffer.offset(i.wrapping_add(1 as size_t) as isize) as c_int & 0xc0 as c_int
                     == 0xc0 as c_int
         {
-            let mut src: u32 = (*buffer.offset(i.wrapping_add(0 as size_t) as isize) as u32) << 24
+            let mut src: u32 = (*buffer.offset(i.wrapping_add(0) as isize) as u32) << 24
                 | (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(3 as size_t) as isize) as u32;
@@ -136,10 +136,10 @@ unsafe extern "C" fn sparc_code(
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
             dest >>= 2 as c_int;
-            dest = (0 as u32).wrapping_sub(dest >> 22 & 1 as u32) << 22 & 0x3fffffff as u32
+            dest = 0u32.wrapping_sub(dest >> 22 & 1 as u32) << 22 & 0x3fffffff as u32
                 | dest & 0x3fffff as u32
                 | 0x40000000 as u32;
-            *buffer.offset(i.wrapping_add(0 as size_t) as isize) = (dest >> 24) as u8;
+            *buffer.offset(i.wrapping_add(0) as isize) = (dest >> 24) as u8;
             *buffer.offset(i.wrapping_add(1 as size_t) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(2 as size_t) as isize) = (dest >> 8) as u8;
             *buffer.offset(i.wrapping_add(3 as size_t) as isize) = dest as u8;
@@ -159,7 +159,7 @@ unsafe extern "C" fn sparc_coder_init(
         allocator,
         filters,
         Some(sparc_code as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t),
-        0 as size_t,
+        0,
         4 as size_t,
         4 as u32,
         is_encoder,

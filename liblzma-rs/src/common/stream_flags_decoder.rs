@@ -71,7 +71,7 @@ unsafe extern "C" fn stream_flags_decode(
     if *in_0.offset(0) as c_int != 0 as c_int || *in_0.offset(1) as c_int & 0xf0 as c_int != 0 {
         return true;
     }
-    (*options).version = 0 as u32;
+    (*options).version = 0;
     (*options).check = (*in_0.offset(1) as c_int & 0xf as c_int) as lzma_check;
     return false;
 }
@@ -91,7 +91,7 @@ pub unsafe extern "C" fn lzma_stream_header_decode(
     let crc: u32 = lzma_crc32(
         in_0.offset(::core::mem::size_of::<[u8; 6]>() as usize as isize),
         LZMA_STREAM_FLAGS_SIZE as size_t,
-        0 as u32,
+        0,
     ) as u32;
     if crc
         != read32le(
@@ -127,7 +127,7 @@ pub unsafe extern "C" fn lzma_stream_footer_decode(
     let crc: u32 = lzma_crc32(
         in_0.offset(::core::mem::size_of::<u32>() as usize as isize),
         (::core::mem::size_of::<u32>() as size_t).wrapping_add(LZMA_STREAM_FLAGS_SIZE as size_t),
-        0 as u32,
+        0,
     ) as u32;
     if crc != read32le(in_0) {
         return LZMA_DATA_ERROR;

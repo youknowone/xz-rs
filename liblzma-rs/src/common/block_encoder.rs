@@ -286,7 +286,7 @@ unsafe extern "C" fn block_encode(
                     (*coder).compressed_size.wrapping_add(out_used as lzma_vli);
                 (*coder).uncompressed_size =
                     (*coder).uncompressed_size.wrapping_add(in_used as lzma_vli);
-                if in_used > 0 as size_t {
+                if in_used > 0 {
                     lzma_check_update(
                         &raw mut (*coder).check,
                         (*(*coder).block).check,
@@ -318,7 +318,7 @@ unsafe extern "C" fn block_encode(
                     if *out_pos >= out_size {
                         return LZMA_OK;
                     }
-                    *out.offset(*out_pos as isize) = 0 as u8;
+                    *out.offset(*out_pos as isize) = 0;
                     *out_pos = (*out_pos).wrapping_add(1);
                     (*coder).compressed_size = (*coder).compressed_size.wrapping_add(1);
                 }
@@ -473,7 +473,7 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
-            init: 0 as uintptr_t,
+            init: 0,
             code: None,
             end: None,
             get_progress: None,
@@ -487,7 +487,7 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
     (*coder).block = block;
     (*coder).compressed_size = 0 as lzma_vli;
     (*coder).uncompressed_size = 0 as lzma_vli;
-    (*coder).pos = 0 as size_t;
+    (*coder).pos = 0;
     lzma_check_init(&raw mut (*coder).check, (*block).check);
     return lzma_raw_encoder_init(&raw mut (*coder).next, allocator, (*block).filters);
 }

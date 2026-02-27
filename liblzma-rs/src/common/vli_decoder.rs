@@ -30,7 +30,7 @@ pub unsafe extern "C" fn lzma_vli_decode(
     mut in_pos: *mut size_t,
     mut in_size: size_t,
 ) -> lzma_ret {
-    let mut vli_pos_internal: size_t = 0 as size_t;
+    let mut vli_pos_internal: size_t = 0;
     if vli_pos.is_null() {
         vli_pos = &raw mut vli_pos_internal;
         *vli = 0 as lzma_vli;
@@ -38,7 +38,7 @@ pub unsafe extern "C" fn lzma_vli_decode(
             return LZMA_DATA_ERROR;
         }
     } else {
-        if *vli_pos == 0 as size_t {
+        if *vli_pos == 0 {
             *vli = 0 as lzma_vli;
         }
         if *vli_pos >= LZMA_VLI_BYTES_MAX as size_t
