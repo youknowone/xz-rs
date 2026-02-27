@@ -248,7 +248,7 @@ unsafe extern "C" fn alone_decode(
                     if (*coder).picky as c_int != 0
                         && (*coder).options.dict_size != UINT32_MAX as u32
                     {
-                        let mut d: u32 = (*coder).options.dict_size.wrapping_sub(1 as u32);
+                        let mut d: u32 = (*coder).options.dict_size.wrapping_sub(1);
                         d |= d >> 2;
                         d |= d >> 3;
                         d |= d >> 4;
@@ -474,11 +474,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     (*coder).options.preset_dict = ::core::ptr::null::<u8>();
     (*coder).options.preset_dict_size = 0;
     (*coder).uncompressed_size = 0 as lzma_vli;
-    (*coder).memlimit = if 1 as u64 > memlimit {
-        1 as u64
-    } else {
-        memlimit
-    };
+    (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
     (*coder).memusage = LZMA_MEMUSAGE_BASE as u64;
     return LZMA_OK;
 }

@@ -177,7 +177,7 @@ pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
-pub const INDEX_INDICATOR: c_int = 0 as c_int;
+pub const INDEX_INDICATOR: c_int = 0;
 unsafe extern "C" fn index_decode(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,
@@ -373,8 +373,8 @@ unsafe extern "C" fn index_decoder_reset(
         return LZMA_MEM_ERROR;
     }
     (*coder).sequence = SEQ_INDICATOR;
-    (*coder).memlimit = if 1 as u64 > memlimit {
-        1 as u64
+    (*coder).memlimit = if 1 > memlimit {
+        1
     } else {
         memlimit
     };

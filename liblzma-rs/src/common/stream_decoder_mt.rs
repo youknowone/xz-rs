@@ -381,7 +381,7 @@ pub struct lzma_stream_coder {
     pub pos: size_t,
     pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
-pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
+pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_outq {
@@ -510,7 +510,7 @@ pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
-pub const SIG_SETMASK: c_int = 3 as c_int;
+pub const SIG_SETMASK: c_int = 3;
 pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 #[inline]
 unsafe extern "C" fn mythread_sigmask(
@@ -627,8 +627,8 @@ pub const LZMA_TELL_ANY_CHECK: c_uint = 0x4;
 pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
 pub const LZMA_CONCATENATED: c_uint = 0x8;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
-pub const LZMA_THREADS_MAX: c_int = 16384 as c_int;
+pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
+pub const LZMA_THREADS_MAX: c_int = 16384;
 pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
 pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_TELL_UNSUPPORTED_CHECK
@@ -636,7 +636,7 @@ pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_IGNORE_CHECK
     | LZMA_CONCATENATED
     | LZMA_FAIL_FAST;
-pub const INDEX_INDICATOR: c_int = 0 as c_int;
+pub const INDEX_INDICATOR: c_int = 0;
 #[inline]
 extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
@@ -1114,7 +1114,7 @@ unsafe extern "C" fn decode_block_header(
             return LZMA_RET_INTERNAL2;
         }
         (*coder).block_options.header_size = (*in_0.offset(*in_pos as isize) as u32)
-            .wrapping_add(1 as u32)
+            .wrapping_add(1)
             .wrapping_mul(4 as u32);
     }
     lzma_bufcpy(
@@ -1129,7 +1129,7 @@ unsafe extern "C" fn decode_block_header(
         return LZMA_OK;
     }
     (*coder).pos = 0;
-    (*coder).block_options.version = 1 as u32;
+    (*coder).block_options.version = 1;
     (*coder).block_options.filters = &raw mut (*coder).filters as *mut lzma_filter;
     let ret_: lzma_ret = lzma_block_header_decode(
         &raw mut (*coder).block_options,
@@ -2082,13 +2082,13 @@ unsafe extern "C" fn stream_decoder_mt_init(
     (*coder).pending_error = LZMA_OK;
     (*coder).thr = core::ptr::null_mut();
     (*coder).timeout = (*options).timeout;
-    (*coder).memlimit_threading = if 1 as u64 > (*options).memlimit_threading {
-        1 as u64
+    (*coder).memlimit_threading = if 1 > (*options).memlimit_threading {
+        1
     } else {
         (*options).memlimit_threading
     };
-    (*coder).memlimit_stop = if 1 as u64 > (*options).memlimit_stop {
-        1 as u64
+    (*coder).memlimit_stop = if 1 > (*options).memlimit_stop {
+        1
     } else {
         (*options).memlimit_stop
     };

@@ -63,7 +63,7 @@ unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
     return num;
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2 as c_int;
+pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2;
 unsafe extern "C" fn stream_flags_decode(
     mut options: *mut lzma_stream_flags,
     mut in_0: *const u8,

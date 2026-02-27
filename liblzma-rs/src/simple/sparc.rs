@@ -135,7 +135,7 @@ unsafe extern "C" fn sparc_code(
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
             dest >>= 2 as c_int;
-            dest = 0u32.wrapping_sub(dest >> 22 & 1 as u32) << 22 & 0x3fffffff as u32
+            dest = 0u32.wrapping_sub(dest >> 22 & 1) << 22 & 0x3fffffff as u32
                 | dest & 0x3fffff as u32
                 | 0x40000000 as u32;
             *buffer.offset(i.wrapping_add(0) as isize) = (dest >> 24) as u8;

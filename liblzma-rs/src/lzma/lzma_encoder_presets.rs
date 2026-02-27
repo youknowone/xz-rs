@@ -36,9 +36,9 @@ pub struct lzma_options_lzma {
     pub reserved_ptr1: *mut c_void,
     pub reserved_ptr2: *mut c_void,
 }
-pub const LZMA_LC_DEFAULT: c_int = 3 as c_int;
-pub const LZMA_LP_DEFAULT: c_int = 0 as c_int;
-pub const LZMA_PB_DEFAULT: c_int = 2 as c_int;
+pub const LZMA_LC_DEFAULT: c_int = 3;
+pub const LZMA_LP_DEFAULT: c_int = 0;
+pub const LZMA_PB_DEFAULT: c_int = 2;
 pub const LZMA_PRESET_LEVEL_MASK: c_uint = 0x1f;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
 #[no_mangle]
@@ -69,7 +69,7 @@ pub unsafe extern "C" fn lzma_lzma_preset(
         } else {
             LZMA_MF_HC4 as c_int
         }) as lzma_match_finder;
-        (*options).nice_len = (if level <= 1 as u32 {
+        (*options).nice_len = (if level <= 1 {
             128 as c_int
         } else {
             273 as c_int

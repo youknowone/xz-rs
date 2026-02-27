@@ -113,11 +113,11 @@ pub const SEQ_BLOCK: C2RustUnnamed_1 = 0;
 pub type lzma_index_hash = lzma_index_hash_s;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
+pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
 pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
-pub const INDEX_INDICATOR: c_int = 0 as c_int;
+pub const INDEX_INDICATOR: c_int = 0;
 #[inline]
 extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
@@ -127,7 +127,7 @@ extern "C" fn index_size_unpadded(
     mut count: lzma_vli,
     mut index_list_size: lzma_vli,
 ) -> lzma_vli {
-    return ((1 as u32).wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
+    return (1u32.wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
         .wrapping_add(index_list_size)
         .wrapping_add(4 as lzma_vli);
 }

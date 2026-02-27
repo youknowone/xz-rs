@@ -213,7 +213,7 @@ extern "C" fn ctz32(mut n: u32) -> u32 {
 }
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
+pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
 pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
@@ -222,11 +222,8 @@ extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
 }
 #[inline]
-extern "C" fn index_size_unpadded(
-    mut count: lzma_vli,
-    mut index_list_size: lzma_vli,
-) -> lzma_vli {
-    return ((1 as u32).wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
+extern "C" fn index_size_unpadded(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
+    return (1u32.wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
         .wrapping_add(index_list_size)
         .wrapping_add(4 as lzma_vli);
 }
@@ -234,7 +231,7 @@ extern "C" fn index_size_unpadded(
 extern "C" fn index_size(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
     return vli_ceil4(index_size_unpadded(count, index_list_size));
 }
-pub const INDEX_GROUP_SIZE: c_int = 512 as c_int;
+pub const INDEX_GROUP_SIZE: c_int = 512;
 pub const PREALLOC_MAX: usize = (SIZE_MAX as usize)
     .wrapping_sub(core::mem::size_of::<index_group>() as usize)
     .wrapping_div(core::mem::size_of::<index_record>() as usize);
@@ -279,7 +276,7 @@ unsafe extern "C" fn index_tree_append(mut tree: *mut index_tree, mut node: *mut
     }
     (*(*tree).rightmost).right = node;
     (*tree).rightmost = node;
-    let mut up: u32 = (*tree).count ^ (1 as u32) << bsr32((*tree).count);
+    let mut up: u32 = (*tree).count ^ (1) << bsr32((*tree).count);
     if up != 0 {
         up = ctz32((*tree).count).wrapping_add(2 as u32);
         loop {
@@ -341,8 +338,7 @@ unsafe extern "C" fn index_stream_init(
     mut allocator: *const lzma_allocator,
 ) -> *mut index_stream {
     let mut s: *mut index_stream =
-        lzma_alloc(core::mem::size_of::<index_stream>() as size_t, allocator)
-            as *mut index_stream;
+        lzma_alloc(core::mem::size_of::<index_stream>() as size_t, allocator) as *mut index_stream;
     if s.is_null() {
         return core::ptr::null_mut();
     }
@@ -389,13 +385,8 @@ pub unsafe extern "C" fn lzma_index_init(mut allocator: *const lzma_allocator) -
     if i.is_null() {
         return core::ptr::null_mut();
     }
-    let mut s: *mut index_stream = index_stream_init(
-        0 as lzma_vli,
-        0 as lzma_vli,
-        1 as u32,
-        0 as lzma_vli,
-        allocator,
-    );
+    let mut s: *mut index_stream =
+        index_stream_init(0 as lzma_vli, 0 as lzma_vli, 1, 0 as lzma_vli, allocator);
     if s.is_null() {
         lzma_free(i as *mut c_void, allocator);
         return core::ptr::null_mut();

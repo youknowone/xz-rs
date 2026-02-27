@@ -96,10 +96,10 @@ unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
 }
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTERS_MAX: c_int = 4 as c_int;
+pub const LZMA_FILTERS_MAX: c_int = 4;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_header_size(mut block: *mut lzma_block) -> lzma_ret {
-    if (*block).version > 1 as u32 {
+    if (*block).version > 1 {
         return LZMA_OPTIONS_ERROR;
     }
     let mut size: u32 = (1 as c_int + 1 as c_int + 4 as c_int) as u32;

@@ -409,7 +409,7 @@ pub unsafe extern "C" fn lzma_simple_coder_init(
         let mut simple: *const lzma_options_bcj =
             (*filters.offset(0)).options as *const lzma_options_bcj;
         (*coder).now_pos = (*simple).start_offset;
-        if (*coder).now_pos & alignment.wrapping_sub(1 as u32) != 0 {
+        if (*coder).now_pos & alignment.wrapping_sub(1) != 0 {
             return LZMA_OPTIONS_ERROR;
         }
     } else {

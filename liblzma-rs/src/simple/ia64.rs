@@ -126,7 +126,7 @@ unsafe extern "C" fn ia64_code(
         let mut bit_pos: u32 = 5 as u32;
         let mut slot: size_t = 0;
         while slot < 3 {
-            if !(mask >> slot & 1 as u32 == 0) {
+            if !(mask >> slot & 1 == 0) {
                 let byte_pos: size_t = (bit_pos >> 3) as size_t;
                 let bit_res: u32 = bit_pos & 0x7 as u32;
                 let mut instruction: u64 = 0;
@@ -141,7 +141,7 @@ unsafe extern "C" fn ia64_code(
                 let mut inst_norm: u64 = instruction >> bit_res;
                 if inst_norm >> 37 & 0xf as u64 == 0x5 as u64 && inst_norm >> 9 & 0x7 as u64 == 0 {
                     let mut src: u32 = (inst_norm >> 13 & 0xfffff as u64) as u32;
-                    src = (src as u64 | (inst_norm >> 36 & 1 as u64) << 20) as u32;
+                    src = (src as u64 | (inst_norm >> 36 & 1) << 20) as u32;
                     src <<= 4 as c_int;
                     let mut dest: u32 = 0;
                     if is_encoder {

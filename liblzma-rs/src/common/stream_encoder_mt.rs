@@ -521,7 +521,7 @@ pub struct lzma_options_easy {
     pub opt_lzma: lzma_options_lzma,
 }
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
-pub const SIG_SETMASK: c_int = 3 as c_int;
+pub const SIG_SETMASK: c_int = 3;
 pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 #[inline]
 unsafe extern "C" fn mythread_sigmask(
@@ -633,8 +633,8 @@ unsafe extern "C" fn mythread_condtime_set(
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
-pub const LZMA_THREADS_MAX: c_int = 16384 as c_int;
+pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
+pub const LZMA_THREADS_MAX: c_int = 16384;
 pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
 #[inline]
 unsafe extern "C" fn lzma_outq_has_buf(mut outq: *const lzma_outq) -> bool {

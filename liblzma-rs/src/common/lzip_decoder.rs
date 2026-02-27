@@ -259,11 +259,11 @@ pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_IGNORE_CHECK
     | LZMA_CONCATENATED
     | LZMA_FAIL_FAST;
-pub const LZIP_V0_FOOTER_SIZE: c_int = 12 as c_int;
-pub const LZIP_V1_FOOTER_SIZE: c_int = 20 as c_int;
-pub const LZIP_LC: c_int = 3 as c_int;
-pub const LZIP_LP: c_int = 0 as c_int;
-pub const LZIP_PB: c_int = 2 as c_int;
+pub const LZIP_V0_FOOTER_SIZE: c_int = 12;
+pub const LZIP_V1_FOOTER_SIZE: c_int = 20;
+pub const LZIP_LC: c_int = 3;
+pub const LZIP_LP: c_int = 0;
+pub const LZIP_PB: c_int = 2;
 unsafe extern "C" fn lzip_decode(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,
@@ -333,7 +333,7 @@ unsafe extern "C" fn lzip_decode(
                 let fresh0 = *in_pos;
                 *in_pos = (*in_pos).wrapping_add(1);
                 (*coder).version = *in_0.offset(fresh0 as isize) as u32;
-                if (*coder).version > 1 as u32 {
+                if (*coder).version > 1 {
                     return LZMA_OPTIONS_ERROR;
                 }
                 (*coder).member_size = (*coder).member_size.wrapping_add(1);
@@ -360,7 +360,7 @@ unsafe extern "C" fn lzip_decode(
                     return LZMA_DATA_ERROR;
                 }
                 (*coder).options.dict_size =
-                    ((1 as u32) << b2log).wrapping_sub(fracnum << b2log.wrapping_sub(4 as u32));
+                    ((1) << b2log).wrapping_sub(fracnum << b2log.wrapping_sub(4 as u32));
                 (*coder).options.preset_dict = ::core::ptr::null::<u8>();
                 (*coder).options.lc = LZIP_LC as u32;
                 (*coder).options.lp = LZIP_LP as u32;
@@ -608,8 +608,8 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
         };
     }
     (*coder).sequence = SEQ_ID_STRING;
-    (*coder).memlimit = if 1 as u64 > memlimit {
-        1 as u64
+    (*coder).memlimit = if 1 > memlimit {
+        1
     } else {
         memlimit
     };

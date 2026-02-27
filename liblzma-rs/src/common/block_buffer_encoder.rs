@@ -199,19 +199,19 @@ pub struct lzma_sha256_state {
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_VLI_BYTES_MAX: c_int = 9 as c_int;
+pub const LZMA_VLI_BYTES_MAX: c_int = 9;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
-pub const LZMA_CHECK_SIZE_MAX: c_int = 64 as c_int;
+pub const LZMA_CHECK_SIZE_MAX: c_int = 64;
 pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
-pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
+pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024;
 pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as u64)
     .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64)
     & !3;
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
-pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3 as c_int;
-pub const HEADERS_BOUND: c_int = 1 as c_int
+pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3;
+pub const HEADERS_BOUND: c_int = 1
     + 1 as c_int
     + 2 as c_int * LZMA_VLI_BYTES_MAX
     + 3 as c_int
@@ -225,10 +225,10 @@ extern "C" fn lzma2_bound(mut uncompressed_size: u64) -> u64 {
     }
     let overhead: u64 = uncompressed_size
         .wrapping_add(LZMA2_CHUNK_MAX as u64)
-        .wrapping_sub(1 as u64)
+        .wrapping_sub(1)
         .wrapping_div(LZMA2_CHUNK_MAX as u64)
         .wrapping_mul(LZMA2_HEADER_UNCOMPRESSED as u64)
-        .wrapping_add(1 as u64);
+        .wrapping_add(1);
     if (COMPRESSED_SIZE_MAX as u64).wrapping_sub(overhead) < uncompressed_size {
         return 0;
     }
@@ -422,7 +422,7 @@ unsafe extern "C" fn block_buffer_encode(
     {
         return LZMA_PROG_ERROR;
     }
-    if (*block).version > 1 as u32 {
+    if (*block).version > 1 {
         return LZMA_OPTIONS_ERROR;
     }
     if (*block).check > LZMA_CHECK_ID_MAX

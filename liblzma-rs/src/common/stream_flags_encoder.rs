@@ -61,9 +61,9 @@ unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
     *buf.offset(3) = (num >> 24) as u8;
 }
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
-pub const LZMA_BACKWARD_SIZE_MIN: c_int = 4 as c_int;
+pub const LZMA_BACKWARD_SIZE_MIN: c_int = 4;
 pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
-pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2 as c_int;
+pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2;
 #[inline]
 unsafe extern "C" fn is_backward_size_valid(mut options: *const lzma_stream_flags) -> bool {
     return (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli

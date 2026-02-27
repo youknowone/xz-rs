@@ -161,10 +161,10 @@ pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_BUFFER_SIZE: c_int = 4096 as c_int;
-pub const LZ_DICT_EXTRA: c_int = 0 as c_int;
-pub const LZ_DICT_REPEAT_MAX: c_int = 288 as c_int;
-pub const LZ_DICT_INIT_POS: c_int = 2 as c_int * LZ_DICT_REPEAT_MAX;
+pub const LZMA_BUFFER_SIZE: c_int = 4096;
+pub const LZ_DICT_EXTRA: c_int = 0;
+pub const LZ_DICT_REPEAT_MAX: c_int = 288;
+pub const LZ_DICT_INIT_POS: c_int = 2 * LZ_DICT_REPEAT_MAX;
 pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
     coder: core::ptr::null_mut(),
     code: None,

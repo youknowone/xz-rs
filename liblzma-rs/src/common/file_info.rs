@@ -221,7 +221,7 @@ pub const SEQ_MAGIC_BYTES: C2RustUnnamed_0 = 0;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
+pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
 unsafe extern "C" fn fill_temp(
     mut coder: *mut lzma_file_info_coder,
     mut in_0: *const u8,
@@ -854,11 +854,7 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
     (*coder).stream_padding = 0 as lzma_vli;
     (*coder).dest_index = dest_index;
     (*coder).external_seek_pos = seek_pos;
-    (*coder).memlimit = if 1 as u64 > memlimit {
-        1 as u64
-    } else {
-        memlimit
-    };
+    (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
     (*coder).temp_pos = 0;
     (*coder).temp_size = LZMA_STREAM_HEADER_SIZE as size_t;
     return LZMA_OK;

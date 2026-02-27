@@ -220,7 +220,7 @@ unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
-pub const ALONE_HEADER_SIZE: c_int = 1 as c_int + 4 as c_int + 8 as c_int;
+pub const ALONE_HEADER_SIZE: c_int = 1 + 4 as c_int + 8 as c_int;
 unsafe extern "C" fn alone_encode(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,
@@ -365,7 +365,7 @@ unsafe extern "C" fn alone_encoder_init(
     if (*options).dict_size < LZMA_DICT_SIZE_MIN as u32 {
         return LZMA_OPTIONS_ERROR;
     }
-    let mut d: u32 = (*options).dict_size.wrapping_sub(1 as u32);
+    let mut d: u32 = (*options).dict_size.wrapping_sub(1);
     d |= d >> 2;
     d |= d >> 3;
     d |= d >> 4;

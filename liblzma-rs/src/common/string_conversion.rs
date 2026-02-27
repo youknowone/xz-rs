@@ -155,7 +155,7 @@ pub const UINT32_MAX: c_uint = 4294967295;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const INT_MAX: c_int = c_int::MAX;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTERS_MAX: c_int = 4 as c_int;
+pub const LZMA_FILTERS_MAX: c_int = 4;
 pub const LZMA_STR_ALL_FILTERS: c_uint = 0x1;
 pub const LZMA_STR_NO_VALIDATION: c_uint = 0x2;
 pub const LZMA_STR_ENCODER: c_uint = 0x10;
@@ -171,20 +171,20 @@ pub const LZMA_FILTER_SPARC: c_ulonglong = 0x9;
 pub const LZMA_FILTER_ARM64: c_ulonglong = 0xa;
 pub const LZMA_FILTER_RISCV: c_ulonglong = 0xb;
 pub const LZMA_FILTER_DELTA: c_ulonglong = 0x3;
-pub const LZMA_DELTA_DIST_MIN: c_int = 1 as c_int;
-pub const LZMA_DELTA_DIST_MAX: c_int = 256 as c_int;
+pub const LZMA_DELTA_DIST_MIN: c_int = 1;
+pub const LZMA_DELTA_DIST_MAX: c_int = 256;
 pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
 pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
 pub const LZMA_DICT_SIZE_DEFAULT: c_uint = 1u32 << 23;
-pub const LZMA_LCLP_MIN: c_int = 0 as c_int;
-pub const LZMA_LCLP_MAX: c_int = 4 as c_int;
-pub const LZMA_PB_MIN: c_int = 0 as c_int;
-pub const LZMA_PB_MAX: c_int = 4 as c_int;
+pub const LZMA_LCLP_MIN: c_int = 0;
+pub const LZMA_LCLP_MAX: c_int = 4;
+pub const LZMA_PB_MIN: c_int = 0;
+pub const LZMA_PB_MAX: c_int = 4;
 pub const LZMA_PRESET_DEFAULT: c_uint = 6;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
 pub const LZMA_FILTER_RESERVED_START: c_ulonglong = 1 << 62;
-pub const STR_ALLOC_SIZE: c_int = 800 as c_int;
+pub const STR_ALLOC_SIZE: c_int = 800;
 unsafe extern "C" fn str_init(
     mut str: *mut lzma_str,
     mut allocator: *const lzma_allocator,
@@ -271,7 +271,7 @@ unsafe extern "C" fn str_append_u32(mut str: *mut lzma_str, mut v: u32, mut use_
         );
     };
 }
-pub const NAME_LEN_MAX: c_int = 11 as c_int;
+pub const NAME_LEN_MAX: c_int = 11;
 pub const OPTMAP_USE_NAME_VALUE_MAP: c_int = 0x1 as c_int;
 pub const OPTMAP_USE_BYTE_SUFFIX: c_int = 0x2 as c_int;
 pub const OPTMAP_NO_STRFY_ZERO: c_int = 0x4 as c_int;
@@ -280,7 +280,7 @@ static mut bcj_optmap: [option_map; 1] = unsafe {
         name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"start\0\0\0\0\0\0\0"),
         type_0: 0,
         flags: (OPTMAP_NO_STRFY_ZERO | OPTMAP_USE_BYTE_SUFFIX) as u8,
-        offset: 0 as c_ulong as u16,
+        offset: 0,
         u: C2RustUnnamed_0 {
             range: C2RustUnnamed_1 {
                 min: 0,
@@ -308,7 +308,7 @@ static mut delta_optmap: [option_map; 1] = unsafe {
         name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"dist\0\0\0\0\0\0\0\0"),
         type_0: 0,
         flags: 0,
-        offset: 4 as c_ulong as u16,
+        offset: 4,
         u: C2RustUnnamed_0 {
             range: C2RustUnnamed_1 {
                 min: LZMA_DELTA_DIST_MIN as u32,
@@ -502,8 +502,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -519,8 +519,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -536,8 +536,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -553,8 +553,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -570,8 +570,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -587,8 +587,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -604,8 +604,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -621,8 +621,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const bcj_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: true,
         },
         C2RustUnnamed {
@@ -638,8 +638,8 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
                     ) -> *const c_char,
             ),
             optmap: &raw const delta_optmap as *const option_map,
-            strfy_encoder: 1 as u8,
-            strfy_decoder: 1 as u8,
+            strfy_encoder: 1,
+            strfy_decoder: 1,
             allow_null: false,
         },
     ]
@@ -1386,11 +1386,11 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"dict\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: OPTMAP_USE_BYTE_SUFFIX as u8,
-            offset: 0 as c_ulong as u16,
+            offset: 0,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: LZMA_DICT_SIZE_MIN as u32,
-                    max: ((1 as u32) << 30).wrapping_add((1 as u32) << 29),
+                    max: ((1) << 30).wrapping_add((1) << 29),
                 },
             },
         },
@@ -1398,7 +1398,7 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lc\0\0\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
-            offset: 20 as c_ulong as u16,
+            offset: 20,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: LZMA_LCLP_MIN as u32,
@@ -1410,7 +1410,7 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lp\0\0\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
-            offset: 24 as c_ulong as u16,
+            offset: 24,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: LZMA_LCLP_MIN as u32,
@@ -1422,7 +1422,7 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"pb\0\0\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
-            offset: 28 as c_ulong as u16,
+            offset: 28,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: LZMA_PB_MIN as u32,
@@ -1434,7 +1434,7 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mode\0\0\0\0\0\0\0\0"),
             type_0: OPTMAP_TYPE_LZMA_MODE as u8,
             flags: OPTMAP_USE_NAME_VALUE_MAP as u8,
-            offset: 32 as c_ulong as u16,
+            offset: 32,
             u: C2RustUnnamed_0 {
                 map: &raw const lzma12_mode_map as *const name_value_map,
             },
@@ -1443,7 +1443,7 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"nice\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
-            offset: 36 as c_ulong as u16,
+            offset: 36,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: 2 as u32,
@@ -1455,7 +1455,7 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mf\0\0\0\0\0\0\0\0\0\0"),
             type_0: OPTMAP_TYPE_LZMA_MATCH_FINDER as u8,
             flags: OPTMAP_USE_NAME_VALUE_MAP as u8,
-            offset: 40 as c_ulong as u16,
+            offset: 40,
             u: C2RustUnnamed_0 {
                 map: &raw const lzma12_mf_map as *const name_value_map,
             },
@@ -1464,7 +1464,7 @@ unsafe extern "C" fn run_static_initializers() {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"depth\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
-            offset: 44 as c_ulong as u16,
+            offset: 44,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: 0,

@@ -210,7 +210,7 @@ extern "C" fn mf_get_hash_bytes(mut match_finder: lzma_match_finder) -> u32 {
 }
 pub const HASH_2_SIZE: c_uint = 1u32 << 10;
 pub const HASH_3_SIZE: c_uint = 1u32 << 16;
-pub const LZMA_MEMCMPLEN_EXTRA: c_int = 0 as c_int;
+pub const LZMA_MEMCMPLEN_EXTRA: c_int = 0;
 unsafe extern "C" fn move_window(mut mf: *mut lzma_mf) {
     let move_offset: u32 = (*mf).read_pos.wrapping_sub((*mf).keep_size_before) & !(15 as u32);
     let move_size: size_t = (*mf).write_pos.wrapping_sub(move_offset) as size_t;
@@ -340,7 +340,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         .after_size
         .wrapping_add((*lz_options).match_len_max) as u32;
     let mut reserve: u32 = (*lz_options).dict_size.wrapping_div(2) as u32;
-    if reserve > (1 as u32) << 30 {
+    if reserve > (1) << 30 {
         reserve = reserve.wrapping_div(2 as u32);
     }
     reserve = (reserve as size_t).wrapping_add(
@@ -419,7 +419,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         hs |= hs >> 8;
         hs >>= 1 as c_int;
         hs |= 0xffff as u32;
-        if hs > (1 as u32) << 24 {
+        if hs > (1) << 24 {
             if hash_bytes == 3 as u32 {
                 hs = (1u32 << 24).wrapping_sub(1) as u32;
             } else {

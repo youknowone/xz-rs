@@ -184,7 +184,7 @@ pub struct lzma_stream_coder {
     pub buffer_size: size_t,
     pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
-pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
+pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024;
 pub type lzma_index = lzma_index_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -250,7 +250,7 @@ pub struct lzma_stream_flags {
 }
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
+pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
 unsafe extern "C" fn block_encoder_init(
     mut coder: *mut lzma_stream_coder,
     mut allocator: *const lzma_allocator,

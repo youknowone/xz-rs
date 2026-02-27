@@ -134,7 +134,7 @@ unsafe extern "C" fn x86_code(
     mut buffer: *mut u8,
     mut size: size_t,
 ) -> size_t {
-    static mut MASK_TO_BIT_NUMBER: [u32; 5] = [0, 1 as u32, 2 as u32, 2 as u32, 3 as u32];
+    static mut MASK_TO_BIT_NUMBER: [u32; 5] = [0, 1, 2 as u32, 2 as u32, 3 as u32];
     let mut simple: *mut lzma_simple_x86 = simple_ptr as *mut lzma_simple_x86;
     let mut prev_mask: u32 = (*simple).prev_mask;
     let mut prev_pos: u32 = (*simple).prev_pos;
@@ -198,11 +198,11 @@ unsafe extern "C" fn x86_code(
                         break;
                     }
                     src = dest
-                        ^ ((1 as u32) << (32 as u32).wrapping_sub(i_0.wrapping_mul(8 as u32)))
-                            .wrapping_sub(1 as u32);
+                        ^ ((1) << (32 as u32).wrapping_sub(i_0.wrapping_mul(8 as u32)))
+                            .wrapping_sub(1);
                 }
                 *buffer.offset(buffer_pos.wrapping_add(4) as isize) =
-                    !(dest >> 24 & 1 as u32).wrapping_sub(1 as u32) as u8;
+                    !(dest >> 24 & 1).wrapping_sub(1) as u8;
                 *buffer.offset(buffer_pos.wrapping_add(3) as isize) = (dest >> 16) as u8;
                 *buffer.offset(buffer_pos.wrapping_add(2) as isize) = (dest >> 8) as u8;
                 *buffer.offset(buffer_pos.wrapping_add(1) as isize) = dest as u8;
@@ -210,7 +210,7 @@ unsafe extern "C" fn x86_code(
                 prev_mask = 0;
             } else {
                 buffer_pos = buffer_pos.wrapping_add(1);
-                prev_mask |= 1 as u32;
+                prev_mask |= 1;
                 if b as c_int == 0 as c_int || b as c_int == 0xff as c_int {
                     prev_mask |= 0x10 as u32;
                 }
@@ -234,7 +234,7 @@ unsafe extern "C" fn x86_coder_init(
         Some(x86_code as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t),
         core::mem::size_of::<lzma_simple_x86>() as size_t,
         5,
-        1 as u32,
+        1,
         is_encoder,
     ) as lzma_ret;
     if ret == LZMA_OK {

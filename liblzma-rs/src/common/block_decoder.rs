@@ -512,7 +512,7 @@ pub unsafe extern "C" fn lzma_block_decoder_init(
     };
     (*coder).check_pos = 0;
     lzma_check_init(&raw mut (*coder).check, (*block).check);
-    (*coder).ignore_check = if (*block).version >= 1 as u32 {
+    (*coder).ignore_check = if (*block).version >= 1 {
         (*block).ignore_check as c_int != 0
     } else {
         false

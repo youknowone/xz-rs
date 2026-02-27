@@ -128,9 +128,9 @@ pub struct lzma_delta_coder {
     pub pos: u8,
     pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
 }
-pub const LZMA_DELTA_DIST_MAX: c_int = 256 as c_int;
+pub const LZMA_DELTA_DIST_MAX: c_int = 256;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
-pub const LZMA_DELTA_DIST_MIN: c_int = 1 as c_int;
+pub const LZMA_DELTA_DIST_MIN: c_int = 1;
 unsafe extern "C" fn copy_and_encode(
     mut coder: *mut lzma_delta_coder,
     mut in_0: *const u8,

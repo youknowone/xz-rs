@@ -195,7 +195,7 @@ pub struct lzma_stream_coder {
     pub pos: size_t,
     pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
-pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
+pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024;
 pub type lzma_index_hash = lzma_index_hash_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -268,7 +268,7 @@ pub const LZMA_TELL_ANY_CHECK: c_uint = 0x4;
 pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
 pub const LZMA_CONCATENATED: c_uint = 0x8;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
+pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
 pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
 pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_TELL_UNSUPPORTED_CHECK
@@ -276,7 +276,7 @@ pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_IGNORE_CHECK
     | LZMA_CONCATENATED
     | LZMA_FAIL_FAST;
-pub const INDEX_INDICATOR: c_int = 0 as c_int;
+pub const INDEX_INDICATOR: c_int = 0;
 unsafe extern "C" fn stream_decoder_reset(
     mut coder: *mut lzma_stream_coder,
     mut allocator: *const lzma_allocator,
@@ -387,7 +387,7 @@ unsafe extern "C" fn stream_decode(
                     } else {
                         (*coder).block_options.header_size = (*in_0.offset(*in_pos as isize)
                             as u32)
-                            .wrapping_add(1 as u32)
+                            .wrapping_add(1)
                             .wrapping_mul(4 as u32);
                         current_block_100 = 13242334135786603907;
                     }
@@ -505,7 +505,7 @@ unsafe extern "C" fn stream_decode(
                 current_block_100 = 16789764818708874114;
             }
             3500765272169221397 => {
-                (*coder).block_options.version = 1 as u32;
+                (*coder).block_options.version = 1;
                 let mut filters: [lzma_filter; 5] = [lzma_filter {
                     id: 0,
                     options: core::ptr::null_mut(),
@@ -700,8 +700,8 @@ pub unsafe extern "C" fn lzma_stream_decoder_init(
         };
         (*coder).index_hash = core::ptr::null_mut();
     }
-    (*coder).memlimit = if 1 as u64 > memlimit {
-        1 as u64
+    (*coder).memlimit = if 1 > memlimit {
+        1
     } else {
         memlimit
     };

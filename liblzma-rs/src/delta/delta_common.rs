@@ -128,8 +128,8 @@ pub struct lzma_delta_coder {
 }
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_DELTA_DIST_MIN: c_int = 1 as c_int;
-pub const LZMA_DELTA_DIST_MAX: c_int = 256 as c_int;
+pub const LZMA_DELTA_DIST_MIN: c_int = 1;
+pub const LZMA_DELTA_DIST_MAX: c_int = 256;
 unsafe extern "C" fn delta_coder_end(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,

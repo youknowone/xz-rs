@@ -79,15 +79,15 @@ pub unsafe extern "C" fn lzma_mf_find(
     let count: u32 = (*mf).find.expect("non-null function pointer")(mf, matches) as u32;
     let mut len_best: u32 = 0;
     if count > 0 {
-        len_best = (*matches.offset(count.wrapping_sub(1 as u32) as isize)).len;
+        len_best = (*matches.offset(count.wrapping_sub(1) as isize)).len;
         if len_best == (*mf).nice_len {
-            let mut limit: u32 = mf_avail(mf).wrapping_add(1 as u32);
+            let mut limit: u32 = mf_avail(mf).wrapping_add(1);
             if limit > (*mf).match_len_max {
                 limit = (*mf).match_len_max;
             }
             let mut p1: *const u8 = mf_ptr(mf).offset(-1);
             let mut p2: *const u8 = p1
-                .offset(-((*matches.offset(count.wrapping_sub(1 as u32) as isize)).dist as isize))
+                .offset(-((*matches.offset(count.wrapping_sub(1) as isize)).dist as isize))
                 .offset(-1);
             len_best = lzma_memcmplen(p1, p2, len_best, limit);
         }
@@ -96,7 +96,7 @@ pub unsafe extern "C" fn lzma_mf_find(
     (*mf).read_ahead = (*mf).read_ahead.wrapping_add(1);
     return len_best;
 }
-pub const EMPTY_HASH_VALUE: c_int = 0 as c_int;
+pub const EMPTY_HASH_VALUE: c_int = 0;
 pub const MUST_NORMALIZE_POS: c_uint = UINT32_MAX;
 unsafe extern "C" fn normalize(mut mf: *mut lzma_mf) {
     let subvalue: u32 = (MUST_NORMALIZE_POS as u32).wrapping_sub((*mf).cyclic_size);
@@ -166,11 +166,11 @@ unsafe extern "C" fn hc_find_func(
         if *pb.offset(len_best as isize) as c_int == *cur.offset(len_best as isize) as c_int
             && *pb.offset(0) as c_int == *cur.offset(0) as c_int
         {
-            let mut len: u32 = lzma_memcmplen(pb, cur, 1 as u32, len_limit);
+            let mut len: u32 = lzma_memcmplen(pb, cur, 1, len_limit);
             if len_best < len {
                 len_best = len;
                 (*matches).len = len;
-                (*matches).dist = delta.wrapping_sub(1 as u32);
+                (*matches).dist = delta.wrapping_sub(1);
                 matches = matches.offset(1);
                 if len == len_limit {
                     return matches;
@@ -209,12 +209,12 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
     if delta2 < (*mf).cyclic_size && *cur.offset(-(delta2 as isize)) as c_int == *cur as c_int {
         len_best = lzma_memcmplen(cur.offset(-(delta2 as isize)), cur, len_best, len_limit);
         (*matches.offset(0)).len = len_best;
-        (*matches.offset(0)).dist = delta2.wrapping_sub(1 as u32);
-        matches_count = 1 as u32;
+        (*matches.offset(0)).dist = delta2.wrapping_sub(1);
+        matches_count = 1;
         if len_best == len_limit {
             *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
             move_pos(mf);
-            return 1 as u32;
+            return 1;
         }
     }
     matches_count = hc_find_func(
@@ -297,12 +297,12 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
     *(*mf)
         .hash
         .offset((FIX_4_HASH_SIZE as u32).wrapping_add(hash_value) as isize) = pos;
-    let mut len_best: u32 = 1 as u32;
+    let mut len_best: u32 = 1;
     if delta2 < (*mf).cyclic_size && *cur.offset(-(delta2 as isize)) as c_int == *cur as c_int {
         len_best = 2 as u32;
         (*matches.offset(0)).len = 2 as u32;
-        (*matches.offset(0)).dist = delta2.wrapping_sub(1 as u32);
-        matches_count = 1 as u32;
+        (*matches.offset(0)).dist = delta2.wrapping_sub(1);
+        matches_count = 1;
     }
     if delta2 != delta3
         && delta3 < (*mf).cyclic_size
@@ -311,12 +311,12 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
         len_best = 3 as u32;
         let fresh3 = matches_count;
         matches_count = matches_count.wrapping_add(1);
-        (*matches.offset(fresh3 as isize)).dist = delta3.wrapping_sub(1 as u32);
+        (*matches.offset(fresh3 as isize)).dist = delta3.wrapping_sub(1);
         delta2 = delta3;
     }
     if matches_count != 0 {
         len_best = lzma_memcmplen(cur.offset(-(delta2 as isize)), cur, len_best, len_limit);
-        (*matches.offset(matches_count.wrapping_sub(1 as u32) as isize)).len = len_best;
+        (*matches.offset(matches_count.wrapping_sub(1) as isize)).len = len_best;
         if len_best == len_limit {
             *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
             move_pos(mf);
@@ -410,11 +410,11 @@ unsafe extern "C" fn bt_find_func(
         let pb: *const u8 = cur.offset(-(delta as isize));
         let mut len: u32 = if len0 < len1 { len0 } else { len1 };
         if *pb.offset(len as isize) as c_int == *cur.offset(len as isize) as c_int {
-            len = lzma_memcmplen(pb, cur, len.wrapping_add(1 as u32), len_limit);
+            len = lzma_memcmplen(pb, cur, len.wrapping_add(1), len_limit);
             if len_best < len {
                 len_best = len;
                 (*matches).len = len;
-                (*matches).dist = delta.wrapping_sub(1 as u32);
+                (*matches).dist = delta.wrapping_sub(1);
                 matches = matches.offset(1);
                 if len == len_limit {
                     *ptr1 = *pair.offset(0);
@@ -468,7 +468,7 @@ unsafe extern "C" fn bt_skip_func(
         let mut pb: *const u8 = cur.offset(-(delta as isize));
         let mut len: u32 = if len0 < len1 { len0 } else { len1 };
         if *pb.offset(len as isize) as c_int == *cur.offset(len as isize) as c_int {
-            len = lzma_memcmplen(pb, cur, len.wrapping_add(1 as u32), len_limit);
+            len = lzma_memcmplen(pb, cur, len.wrapping_add(1), len_limit);
             if len == len_limit {
                 *ptr1 = *pair.offset(0);
                 *ptr0 = *pair.offset(1);
@@ -516,7 +516,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_find(
         (*mf).cyclic_pos,
         (*mf).cyclic_size,
         matches.offset(matches_count as isize),
-        1 as u32,
+        1,
     )
     .offset_from(matches) as c_long as u32;
     move_pos(mf);
@@ -593,8 +593,8 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
     if delta2 < (*mf).cyclic_size && *cur.offset(-(delta2 as isize)) as c_int == *cur as c_int {
         len_best = lzma_memcmplen(cur, cur.offset(-(delta2 as isize)), len_best, len_limit);
         (*matches.offset(0)).len = len_best;
-        (*matches.offset(0)).dist = delta2.wrapping_sub(1 as u32);
-        matches_count = 1 as u32;
+        (*matches.offset(0)).dist = delta2.wrapping_sub(1);
+        matches_count = 1;
         if len_best == len_limit {
             bt_skip_func(
                 len_limit,
@@ -607,7 +607,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
                 (*mf).cyclic_size,
             );
             move_pos(mf);
-            return 1 as u32;
+            return 1;
         }
     }
     matches_count = bt_find_func(
@@ -712,12 +712,12 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
     *(*mf)
         .hash
         .offset((FIX_4_HASH_SIZE as u32).wrapping_add(hash_value) as isize) = pos;
-    let mut len_best: u32 = 1 as u32;
+    let mut len_best: u32 = 1;
     if delta2 < (*mf).cyclic_size && *cur.offset(-(delta2 as isize)) as c_int == *cur as c_int {
         len_best = 2 as u32;
         (*matches.offset(0)).len = 2 as u32;
-        (*matches.offset(0)).dist = delta2.wrapping_sub(1 as u32);
-        matches_count = 1 as u32;
+        (*matches.offset(0)).dist = delta2.wrapping_sub(1);
+        matches_count = 1;
     }
     if delta2 != delta3
         && delta3 < (*mf).cyclic_size
@@ -726,12 +726,12 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
         len_best = 3 as u32;
         let fresh6 = matches_count;
         matches_count = matches_count.wrapping_add(1);
-        (*matches.offset(fresh6 as isize)).dist = delta3.wrapping_sub(1 as u32);
+        (*matches.offset(fresh6 as isize)).dist = delta3.wrapping_sub(1);
         delta2 = delta3;
     }
     if matches_count != 0 {
         len_best = lzma_memcmplen(cur, cur.offset(-(delta2 as isize)), len_best, len_limit);
-        (*matches.offset(matches_count.wrapping_sub(1 as u32) as isize)).len = len_best;
+        (*matches.offset(matches_count.wrapping_sub(1) as isize)).len = len_best;
         if len_best == len_limit {
             bt_skip_func(
                 len_limit,

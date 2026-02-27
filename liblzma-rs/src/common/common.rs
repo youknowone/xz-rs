@@ -143,11 +143,11 @@ pub type lzma_init_function = Option<
 >;
 pub type lzma_filter_info = lzma_filter_info_s;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
-pub const LZMA_VERSION_MAJOR: c_int = 5 as c_int;
-pub const LZMA_VERSION_MINOR: c_int = 8 as c_int;
-pub const LZMA_VERSION_PATCH: c_int = 2 as c_int;
+pub const LZMA_VERSION_MAJOR: c_int = 5;
+pub const LZMA_VERSION_MINOR: c_int = 8;
+pub const LZMA_VERSION_PATCH: c_int = 2;
 pub const LZMA_VERSION_STABILITY: c_int = LZMA_VERSION_STABILITY_STABLE;
-pub const LZMA_VERSION_STABILITY_STABLE: c_int = 2 as c_int;
+pub const LZMA_VERSION_STABILITY_STABLE: c_int = 2;
 pub const LZMA_VERSION: c_uint = (LZMA_VERSION_MAJOR as u32)
     .wrapping_mul(10000000)
     .wrapping_add((LZMA_VERSION_MINOR as u32).wrapping_mul(10000))
@@ -573,7 +573,7 @@ pub unsafe extern "C" fn lzma_memlimit_set(
         return LZMA_PROG_ERROR;
     }
     if new_memlimit == 0 {
-        new_memlimit = 1 as u64;
+        new_memlimit = 1;
     }
     return (*(*strm).internal)
         .next

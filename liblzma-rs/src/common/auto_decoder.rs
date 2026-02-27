@@ -337,10 +337,8 @@ unsafe extern "C" fn auto_decoder_init(
     }
     let mut coder: *mut lzma_auto_coder = (*next).coder as *mut lzma_auto_coder;
     if coder.is_null() {
-        coder = lzma_alloc(
-            core::mem::size_of::<lzma_auto_coder>() as size_t,
-            allocator,
-        ) as *mut lzma_auto_coder;
+        coder = lzma_alloc(core::mem::size_of::<lzma_auto_coder>() as size_t, allocator)
+            as *mut lzma_auto_coder;
         if coder.is_null() {
             return LZMA_MEM_ERROR;
         }
@@ -383,11 +381,7 @@ unsafe extern "C" fn auto_decoder_init(
             set_out_limit: None,
         };
     }
-    (*coder).memlimit = if 1 as u64 > memlimit {
-        1 as u64
-    } else {
-        memlimit
-    };
+    (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
     (*coder).flags = flags;
     (*coder).sequence = SEQ_INIT;
     return LZMA_OK;

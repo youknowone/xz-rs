@@ -123,7 +123,7 @@ pub struct lzma_delta_coder {
     pub pos: u8,
     pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
 }
-pub const LZMA_DELTA_DIST_MAX: c_int = 256 as c_int;
+pub const LZMA_DELTA_DIST_MAX: c_int = 256;
 unsafe extern "C" fn decode_buffer(
     mut coder: *mut lzma_delta_coder,
     mut buffer: *mut u8,
