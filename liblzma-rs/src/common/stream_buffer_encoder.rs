@@ -206,9 +206,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
         reserved_int1: 0,
         reserved_int2: 0,
     };
-    if lzma_stream_header_encode(&raw mut stream_flags, out.offset(out_pos as isize))
-        != LZMA_OK
-    {
+    if lzma_stream_header_encode(&raw mut stream_flags, out.offset(out_pos as isize)) != LZMA_OK {
         return LZMA_PROG_ERROR;
     }
     out_pos = out_pos.wrapping_add(LZMA_STREAM_HEADER_SIZE as size_t);
@@ -279,9 +277,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
     if ret != LZMA_OK {
         return ret;
     }
-    if lzma_stream_footer_encode(&raw mut stream_flags, out.offset(out_pos as isize))
-        != LZMA_OK
-    {
+    if lzma_stream_footer_encode(&raw mut stream_flags, out.offset(out_pos as isize)) != LZMA_OK {
         return LZMA_PROG_ERROR;
     }
     out_pos = out_pos.wrapping_add(LZMA_STREAM_HEADER_SIZE as size_t);

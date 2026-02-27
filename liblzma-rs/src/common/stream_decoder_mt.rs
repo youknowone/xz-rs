@@ -764,9 +764,7 @@ unsafe extern "C" fn worker_decoder(mut thr_ptr: *mut c_void) -> *mut c_void {
             {
                 let mut mythread_j_434: c_uint = 0;
                 while mythread_j_434 == 0 {
-                    if ret == LZMA_STREAM_END
-                        && (*thr).in_filled != (*thr).in_size
-                    {
+                    if ret == LZMA_STREAM_END && (*thr).in_filled != (*thr).in_size {
                         ret = LZMA_PROG_ERROR;
                     }
                     if (*thr).state != THR_EXIT {
@@ -804,9 +802,7 @@ unsafe extern "C" fn worker_decoder(mut thr_ptr: *mut c_void) -> *mut c_void {
                     (*(*thr).outbuf).finished = true_0 != 0;
                     (*(*thr).outbuf).finish_ret = ret;
                     (*thr).outbuf = ::core::ptr::null_mut::<lzma_outbuf>();
-                    if ret != LZMA_STREAM_END
-                        && (*(*thr).coder).thread_error == LZMA_OK
-                    {
+                    if ret != LZMA_STREAM_END && (*(*thr).coder).thread_error == LZMA_OK {
                         (*(*thr).coder).thread_error = ret;
                     }
                     if ret == LZMA_STREAM_END {
@@ -1219,9 +1215,7 @@ unsafe extern "C" fn stream_decode_mt(
                     &raw mut (*coder).buffer as *mut u8,
                 ) as lzma_ret;
                 if ret != LZMA_OK {
-                    return (if ret == LZMA_FORMAT_ERROR
-                        && !(*coder).first_stream
-                    {
+                    return (if ret == LZMA_FORMAT_ERROR && !(*coder).first_stream {
                         LZMA_DATA_ERROR
                     } else {
                         ret
@@ -1394,8 +1388,7 @@ unsafe extern "C" fn stream_decode_mt(
                     .progress_in
                     .wrapping_add((*in_pos).wrapping_sub(in_old_0) as u64);
                 if ret_0 == LZMA_OK {
-                    if action == LZMA_FINISH && (*coder).fail_fast as c_int != 0
-                    {
+                    if action == LZMA_FINISH && (*coder).fail_fast as c_int != 0 {
                         threads_stop(coder);
                         return LZMA_DATA_ERROR;
                     }

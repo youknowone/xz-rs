@@ -337,7 +337,7 @@ pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002 as c_ulonglong;
 pub const LZMA_LCLP_MAX: c_int = 4 as c_int;
 pub const LZMA_PB_MAX: c_int = 4 as c_int;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
-pub const LZMA2_CHUNK_MAX: c_uint = (1 as c_uint) << 16 as c_int;
+pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16 as c_int;
 #[inline]
 unsafe extern "C" fn mf_get_hash_bytes(mut match_finder: lzma_match_finder) -> u32 {
     return match_finder as u32 & 0xf as u32;
@@ -351,9 +351,9 @@ unsafe extern "C" fn mf_skip(mut mf: *mut lzma_mf, mut amount: u32) {
 }
 pub const RC_SHIFT_BITS: c_int = 8 as c_int;
 pub const RC_TOP_BITS: c_int = 24 as c_int;
-pub const RC_TOP_VALUE: c_uint = (1 as c_uint) << RC_TOP_BITS;
+pub const RC_TOP_VALUE: c_uint = 1u32 << RC_TOP_BITS;
 pub const RC_BIT_MODEL_TOTAL_BITS: c_int = 11 as c_int;
-pub const RC_BIT_MODEL_TOTAL: c_uint = (1 as c_uint) << RC_BIT_MODEL_TOTAL_BITS;
+pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_BITS: c_int = 5 as c_int;
 pub const RC_MOVE_REDUCING_BITS: c_int = 4 as c_int;
 #[inline]
@@ -368,8 +368,9 @@ unsafe extern "C" fn rc_bit_0_price(prob: probability) -> u32 {
 }
 #[inline]
 unsafe extern "C" fn rc_bit_1_price(prob: probability) -> u32 {
-    return lzma_rc_prices[((prob as c_uint ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1))
-        >> RC_MOVE_REDUCING_BITS) as usize] as u32;
+    return lzma_rc_prices
+        [((prob as c_uint ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1)) >> RC_MOVE_REDUCING_BITS) as usize]
+        as u32;
 }
 #[inline]
 unsafe extern "C" fn rc_bittree_price(
@@ -378,7 +379,7 @@ unsafe extern "C" fn rc_bittree_price(
     mut symbol: u32,
 ) -> u32 {
     let mut price: u32 = 0 as u32;
-    symbol = (symbol as c_uint).wrapping_add((1 as c_uint) << bit_levels) as u32 as u32;
+    symbol = (symbol as c_uint).wrapping_add(1u32 << bit_levels) as u32 as u32;
     loop {
         let bit: u32 = symbol & 1 as u32;
         symbol >>= 1 as c_int;
@@ -492,9 +493,7 @@ unsafe extern "C" fn rc_shift_low(
     mut out_pos: *mut size_t,
     mut out_size: size_t,
 ) -> bool {
-    if ((*rc).low as u32) < 0xff000000 as u32
-        || ((*rc).low >> 32 as c_int) as u32 != 0 as u32
-    {
+    if ((*rc).low as u32) < 0xff000000 as u32 || ((*rc).low >> 32 as c_int) as u32 != 0 as u32 {
         loop {
             if *out_pos == out_size {
                 return true_0 != 0;
@@ -740,7 +739,7 @@ unsafe extern "C" fn literal_matched(
     mut symbol: u32,
 ) {
     let mut offset: u32 = 0x100 as u32;
-    symbol = (symbol as c_uint).wrapping_add((1 as c_uint) << 8 as c_int) as u32 as u32;
+    symbol = (symbol as c_uint).wrapping_add(1u32 << 8 as c_int) as u32 as u32;
     loop {
         match_byte <<= 1 as c_int;
         let match_bit: u32 = match_byte & offset;
@@ -1238,8 +1237,7 @@ unsafe extern "C" fn is_options_valid(mut options: *const lzma_options_lzma) -> 
     return is_lclppb_valid(options) as c_int != 0
         && (*options).nice_len >= MATCH_LEN_MIN as u32
         && (*options).nice_len <= MATCH_LEN_MAX as u32
-        && ((*options).mode == LZMA_MODE_FAST
-            || (*options).mode == LZMA_MODE_NORMAL);
+        && ((*options).mode == LZMA_MODE_FAST || (*options).mode == LZMA_MODE_NORMAL);
 }
 unsafe extern "C" fn set_lz_options(
     mut lz_options: *mut lzma_lz_options,
@@ -1303,7 +1301,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
     if !is_options_valid(options) {
         return LZMA_OPTIONS_ERROR;
     }
-    (*coder).pos_mask = ((1 as c_uint) << (*options).pb).wrapping_sub(1) as u32;
+    (*coder).pos_mask = (1u32 << (*options).pb).wrapping_sub(1) as u32;
     (*coder).literal_context_bits = (*options).lc;
     (*coder).literal_mask =
         ((0x100 as c_uint) << (*options).lp).wrapping_sub(0x100 >> (*options).lc) as u32;
@@ -1554,6 +1552,5 @@ pub unsafe extern "C" fn lzma_lzma_props_encode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mode_is_supported(mut mode: lzma_mode) -> lzma_bool {
-    return (mode == LZMA_MODE_FAST
-        || mode == LZMA_MODE_NORMAL) as lzma_bool;
+    return (mode == LZMA_MODE_FAST || mode == LZMA_MODE_NORMAL) as lzma_bool;
 }

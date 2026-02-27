@@ -976,8 +976,7 @@ unsafe extern "C" fn threads_stop(mut coder: *mut lzma_stream_coder, mut wait_fo
         {
             let mut mythread_j_460: c_uint = 0;
             while mythread_j_460 == 0 {
-                while (*(*coder).threads.offset(i_0 as isize)).state != THR_IDLE
-                {
+                while (*(*coder).threads.offset(i_0 as isize)).state != THR_IDLE {
                     mythread_cond_wait(
                         &raw mut (*(*coder).threads.offset(i_0 as isize)).cond,
                         &raw mut (*(*coder).threads.offset(i_0 as isize)).mutex,
@@ -1180,8 +1179,8 @@ unsafe extern "C" fn stream_encode_in(
             &raw mut thr_in_size,
             (*coder).block_size,
         );
-        let finish: bool = thr_in_size == (*coder).block_size
-            || *in_pos == in_size && action != LZMA_RUN;
+        let finish: bool =
+            thr_in_size == (*coder).block_size || *in_pos == in_size && action != LZMA_RUN;
         let mut block_error: bool = false_0 != 0;
         let mut mythread_i_628: c_uint = 0;
         while if mythread_i_628 != 0 {
@@ -1454,8 +1453,7 @@ unsafe extern "C" fn stream_encode_mt(
                 if lzma_stream_footer_encode(
                     &raw mut (*coder).stream_flags,
                     &raw mut (*coder).header as *mut u8,
-                )
-                    != LZMA_OK
+                ) != LZMA_OK
                 {
                     return LZMA_PROG_ERROR;
                 }
@@ -1925,8 +1923,7 @@ pub unsafe extern "C" fn lzma_stream_encoder_mt_memusage(mut options: *const lzm
         &raw mut filters,
         &raw mut block_size,
         &raw mut outbuf_size_max,
-    )
-        != LZMA_OK
+    ) != LZMA_OK
     {
         return UINT64_MAX as u64;
     }

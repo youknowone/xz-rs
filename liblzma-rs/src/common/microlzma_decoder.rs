@@ -309,8 +309,7 @@ unsafe extern "C" fn microlzma_decode(
             out_pos,
             out_size,
             LZMA_RUN,
-        )
-            != LZMA_OK
+        ) != LZMA_OK
         {
             return LZMA_PROG_ERROR;
         }

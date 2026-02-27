@@ -295,12 +295,11 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                 continue;
             }
             2 | 3 => {
-                let mut size: *mut lzma_vli =
-                    if (*index_hash).sequence == SEQ_UNPADDED {
-                        &raw mut (*index_hash).unpadded_size
-                    } else {
-                        &raw mut (*index_hash).uncompressed_size
-                    };
+                let mut size: *mut lzma_vli = if (*index_hash).sequence == SEQ_UNPADDED {
+                    &raw mut (*index_hash).unpadded_size
+                } else {
+                    &raw mut (*index_hash).uncompressed_size
+                };
                 ret = lzma_vli_decode(size, &raw mut (*index_hash).pos, in_0, in_pos, in_size);
                 if ret != LZMA_STREAM_END {
                     break;

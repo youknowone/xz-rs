@@ -159,8 +159,7 @@ unsafe extern "C" fn arm64_code(
                 let dest: u32 = src_0.wrapping_add(pc);
                 instr |= (dest & 3 as u32) << 29 as c_int;
                 instr |= (dest & 0x3fffc as u32) << 3 as c_int;
-                instr = (instr
-                    | ((0 as u32).wrapping_sub(dest & 0x20000 as u32) & 0xe00000 as u32))
+                instr = (instr | ((0 as u32).wrapping_sub(dest & 0x20000 as u32) & 0xe00000 as u32))
                     as u32;
                 write32le(buffer.offset(i as isize), instr);
             }

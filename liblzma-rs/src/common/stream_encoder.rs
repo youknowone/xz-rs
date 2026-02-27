@@ -331,8 +331,7 @@ unsafe extern "C" fn stream_encode(
                     if lzma_block_header_encode(
                         &raw mut (*coder).block_options,
                         &raw mut (*coder).buffer as *mut u8,
-                    )
-                        != LZMA_OK
+                    ) != LZMA_OK
                     {
                         return LZMA_PROG_ERROR;
                     }
@@ -362,9 +361,7 @@ unsafe extern "C" fn stream_encode(
                     out_size,
                     convert[action as usize],
                 ) as lzma_ret;
-                if ret != LZMA_STREAM_END
-                    || action == LZMA_SYNC_FLUSH
-                {
+                if ret != LZMA_STREAM_END || action == LZMA_SYNC_FLUSH {
                     return ret;
                 }
                 let unpadded_size: lzma_vli =
@@ -420,8 +417,7 @@ unsafe extern "C" fn stream_encode(
                 if lzma_stream_footer_encode(
                     &raw const stream_flags,
                     &raw mut (*coder).buffer as *mut u8,
-                )
-                    != LZMA_OK
+                ) != LZMA_OK
                 {
                     return LZMA_PROG_ERROR;
                 }

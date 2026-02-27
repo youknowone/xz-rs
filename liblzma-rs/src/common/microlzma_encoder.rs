@@ -222,8 +222,7 @@ unsafe extern "C" fn microlzma_encode(
         (*coder).lzma.coder,
         &raw mut uncomp_size,
         out_size.wrapping_sub(*out_pos) as u64,
-    )
-        != LZMA_OK
+    ) != LZMA_OK
     {
         return LZMA_PROG_ERROR;
     }

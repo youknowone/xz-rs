@@ -162,10 +162,10 @@ unsafe extern "C" fn mf_skip(mut mf: *mut lzma_mf, mut amount: u32) {
     }
 }
 pub const RC_BIT_MODEL_TOTAL_BITS: c_int = 11 as c_int;
-pub const RC_BIT_MODEL_TOTAL: c_uint = (1 as c_uint) << RC_BIT_MODEL_TOTAL_BITS;
+pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_REDUCING_BITS: c_int = 4 as c_int;
 pub const RC_BIT_PRICE_SHIFT_BITS: c_int = 4 as c_int;
-pub const RC_INFINITY_PRICE: c_uint = (1 as c_uint) << 30 as c_int;
+pub const RC_INFINITY_PRICE: c_uint = 1u32 << 30 as c_int;
 #[inline]
 unsafe extern "C" fn rc_bit_price(prob: probability, bit: u32) -> u32 {
     return lzma_rc_prices[((prob as u32
@@ -178,8 +178,9 @@ unsafe extern "C" fn rc_bit_0_price(prob: probability) -> u32 {
 }
 #[inline]
 unsafe extern "C" fn rc_bit_1_price(prob: probability) -> u32 {
-    return lzma_rc_prices[((prob as c_uint ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1))
-        >> RC_MOVE_REDUCING_BITS) as usize] as u32;
+    return lzma_rc_prices
+        [((prob as c_uint ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1)) >> RC_MOVE_REDUCING_BITS) as usize]
+        as u32;
 }
 #[inline]
 unsafe extern "C" fn rc_bittree_price(
@@ -188,7 +189,7 @@ unsafe extern "C" fn rc_bittree_price(
     mut symbol: u32,
 ) -> u32 {
     let mut price: u32 = 0 as u32;
-    symbol = (symbol as c_uint).wrapping_add((1 as c_uint) << bit_levels) as u32 as u32;
+    symbol = (symbol as c_uint).wrapping_add(1u32 << bit_levels) as u32 as u32;
     loop {
         let bit: u32 = symbol & 1 as u32;
         symbol >>= 1 as c_int;
@@ -325,7 +326,7 @@ unsafe extern "C" fn get_literal_price(
         price = rc_bittree_price(subcoder, 8 as u32, symbol);
     } else {
         let mut offset: u32 = 0x100 as u32;
-        symbol = (symbol as c_uint).wrapping_add((1 as c_uint) << 8 as c_int) as u32 as u32;
+        symbol = (symbol as c_uint).wrapping_add(1u32 << 8 as c_int) as u32 as u32;
         loop {
             match_byte <<= 1 as c_int;
             let match_bit: u32 = match_byte & offset;

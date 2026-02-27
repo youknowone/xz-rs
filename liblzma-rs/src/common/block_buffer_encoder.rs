@@ -213,7 +213,7 @@ pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as c_ulonglong)
     .wrapping_sub(LZMA_CHECK_SIZE_MAX as c_ulonglong)
     & !(3 as c_ulonglong);
-pub const LZMA2_CHUNK_MAX: c_uint = (1 as c_uint) << 16 as c_int;
+pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16 as c_int;
 pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3 as c_int;
 pub const HEADERS_BOUND: c_int = 1 as c_int
     + 1 as c_int
@@ -305,8 +305,7 @@ unsafe extern "C" fn block_encode_uncompressed(
         (*block).filters = filters_orig;
         return LZMA_BUF_ERROR;
     }
-    if lzma_block_header_encode(block, out.offset(*out_pos as isize)) != LZMA_OK
-    {
+    if lzma_block_header_encode(block, out.offset(*out_pos as isize)) != LZMA_OK {
         (*block).filters = filters_orig;
         return LZMA_PROG_ERROR;
     }
@@ -320,10 +319,10 @@ unsafe extern "C" fn block_encode_uncompressed(
         *out.offset(fresh1 as isize) = control;
         control = 0x2 as u8;
         let copy_size: size_t =
-            if in_size.wrapping_sub(in_pos) < ((1 as c_uint) << 16 as c_int) as size_t {
+            if in_size.wrapping_sub(in_pos) < (1u32 << 16 as c_int) as size_t {
                 in_size.wrapping_sub(in_pos)
             } else {
-                ((1 as c_uint) << 16 as c_int) as size_t
+                (1u32 << 16 as c_int) as size_t
             };
         let fresh2 = *out_pos;
         *out_pos = (*out_pos).wrapping_add(1);

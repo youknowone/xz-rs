@@ -44,7 +44,7 @@ pub const LZMA_LC_DEFAULT: c_int = 3 as c_int;
 pub const LZMA_LP_DEFAULT: c_int = 0 as c_int;
 pub const LZMA_PB_DEFAULT: c_int = 2 as c_int;
 pub const LZMA_PRESET_LEVEL_MASK: c_uint = 0x1f;
-pub const LZMA_PRESET_EXTREME: c_uint = (1 as c_uint) << 31 as c_int;
+pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31 as c_int;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_preset(
     mut options: *mut lzma_options_lzma,
@@ -65,7 +65,7 @@ pub unsafe extern "C" fn lzma_lzma_preset(
         18 as u8, 20 as u8, 21 as u8, 22 as u8, 22 as u8, 23 as u8, 23 as u8, 24 as u8, 25 as u8,
         26 as u8,
     ];
-    (*options).dict_size = ((1 as c_uint) << dict_pow2[level as usize] as c_int) as u32;
+    (*options).dict_size = (1u32 << dict_pow2[level as usize] as c_int) as u32;
     if level <= 3 as u32 {
         (*options).mode = LZMA_MODE_FAST;
         (*options).mf = (if level == 0 as u32 {

@@ -538,7 +538,7 @@ pub unsafe extern "C" fn lzma_index_checks(mut i: *const lzma_index) -> u32 {
     let mut checks: u32 = (*i).checks;
     let mut s: *const index_stream = (*i).streams.rightmost as *const index_stream;
     if (*s).stream_flags.version != UINT32_MAX as u32 {
-        checks = (checks | (1 as c_uint) << (*s).stream_flags.check) as u32;
+        checks = (checks | 1u32 << (*s).stream_flags.check) as u32;
     }
     return checks;
 }
@@ -1032,9 +1032,7 @@ pub unsafe extern "C" fn lzma_index_iter_next(
                     if stream.is_null() {
                         return true_0 as lzma_bool;
                     }
-                    if !(mode >= LZMA_INDEX_ITER_BLOCK
-                        && (*stream).groups.leftmost.is_null())
-                    {
+                    if !(mode >= LZMA_INDEX_ITER_BLOCK && (*stream).groups.leftmost.is_null()) {
                         break;
                     }
                 }

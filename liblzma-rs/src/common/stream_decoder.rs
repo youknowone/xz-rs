@@ -325,9 +325,7 @@ unsafe extern "C" fn stream_decode(
                     &raw mut (*coder).buffer as *mut u8,
                 ) as lzma_ret;
                 if ret != LZMA_OK {
-                    return (if ret == LZMA_FORMAT_ERROR
-                        && !(*coder).first_stream
-                    {
+                    return (if ret == LZMA_FORMAT_ERROR && !(*coder).first_stream {
                         LZMA_DATA_ERROR
                     } else {
                         ret

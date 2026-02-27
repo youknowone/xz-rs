@@ -53,11 +53,11 @@ unsafe extern "C" fn mf_ptr(mut mf: *const lzma_mf) -> *const u8 {
 unsafe extern "C" fn mf_avail(mut mf: *const lzma_mf) -> u32 {
     return (*mf).write_pos.wrapping_sub((*mf).read_pos);
 }
-pub const HASH_2_SIZE: c_uint = (1 as c_uint) << 10 as c_int;
-pub const HASH_3_SIZE: c_uint = (1 as c_uint) << 16 as c_int;
+pub const HASH_2_SIZE: c_uint = 1u32 << 10 as c_int;
+pub const HASH_3_SIZE: c_uint = 1u32 << 16 as c_int;
 pub const HASH_2_MASK: c_uint = HASH_2_SIZE.wrapping_sub(1);
 pub const HASH_3_MASK: c_uint = HASH_3_SIZE.wrapping_sub(1);
-pub const FIX_3_HASH_SIZE: c_uint = (1 as c_uint) << 10 as c_int;
+pub const FIX_3_HASH_SIZE: c_uint = 1u32 << 10 as c_int;
 pub const FIX_4_HASH_SIZE: c_uint = HASH_2_SIZE.wrapping_add(HASH_3_SIZE);
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
@@ -190,9 +190,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
-    } else if len_limit < 3 as u32
-        || 0 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-    {
+    } else if len_limit < 3 as u32 || 0 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
         move_pending(mf);
         return 0 as u32;
     }
@@ -276,9 +274,7 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
-    } else if len_limit < 4 as u32
-        || 0 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-    {
+    } else if len_limit < 4 as u32 || 0 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
         move_pending(mf);
         return 0 as u32;
     }
@@ -521,9 +517,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_find(
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
-    } else if len_limit < 2 as u32
-        || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-    {
+    } else if len_limit < 2 as u32 || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
         move_pending(mf);
         return 0 as u32;
     }
@@ -558,9 +552,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_skip(mut mf: *mut lzma_mf, mut amount: u32)
         if (*mf).nice_len <= len_limit {
             len_limit = (*mf).nice_len;
             current_block_8 = 11875828834189669668;
-        } else if len_limit < 2 as u32
-            || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-        {
+        } else if len_limit < 2 as u32 || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
             move_pending(mf);
             current_block_8 = 18088007599891946824;
         } else {
@@ -602,9 +594,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
-    } else if len_limit < 3 as u32
-        || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-    {
+    } else if len_limit < 3 as u32 || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
         move_pending(mf);
         return 0 as u32;
     }
@@ -668,9 +658,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_skip(mut mf: *mut lzma_mf, mut amount: u32)
         if (*mf).nice_len <= len_limit {
             len_limit = (*mf).nice_len;
             current_block_9 = 11875828834189669668;
-        } else if len_limit < 3 as u32
-            || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-        {
+        } else if len_limit < 3 as u32 || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
             move_pending(mf);
             current_block_9 = 18088007599891946824;
         } else {
@@ -720,9 +708,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
-    } else if len_limit < 4 as u32
-        || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-    {
+    } else if len_limit < 4 as u32 || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
         move_pending(mf);
         return 0 as u32;
     }
@@ -816,9 +802,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_skip(mut mf: *mut lzma_mf, mut amount: u32)
         if (*mf).nice_len <= len_limit {
             len_limit = (*mf).nice_len;
             current_block_10 = 11875828834189669668;
-        } else if len_limit < 4 as u32
-            || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH
-        {
+        } else if len_limit < 4 as u32 || 1 as c_int != 0 && (*mf).action == LZMA_SYNC_FLUSH {
             move_pending(mf);
             current_block_10 = 18088007599891946824;
         } else {

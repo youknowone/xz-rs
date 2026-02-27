@@ -297,9 +297,7 @@ unsafe extern "C" fn block_encode(
                         in_used,
                     );
                 }
-                if ret != LZMA_STREAM_END
-                    || action == LZMA_SYNC_FLUSH
-                {
+                if ret != LZMA_STREAM_END || action == LZMA_SYNC_FLUSH {
                     return ret;
                 }
                 (*(*coder).block).compressed_size = (*coder).compressed_size;

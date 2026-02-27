@@ -158,10 +158,7 @@ unsafe extern "C" fn copy_or_code(
 ) -> lzma_ret {
     if (*coder).next.code.is_none() {
         lzma_bufcpy(in_0, in_pos, in_size, out, out_pos, out_size);
-        if (*coder).is_encoder as c_int != 0
-            && action == LZMA_FINISH
-            && *in_pos == in_size
-        {
+        if (*coder).is_encoder as c_int != 0 && action == LZMA_FINISH && *in_pos == in_size {
             (*coder).end_was_reached = true_0 != 0;
         }
     } else {

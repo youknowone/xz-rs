@@ -160,7 +160,7 @@ unsafe extern "C" fn ia64_code(
                     inst_norm &= !((0x8fffff as u64) << 13 as c_int);
                     inst_norm |= ((dest & 0xfffff as u32) as u64) << 13 as c_int;
                     inst_norm |= ((dest & 0x100000 as u32) as u64) << 36 as c_int - 20 as c_int;
-                    instruction &= ((1 as c_uint) << bit_res).wrapping_sub(1) as u64;
+                    instruction &= (1u32 << bit_res).wrapping_sub(1) as u64;
                     instruction |= inst_norm << bit_res;
                     let mut j_0: size_t = 0 as size_t;
                     while j_0 < 6 as size_t {

@@ -391,30 +391,22 @@ pub unsafe extern "C" fn lzma_code(
             0 | _ => {}
         },
         1 => {
-            if action != LZMA_SYNC_FLUSH
-                || (*(*strm).internal).avail_in != (*strm).avail_in
-            {
+            if action != LZMA_SYNC_FLUSH || (*(*strm).internal).avail_in != (*strm).avail_in {
                 return LZMA_PROG_ERROR;
             }
         }
         2 => {
-            if action != LZMA_FULL_FLUSH
-                || (*(*strm).internal).avail_in != (*strm).avail_in
-            {
+            if action != LZMA_FULL_FLUSH || (*(*strm).internal).avail_in != (*strm).avail_in {
                 return LZMA_PROG_ERROR;
             }
         }
         3 => {
-            if action != LZMA_FINISH
-                || (*(*strm).internal).avail_in != (*strm).avail_in
-            {
+            if action != LZMA_FINISH || (*(*strm).internal).avail_in != (*strm).avail_in {
                 return LZMA_PROG_ERROR;
             }
         }
         4 => {
-            if action != LZMA_FULL_BARRIER
-                || (*(*strm).internal).avail_in != (*strm).avail_in
-            {
+            if action != LZMA_FULL_BARRIER || (*(*strm).internal).avail_in != (*strm).avail_in {
                 return LZMA_PROG_ERROR;
             }
         }
@@ -554,8 +546,7 @@ pub unsafe extern "C" fn lzma_memusage(mut strm: *const lzma_stream) -> u64 {
             &raw mut memusage,
             &raw mut old_memlimit,
             0 as u64,
-        )
-            != LZMA_OK
+        ) != LZMA_OK
     {
         return 0 as u64;
     }
@@ -576,8 +567,7 @@ pub unsafe extern "C" fn lzma_memlimit_get(mut strm: *const lzma_stream) -> u64 
             &raw mut memusage,
             &raw mut old_memlimit,
             0 as u64,
-        )
-            != LZMA_OK
+        ) != LZMA_OK
     {
         return 0 as u64;
     }

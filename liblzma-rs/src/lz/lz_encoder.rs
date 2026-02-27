@@ -212,8 +212,8 @@ pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
 unsafe extern "C" fn mf_get_hash_bytes(mut match_finder: lzma_match_finder) -> u32 {
     return match_finder as u32 & 0xf as u32;
 }
-pub const HASH_2_SIZE: c_uint = (1 as c_uint) << 10 as c_int;
-pub const HASH_3_SIZE: c_uint = (1 as c_uint) << 16 as c_int;
+pub const HASH_2_SIZE: c_uint = 1u32 << 10 as c_int;
+pub const HASH_3_SIZE: c_uint = 1u32 << 16 as c_int;
 pub const LZMA_MEMCMPLEN_EXTRA: c_int = 0 as c_int;
 unsafe extern "C" fn move_window(mut mf: *mut lzma_mf) {
     let move_offset: u32 = (*mf).read_pos.wrapping_sub((*mf).keep_size_before) & !(15 as u32);
@@ -305,9 +305,7 @@ unsafe extern "C" fn lz_encode(
 ) -> lzma_ret {
     let mut coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
     while *out_pos < out_size && (*in_pos < in_size || action != LZMA_RUN) {
-        if (*coder).mf.action == LZMA_RUN
-            && (*coder).mf.read_pos >= (*coder).mf.read_limit
-        {
+        if (*coder).mf.action == LZMA_RUN && (*coder).mf.read_pos >= (*coder).mf.read_limit {
             let ret_: lzma_ret =
                 fill_window(coder, allocator, in_0, in_pos, in_size, action) as lzma_ret;
             if ret_ != LZMA_OK {
@@ -335,7 +333,7 @@ unsafe extern "C" fn lz_encoder_prepare(
 ) -> bool {
     if !((*lz_options).dict_size >= LZMA_DICT_SIZE_MIN as size_t
         && (*lz_options).dict_size
-            <= ((1 as c_uint) << 30 as c_int).wrapping_add((1 as c_uint) << 29 as c_int) as size_t)
+            <= (1u32 << 30 as c_int).wrapping_add(1u32 << 29 as c_int) as size_t)
         || (*lz_options).nice_len > (*lz_options).match_len_max
     {
         return true_0 != 0;
@@ -356,7 +354,7 @@ unsafe extern "C" fn lz_encoder_prepare(
             .wrapping_add((*lz_options).match_len_max)
             .wrapping_add((*lz_options).after_size)
             .wrapping_div(2 as size_t)
-            .wrapping_add(((1 as c_uint) << 19 as c_int) as size_t),
+            .wrapping_add((1u32 << 19 as c_int) as size_t),
     ) as u32 as u32;
     let old_size: u32 = (*mf).size;
     (*mf).size = (*mf)
@@ -428,7 +426,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         hs |= 0xffff as u32;
         if hs > (1 as u32) << 24 as c_int {
             if hash_bytes == 3 as u32 {
-                hs = ((1 as c_uint) << 24 as c_int).wrapping_sub(1) as u32;
+                hs = (1u32 << 24 as c_int).wrapping_sub(1) as u32;
             } else {
                 hs >>= 1 as c_int;
             }

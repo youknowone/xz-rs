@@ -239,10 +239,7 @@ unsafe extern "C" fn decode_buffer(
             if ret != LZMA_OK || *out_pos == out_size {
                 return ret;
             }
-        } else if ret != LZMA_OK
-            || *out_pos == out_size
-            || (*coder).dict.pos < (*coder).dict.size
-        {
+        } else if ret != LZMA_OK || *out_pos == out_size || (*coder).dict.pos < (*coder).dict.size {
             return ret;
         }
     }

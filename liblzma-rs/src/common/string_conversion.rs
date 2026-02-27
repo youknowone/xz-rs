@@ -180,13 +180,13 @@ pub const LZMA_DELTA_DIST_MAX: c_int = 256 as c_int;
 pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001 as c_ulonglong;
 pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21 as c_ulonglong;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
-pub const LZMA_DICT_SIZE_DEFAULT: c_uint = (1 as c_uint) << 23 as c_int;
+pub const LZMA_DICT_SIZE_DEFAULT: c_uint = 1u32 << 23 as c_int;
 pub const LZMA_LCLP_MIN: c_int = 0 as c_int;
 pub const LZMA_LCLP_MAX: c_int = 4 as c_int;
 pub const LZMA_PB_MIN: c_int = 0 as c_int;
 pub const LZMA_PB_MAX: c_int = 4 as c_int;
 pub const LZMA_PRESET_DEFAULT: c_uint = 6;
-pub const LZMA_PRESET_EXTREME: c_uint = (1 as c_uint) << 31 as c_int;
+pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31 as c_int;
 pub const LZMA_FILTER_RESERVED_START: c_ulonglong = (1 as c_ulonglong) << 62 as c_int;
 pub const STR_ALLOC_SIZE: c_int = 800 as c_int;
 unsafe extern "C" fn str_init(

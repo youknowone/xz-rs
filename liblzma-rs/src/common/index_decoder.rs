@@ -226,12 +226,11 @@ unsafe extern "C" fn index_decode(
                 current_block = 7642845755631126846;
             }
             3 | 4 => {
-                let mut size: *mut lzma_vli =
-                    if (*coder).sequence == SEQ_UNPADDED {
-                        &raw mut (*coder).unpadded_size
-                    } else {
-                        &raw mut (*coder).uncompressed_size
-                    };
+                let mut size: *mut lzma_vli = if (*coder).sequence == SEQ_UNPADDED {
+                    &raw mut (*coder).unpadded_size
+                } else {
+                    &raw mut (*coder).uncompressed_size
+                };
                 ret = lzma_vli_decode(size, &raw mut (*coder).pos, in_0, in_pos, in_size);
                 if ret != LZMA_STREAM_END {
                     break;

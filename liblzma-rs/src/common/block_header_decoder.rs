@@ -174,8 +174,7 @@ pub unsafe extern "C" fn lzma_block_header_decode(
     } else {
         (*block).uncompressed_size = LZMA_VLI_UNKNOWN as lzma_vli;
     }
-    let filter_count: size_t =
-        (*in_0.offset(1 as isize) as c_uint & 3).wrapping_add(1) as size_t;
+    let filter_count: size_t = (*in_0.offset(1 as isize) as c_uint & 3).wrapping_add(1) as size_t;
     let mut i_0: size_t = 0 as size_t;
     while i_0 < filter_count {
         let ret: lzma_ret = lzma_filter_flags_decode(

@@ -381,9 +381,9 @@ unsafe extern "C" fn dict_put_safe(mut dict: *mut lzma_dict, mut byte: u8) -> bo
 }
 pub const RC_SHIFT_BITS: c_int = 8 as c_int;
 pub const RC_TOP_BITS: c_int = 24 as c_int;
-pub const RC_TOP_VALUE: c_uint = (1 as c_uint) << RC_TOP_BITS;
+pub const RC_TOP_VALUE: c_uint = 1u32 << RC_TOP_BITS;
 pub const RC_BIT_MODEL_TOTAL_BITS: c_int = 11 as c_int;
-pub const RC_BIT_MODEL_TOTAL: c_uint = (1 as c_uint) << RC_BIT_MODEL_TOTAL_BITS;
+pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_BITS: c_int = 5 as c_int;
 #[inline]
 unsafe extern "C" fn is_lclppb_valid(mut options: *const lzma_options_lzma) -> bool {
@@ -947,7 +947,7 @@ unsafe extern "C" fn lzma_decode(
                         - (*probs.offset(symbol as isize) as c_int >> RC_MOVE_BITS))
                         as probability;
                     symbol = (symbol << 1 as c_int).wrapping_add(1 as u32);
-                    rep0 = (rep0 as c_uint).wrapping_add((1 as c_uint) << offset) as u32 as u32;
+                    rep0 = (rep0 as c_uint).wrapping_add(1u32 << offset) as u32 as u32;
                 }
                 offset = offset.wrapping_add(1);
                 if offset < limit {
@@ -3824,7 +3824,7 @@ unsafe extern "C" fn lzma_decoder_uncompressed(
 unsafe extern "C" fn lzma_decoder_reset(mut coder_ptr: *mut c_void, mut opt: *const c_void) {
     let mut coder: *mut lzma_lzma1_decoder = coder_ptr as *mut lzma_lzma1_decoder;
     let mut options: *const lzma_options_lzma = opt as *const lzma_options_lzma;
-    (*coder).pos_mask = ((1 as c_uint) << (*options).pb).wrapping_sub(1) as u32;
+    (*coder).pos_mask = (1u32 << (*options).pb).wrapping_sub(1) as u32;
     literal_init(
         &raw mut (*coder).literal as *mut probability,
         (*options).lc,
@@ -3838,7 +3838,7 @@ unsafe extern "C" fn lzma_decoder_reset(mut coder_ptr: *mut c_void, mut opt: *co
     (*coder).rep1 = 0 as u32;
     (*coder).rep2 = 0 as u32;
     (*coder).rep3 = 0 as u32;
-    (*coder).pos_mask = ((1 as c_uint) << (*options).pb).wrapping_sub(1) as u32;
+    (*coder).pos_mask = (1u32 << (*options).pb).wrapping_sub(1) as u32;
     (*coder).rc.range = UINT32_MAX as u32;
     (*coder).rc.code = 0 as u32;
     (*coder).rc.init_bytes_left = 5 as u32;

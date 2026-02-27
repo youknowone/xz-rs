@@ -238,9 +238,7 @@ unsafe extern "C" fn auto_decode(
                 out_size,
                 action,
             ) as lzma_ret;
-            if ret != LZMA_STREAM_END
-                || (*coder).flags & LZMA_CONCATENATED as u32 == 0 as u32
-            {
+            if ret != LZMA_STREAM_END || (*coder).flags & LZMA_CONCATENATED as u32 == 0 as u32 {
                 return ret;
             }
             (*coder).sequence = SEQ_FINISH;

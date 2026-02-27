@@ -247,7 +247,7 @@ pub unsafe extern "C" fn lzma_bcj_riscv_encode(
     mut buf: *mut u8,
     mut size: size_t,
 ) -> size_t {
-    start_offset = (start_offset & !(1 as c_uint)) as u32;
+    start_offset = (start_offset & !1u32) as u32;
     return riscv_encode(NULL, start_offset, true_0 != 0, buf, size);
 }
 unsafe extern "C" fn riscv_decode(
@@ -356,6 +356,6 @@ pub unsafe extern "C" fn lzma_bcj_riscv_decode(
     mut buf: *mut u8,
     mut size: size_t,
 ) -> size_t {
-    start_offset = (start_offset & !(1 as c_uint)) as u32;
+    start_offset = (start_offset & !1u32) as u32;
     return riscv_decode(NULL, start_offset, false_0 != 0, buf, size);
 }

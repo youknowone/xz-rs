@@ -228,9 +228,7 @@ unsafe extern "C" fn alone_decode(
     mut action: lzma_action,
 ) -> lzma_ret {
     let mut coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
-    while *out_pos < out_size
-        && ((*coder).sequence == SEQ_CODE || *in_pos < in_size)
-    {
+    while *out_pos < out_size && ((*coder).sequence == SEQ_CODE || *in_pos < in_size) {
         let mut current_block_42: u64;
         match (*coder).sequence {
             0 => {

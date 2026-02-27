@@ -287,9 +287,7 @@ unsafe extern "C" fn lzip_decode(
                 let lzip_id_string: [u8; 4] = [0x4c as u8, 0x5a as u8, 0x49 as u8, 0x50 as u8];
                 while (*coder).pos < ::core::mem::size_of::<[u8; 4]>() as usize {
                     if *in_pos >= in_size {
-                        return (if !(*coder).first_member
-                            && action == LZMA_FINISH
-                        {
+                        return (if !(*coder).first_member && action == LZMA_FINISH {
                             LZMA_STREAM_END as c_int
                         } else {
                             LZMA_OK as c_int

@@ -319,8 +319,8 @@ unsafe extern "C" fn get_dist_slot(mut dist: u32) -> u32 {
             (2 as c_int * (0 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
         );
 }
-pub const LZMA2_CHUNK_MAX: c_uint = (1 as c_uint) << 16 as c_int;
-pub const LZMA2_UNCOMPRESSED_MAX: c_uint = (1 as c_uint) << 21 as c_int;
+pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16 as c_int;
+pub const LZMA2_UNCOMPRESSED_MAX: c_uint = 1u32 << 21 as c_int;
 pub const LZMA2_HEADER_MAX: c_int = 6 as c_int;
 pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3 as c_int;
 unsafe extern "C" fn lzma2_header_lzma(mut coder: *mut lzma_lzma2_coder) {

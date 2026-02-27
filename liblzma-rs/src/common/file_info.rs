@@ -695,8 +695,7 @@ unsafe extern "C" fn file_info_decoder_memconfig(
             &raw mut this_index_memusage,
             &raw mut dummy,
             0 as u64,
-        )
-            != LZMA_OK
+        ) != LZMA_OK
         {
             return LZMA_PROG_ERROR;
         }
@@ -710,9 +709,7 @@ unsafe extern "C" fn file_info_decoder_memconfig(
         if new_memlimit < *memusage {
             return LZMA_MEMLIMIT_ERROR;
         }
-        if (*coder).this_index.is_null()
-            && (*coder).sequence == SEQ_INDEX_DECODE
-        {
+        if (*coder).this_index.is_null() && (*coder).sequence == SEQ_INDEX_DECODE {
             let idec_new_memlimit: u64 = new_memlimit.wrapping_sub(combined_index_memusage);
             let mut dummy1: u64 = 0;
             let mut dummy2: u64 = 0;
@@ -724,8 +721,7 @@ unsafe extern "C" fn file_info_decoder_memconfig(
                 &raw mut dummy1,
                 &raw mut dummy2,
                 idec_new_memlimit,
-            )
-                != LZMA_OK
+            ) != LZMA_OK
             {
                 return LZMA_PROG_ERROR;
             }
