@@ -513,11 +513,11 @@ pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const SIG_SETMASK: c_int = 3;
 pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 #[inline]
-unsafe extern "C" fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
-    let _ret: c_int = pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t);
+extern "C" fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
+    let _ret: c_int = unsafe { pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t) };
 }
 #[inline]
-unsafe extern "C" fn mythread_create(
+extern "C" fn mythread_create(
     thread: *mut mythread,
     func: Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
     arg: *mut c_void,
@@ -526,12 +526,14 @@ unsafe extern "C" fn mythread_create(
     let mut all: sigset_t = 0;
     all = !(0 as sigset_t);
     mythread_sigmask(SIG_SETMASK, &raw mut all, &raw mut old);
-    let ret: c_int = pthread_create(
-        thread as *mut pthread_t,
-        ::core::ptr::null::<pthread_attr_t>(),
-        func as Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
-        arg as *mut c_void,
-    ) as c_int;
+    let ret: c_int = unsafe {
+        pthread_create(
+            thread as *mut pthread_t,
+            ::core::ptr::null::<pthread_attr_t>(),
+            func as Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
+            arg as *mut c_void,
+        ) as c_int
+    };
     mythread_sigmask(SIG_SETMASK, &raw mut old, core::ptr::null_mut());
     return ret;
 }
@@ -540,23 +542,25 @@ extern "C" fn mythread_join(thread: mythread) -> c_int {
     return unsafe { pthread_join(thread as pthread_t, core::ptr::null_mut()) };
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
-    return pthread_mutex_init(
-        mutex as *mut pthread_mutex_t,
-        ::core::ptr::null::<pthread_mutexattr_t>(),
-    );
+extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
+    return unsafe {
+        pthread_mutex_init(
+            mutex as *mut pthread_mutex_t,
+            ::core::ptr::null::<pthread_mutexattr_t>(),
+        )
+    };
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_destroy(mutex: *mut mythread_mutex) {
-    let _ret: c_int = pthread_mutex_destroy(mutex as *mut pthread_mutex_t);
+extern "C" fn mythread_mutex_destroy(mutex: *mut mythread_mutex) {
+    let _ret: c_int = unsafe { pthread_mutex_destroy(mutex as *mut pthread_mutex_t) };
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_lock(mutex: *mut mythread_mutex) {
-    let _ret: c_int = pthread_mutex_lock(mutex as *mut pthread_mutex_t);
+extern "C" fn mythread_mutex_lock(mutex: *mut mythread_mutex) {
+    let _ret: c_int = unsafe { pthread_mutex_lock(mutex as *mut pthread_mutex_t) };
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
-    let _ret: c_int = pthread_mutex_unlock(mutex as *mut pthread_mutex_t);
+extern "C" fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
+    let _ret: c_int = unsafe { pthread_mutex_unlock(mutex as *mut pthread_mutex_t) };
 }
 #[inline]
 unsafe extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
