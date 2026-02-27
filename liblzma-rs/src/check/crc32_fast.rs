@@ -1,7 +1,6 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint};
 #[inline]
-unsafe extern "C" fn aligned_read32ne(mut buf: *const u8) -> u32 {
+unsafe extern "C" fn aligned_read32ne(buf: *const u8) -> u32 {
     return *(buf as *const u32);
 }
 #[no_mangle]
@@ -359,6 +358,6 @@ unsafe extern "C" fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mu
     return !crc;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_crc32(mut buf: *const u8, mut size: size_t, mut crc: u32) -> u32 {
+pub unsafe extern "C" fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
     return lzma_crc32_generic(buf, size, crc);
 }

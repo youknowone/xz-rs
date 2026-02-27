@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_ulonglong, c_void};
 extern "C" {
     fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_raw_encoder_init(
@@ -91,13 +91,13 @@ pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_raw_buffer_encode(
-    mut filters: *const lzma_filter,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
+    filters: *const lzma_filter,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
 ) -> lzma_ret {
     if in_0.is_null() && in_size != 0 || out.is_null() || out_pos.is_null() || *out_pos > out_size {
         return LZMA_PROG_ERROR;

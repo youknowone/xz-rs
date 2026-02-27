@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
     fn memset(__b: *mut c_void, __c: c_int, __len: size_t) -> *mut c_void;
     fn lzma_vli_encode(
@@ -88,7 +88,7 @@ pub struct lzma_block {
 }
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
-unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
+unsafe extern "C" fn write32le(buf: *mut u8, num: u32) {
     *buf.offset(0) = num as u8;
     *buf.offset(1) = (num >> 8) as u8;
     *buf.offset(2) = (num >> 16) as u8;
@@ -98,7 +98,7 @@ pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTERS_MAX: c_int = 4;
 #[no_mangle]
-pub unsafe extern "C" fn lzma_block_header_size(mut block: *mut lzma_block) -> lzma_ret {
+pub unsafe extern "C" fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret {
     if (*block).version > 1 {
         return LZMA_OPTIONS_ERROR;
     }
@@ -141,8 +141,8 @@ pub unsafe extern "C" fn lzma_block_header_size(mut block: *mut lzma_block) -> l
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_header_encode(
-    mut block: *const lzma_block,
-    mut out: *mut u8,
+    block: *const lzma_block,
+    out: *mut u8,
 ) -> lzma_ret {
     if lzma_block_unpadded_size(block) == 0 as lzma_vli
         || !((*block).uncompressed_size <= LZMA_VLI_MAX as lzma_vli

@@ -44,11 +44,11 @@ pub struct lzma_mf_s {
 pub type lzma_mf = lzma_mf_s;
 pub const UINT32_MAX: c_uint = 4294967295;
 #[inline]
-unsafe extern "C" fn mf_ptr(mut mf: *const lzma_mf) -> *const u8 {
+unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     return (*mf).buffer.offset((*mf).read_pos as isize);
 }
 #[inline]
-unsafe extern "C" fn mf_avail(mut mf: *const lzma_mf) -> u32 {
+unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
     return (*mf).write_pos.wrapping_sub((*mf).read_pos);
 }
 pub const HASH_2_SIZE: c_uint = 1u32 << 10;
@@ -59,10 +59,10 @@ pub const FIX_3_HASH_SIZE: c_uint = 1u32 << 10;
 pub const FIX_4_HASH_SIZE: c_uint = HASH_2_SIZE.wrapping_add(HASH_3_SIZE);
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
-    mut buf1: *const u8,
-    mut buf2: *const u8,
+    buf1: *const u8,
+    buf2: *const u8,
     mut len: u32,
-    mut limit: u32,
+    limit: u32,
 ) -> u32 {
     while len < limit && *buf1.offset(len as isize) as c_int == *buf2.offset(len as isize) as c_int
     {
@@ -72,9 +72,9 @@ unsafe extern "C" fn lzma_memcmplen(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mf_find(
-    mut mf: *mut lzma_mf,
-    mut count_ptr: *mut u32,
-    mut matches: *mut lzma_match,
+    mf: *mut lzma_mf,
+    count_ptr: *mut u32,
+    matches: *mut lzma_match,
 ) -> u32 {
     let count: u32 = (*mf).find.expect("non-null function pointer")(mf, matches) as u32;
     let mut len_best: u32 = 0;
@@ -85,8 +85,8 @@ pub unsafe extern "C" fn lzma_mf_find(
             if limit > (*mf).match_len_max {
                 limit = (*mf).match_len_max;
             }
-            let mut p1: *const u8 = mf_ptr(mf).offset(-1);
-            let mut p2: *const u8 = p1
+            let p1: *const u8 = mf_ptr(mf).offset(-1);
+            let p2: *const u8 = p1
                 .offset(-((*matches.offset(count.wrapping_sub(1) as isize)).dist as isize))
                 .offset(-1);
             len_best = lzma_memcmplen(p1, p2, len_best, limit);
@@ -98,7 +98,7 @@ pub unsafe extern "C" fn lzma_mf_find(
 }
 pub const EMPTY_HASH_VALUE: c_int = 0;
 pub const MUST_NORMALIZE_POS: c_uint = UINT32_MAX;
-unsafe extern "C" fn normalize(mut mf: *mut lzma_mf) {
+unsafe extern "C" fn normalize(mf: *mut lzma_mf) {
     let subvalue: u32 = (MUST_NORMALIZE_POS as u32).wrapping_sub((*mf).cyclic_size);
     let mut i: u32 = 0;
     while i < (*mf).hash_count {
@@ -122,7 +122,7 @@ unsafe extern "C" fn normalize(mut mf: *mut lzma_mf) {
     }
     (*mf).offset = (*mf).offset.wrapping_sub(subvalue);
 }
-unsafe extern "C" fn move_pos(mut mf: *mut lzma_mf) {
+unsafe extern "C" fn move_pos(mf: *mut lzma_mf) {
     (*mf).cyclic_pos = (*mf).cyclic_pos.wrapping_add(1);
     if (*mf).cyclic_pos == (*mf).cyclic_size {
         (*mf).cyclic_pos = 0;
@@ -132,7 +132,7 @@ unsafe extern "C" fn move_pos(mut mf: *mut lzma_mf) {
         normalize(mf);
     }
 }
-unsafe extern "C" fn move_pending(mut mf: *mut lzma_mf) {
+unsafe extern "C" fn move_pending(mf: *mut lzma_mf) {
     (*mf).read_pos = (*mf).read_pos.wrapping_add(1);
     (*mf).pending = (*mf).pending.wrapping_add(1);
 }
@@ -160,13 +160,13 @@ unsafe extern "C" fn hc_find_func(
         cur_match = *son.offset(
             cyclic_pos
                 .wrapping_sub(delta)
-                .wrapping_add((if delta > cyclic_pos { cyclic_size } else { 0 }))
+                .wrapping_add(if delta > cyclic_pos { cyclic_size } else { 0 })
                 as isize,
         );
         if *pb.offset(len_best as isize) as c_int == *cur.offset(len_best as isize) as c_int
             && *pb.offset(0) as c_int == *cur.offset(0) as c_int
         {
-            let mut len: u32 = lzma_memcmplen(pb, cur, 1, len_limit);
+            let len: u32 = lzma_memcmplen(pb, cur, 1, len_limit);
             if len_best < len {
                 len_best = len;
                 (*matches).len = len;
@@ -180,10 +180,7 @@ unsafe extern "C" fn hc_find_func(
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_hc3_find(
-    mut mf: *mut lzma_mf,
-    mut matches: *mut lzma_match,
-) -> u32 {
+pub unsafe extern "C" fn lzma_mf_hc3_find(mf: *mut lzma_mf, matches: *mut lzma_match) -> u32 {
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
@@ -191,7 +188,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
         move_pending(mf);
         return 0;
     }
-    let mut cur: *const u8 = mf_ptr(mf);
+    let cur: *const u8 = mf_ptr(mf);
     let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: u32 = 0;
     let temp: u32 = lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;
@@ -234,12 +231,12 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
     return matches_count;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_hc3_skip(mut mf: *mut lzma_mf, mut amount: u32) {
+pub unsafe extern "C" fn lzma_mf_hc3_skip(mf: *mut lzma_mf, mut amount: u32) {
     loop {
         if mf_avail(mf) < 3 {
             move_pending(mf);
         } else {
-            let mut cur: *const u8 = mf_ptr(mf);
+            let cur: *const u8 = mf_ptr(mf);
             let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
             let temp: u32 = lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;
             let hash_2_value: u32 = temp & HASH_2_MASK as u32;
@@ -261,10 +258,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_skip(mut mf: *mut lzma_mf, mut amount: u32)
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_hc4_find(
-    mut mf: *mut lzma_mf,
-    mut matches: *mut lzma_match,
-) -> u32 {
+pub unsafe extern "C" fn lzma_mf_hc4_find(mf: *mut lzma_mf, matches: *mut lzma_match) -> u32 {
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
@@ -272,7 +266,7 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
         move_pending(mf);
         return 0;
     }
-    let mut cur: *const u8 = mf_ptr(mf);
+    let cur: *const u8 = mf_ptr(mf);
     let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: u32 = 0;
     let temp: u32 = lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;
@@ -343,12 +337,12 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
     return matches_count;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_hc4_skip(mut mf: *mut lzma_mf, mut amount: u32) {
+pub unsafe extern "C" fn lzma_mf_hc4_skip(mf: *mut lzma_mf, mut amount: u32) {
     loop {
         if mf_avail(mf) < 4 {
             move_pending(mf);
         } else {
-            let mut cur: *const u8 = mf_ptr(mf);
+            let cur: *const u8 = mf_ptr(mf);
             let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
             let temp: u32 = lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;
             let hash_2_value: u32 = temp & HASH_2_MASK as u32;
@@ -404,7 +398,7 @@ unsafe extern "C" fn bt_find_func(
         let pair: *mut u32 = son.offset(
             (cyclic_pos
                 .wrapping_sub(delta)
-                .wrapping_add((if delta > cyclic_pos { cyclic_size } else { 0 }))
+                .wrapping_add(if delta > cyclic_pos { cyclic_size } else { 0 })
                 << 1) as isize,
         );
         let pb: *const u8 = cur.offset(-(delta as isize));
@@ -459,13 +453,13 @@ unsafe extern "C" fn bt_skip_func(
             *ptr1 = EMPTY_HASH_VALUE as u32;
             return;
         }
-        let mut pair: *mut u32 = son.offset(
+        let pair: *mut u32 = son.offset(
             (cyclic_pos
                 .wrapping_sub(delta)
-                .wrapping_add((if delta > cyclic_pos { cyclic_size } else { 0 }))
+                .wrapping_add(if delta > cyclic_pos { cyclic_size } else { 0 })
                 << 1) as isize,
         );
-        let mut pb: *const u8 = cur.offset(-(delta as isize));
+        let pb: *const u8 = cur.offset(-(delta as isize));
         let mut len: u32 = if len0 < len1 { len0 } else { len1 };
         if *pb.offset(len as isize) as c_int == *cur.offset(len as isize) as c_int {
             len = lzma_memcmplen(pb, cur, len.wrapping_add(1), len_limit);
@@ -489,10 +483,7 @@ unsafe extern "C" fn bt_skip_func(
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_bt2_find(
-    mut mf: *mut lzma_mf,
-    mut matches: *mut lzma_match,
-) -> u32 {
+pub unsafe extern "C" fn lzma_mf_bt2_find(mf: *mut lzma_mf, matches: *mut lzma_match) -> u32 {
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
@@ -500,7 +491,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_find(
         move_pending(mf);
         return 0;
     }
-    let mut cur: *const u8 = mf_ptr(mf);
+    let cur: *const u8 = mf_ptr(mf);
     let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: u32 = 0;
     let hash_value: u32 = *cur.offset(0) as u32 | (*cur.offset(1) as u32) << 8;
@@ -523,7 +514,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_find(
     return matches_count;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_bt2_skip(mut mf: *mut lzma_mf, mut amount: u32) {
+pub unsafe extern "C" fn lzma_mf_bt2_skip(mf: *mut lzma_mf, mut amount: u32) {
     let mut current_block_8: u64;
     loop {
         let mut len_limit: u32 = mf_avail(mf);
@@ -538,7 +529,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_skip(mut mf: *mut lzma_mf, mut amount: u32)
         }
         match current_block_8 {
             11875828834189669668 => {
-                let mut cur: *const u8 = mf_ptr(mf);
+                let cur: *const u8 = mf_ptr(mf);
                 let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
                 let hash_value: u32 = *cur.offset(0) as u32 | (*cur.offset(1) as u32) << 8;
                 let cur_match: u32 = *(*mf).hash.offset(hash_value as isize);
@@ -564,10 +555,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_skip(mut mf: *mut lzma_mf, mut amount: u32)
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_bt3_find(
-    mut mf: *mut lzma_mf,
-    mut matches: *mut lzma_match,
-) -> u32 {
+pub unsafe extern "C" fn lzma_mf_bt3_find(mf: *mut lzma_mf, matches: *mut lzma_match) -> u32 {
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
@@ -575,7 +563,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
         move_pending(mf);
         return 0;
     }
-    let mut cur: *const u8 = mf_ptr(mf);
+    let cur: *const u8 = mf_ptr(mf);
     let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: u32 = 0;
     let temp: u32 = lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;
@@ -627,7 +615,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
     return matches_count;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_bt3_skip(mut mf: *mut lzma_mf, mut amount: u32) {
+pub unsafe extern "C" fn lzma_mf_bt3_skip(mf: *mut lzma_mf, mut amount: u32) {
     let mut current_block_9: u64;
     loop {
         let mut len_limit: u32 = mf_avail(mf);
@@ -642,7 +630,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_skip(mut mf: *mut lzma_mf, mut amount: u32)
         }
         match current_block_9 {
             11875828834189669668 => {
-                let mut cur: *const u8 = mf_ptr(mf);
+                let cur: *const u8 = mf_ptr(mf);
                 let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
                 let temp: u32 =
                     lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;
@@ -676,10 +664,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_skip(mut mf: *mut lzma_mf, mut amount: u32)
     }
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_bt4_find(
-    mut mf: *mut lzma_mf,
-    mut matches: *mut lzma_match,
-) -> u32 {
+pub unsafe extern "C" fn lzma_mf_bt4_find(mf: *mut lzma_mf, matches: *mut lzma_match) -> u32 {
     let mut len_limit: u32 = mf_avail(mf);
     if (*mf).nice_len <= len_limit {
         len_limit = (*mf).nice_len;
@@ -687,7 +672,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
         move_pending(mf);
         return 0;
     }
-    let mut cur: *const u8 = mf_ptr(mf);
+    let cur: *const u8 = mf_ptr(mf);
     let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: u32 = 0;
     let temp: u32 = lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;
@@ -767,7 +752,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
     return matches_count;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mf_bt4_skip(mut mf: *mut lzma_mf, mut amount: u32) {
+pub unsafe extern "C" fn lzma_mf_bt4_skip(mf: *mut lzma_mf, mut amount: u32) {
     let mut current_block_10: u64;
     loop {
         let mut len_limit: u32 = mf_avail(mf);
@@ -782,7 +767,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_skip(mut mf: *mut lzma_mf, mut amount: u32)
         }
         match current_block_10 {
             11875828834189669668 => {
-                let mut cur: *const u8 = mf_ptr(mf);
+                let cur: *const u8 = mf_ptr(mf);
                 let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
                 let temp: u32 =
                     lzma_crc32_table[0][*cur.offset(0) as usize] ^ *cur.offset(1) as u32;

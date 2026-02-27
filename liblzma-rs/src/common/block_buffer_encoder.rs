@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
 extern "C" {
     fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
@@ -219,7 +219,7 @@ pub const HEADERS_BOUND: c_int = 1
     + LZMA_CHECK_SIZE_MAX
     + 3 as c_int
     & !(3 as c_int);
-extern "C" fn lzma2_bound(mut uncompressed_size: u64) -> u64 {
+extern "C" fn lzma2_bound(uncompressed_size: u64) -> u64 {
     if uncompressed_size > COMPRESSED_SIZE_MAX as u64 {
         return 0;
     }
@@ -235,7 +235,7 @@ extern "C" fn lzma2_bound(mut uncompressed_size: u64) -> u64 {
     return uncompressed_size.wrapping_add(overhead);
 }
 #[no_mangle]
-pub extern "C" fn lzma_block_buffer_bound64(mut uncompressed_size: u64) -> u64 {
+pub extern "C" fn lzma_block_buffer_bound64(uncompressed_size: u64) -> u64 {
     let mut lzma2_size: u64 = lzma2_bound(uncompressed_size);
     if lzma2_size == 0 {
         return 0;
@@ -244,17 +244,17 @@ pub extern "C" fn lzma_block_buffer_bound64(mut uncompressed_size: u64) -> u64 {
     return (HEADERS_BOUND as u64).wrapping_add(lzma2_size);
 }
 #[no_mangle]
-pub extern "C" fn lzma_block_buffer_bound(mut uncompressed_size: size_t) -> size_t {
-    let mut ret: u64 = lzma_block_buffer_bound64(uncompressed_size as u64);
+pub extern "C" fn lzma_block_buffer_bound(uncompressed_size: size_t) -> size_t {
+    let ret: u64 = lzma_block_buffer_bound64(uncompressed_size as u64);
     return ret as size_t;
 }
 unsafe extern "C" fn block_encode_uncompressed(
-    mut block: *mut lzma_block,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
+    block: *mut lzma_block,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
 ) -> lzma_ret {
     let mut lzma2: lzma_options_lzma = lzma_options_lzma {
         dict_size: LZMA_DICT_SIZE_MIN as u32,
@@ -289,7 +289,7 @@ unsafe extern "C" fn block_encode_uncompressed(
     filters[0].id = LZMA_FILTER_LZMA2 as lzma_vli;
     filters[0].options = &raw mut lzma2 as *mut c_void;
     filters[1].id = LZMA_VLI_UNKNOWN as lzma_vli;
-    let mut filters_orig: *mut lzma_filter = (*block).filters;
+    let filters_orig: *mut lzma_filter = (*block).filters;
     (*block).filters = &raw mut filters as *mut lzma_filter;
     if lzma_block_header_size(block) != LZMA_OK {
         (*block).filters = filters_orig;
@@ -339,12 +339,12 @@ unsafe extern "C" fn block_encode_uncompressed(
     return LZMA_OK;
 }
 unsafe extern "C" fn block_encode_normal(
-    mut block: *mut lzma_block,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
+    block: *mut lzma_block,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
     mut out_size: size_t,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_block_header_size(block) as lzma_ret;
@@ -405,14 +405,14 @@ unsafe extern "C" fn block_encode_normal(
     return ret;
 }
 unsafe extern "C" fn block_buffer_encode(
-    mut block: *mut lzma_block,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
+    block: *mut lzma_block,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
     mut out_size: size_t,
-    mut try_to_compress: bool,
+    try_to_compress: bool,
 ) -> lzma_ret {
     if block.is_null()
         || in_0.is_null() && in_size != 0
@@ -489,13 +489,13 @@ unsafe extern "C" fn block_buffer_encode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_buffer_encode(
-    mut block: *mut lzma_block,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
+    block: *mut lzma_block,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
 ) -> lzma_ret {
     return block_buffer_encode(
         block, allocator, in_0, in_size, out, out_pos, out_size, true,
@@ -503,12 +503,12 @@ pub unsafe extern "C" fn lzma_block_buffer_encode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_uncomp_encode(
-    mut block: *mut lzma_block,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
+    block: *mut lzma_block,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
 ) -> lzma_ret {
     return block_buffer_encode(
         block,

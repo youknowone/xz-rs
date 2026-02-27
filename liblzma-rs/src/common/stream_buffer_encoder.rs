@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_void};
 #[repr(C)]
 pub struct lzma_index_s {
     _opaque: [u8; 0],
@@ -139,7 +139,7 @@ pub const INDEX_BOUND: c_int =
 pub const HEADERS_BOUND: c_int = 2 * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
 pub const LZMA_VLI_MAX: lzma_vli = u64::MAX / 2;
 #[no_mangle]
-pub extern "C" fn lzma_stream_buffer_bound(mut uncompressed_size: size_t) -> size_t {
+pub extern "C" fn lzma_stream_buffer_bound(uncompressed_size: size_t) -> size_t {
     let block_bound: size_t = unsafe { lzma_block_buffer_bound(uncompressed_size) } as size_t;
     if block_bound == 0 {
         return 0;
@@ -154,13 +154,13 @@ pub extern "C" fn lzma_stream_buffer_bound(mut uncompressed_size: size_t) -> siz
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_buffer_encode(
-    mut filters: *mut lzma_filter,
-    mut check: lzma_check,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos_ptr: *mut size_t,
+    filters: *mut lzma_filter,
+    check: lzma_check,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos_ptr: *mut size_t,
     mut out_size: size_t,
 ) -> lzma_ret {
     if filters.is_null()
@@ -249,7 +249,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
             return ret_;
         }
     }
-    let mut i: *mut lzma_index = lzma_index_init(allocator);
+    let i: *mut lzma_index = lzma_index_init(allocator);
     if i.is_null() {
         return LZMA_MEM_ERROR;
     }

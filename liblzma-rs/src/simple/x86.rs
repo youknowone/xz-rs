@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_int, c_void};
 extern "C" {
     fn lzma_simple_coder_init(
         next: *mut lzma_next_coder,
@@ -128,14 +128,14 @@ pub struct lzma_simple_coder {
     pub buffer: [u8; 0],
 }
 unsafe extern "C" fn x86_code(
-    mut simple_ptr: *mut c_void,
-    mut now_pos: u32,
-    mut is_encoder: bool,
-    mut buffer: *mut u8,
-    mut size: size_t,
+    simple_ptr: *mut c_void,
+    now_pos: u32,
+    is_encoder: bool,
+    buffer: *mut u8,
+    size: size_t,
 ) -> size_t {
     static mut MASK_TO_BIT_NUMBER: [u32; 5] = [0, 1, 2, 2, 3];
-    let mut simple: *mut lzma_simple_x86 = simple_ptr as *mut lzma_simple_x86;
+    let simple: *mut lzma_simple_x86 = simple_ptr as *mut lzma_simple_x86;
     let mut prev_mask: u32 = (*simple).prev_mask;
     let mut prev_pos: u32 = (*simple).prev_pos;
     if size < 5 {
@@ -215,10 +215,10 @@ unsafe extern "C" fn x86_code(
     return buffer_pos;
 }
 unsafe extern "C" fn x86_coder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter_info,
-    mut is_encoder: bool,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter_info,
+    is_encoder: bool,
 ) -> lzma_ret {
     let ret: lzma_ret = lzma_simple_coder_init(
         next,
@@ -231,8 +231,8 @@ unsafe extern "C" fn x86_coder_init(
         is_encoder,
     ) as lzma_ret;
     if ret == LZMA_OK {
-        let mut coder: *mut lzma_simple_coder = (*next).coder as *mut lzma_simple_coder;
-        let mut simple: *mut lzma_simple_x86 = (*coder).simple as *mut lzma_simple_x86;
+        let coder: *mut lzma_simple_coder = (*next).coder as *mut lzma_simple_coder;
+        let simple: *mut lzma_simple_x86 = (*coder).simple as *mut lzma_simple_x86;
         (*simple).prev_mask = 0;
         (*simple).prev_pos = -(5 as c_int) as u32;
     }
@@ -240,17 +240,17 @@ unsafe extern "C" fn x86_coder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_simple_x86_encoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter_info,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter_info,
 ) -> lzma_ret {
     return x86_coder_init(next, allocator, filters, true);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_bcj_x86_encode(
-    mut start_offset: u32,
-    mut buf: *mut u8,
-    mut size: size_t,
+    start_offset: u32,
+    buf: *mut u8,
+    size: size_t,
 ) -> size_t {
     let mut simple: lzma_simple_x86 = lzma_simple_x86 {
         prev_mask: 0,
@@ -266,17 +266,17 @@ pub unsafe extern "C" fn lzma_bcj_x86_encode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_simple_x86_decoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter_info,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter_info,
 ) -> lzma_ret {
     return x86_coder_init(next, allocator, filters, false);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_bcj_x86_decode(
-    mut start_offset: u32,
-    mut buf: *mut u8,
-    mut size: size_t,
+    start_offset: u32,
+    buf: *mut u8,
+    size: size_t,
 ) -> size_t {
     let mut simple: lzma_simple_x86 = lzma_simple_x86 {
         prev_mask: 0,

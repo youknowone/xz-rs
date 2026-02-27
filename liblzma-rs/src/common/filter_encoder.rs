@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
 extern "C" {
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
@@ -479,7 +479,7 @@ static mut encoders: [lzma_filter_encoder; 12] = [
         ),
     },
 ];
-unsafe extern "C" fn encoder_find(mut id: lzma_vli) -> *const lzma_filter_encoder {
+unsafe extern "C" fn encoder_find(id: lzma_vli) -> *const lzma_filter_encoder {
     let mut i: size_t = 0;
     while i
         < (core::mem::size_of::<[lzma_filter_encoder; 12]>() as usize)
@@ -492,17 +492,17 @@ unsafe extern "C" fn encoder_find(mut id: lzma_vli) -> *const lzma_filter_encode
     }
     return ::core::ptr::null::<lzma_filter_encoder>();
 }
-unsafe extern "C" fn coder_find(mut id: lzma_vli) -> *const lzma_filter_coder {
+unsafe extern "C" fn coder_find(id: lzma_vli) -> *const lzma_filter_coder {
     return encoder_find(id) as *const lzma_filter_coder;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_filter_encoder_is_supported(mut id: lzma_vli) -> lzma_bool {
+pub unsafe extern "C" fn lzma_filter_encoder_is_supported(id: lzma_vli) -> lzma_bool {
     return !encoder_find(id).is_null() as lzma_bool;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filters_update(
-    mut strm: *mut lzma_stream,
-    mut filters: *const lzma_filter,
+    strm: *mut lzma_stream,
+    filters: *const lzma_filter,
 ) -> lzma_ret {
     if (*(*strm).internal).next.update.is_none() {
         return LZMA_PROG_ERROR;
@@ -537,9 +537,9 @@ pub unsafe extern "C" fn lzma_filters_update(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_raw_encoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter,
 ) -> lzma_ret {
     return lzma_raw_coder_init(
         next,
@@ -551,8 +551,8 @@ pub unsafe extern "C" fn lzma_raw_encoder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_raw_encoder(
-    mut strm: *mut lzma_stream,
-    mut filters: *const lzma_filter,
+    strm: *mut lzma_stream,
+    filters: *const lzma_filter,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm) as lzma_ret;
     if ret_ != LZMA_OK {
@@ -575,14 +575,14 @@ pub unsafe extern "C" fn lzma_raw_encoder(
     return LZMA_OK;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_raw_encoder_memusage(mut filters: *const lzma_filter) -> u64 {
+pub unsafe extern "C" fn lzma_raw_encoder_memusage(filters: *const lzma_filter) -> u64 {
     return lzma_raw_coder_memusage(
         Some(coder_find as unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder),
         filters,
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_mt_block_size(mut filters: *const lzma_filter) -> u64 {
+pub unsafe extern "C" fn lzma_mt_block_size(filters: *const lzma_filter) -> u64 {
     if filters.is_null() {
         return UINT64_MAX as u64;
     }
@@ -608,8 +608,8 @@ pub unsafe extern "C" fn lzma_mt_block_size(mut filters: *const lzma_filter) -> 
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_properties_size(
-    mut size: *mut u32,
-    mut filter: *const lzma_filter,
+    size: *mut u32,
+    filter: *const lzma_filter,
 ) -> lzma_ret {
     let fe: *const lzma_filter_encoder = encoder_find((*filter).id) as *const lzma_filter_encoder;
     if fe.is_null() {
@@ -627,8 +627,8 @@ pub unsafe extern "C" fn lzma_properties_size(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_properties_encode(
-    mut filter: *const lzma_filter,
-    mut props: *mut u8,
+    filter: *const lzma_filter,
+    props: *mut u8,
 ) -> lzma_ret {
     let fe: *const lzma_filter_encoder = encoder_find((*filter).id) as *const lzma_filter_encoder;
     if fe.is_null() {

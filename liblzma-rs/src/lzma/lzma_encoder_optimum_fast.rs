@@ -144,15 +144,15 @@ pub struct lzma_length_encoder {
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 pub const UINT32_MAX: c_uint = 4294967295;
 #[inline]
-unsafe extern "C" fn mf_ptr(mut mf: *const lzma_mf) -> *const u8 {
+unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     return (*mf).buffer.offset((*mf).read_pos as isize);
 }
 #[inline]
-unsafe extern "C" fn mf_avail(mut mf: *const lzma_mf) -> u32 {
+unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
     return (*mf).write_pos.wrapping_sub((*mf).read_pos);
 }
 #[inline]
-unsafe extern "C" fn mf_skip(mut mf: *mut lzma_mf, mut amount: u32) {
+unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
     if amount != 0 {
         (*mf).skip.expect("non-null function pointer")(mf, amount);
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
@@ -161,10 +161,10 @@ unsafe extern "C" fn mf_skip(mut mf: *mut lzma_mf, mut amount: u32) {
 pub const REPS: c_int = 4;
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
-    mut buf1: *const u8,
-    mut buf2: *const u8,
+    buf1: *const u8,
+    buf2: *const u8,
     mut len: u32,
-    mut limit: u32,
+    limit: u32,
 ) -> u32 {
     while len < limit && *buf1.offset(len as isize) as c_int == *buf2.offset(len as isize) as c_int
     {
@@ -174,10 +174,10 @@ unsafe extern "C" fn lzma_memcmplen(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_optimum_fast(
-    mut coder: *mut lzma_lzma1_encoder,
-    mut mf: *mut lzma_mf,
-    mut back_res: *mut u32,
-    mut len_res: *mut u32,
+    coder: *mut lzma_lzma1_encoder,
+    mf: *mut lzma_mf,
+    back_res: *mut u32,
+    len_res: *mut u32,
 ) {
     let nice_len: u32 = (*mf).nice_len;
     let mut len_main: u32 = 0;

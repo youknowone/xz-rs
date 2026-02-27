@@ -171,9 +171,9 @@ pub struct lzma_options_easy {
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_easy_encoder(
-    mut strm: *mut lzma_stream,
-    mut preset: u32,
-    mut check: lzma_check,
+    strm: *mut lzma_stream,
+    preset: u32,
+    check: lzma_check,
 ) -> lzma_ret {
     let mut opt_easy: lzma_options_easy = lzma_options_easy {
         filters: [lzma_filter {

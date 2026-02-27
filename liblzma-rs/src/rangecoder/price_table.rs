@@ -1,5 +1,3 @@
-use crate::types::*;
-use core::ffi::c_int;
 #[no_mangle]
 pub static mut lzma_rc_prices: [u8; 128] = [
     128, 103, 91, 84, 78, 73, 69, 66, 63, 61, 58, 56, 54, 52, 51, 49, 48, 46, 45, 44, 43, 42, 41,

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_char, c_int, c_long, c_uchar, c_uint, c_ulong, c_ulonglong, c_void};
+use core::ffi::{c_char, c_int, c_long, c_uint, c_ulong, c_ulonglong, c_void};
 pub enum lzma_index_hash_s {}
 extern "C" {
     fn memset(__b: *mut c_void, __c: c_int, __len: size_t) -> *mut c_void;
@@ -513,18 +513,14 @@ pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const SIG_SETMASK: c_int = 3;
 pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 #[inline]
-unsafe extern "C" fn mythread_sigmask(
-    mut how: c_int,
-    mut set: *const sigset_t,
-    mut oset: *mut sigset_t,
-) {
-    let mut ret: c_int = pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t);
+unsafe extern "C" fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
+    let _ret: c_int = pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t);
 }
 #[inline]
 unsafe extern "C" fn mythread_create(
-    mut thread: *mut mythread,
-    mut func: Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
-    mut arg: *mut c_void,
+    thread: *mut mythread,
+    func: Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
+    arg: *mut c_void,
 ) -> c_int {
     let mut old: sigset_t = 0;
     let mut all: sigset_t = 0;
@@ -540,30 +536,30 @@ unsafe extern "C" fn mythread_create(
     return ret;
 }
 #[inline]
-unsafe extern "C" fn mythread_join(mut thread: mythread) -> c_int {
+unsafe extern "C" fn mythread_join(thread: mythread) -> c_int {
     return pthread_join(thread as pthread_t, core::ptr::null_mut());
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_init(mut mutex: *mut mythread_mutex) -> c_int {
+unsafe extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
     return pthread_mutex_init(
         mutex as *mut pthread_mutex_t,
         ::core::ptr::null::<pthread_mutexattr_t>(),
     );
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_destroy(mut mutex: *mut mythread_mutex) {
-    let mut ret: c_int = pthread_mutex_destroy(mutex as *mut pthread_mutex_t);
+unsafe extern "C" fn mythread_mutex_destroy(mutex: *mut mythread_mutex) {
+    let _ret: c_int = pthread_mutex_destroy(mutex as *mut pthread_mutex_t);
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_lock(mut mutex: *mut mythread_mutex) {
-    let mut ret: c_int = pthread_mutex_lock(mutex as *mut pthread_mutex_t);
+unsafe extern "C" fn mythread_mutex_lock(mutex: *mut mythread_mutex) {
+    let _ret: c_int = pthread_mutex_lock(mutex as *mut pthread_mutex_t);
 }
 #[inline]
-unsafe extern "C" fn mythread_mutex_unlock(mut mutex: *mut mythread_mutex) {
-    let mut ret: c_int = pthread_mutex_unlock(mutex as *mut pthread_mutex_t);
+unsafe extern "C" fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
+    let _ret: c_int = pthread_mutex_unlock(mutex as *mut pthread_mutex_t);
 }
 #[inline]
-unsafe extern "C" fn mythread_cond_init(mut mycond: *mut mythread_cond) -> c_int {
+unsafe extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
     (*mycond).clk_id = _CLOCK_REALTIME;
     return pthread_cond_init(
         &raw mut (*mycond).cond,
@@ -571,27 +567,24 @@ unsafe extern "C" fn mythread_cond_init(mut mycond: *mut mythread_cond) -> c_int
     );
 }
 #[inline]
-unsafe extern "C" fn mythread_cond_destroy(mut cond: *mut mythread_cond) {
-    let mut ret: c_int = pthread_cond_destroy(&raw mut (*cond).cond);
+unsafe extern "C" fn mythread_cond_destroy(cond: *mut mythread_cond) {
+    let _ret: c_int = pthread_cond_destroy(&raw mut (*cond).cond);
 }
 #[inline]
-unsafe extern "C" fn mythread_cond_signal(mut cond: *mut mythread_cond) {
-    let mut ret: c_int = pthread_cond_signal(&raw mut (*cond).cond);
+unsafe extern "C" fn mythread_cond_signal(cond: *mut mythread_cond) {
+    let _ret: c_int = pthread_cond_signal(&raw mut (*cond).cond);
 }
 #[inline]
-unsafe extern "C" fn mythread_cond_wait(
-    mut cond: *mut mythread_cond,
-    mut mutex: *mut mythread_mutex,
-) {
-    let mut ret: c_int = pthread_cond_wait(&raw mut (*cond).cond, mutex as *mut pthread_mutex_t);
+unsafe extern "C" fn mythread_cond_wait(cond: *mut mythread_cond, mutex: *mut mythread_mutex) {
+    let _ret: c_int = pthread_cond_wait(&raw mut (*cond).cond, mutex as *mut pthread_mutex_t);
 }
 #[inline]
 unsafe extern "C" fn mythread_cond_timedwait(
-    mut cond: *mut mythread_cond,
-    mut mutex: *mut mythread_mutex,
-    mut condtime: *const mythread_condtime,
+    cond: *mut mythread_cond,
+    mutex: *mut mythread_mutex,
+    condtime: *const mythread_condtime,
 ) -> c_int {
-    let mut ret: c_int = pthread_cond_timedwait(
+    let ret: c_int = pthread_cond_timedwait(
         &raw mut (*cond).cond,
         mutex as *mut pthread_mutex_t,
         condtime as *const timespec,
@@ -600,9 +593,9 @@ unsafe extern "C" fn mythread_cond_timedwait(
 }
 #[inline]
 unsafe extern "C" fn mythread_condtime_set(
-    mut condtime: *mut mythread_condtime,
-    mut cond: *const mythread_cond,
-    mut timeout_ms: u32,
+    condtime: *mut mythread_condtime,
+    cond: *const mythread_cond,
+    timeout_ms: u32,
 ) {
     (*condtime).tv_sec = timeout_ms.wrapping_div(1000) as time_t as __darwin_time_t;
     (*condtime).tv_nsec = timeout_ms.wrapping_rem(1000).wrapping_mul(1000000) as c_long;
@@ -610,7 +603,7 @@ unsafe extern "C" fn mythread_condtime_set(
         tv_sec: 0,
         tv_nsec: 0,
     };
-    let mut ret: c_int = clock_gettime((*cond).clk_id, &raw mut now);
+    let _ret: c_int = clock_gettime((*cond).clk_id, &raw mut now);
     (*condtime).tv_sec += now.tv_sec;
     (*condtime).tv_nsec += now.tv_nsec;
     if (*condtime).tv_nsec >= 1000000000 as c_long {
@@ -636,23 +629,23 @@ pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_FAIL_FAST;
 pub const INDEX_INDICATOR: c_int = 0;
 #[inline]
-extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
+extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
 }
 #[inline]
-unsafe extern "C" fn lzma_outq_has_buf(mut outq: *const lzma_outq) -> bool {
+unsafe extern "C" fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
     return (*outq).bufs_in_use < (*outq).bufs_limit;
 }
 #[inline]
-unsafe extern "C" fn lzma_outq_is_empty(mut outq: *const lzma_outq) -> bool {
+unsafe extern "C" fn lzma_outq_is_empty(outq: *const lzma_outq) -> bool {
     return (*outq).bufs_in_use == 0;
 }
 #[inline]
-unsafe extern "C" fn lzma_outq_outbuf_memusage(mut buf_size: size_t) -> u64 {
+unsafe extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
     return (core::mem::size_of::<lzma_outbuf>() as usize).wrapping_add(buf_size as usize) as u64;
 }
-unsafe extern "C" fn worker_enable_partial_update(mut thr_ptr: *mut c_void) {
-    let mut thr: *mut worker_thread = thr_ptr as *mut worker_thread;
+unsafe extern "C" fn worker_enable_partial_update(thr_ptr: *mut c_void) {
+    let thr: *mut worker_thread = thr_ptr as *mut worker_thread;
     let mut mythread_i_325: c_uint = 0;
     while if mythread_i_325 != 0 {
         mythread_mutex_unlock(&raw mut (*thr).mutex);
@@ -671,8 +664,8 @@ unsafe extern "C" fn worker_enable_partial_update(mut thr_ptr: *mut c_void) {
         mythread_i_325 = 1;
     }
 }
-unsafe extern "C" fn worker_decoder(mut thr_ptr: *mut c_void) -> *mut c_void {
-    let mut thr: *mut worker_thread = thr_ptr as *mut worker_thread;
+unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
+    let thr: *mut worker_thread = thr_ptr as *mut worker_thread;
     let mut in_filled: size_t = 0;
     let mut partial_update_enabled: bool = false;
     let mut ret: lzma_ret = LZMA_OK;
@@ -815,10 +808,7 @@ unsafe extern "C" fn worker_decoder(mut thr_ptr: *mut c_void) -> *mut c_void {
         }
     }
 }
-unsafe extern "C" fn threads_end(
-    mut coder: *mut lzma_stream_coder,
-    mut allocator: *const lzma_allocator,
-) {
+unsafe extern "C" fn threads_end(coder: *mut lzma_stream_coder, allocator: *const lzma_allocator) {
     let mut i: u32 = 0;
     while i < (*coder).threads_initialized {
         let mut mythread_i_502: c_uint = 0;
@@ -852,7 +842,7 @@ unsafe extern "C" fn threads_end(
     (*coder).mem_in_use = 0;
     (*coder).mem_cached = 0;
 }
-unsafe extern "C" fn threads_stop(mut coder: *mut lzma_stream_coder) {
+unsafe extern "C" fn threads_stop(coder: *mut lzma_stream_coder) {
     let mut i: u32 = 0;
     while i < (*coder).threads_initialized {
         let mut mythread_i_538: c_uint = 0;
@@ -875,8 +865,8 @@ unsafe extern "C" fn threads_stop(mut coder: *mut lzma_stream_coder) {
     }
 }
 unsafe extern "C" fn initialize_new_thread(
-    mut coder: *mut lzma_stream_coder,
-    mut allocator: *const lzma_allocator,
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
 ) -> lzma_ret {
     if (*coder).threads.is_null() {
         (*coder).threads = lzma_alloc(
@@ -888,7 +878,7 @@ unsafe extern "C" fn initialize_new_thread(
             return LZMA_MEM_ERROR;
         }
     }
-    let mut thr: *mut worker_thread = (*coder)
+    let thr: *mut worker_thread = (*coder)
         .threads
         .offset((*coder).threads_initialized as isize)
         as *mut worker_thread;
@@ -931,8 +921,8 @@ unsafe extern "C" fn initialize_new_thread(
     return LZMA_MEM_ERROR;
 }
 unsafe extern "C" fn get_thread(
-    mut coder: *mut lzma_stream_coder,
-    mut allocator: *const lzma_allocator,
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
 ) -> lzma_ret {
     let mut mythread_i_608: c_uint = 0;
     while if mythread_i_608 != 0 {
@@ -972,15 +962,15 @@ unsafe extern "C" fn get_thread(
     return LZMA_OK;
 }
 unsafe extern "C" fn read_output_and_wait(
-    mut coder: *mut lzma_stream_coder,
-    mut allocator: *const lzma_allocator,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
-    mut input_is_possible: *mut bool,
-    mut waiting_allowed: bool,
-    mut wait_abs: *mut mythread_condtime,
-    mut has_blocked: *mut bool,
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
+    input_is_possible: *mut bool,
+    waiting_allowed: bool,
+    wait_abs: *mut mythread_condtime,
+    has_blocked: *mut bool,
 ) -> lzma_ret {
     let mut ret: lzma_ret = LZMA_OK;
     let mut mythread_i_654: c_uint = 0;
@@ -1098,11 +1088,11 @@ unsafe extern "C" fn read_output_and_wait(
     return ret;
 }
 unsafe extern "C" fn decode_block_header(
-    mut coder: *mut lzma_stream_coder,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
 ) -> lzma_ret {
     if *in_pos >= in_size {
         return LZMA_OK;
@@ -1140,18 +1130,18 @@ unsafe extern "C" fn decode_block_header(
     (*coder).block_options.ignore_check = (*coder).ignore_check as lzma_bool;
     return LZMA_STREAM_END;
 }
-unsafe extern "C" fn comp_blk_size(mut coder: *const lzma_stream_coder) -> size_t {
+unsafe extern "C" fn comp_blk_size(coder: *const lzma_stream_coder) -> size_t {
     return vli_ceil4((*coder).block_options.compressed_size)
         .wrapping_add(lzma_check_size((*coder).stream_flags.check) as lzma_vli)
         as size_t;
 }
-unsafe extern "C" fn is_direct_mode_needed(mut size: lzma_vli) -> bool {
+unsafe extern "C" fn is_direct_mode_needed(size: lzma_vli) -> bool {
     return size == LZMA_VLI_UNKNOWN as lzma_vli
         || size > SIZE_MAX.wrapping_div(3 as c_ulong) as lzma_vli;
 }
 unsafe extern "C" fn stream_decoder_reset(
-    mut coder: *mut lzma_stream_coder,
-    mut allocator: *const lzma_allocator,
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
 ) -> lzma_ret {
     (*coder).index_hash = lzma_index_hash_init((*coder).index_hash, allocator);
     if (*coder).index_hash.is_null() {
@@ -1162,17 +1152,17 @@ unsafe extern "C" fn stream_decoder_reset(
     return LZMA_OK;
 }
 unsafe extern "C" fn stream_decode_mt(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
-    mut action: lzma_action,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
+    action: lzma_action,
 ) -> lzma_ret {
-    let mut coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
+    let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut wait_abs: mythread_condtime = timespec {
         tv_sec: 0,
         tv_nsec: 0,
@@ -1843,10 +1833,10 @@ unsafe extern "C" fn stream_decode_mt(
     }
 }
 unsafe extern "C" fn stream_decoder_mt_end(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
 ) {
-    let mut coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
+    let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     threads_end(coder, allocator);
     lzma_outq_end(&raw mut (*coder).outq, allocator);
     lzma_next_end(&raw mut (*coder).block_decoder, allocator);
@@ -1854,17 +1844,17 @@ unsafe extern "C" fn stream_decoder_mt_end(
     lzma_index_hash_end((*coder).index_hash, allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
-unsafe extern "C" fn stream_decoder_mt_get_check(mut coder_ptr: *const c_void) -> lzma_check {
-    let mut coder: *const lzma_stream_coder = coder_ptr as *const lzma_stream_coder;
+unsafe extern "C" fn stream_decoder_mt_get_check(coder_ptr: *const c_void) -> lzma_check {
+    let coder: *const lzma_stream_coder = coder_ptr as *const lzma_stream_coder;
     return (*coder).stream_flags.check;
 }
 unsafe extern "C" fn stream_decoder_mt_memconfig(
-    mut coder_ptr: *mut c_void,
-    mut memusage: *mut u64,
-    mut old_memlimit: *mut u64,
-    mut new_memlimit: u64,
+    coder_ptr: *mut c_void,
+    memusage: *mut u64,
+    old_memlimit: *mut u64,
+    new_memlimit: u64,
 ) -> lzma_ret {
-    let mut coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
+    let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut mythread_i_1829: c_uint = 0;
     while if mythread_i_1829 != 0 {
         mythread_mutex_unlock(&raw mut (*coder).mutex);
@@ -1898,11 +1888,11 @@ unsafe extern "C" fn stream_decoder_mt_memconfig(
     return LZMA_OK;
 }
 unsafe extern "C" fn stream_decoder_mt_get_progress(
-    mut coder_ptr: *mut c_void,
-    mut progress_in: *mut u64,
-    mut progress_out: *mut u64,
+    coder_ptr: *mut c_void,
+    progress_in: *mut u64,
+    progress_out: *mut u64,
 ) {
-    let mut coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
+    let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut mythread_i_1862: c_uint = 0;
     while if mythread_i_1862 != 0 {
         mythread_mutex_unlock(&raw mut (*coder).mutex);
@@ -1947,9 +1937,9 @@ unsafe extern "C" fn stream_decoder_mt_get_progress(
     }
 }
 unsafe extern "C" fn stream_decoder_mt_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut options: *const lzma_mt,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    options: *const lzma_mt,
 ) -> lzma_ret {
     let mut coder: *mut lzma_stream_coder = core::ptr::null_mut();
     if (*options).threads == 0 || (*options).threads > LZMA_THREADS_MAX as u32 {
@@ -2112,8 +2102,8 @@ unsafe extern "C" fn stream_decoder_mt_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_decoder_mt(
-    mut strm: *mut lzma_stream,
-    mut options: *const lzma_mt,
+    strm: *mut lzma_stream,
+    options: *const lzma_mt,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm) as lzma_ret;
     if ret_ != LZMA_OK {

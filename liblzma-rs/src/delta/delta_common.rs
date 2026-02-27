@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
     fn memset(__b: *mut c_void, __c: c_int, __len: size_t) -> *mut c_void;
     fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
@@ -130,19 +130,16 @@ pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_DELTA_DIST_MIN: c_int = 1;
 pub const LZMA_DELTA_DIST_MAX: c_int = 256;
-unsafe extern "C" fn delta_coder_end(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-) {
-    let mut coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
+unsafe extern "C" fn delta_coder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
     lzma_next_end(&raw mut (*coder).next, allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_delta_coder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter_info,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter_info,
 ) -> lzma_ret {
     let mut coder: *mut lzma_delta_coder = (*next).coder as *mut lzma_delta_coder;
     if coder.is_null() {
@@ -173,8 +170,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
     if lzma_delta_coder_memusage((*filters.offset(0)).options) == UINT64_MAX as u64 {
         return LZMA_OPTIONS_ERROR;
     }
-    let mut opt: *const lzma_options_delta =
-        (*filters.offset(0)).options as *const lzma_options_delta;
+    let opt: *const lzma_options_delta = (*filters.offset(0)).options as *const lzma_options_delta;
     (*coder).distance = (*opt).dist as size_t;
     (*coder).pos = 0;
     memset(
@@ -185,8 +181,8 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
     return lzma_next_filter_init(&raw mut (*coder).next, allocator, filters.offset(1));
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_delta_coder_memusage(mut options: *const c_void) -> u64 {
-    let mut opt: *const lzma_options_delta = options as *const lzma_options_delta;
+pub unsafe extern "C" fn lzma_delta_coder_memusage(options: *const c_void) -> u64 {
+    let opt: *const lzma_options_delta = options as *const lzma_options_delta;
     if opt.is_null()
         || (*opt).type_0 != LZMA_DELTA_TYPE_BYTE
         || (*opt).dist < LZMA_DELTA_DIST_MIN as u32

@@ -179,18 +179,18 @@ pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 pub const INDEX_INDICATOR: c_int = 0;
 unsafe extern "C" fn index_decode(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
-    mut action: lzma_action,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
+    _out: *mut u8,
+    _out_pos: *mut size_t,
+    _out_size: size_t,
+    _action: lzma_action,
 ) -> lzma_ret {
     let mut current_block: u64;
-    let mut coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
+    let coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
     let in_start: size_t = *in_pos;
     let mut ret: lzma_ret = LZMA_OK;
     while *in_pos < in_size {
@@ -223,7 +223,7 @@ unsafe extern "C" fn index_decode(
                 current_block = 7642845755631126846;
             }
             3 | 4 => {
-                let mut size: *mut lzma_vli = if (*coder).sequence == SEQ_UNPADDED {
+                let size: *mut lzma_vli = if (*coder).sequence == SEQ_UNPADDED {
                     &raw mut (*coder).unpadded_size
                 } else {
                     &raw mut (*coder).uncompressed_size
@@ -335,21 +335,18 @@ unsafe extern "C" fn index_decode(
     }
     return ret;
 }
-unsafe extern "C" fn index_decoder_end(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-) {
-    let mut coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
+unsafe extern "C" fn index_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    let coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
     lzma_index_end((*coder).index, allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 unsafe extern "C" fn index_decoder_memconfig(
-    mut coder_ptr: *mut c_void,
-    mut memusage: *mut u64,
-    mut old_memlimit: *mut u64,
-    mut new_memlimit: u64,
+    coder_ptr: *mut c_void,
+    memusage: *mut u64,
+    old_memlimit: *mut u64,
+    new_memlimit: u64,
 ) -> lzma_ret {
-    let mut coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
+    let coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
     *memusage = lzma_index_memusage(1 as lzma_vli, (*coder).count);
     *old_memlimit = (*coder).memlimit;
     if new_memlimit != 0 {
@@ -361,10 +358,10 @@ unsafe extern "C" fn index_decoder_memconfig(
     return LZMA_OK;
 }
 unsafe extern "C" fn index_decoder_reset(
-    mut coder: *mut lzma_index_coder,
-    mut allocator: *const lzma_allocator,
-    mut i: *mut *mut lzma_index,
-    mut memlimit: u64,
+    coder: *mut lzma_index_coder,
+    allocator: *const lzma_allocator,
+    i: *mut *mut lzma_index,
+    memlimit: u64,
 ) -> lzma_ret {
     (*coder).index_ptr = i;
     *i = core::ptr::null_mut();
@@ -381,10 +378,10 @@ unsafe extern "C" fn index_decoder_reset(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_decoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut i: *mut *mut lzma_index,
-    mut memlimit: u64,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    i: *mut *mut lzma_index,
+    memlimit: u64,
 ) -> lzma_ret {
     if ::core::mem::transmute::<
         Option<
@@ -470,9 +467,9 @@ pub unsafe extern "C" fn lzma_index_decoder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_decoder(
-    mut strm: *mut lzma_stream,
-    mut i: *mut *mut lzma_index,
-    mut memlimit: u64,
+    strm: *mut lzma_stream,
+    i: *mut *mut lzma_index,
+    memlimit: u64,
 ) -> lzma_ret {
     if !i.is_null() {
         *i = core::ptr::null_mut();
@@ -497,12 +494,12 @@ pub unsafe extern "C" fn lzma_index_decoder(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_buffer_decode(
-    mut i: *mut *mut lzma_index,
-    mut memlimit: *mut u64,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
+    i: *mut *mut lzma_index,
+    memlimit: *mut u64,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
 ) -> lzma_ret {
     if !i.is_null() {
         *i = core::ptr::null_mut();

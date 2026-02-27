@@ -211,7 +211,7 @@ pub const SEQ_HEADER: C2RustUnnamed_0 = 0;
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
-unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
+unsafe extern "C" fn write32le(buf: *mut u8, num: u32) {
     *buf.offset(0) = num as u8;
     *buf.offset(1) = (num >> 8) as u8;
     *buf.offset(2) = (num >> 16) as u8;
@@ -222,17 +222,17 @@ pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
 pub const ALONE_HEADER_SIZE: c_int = 1 + 4 as c_int + 8 as c_int;
 unsafe extern "C" fn alone_encode(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
-    mut action: lzma_action,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
+    action: lzma_action,
 ) -> lzma_ret {
-    let mut coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
+    let coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
     while *out_pos < out_size {
         match (*coder).sequence {
             0 => {
@@ -267,18 +267,15 @@ unsafe extern "C" fn alone_encode(
     }
     return LZMA_OK;
 }
-unsafe extern "C" fn alone_encoder_end(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-) {
-    let mut coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
+unsafe extern "C" fn alone_encoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    let coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
     lzma_next_end(&raw mut (*coder).next, allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 unsafe extern "C" fn alone_encoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut options: *const lzma_options_lzma,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    options: *const lzma_options_lzma,
 ) -> lzma_ret {
     if ::core::mem::transmute::<
         Option<
@@ -407,8 +404,8 @@ unsafe extern "C" fn alone_encoder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_alone_encoder(
-    mut strm: *mut lzma_stream,
-    mut options: *const lzma_options_lzma,
+    strm: *mut lzma_stream,
+    options: *const lzma_options_lzma,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm) as lzma_ret;
     if ret_ != LZMA_OK {

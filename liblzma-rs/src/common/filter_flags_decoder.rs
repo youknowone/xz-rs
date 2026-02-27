@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_ulonglong, c_void};
 extern "C" {
     fn lzma_vli_decode(
         vli: *mut lzma_vli,
@@ -52,11 +52,11 @@ pub struct lzma_filter {
 pub const LZMA_FILTER_RESERVED_START: c_ulonglong = 1 << 62;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filter_flags_decode(
-    mut filter: *mut lzma_filter,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
+    filter: *mut lzma_filter,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
 ) -> lzma_ret {
     (*filter).options = core::ptr::null_mut();
     let ret_: lzma_ret = lzma_vli_decode(

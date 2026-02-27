@@ -54,7 +54,7 @@ pub struct lzma_options_easy {
 }
 pub const UINT32_MAX: c_uint = 4294967295;
 #[no_mangle]
-pub unsafe extern "C" fn lzma_easy_decoder_memusage(mut preset: u32) -> u64 {
+pub unsafe extern "C" fn lzma_easy_decoder_memusage(preset: u32) -> u64 {
     let mut opt_easy: lzma_options_easy = lzma_options_easy {
         filters: [lzma_filter {
             id: 0,

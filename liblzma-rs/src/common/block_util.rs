@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
     fn lzma_check_size(check: lzma_check) -> u32;
 }
@@ -77,13 +77,13 @@ pub const LZMA_BLOCK_HEADER_SIZE_MIN: c_int = 8;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
-extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
+extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_compressed_size(
-    mut block: *mut lzma_block,
-    mut unpadded_size: lzma_vli,
+    block: *mut lzma_block,
+    unpadded_size: lzma_vli,
 ) -> lzma_ret {
     if lzma_block_unpadded_size(block) == 0 as lzma_vli {
         return LZMA_PROG_ERROR;
@@ -104,7 +104,7 @@ pub unsafe extern "C" fn lzma_block_compressed_size(
     return LZMA_OK;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_block_unpadded_size(mut block: *const lzma_block) -> lzma_vli {
+pub unsafe extern "C" fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli {
     if block.is_null()
         || (*block).version > 1
         || (*block).header_size < LZMA_BLOCK_HEADER_SIZE_MIN as u32
@@ -130,7 +130,7 @@ pub unsafe extern "C" fn lzma_block_unpadded_size(mut block: *const lzma_block) 
     return unpadded_size;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_block_total_size(mut block: *const lzma_block) -> lzma_vli {
+pub unsafe extern "C" fn lzma_block_total_size(block: *const lzma_block) -> lzma_vli {
     let mut unpadded_size: lzma_vli = lzma_block_unpadded_size(block);
     if unpadded_size != LZMA_VLI_UNKNOWN as lzma_vli {
         unpadded_size = vli_ceil4(unpadded_size);

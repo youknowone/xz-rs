@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
 extern "C" {
     fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_end(strm: *mut lzma_stream);
@@ -242,24 +242,24 @@ pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64)
     & !3;
 unsafe extern "C" fn block_encode(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
-    mut action: lzma_action,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
+    action: lzma_action,
 ) -> lzma_ret {
-    let mut coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
+    let coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
     if (LZMA_VLI_MAX as lzma_vli).wrapping_sub((*coder).uncompressed_size)
         < in_size.wrapping_sub(*in_pos) as lzma_vli
     {
         return LZMA_DATA_ERROR;
     }
     's_142: {
-        let mut current_block_34: u64;
+        let current_block_34: u64;
         match (*coder).sequence {
             0 => {
                 let in_start: size_t = *in_pos;
@@ -351,21 +351,18 @@ unsafe extern "C" fn block_encode(
     }
     return LZMA_PROG_ERROR;
 }
-unsafe extern "C" fn block_encoder_end(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-) {
-    let mut coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
+unsafe extern "C" fn block_encoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    let coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
     lzma_next_end(&raw mut (*coder).next, allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 unsafe extern "C" fn block_encoder_update(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter,
-    mut reversed_filters: *const lzma_filter,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    _filters: *const lzma_filter,
+    reversed_filters: *const lzma_filter,
 ) -> lzma_ret {
-    let mut coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
+    let coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
     if (*coder).sequence != SEQ_CODE {
         return LZMA_PROG_ERROR;
     }
@@ -373,9 +370,9 @@ unsafe extern "C" fn block_encoder_update(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_encoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut block: *mut lzma_block,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    block: *mut lzma_block,
 ) -> lzma_ret {
     if ::core::mem::transmute::<
         Option<
@@ -493,8 +490,8 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_encoder(
-    mut strm: *mut lzma_stream,
-    mut block: *mut lzma_block,
+    strm: *mut lzma_stream,
+    block: *mut lzma_block,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm) as lzma_ret;
     if ret_ != LZMA_OK {

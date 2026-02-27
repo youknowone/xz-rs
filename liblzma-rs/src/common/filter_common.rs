@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
     fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
@@ -287,11 +287,11 @@ static mut features: [C2RustUnnamed; 13] = [
 ];
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filters_copy(
-    mut src: *const lzma_filter,
-    mut real_dest: *mut lzma_filter,
-    mut allocator: *const lzma_allocator,
+    src: *const lzma_filter,
+    real_dest: *mut lzma_filter,
+    allocator: *const lzma_allocator,
 ) -> lzma_ret {
-    let mut current_block: u64;
+    let current_block: u64;
     if src.is_null() || real_dest.is_null() {
         return LZMA_PROG_ERROR;
     }
@@ -366,8 +366,8 @@ pub unsafe extern "C" fn lzma_filters_copy(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filters_free(
-    mut filters: *mut lzma_filter,
-    mut allocator: *const lzma_allocator,
+    filters: *mut lzma_filter,
+    allocator: *const lzma_allocator,
 ) {
     if filters.is_null() {
         return;
@@ -386,8 +386,8 @@ pub unsafe extern "C" fn lzma_filters_free(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_validate_chain(
-    mut filters: *const lzma_filter,
-    mut count: *mut size_t,
+    filters: *const lzma_filter,
+    count: *mut size_t,
 ) -> lzma_ret {
     if filters.is_null() || (*filters.offset(0)).id == LZMA_VLI_UNKNOWN as lzma_vli {
         return LZMA_PROG_ERROR;
@@ -425,11 +425,11 @@ pub unsafe extern "C" fn lzma_validate_chain(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_raw_coder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut options: *const lzma_filter,
-    mut coder_find: lzma_filter_find,
-    mut is_encoder: bool,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    options: *const lzma_filter,
+    coder_find: lzma_filter_find,
+    is_encoder: bool,
 ) -> lzma_ret {
     let mut count: size_t = 0;
     let ret_: lzma_ret = lzma_validate_chain(options, &raw mut count) as lzma_ret;
@@ -483,8 +483,8 @@ pub unsafe extern "C" fn lzma_raw_coder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_raw_coder_memusage(
-    mut coder_find: lzma_filter_find,
-    mut filters: *const lzma_filter,
+    coder_find: lzma_filter_find,
+    filters: *const lzma_filter,
 ) -> u64 {
     let mut tmp: size_t = 0;
     if lzma_validate_chain(filters, &raw mut tmp) != LZMA_OK {

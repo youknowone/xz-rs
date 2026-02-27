@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::c_int;
 pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
 pub const LZMA_RET_INTERNAL7: lzma_ret = 107;
 pub const LZMA_RET_INTERNAL6: lzma_ret = 106;
@@ -24,11 +24,11 @@ pub const LZMA_OK: lzma_ret = 0;
 pub const LZMA_VLI_BYTES_MAX: c_int = 9;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_vli_decode(
-    mut vli: *mut lzma_vli,
+    vli: *mut lzma_vli,
     mut vli_pos: *mut size_t,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
 ) -> lzma_ret {
     let mut vli_pos_internal: size_t = 0;
     if vli_pos.is_null() {

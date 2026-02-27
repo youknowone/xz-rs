@@ -119,24 +119,24 @@ pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 pub const INDEX_INDICATOR: c_int = 0;
 #[inline]
-extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
+extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
 }
 #[inline]
-extern "C" fn index_size_unpadded(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
+extern "C" fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     return (1u32.wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
         .wrapping_add(index_list_size)
         .wrapping_add(4 as lzma_vli);
 }
 #[inline]
-extern "C" fn index_size(mut count: lzma_vli, mut index_list_size: lzma_vli) -> lzma_vli {
+extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     return vli_ceil4(index_size_unpadded(count, index_list_size));
 }
 #[inline]
 extern "C" fn index_stream_size(
-    mut blocks_size: lzma_vli,
-    mut count: lzma_vli,
-    mut index_list_size: lzma_vli,
+    blocks_size: lzma_vli,
+    count: lzma_vli,
+    index_list_size: lzma_vli,
 ) -> lzma_vli {
     return (LZMA_STREAM_HEADER_SIZE as lzma_vli)
         .wrapping_add(blocks_size)
@@ -146,7 +146,7 @@ extern "C" fn index_stream_size(
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_hash_init(
     mut index_hash: *mut lzma_index_hash,
-    mut allocator: *const lzma_allocator,
+    allocator: *const lzma_allocator,
 ) -> *mut lzma_index_hash {
     if index_hash.is_null() {
         index_hash = lzma_alloc(core::mem::size_of::<lzma_index_hash>() as size_t, allocator)
@@ -174,22 +174,22 @@ pub unsafe extern "C" fn lzma_index_hash_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_hash_end(
-    mut index_hash: *mut lzma_index_hash,
-    mut allocator: *const lzma_allocator,
+    index_hash: *mut lzma_index_hash,
+    allocator: *const lzma_allocator,
 ) {
     lzma_free(index_hash as *mut c_void, allocator);
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_hash_size(mut index_hash: *const lzma_index_hash) -> lzma_vli {
+pub unsafe extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
     return index_size(
         (*index_hash).blocks.count,
         (*index_hash).blocks.index_list_size,
     );
 }
 unsafe extern "C" fn hash_append(
-    mut info: *mut lzma_index_hash_info,
-    mut unpadded_size: lzma_vli,
-    mut uncompressed_size: lzma_vli,
+    info: *mut lzma_index_hash_info,
+    unpadded_size: lzma_vli,
+    uncompressed_size: lzma_vli,
 ) {
     (*info).blocks_size = (*info).blocks_size.wrapping_add(vli_ceil4(unpadded_size));
     (*info).uncompressed_size = (*info).uncompressed_size.wrapping_add(uncompressed_size);
@@ -207,9 +207,9 @@ unsafe extern "C" fn hash_append(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_hash_append(
-    mut index_hash: *mut lzma_index_hash,
-    mut unpadded_size: lzma_vli,
-    mut uncompressed_size: lzma_vli,
+    index_hash: *mut lzma_index_hash,
+    unpadded_size: lzma_vli,
+    uncompressed_size: lzma_vli,
 ) -> lzma_ret {
     if index_hash.is_null()
         || (*index_hash).sequence != SEQ_BLOCK
@@ -242,10 +242,10 @@ pub unsafe extern "C" fn lzma_index_hash_append(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_hash_decode(
-    mut index_hash: *mut lzma_index_hash,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
+    index_hash: *mut lzma_index_hash,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
 ) -> lzma_ret {
     let mut current_block: u64;
     if *in_pos >= in_size {
@@ -288,7 +288,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                 continue;
             }
             2 | 3 => {
-                let mut size: *mut lzma_vli = if (*index_hash).sequence == SEQ_UNPADDED {
+                let size: *mut lzma_vli = if (*index_hash).sequence == SEQ_UNPADDED {
                     &raw mut (*index_hash).unpadded_size
                 } else {
                     &raw mut (*index_hash).uncompressed_size

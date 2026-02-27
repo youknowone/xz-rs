@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_stream_buffer_encode(
         filters: *mut lzma_filter,
@@ -95,14 +95,14 @@ pub struct lzma_options_easy {
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_easy_buffer_encode(
-    mut preset: u32,
-    mut check: lzma_check,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
+    preset: u32,
+    check: lzma_check,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
 ) -> lzma_ret {
     let mut opt_easy: lzma_options_easy = lzma_options_easy {
         filters: [lzma_filter {

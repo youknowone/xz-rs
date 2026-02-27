@@ -1,5 +1,3 @@
-use crate::types::*;
-
 #[no_mangle]
 pub extern "C" fn tuklib_cpucores() -> u32 {
     match std::thread::available_parallelism() {

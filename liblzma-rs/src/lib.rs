@@ -5,10 +5,6 @@
     non_snake_case,
     non_upper_case_globals,
     unused_assignments,
-    unused_mut,
-    unused_parens,
-    unused_variables,
-    unused_imports,
     clippy::all
 )]
 

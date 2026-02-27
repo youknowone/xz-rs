@@ -146,15 +146,15 @@ pub struct lzma_length_encoder {
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 pub const UINT32_MAX: c_uint = 4294967295;
 #[inline]
-unsafe extern "C" fn mf_ptr(mut mf: *const lzma_mf) -> *const u8 {
+unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     return (*mf).buffer.offset((*mf).read_pos as isize);
 }
 #[inline]
-unsafe extern "C" fn mf_avail(mut mf: *const lzma_mf) -> u32 {
+unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
     return (*mf).write_pos.wrapping_sub((*mf).read_pos);
 }
 #[inline]
-unsafe extern "C" fn mf_skip(mut mf: *mut lzma_mf, mut amount: u32) {
+unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
     if amount != 0 {
         (*mf).skip.expect("non-null function pointer")(mf, amount);
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
@@ -241,7 +241,7 @@ pub const ALIGN_MASK: c_int = ALIGN_SIZE - 1;
 pub const REPS: c_int = 4;
 pub const FASTPOS_BITS: c_int = 13;
 #[inline]
-unsafe extern "C" fn get_dist_slot(mut dist: u32) -> u32 {
+unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
     if dist < (1) << FASTPOS_BITS + (0 as c_int + 0 as c_int * (FASTPOS_BITS - 1 as c_int)) {
         return lzma_fastpos[dist as usize] as u32;
     }
@@ -258,7 +258,7 @@ unsafe extern "C" fn get_dist_slot(mut dist: u32) -> u32 {
         );
 }
 #[inline]
-unsafe extern "C" fn get_dist_slot_2(mut dist: u32) -> u32 {
+unsafe extern "C" fn get_dist_slot_2(dist: u32) -> u32 {
     if dist
         < (1)
             << FASTPOS_BITS
@@ -298,10 +298,10 @@ unsafe extern "C" fn get_dist_slot_2(mut dist: u32) -> u32 {
 }
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
-    mut buf1: *const u8,
-    mut buf2: *const u8,
+    buf1: *const u8,
+    buf2: *const u8,
     mut len: u32,
-    mut limit: u32,
+    limit: u32,
 ) -> u32 {
     while len < limit && *buf1.offset(len as isize) as c_int == *buf2.offset(len as isize) as c_int
     {
@@ -367,7 +367,7 @@ unsafe extern "C" fn get_pure_rep_price(
     coder: *const lzma_lzma1_encoder,
     rep_index: u32,
     state: lzma_lzma_state,
-    mut pos_state: u32,
+    pos_state: u32,
 ) -> u32 {
     let mut price: u32 = 0;
     if rep_index == 0 {
@@ -427,7 +427,7 @@ unsafe extern "C" fn get_dist_len_price(
     ));
     return price;
 }
-unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
+unsafe extern "C" fn fill_dist_prices(coder: *mut lzma_lzma1_encoder) {
     let mut dist_state: u32 = 0;
     while dist_state < DIST_STATES as u32 {
         let dist_slot_prices: *mut u32 = &raw mut *(&raw mut (*coder).dist_slot_prices
@@ -485,7 +485,7 @@ unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
     }
     (*coder).match_price_count = 0;
 }
-unsafe extern "C" fn fill_align_prices(mut coder: *mut lzma_lzma1_encoder) {
+unsafe extern "C" fn fill_align_prices(coder: *mut lzma_lzma1_encoder) {
     let mut i: u32 = 0;
     while i < ALIGN_SIZE as u32 {
         (*coder).align_prices[i as usize] = rc_bittree_reverse_price(
@@ -498,19 +498,19 @@ unsafe extern "C" fn fill_align_prices(mut coder: *mut lzma_lzma1_encoder) {
     (*coder).align_price_count = 0;
 }
 #[inline]
-unsafe extern "C" fn make_literal(mut optimal: *mut lzma_optimal) {
+unsafe extern "C" fn make_literal(optimal: *mut lzma_optimal) {
     (*optimal).back_prev = UINT32_MAX as u32;
     (*optimal).prev_1_is_literal = false;
 }
 #[inline]
-unsafe extern "C" fn make_short_rep(mut optimal: *mut lzma_optimal) {
+unsafe extern "C" fn make_short_rep(optimal: *mut lzma_optimal) {
     (*optimal).back_prev = 0;
     (*optimal).prev_1_is_literal = false;
 }
 unsafe extern "C" fn backward(
-    mut coder: *mut lzma_lzma1_encoder,
-    mut len_res: *mut u32,
-    mut back_res: *mut u32,
+    coder: *mut lzma_lzma1_encoder,
+    len_res: *mut u32,
+    back_res: *mut u32,
     mut cur: u32,
 ) {
     (*coder).opts_end_index = cur;
@@ -548,11 +548,11 @@ unsafe extern "C" fn backward(
 }
 #[inline]
 unsafe extern "C" fn helper1(
-    mut coder: *mut lzma_lzma1_encoder,
-    mut mf: *mut lzma_mf,
-    mut back_res: *mut u32,
-    mut len_res: *mut u32,
-    mut position: u32,
+    coder: *mut lzma_lzma1_encoder,
+    mf: *mut lzma_mf,
+    back_res: *mut u32,
+    len_res: *mut u32,
+    position: u32,
 ) -> u32 {
     let nice_len: u32 = (*mf).nice_len;
     let mut len_main: u32 = 0;
@@ -740,11 +740,11 @@ unsafe extern "C" fn helper1(
 }
 #[inline]
 unsafe extern "C" fn helper2(
-    mut coder: *mut lzma_lzma1_encoder,
-    mut reps: *mut u32,
-    mut buf: *const u8,
+    coder: *mut lzma_lzma1_encoder,
+    reps: *mut u32,
+    buf: *const u8,
     mut len_end: u32,
-    mut position: u32,
+    position: u32,
     cur: u32,
     nice_len: u32,
     buf_avail_full: u32,
@@ -1190,11 +1190,11 @@ unsafe extern "C" fn helper2(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_optimum_normal(
-    mut coder: *mut lzma_lzma1_encoder,
-    mut mf: *mut lzma_mf,
-    mut back_res: *mut u32,
-    mut len_res: *mut u32,
-    mut position: u32,
+    coder: *mut lzma_lzma1_encoder,
+    mf: *mut lzma_mf,
+    back_res: *mut u32,
+    len_res: *mut u32,
+    position: u32,
 ) {
     if (*coder).opts_end_index != (*coder).opts_current_index {
         *len_res = (*coder).opts[(*coder).opts_current_index as usize]

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
     fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
@@ -54,7 +54,7 @@ pub struct lzma_stream_flags {
     pub reserved_int2: u32,
 }
 #[inline]
-unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
+unsafe extern "C" fn write32le(buf: *mut u8, num: u32) {
     *buf.offset(0) = num as u8;
     *buf.offset(1) = (num >> 8) as u8;
     *buf.offset(2) = (num >> 16) as u8;
@@ -65,15 +65,12 @@ pub const LZMA_BACKWARD_SIZE_MIN: c_int = 4;
 pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
 pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2;
 #[inline]
-unsafe extern "C" fn is_backward_size_valid(mut options: *const lzma_stream_flags) -> bool {
+unsafe extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
     return (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
         && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX as lzma_vli
         && (*options).backward_size & 3 as lzma_vli == 0 as lzma_vli;
 }
-unsafe extern "C" fn stream_flags_encode(
-    mut options: *const lzma_stream_flags,
-    mut out: *mut u8,
-) -> bool {
+unsafe extern "C" fn stream_flags_encode(options: *const lzma_stream_flags, out: *mut u8) -> bool {
     if (*options).check > LZMA_CHECK_ID_MAX {
         return true;
     }
@@ -83,8 +80,8 @@ unsafe extern "C" fn stream_flags_encode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_header_encode(
-    mut options: *const lzma_stream_flags,
-    mut out: *mut u8,
+    options: *const lzma_stream_flags,
+    out: *mut u8,
 ) -> lzma_ret {
     if (*options).version != 0 {
         return LZMA_OPTIONS_ERROR;
@@ -114,8 +111,8 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_footer_encode(
-    mut options: *const lzma_stream_flags,
-    mut out: *mut u8,
+    options: *const lzma_stream_flags,
+    out: *mut u8,
 ) -> lzma_ret {
     if (*options).version != 0 {
         return LZMA_OPTIONS_ERROR;

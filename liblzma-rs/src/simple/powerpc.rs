@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_int, c_void};
 extern "C" {
     fn lzma_simple_coder_init(
         next: *mut lzma_next_coder,
@@ -107,10 +107,10 @@ pub type lzma_init_function = Option<
 >;
 pub type lzma_filter_info = lzma_filter_info_s;
 unsafe extern "C" fn powerpc_code(
-    mut simple: *mut c_void,
-    mut now_pos: u32,
-    mut is_encoder: bool,
-    mut buffer: *mut u8,
+    _simple: *mut c_void,
+    now_pos: u32,
+    is_encoder: bool,
+    buffer: *mut u8,
     mut size: size_t,
 ) -> size_t {
     size &= !(3);
@@ -144,10 +144,10 @@ unsafe extern "C" fn powerpc_code(
     return i;
 }
 unsafe extern "C" fn powerpc_coder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter_info,
-    mut is_encoder: bool,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter_info,
+    is_encoder: bool,
 ) -> lzma_ret {
     return lzma_simple_coder_init(
         next,
@@ -164,17 +164,17 @@ unsafe extern "C" fn powerpc_coder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_simple_powerpc_encoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter_info,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter_info,
 ) -> lzma_ret {
     return powerpc_coder_init(next, allocator, filters, true);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_simple_powerpc_decoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter_info,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter_info,
 ) -> lzma_ret {
     return powerpc_coder_init(next, allocator, filters, false);
 }

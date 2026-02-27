@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
     fn memcmp(__s1: *const c_void, __s2: *const c_void, __n: size_t) -> c_int;
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
@@ -55,7 +55,7 @@ pub struct lzma_stream_flags {
 }
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
-unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
+unsafe extern "C" fn read32le(buf: *const u8) -> u32 {
     let mut num: u32 = *buf.offset(0) as u32;
     num |= (*buf.offset(1) as u32) << 8;
     num |= (*buf.offset(2) as u32) << 16;
@@ -64,10 +64,7 @@ unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2;
-unsafe extern "C" fn stream_flags_decode(
-    mut options: *mut lzma_stream_flags,
-    mut in_0: *const u8,
-) -> bool {
+unsafe extern "C" fn stream_flags_decode(options: *mut lzma_stream_flags, in_0: *const u8) -> bool {
     if *in_0.offset(0) as c_int != 0 as c_int || *in_0.offset(1) as c_int & 0xf0 as c_int != 0 {
         return true;
     }
@@ -77,8 +74,8 @@ unsafe extern "C" fn stream_flags_decode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_header_decode(
-    mut options: *mut lzma_stream_flags,
-    mut in_0: *const u8,
+    options: *mut lzma_stream_flags,
+    in_0: *const u8,
 ) -> lzma_ret {
     if memcmp(
         in_0 as *const c_void,
@@ -112,8 +109,8 @@ pub unsafe extern "C" fn lzma_stream_header_decode(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_footer_decode(
-    mut options: *mut lzma_stream_flags,
-    mut in_0: *const u8,
+    options: *mut lzma_stream_flags,
+    in_0: *const u8,
 ) -> lzma_ret {
     if memcmp(
         in_0.offset((core::mem::size_of::<u32>() as usize).wrapping_mul(2 as usize) as isize)

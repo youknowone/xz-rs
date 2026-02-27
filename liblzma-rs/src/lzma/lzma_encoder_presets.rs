@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_void};
+use core::ffi::{c_int, c_uint, c_void};
 pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
 pub const LZMA_MF_BT4: lzma_match_finder = 20;
 pub const LZMA_MF_BT3: lzma_match_finder = 19;
@@ -43,8 +43,8 @@ pub const LZMA_PRESET_LEVEL_MASK: c_uint = 0x1f;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_preset(
-    mut options: *mut lzma_options_lzma,
-    mut preset: u32,
+    options: *mut lzma_options_lzma,
+    preset: u32,
 ) -> lzma_bool {
     let level: u32 = preset & LZMA_PRESET_LEVEL_MASK as u32;
     let flags: u32 = preset & !(LZMA_PRESET_LEVEL_MASK as u32);

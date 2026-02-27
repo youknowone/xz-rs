@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint};
+use core::ffi::c_uint;
 extern "C" {
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64;
@@ -40,7 +40,7 @@ pub union C2RustUnnamed_0 {
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 #[no_mangle]
-pub unsafe extern "C" fn lzma_check_is_supported(mut type_0: lzma_check) -> lzma_bool {
+pub unsafe extern "C" fn lzma_check_is_supported(type_0: lzma_check) -> lzma_bool {
     if type_0 > LZMA_CHECK_ID_MAX {
         return false as lzma_bool;
     }
@@ -65,7 +65,7 @@ pub unsafe extern "C" fn lzma_check_is_supported(mut type_0: lzma_check) -> lzma
     return available_checks[type_0 as usize];
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_check_size(mut type_0: lzma_check) -> u32 {
+pub unsafe extern "C" fn lzma_check_size(type_0: lzma_check) -> u32 {
     if type_0 > LZMA_CHECK_ID_MAX {
         return UINT32_MAX as u32;
     }
@@ -73,7 +73,7 @@ pub unsafe extern "C" fn lzma_check_size(mut type_0: lzma_check) -> u32 {
     return check_sizes[type_0 as usize] as u32;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_check_init(mut check: *mut lzma_check_state, mut type_0: lzma_check) {
+pub unsafe extern "C" fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check) {
     match type_0 {
         1 => {
             (*check).state.crc32 = 0;
@@ -89,10 +89,10 @@ pub unsafe extern "C" fn lzma_check_init(mut check: *mut lzma_check_state, mut t
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_check_update(
-    mut check: *mut lzma_check_state,
-    mut type_0: lzma_check,
-    mut buf: *const u8,
-    mut size: size_t,
+    check: *mut lzma_check_state,
+    type_0: lzma_check,
+    buf: *const u8,
+    size: size_t,
 ) {
     match type_0 {
         1 => {
@@ -108,10 +108,7 @@ pub unsafe extern "C" fn lzma_check_update(
     };
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_check_finish(
-    mut check: *mut lzma_check_state,
-    mut type_0: lzma_check,
-) {
+pub unsafe extern "C" fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check) {
     match type_0 {
         1 => {
             (*check).buffer.u32_0[0] = (*check).state.crc32;

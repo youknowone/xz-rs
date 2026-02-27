@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
     fn lzma_vli_decode(
         vli: *mut lzma_vli,
@@ -94,7 +94,7 @@ pub struct lzma_block {
 }
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
-unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
+unsafe extern "C" fn read32le(buf: *const u8) -> u32 {
     let mut num: u32 = *buf.offset(0) as u32;
     num |= (*buf.offset(1) as u32) << 8;
     num |= (*buf.offset(2) as u32) << 16;
@@ -106,9 +106,9 @@ pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_FILTERS_MAX: c_int = 4;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_header_decode(
-    mut block: *mut lzma_block,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
+    block: *mut lzma_block,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
 ) -> lzma_ret {
     if block.is_null() || (*block).filters.is_null() || in_0.is_null() {
         return LZMA_PROG_ERROR;

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uchar, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
 #[repr(C)]
 pub struct lzma_index_s {
     _opaque: [u8; 0],
@@ -252,8 +252,8 @@ pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
 unsafe extern "C" fn block_encoder_init(
-    mut coder: *mut lzma_stream_coder,
-    mut allocator: *const lzma_allocator,
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
 ) -> lzma_ret {
     (*coder).block_options.compressed_size = LZMA_VLI_UNKNOWN as lzma_vli;
     (*coder).block_options.uncompressed_size = LZMA_VLI_UNKNOWN as lzma_vli;
@@ -268,17 +268,17 @@ unsafe extern "C" fn block_encoder_init(
     );
 }
 unsafe extern "C" fn stream_encode(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-    mut in_0: *const u8,
-    mut in_pos: *mut size_t,
-    mut in_size: size_t,
-    mut out: *mut u8,
-    mut out_pos: *mut size_t,
-    mut out_size: size_t,
-    mut action: lzma_action,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
+    action: lzma_action,
 ) -> lzma_ret {
-    let mut coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
+    let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     while *out_pos < out_size {
         match (*coder).sequence {
             0 | 2 | 5 => {
@@ -426,11 +426,8 @@ unsafe extern "C" fn stream_encode(
     }
     return LZMA_OK;
 }
-unsafe extern "C" fn stream_encoder_end(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-) {
-    let mut coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
+unsafe extern "C" fn stream_encoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     lzma_next_end(&raw mut (*coder).block_encoder, allocator);
     lzma_next_end(&raw mut (*coder).index_encoder, allocator);
     lzma_index_end((*coder).index, allocator);
@@ -438,13 +435,13 @@ unsafe extern "C" fn stream_encoder_end(
     lzma_free(coder as *mut c_void, allocator);
 }
 unsafe extern "C" fn stream_encoder_update(
-    mut coder_ptr: *mut c_void,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter,
-    mut reversed_filters: *const lzma_filter,
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter,
+    reversed_filters: *const lzma_filter,
 ) -> lzma_ret {
-    let mut current_block: u64;
-    let mut coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
+    let current_block: u64;
+    let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut ret: lzma_ret = LZMA_OK;
     let mut temp: [lzma_filter; 5] = [lzma_filter {
         id: 0,
@@ -502,10 +499,10 @@ unsafe extern "C" fn stream_encoder_update(
     };
 }
 unsafe extern "C" fn stream_encoder_init(
-    mut next: *mut lzma_next_coder,
-    mut allocator: *const lzma_allocator,
-    mut filters: *const lzma_filter,
-    mut check: lzma_check,
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter,
+    check: lzma_check,
 ) -> lzma_ret {
     if ::core::mem::transmute::<
         Option<
@@ -666,9 +663,9 @@ unsafe extern "C" fn stream_encoder_init(
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_encoder(
-    mut strm: *mut lzma_stream,
-    mut filters: *const lzma_filter,
-    mut check: lzma_check,
+    strm: *mut lzma_stream,
+    filters: *const lzma_filter,
+    check: lzma_check,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm) as lzma_ret;
     if ret_ != LZMA_OK {
