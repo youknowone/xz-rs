@@ -4,11 +4,7 @@ extern "C" {
         __src: *const ::core::ffi::c_void,
         __n: size_t,
     ) -> *mut ::core::ffi::c_void;
-    fn lzma_mf_find(
-        mf: *mut lzma_mf,
-        count: *mut uint32_t,
-        matches: *mut lzma_match,
-    ) -> uint32_t;
+    fn lzma_mf_find(mf: *mut lzma_mf, count: *mut uint32_t, matches: *mut lzma_match) -> uint32_t;
     static lzma_rc_prices: [uint8_t; 128];
     static lzma_fastpos: [uint8_t; 8192];
 }
@@ -177,12 +173,12 @@ unsafe extern "C" fn mf_skip(mut mf: *mut lzma_mf, mut amount: uint32_t) {
     }
 }
 pub const RC_BIT_MODEL_TOTAL_BITS: ::core::ffi::c_int = 11 as ::core::ffi::c_int;
-pub const RC_BIT_MODEL_TOTAL: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << RC_BIT_MODEL_TOTAL_BITS;
+pub const RC_BIT_MODEL_TOTAL: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_REDUCING_BITS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const RC_BIT_PRICE_SHIFT_BITS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
-pub const RC_INFINITY_PRICE: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 30 as ::core::ffi::c_int;
+pub const RC_INFINITY_PRICE: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << 30 as ::core::ffi::c_int;
 #[inline]
 unsafe extern "C" fn rc_bit_price(prob: probability, bit: uint32_t) -> uint32_t {
     return lzma_rc_prices[((prob as uint32_t
@@ -208,8 +204,8 @@ unsafe extern "C" fn rc_bittree_price(
     mut symbol: uint32_t,
 ) -> uint32_t {
     let mut price: uint32_t = 0 as uint32_t;
-    symbol = (symbol as ::core::ffi::c_uint)
-        .wrapping_add((1 as ::core::ffi::c_uint) << bit_levels) as uint32_t as uint32_t;
+    symbol = (symbol as ::core::ffi::c_uint).wrapping_add((1 as ::core::ffi::c_uint) << bit_levels)
+        as uint32_t as uint32_t;
     loop {
         let bit: uint32_t = symbol & 1 as uint32_t;
         symbol >>= 1 as ::core::ffi::c_int;
@@ -231,8 +227,7 @@ unsafe extern "C" fn rc_bittree_reverse_price(
     loop {
         let bit: uint32_t = symbol & 1 as uint32_t;
         symbol >>= 1 as ::core::ffi::c_int;
-        price = price
-            .wrapping_add(rc_bit_price(*probs.offset(model_index as isize), bit));
+        price = price.wrapping_add(rc_bit_price(*probs.offset(model_index as isize), bit));
         model_index = (model_index << 1 as ::core::ffi::c_int).wrapping_add(bit);
         bit_levels = bit_levels.wrapping_sub(1);
         if !(bit_levels != 0 as uint32_t) {
@@ -251,10 +246,8 @@ pub const DIST_STATES: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const DIST_SLOT_BITS: ::core::ffi::c_int = 6 as ::core::ffi::c_int;
 pub const DIST_MODEL_START: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const DIST_MODEL_END: ::core::ffi::c_int = 14 as ::core::ffi::c_int;
-pub const FULL_DISTANCES_BITS: ::core::ffi::c_int = DIST_MODEL_END
-    / 2 as ::core::ffi::c_int;
-pub const FULL_DISTANCES: ::core::ffi::c_int = (1 as ::core::ffi::c_int)
-    << FULL_DISTANCES_BITS;
+pub const FULL_DISTANCES_BITS: ::core::ffi::c_int = DIST_MODEL_END / 2 as ::core::ffi::c_int;
+pub const FULL_DISTANCES: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << FULL_DISTANCES_BITS;
 pub const ALIGN_BITS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const ALIGN_SIZE: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << ALIGN_BITS;
 pub const ALIGN_MASK: ::core::ffi::c_int = ALIGN_SIZE - 1 as ::core::ffi::c_int;
@@ -283,8 +276,8 @@ unsafe extern "C" fn get_dist_slot(mut dist: uint32_t) -> uint32_t {
             .wrapping_add(
                 (2 as ::core::ffi::c_int
                     * (0 as ::core::ffi::c_int
-                        + 1 as ::core::ffi::c_int
-                            * (FASTPOS_BITS - 1 as ::core::ffi::c_int))) as uint32_t,
+                        + 1 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int)))
+                    as uint32_t,
             );
     }
     return (lzma_fastpos[(dist
@@ -294,8 +287,8 @@ unsafe extern "C" fn get_dist_slot(mut dist: uint32_t) -> uint32_t {
         .wrapping_add(
             (2 as ::core::ffi::c_int
                 * (0 as ::core::ffi::c_int
-                    + 2 as ::core::ffi::c_int
-                        * (FASTPOS_BITS - 1 as ::core::ffi::c_int))) as uint32_t,
+                    + 2 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int)))
+                as uint32_t,
         );
 }
 #[inline]
@@ -303,41 +296,37 @@ unsafe extern "C" fn get_dist_slot_2(mut dist: uint32_t) -> uint32_t {
     if dist
         < (1 as uint32_t)
             << FASTPOS_BITS
-                + (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int
-                    - 1 as ::core::ffi::c_int
+                + (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
                     + 0 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int))
     {
         return (lzma_fastpos[(dist
-            >> 14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int
-                - 1 as ::core::ffi::c_int
+            >> 14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
                 + 0 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int))
             as usize] as uint32_t)
             .wrapping_add(
                 (2 as ::core::ffi::c_int
                     * (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int
                         - 1 as ::core::ffi::c_int
-                        + 0 as ::core::ffi::c_int
-                            * (FASTPOS_BITS - 1 as ::core::ffi::c_int))) as uint32_t,
+                        + 0 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int)))
+                    as uint32_t,
             );
     }
     if dist
         < (1 as uint32_t)
             << FASTPOS_BITS
-                + (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int
-                    - 1 as ::core::ffi::c_int
+                + (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
                     + 1 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int))
     {
         return (lzma_fastpos[(dist
-            >> 14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int
-                - 1 as ::core::ffi::c_int
+            >> 14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
                 + 1 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int))
             as usize] as uint32_t)
             .wrapping_add(
                 (2 as ::core::ffi::c_int
                     * (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int
                         - 1 as ::core::ffi::c_int
-                        + 1 as ::core::ffi::c_int
-                            * (FASTPOS_BITS - 1 as ::core::ffi::c_int))) as uint32_t,
+                        + 1 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int)))
+                    as uint32_t,
             );
     }
     return (lzma_fastpos[(dist
@@ -346,10 +335,9 @@ unsafe extern "C" fn get_dist_slot_2(mut dist: uint32_t) -> uint32_t {
         as usize] as uint32_t)
         .wrapping_add(
             (2 as ::core::ffi::c_int
-                * (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int
-                    - 1 as ::core::ffi::c_int
-                    + 2 as ::core::ffi::c_int
-                        * (FASTPOS_BITS - 1 as ::core::ffi::c_int))) as uint32_t,
+                * (14 as ::core::ffi::c_int / 2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                    + 2 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int)))
+                as uint32_t,
         );
 }
 #[inline(always)]
@@ -375,15 +363,11 @@ unsafe extern "C" fn get_literal_price(
     mut match_byte: uint32_t,
     mut symbol: uint32_t,
 ) -> uint32_t {
-    let subcoder: *const probability = (&raw const (*coder).literal
-        as *const probability)
-        .offset(
-            (3 as uint32_t)
-                .wrapping_mul(
-                    ((pos << 8 as ::core::ffi::c_int).wrapping_add(prev_byte)
-                        & (*coder).literal_mask) << (*coder).literal_context_bits,
-                ) as isize,
-        );
+    let subcoder: *const probability =
+        (&raw const (*coder).literal as *const probability).offset((3 as uint32_t).wrapping_mul(
+            ((pos << 8 as ::core::ffi::c_int).wrapping_add(prev_byte) & (*coder).literal_mask)
+                << (*coder).literal_context_bits,
+        ) as isize);
     let mut price: uint32_t = 0 as uint32_t;
     if !match_mode {
         price = rc_bittree_price(subcoder, 8 as uint32_t, symbol);
@@ -399,10 +383,8 @@ unsafe extern "C" fn get_literal_price(
                 .wrapping_add(match_bit)
                 .wrapping_add(symbol >> 8 as ::core::ffi::c_int);
             let bit: uint32_t = symbol >> 7 as ::core::ffi::c_int & 1 as uint32_t;
-            price = price
-                .wrapping_add(
-                    rc_bit_price(*subcoder.offset(subcoder_index as isize), bit),
-                );
+            price =
+                price.wrapping_add(rc_bit_price(*subcoder.offset(subcoder_index as isize), bit));
             symbol <<= 1 as ::core::ffi::c_int;
             offset &= !(match_byte ^ symbol);
             if !(symbol < (1 as uint32_t) << 16 as ::core::ffi::c_int) {
@@ -418,9 +400,8 @@ unsafe extern "C" fn get_len_price(
     len: uint32_t,
     pos_state: uint32_t,
 ) -> uint32_t {
-    return (*lencoder)
-        .prices[pos_state
-        as usize][len.wrapping_sub(MATCH_LEN_MIN as uint32_t) as usize];
+    return (*lencoder).prices[pos_state as usize]
+        [len.wrapping_sub(MATCH_LEN_MIN as uint32_t) as usize];
 }
 #[inline]
 unsafe extern "C" fn get_short_rep_price(
@@ -428,10 +409,9 @@ unsafe extern "C" fn get_short_rep_price(
     state: lzma_lzma_state,
     pos_state: uint32_t,
 ) -> uint32_t {
-    return rc_bit_0_price((*coder).is_rep0[state as usize])
-        .wrapping_add(
-            rc_bit_0_price((*coder).is_rep0_long[state as usize][pos_state as usize]),
-        );
+    return rc_bit_0_price((*coder).is_rep0[state as usize]).wrapping_add(rc_bit_0_price(
+        (*coder).is_rep0_long[state as usize][pos_state as usize],
+    ));
 }
 #[inline]
 unsafe extern "C" fn get_pure_rep_price(
@@ -443,23 +423,19 @@ unsafe extern "C" fn get_pure_rep_price(
     let mut price: uint32_t = 0;
     if rep_index == 0 as uint32_t {
         price = rc_bit_0_price((*coder).is_rep0[state as usize]);
-        price = price
-            .wrapping_add(
-                rc_bit_1_price((*coder).is_rep0_long[state as usize][pos_state as usize]),
-            );
+        price = price.wrapping_add(rc_bit_1_price(
+            (*coder).is_rep0_long[state as usize][pos_state as usize],
+        ));
     } else {
         price = rc_bit_1_price((*coder).is_rep0[state as usize]);
         if rep_index == 1 as uint32_t {
             price = price.wrapping_add(rc_bit_0_price((*coder).is_rep1[state as usize]));
         } else {
             price = price.wrapping_add(rc_bit_1_price((*coder).is_rep1[state as usize]));
-            price = price
-                .wrapping_add(
-                    rc_bit_price(
-                        (*coder).is_rep2[state as usize],
-                        rep_index.wrapping_sub(2 as uint32_t),
-                    ),
-                );
+            price = price.wrapping_add(rc_bit_price(
+                (*coder).is_rep2[state as usize],
+                rep_index.wrapping_sub(2 as uint32_t),
+            ));
         }
     }
     return price;
@@ -492,24 +468,22 @@ unsafe extern "C" fn get_dist_len_price(
         price = (*coder).dist_prices[dist_state as usize][dist as usize];
     } else {
         let dist_slot: uint32_t = get_dist_slot_2(dist) as uint32_t;
-        price = (*coder)
-            .dist_slot_prices[dist_state as usize][dist_slot as usize]
-            .wrapping_add(
-                (*coder).align_prices[(dist & ALIGN_MASK as uint32_t) as usize],
-            );
+        price = (*coder).dist_slot_prices[dist_state as usize][dist_slot as usize]
+            .wrapping_add((*coder).align_prices[(dist & ALIGN_MASK as uint32_t) as usize]);
     }
-    price = price
-        .wrapping_add(
-            get_len_price(&raw const (*coder).match_len_encoder, len, pos_state),
-        );
+    price = price.wrapping_add(get_len_price(
+        &raw const (*coder).match_len_encoder,
+        len,
+        pos_state,
+    ));
     return price;
 }
 unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
     let mut dist_state: uint32_t = 0 as uint32_t;
     while dist_state < DIST_STATES as uint32_t {
-        let dist_slot_prices: *mut uint32_t = &raw mut *(&raw mut (*coder)
-            .dist_slot_prices as *mut [uint32_t; 64])
-            .offset(dist_state as isize) as *mut uint32_t;
+        let dist_slot_prices: *mut uint32_t =
+            &raw mut *(&raw mut (*coder).dist_slot_prices as *mut [uint32_t; 64])
+                .offset(dist_state as isize) as *mut uint32_t;
         let mut dist_slot: uint32_t = 0 as uint32_t;
         while dist_slot < (*coder).dist_table_size {
             *dist_slot_prices.offset(dist_slot as isize) = rc_bittree_price(
@@ -523,20 +497,17 @@ unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
         let mut dist_slot_0: uint32_t = DIST_MODEL_END as uint32_t;
         while dist_slot_0 < (*coder).dist_table_size {
             let ref mut fresh1 = *dist_slot_prices.offset(dist_slot_0 as isize);
-            *fresh1 = (*fresh1)
-                .wrapping_add(
-                    rc_direct_price(
-                        (dist_slot_0 >> 1 as ::core::ffi::c_int)
-                            .wrapping_sub(1 as uint32_t)
-                            .wrapping_sub(ALIGN_BITS as uint32_t),
-                    ),
-                );
+            *fresh1 = (*fresh1).wrapping_add(rc_direct_price(
+                (dist_slot_0 >> 1 as ::core::ffi::c_int)
+                    .wrapping_sub(1 as uint32_t)
+                    .wrapping_sub(ALIGN_BITS as uint32_t),
+            ));
             dist_slot_0 = dist_slot_0.wrapping_add(1);
         }
         let mut i: uint32_t = 0 as uint32_t;
         while i < DIST_MODEL_START as uint32_t {
-            (*coder).dist_prices[dist_state as usize][i as usize] = *dist_slot_prices
-                .offset(i as isize);
+            (*coder).dist_prices[dist_state as usize][i as usize] =
+                *dist_slot_prices.offset(i as isize);
             i = i.wrapping_add(1);
         }
         dist_state = dist_state.wrapping_add(1);
@@ -544,10 +515,9 @@ unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
     let mut i_0: uint32_t = DIST_MODEL_START as uint32_t;
     while i_0 < FULL_DISTANCES as uint32_t {
         let dist_slot_1: uint32_t = get_dist_slot(i_0) as uint32_t;
-        let footer_bits: uint32_t = (dist_slot_1 >> 1 as ::core::ffi::c_int)
-            .wrapping_sub(1 as uint32_t);
-        let base: uint32_t = (2 as uint32_t | dist_slot_1 & 1 as uint32_t)
-            << footer_bits;
+        let footer_bits: uint32_t =
+            (dist_slot_1 >> 1 as ::core::ffi::c_int).wrapping_sub(1 as uint32_t);
+        let base: uint32_t = (2 as uint32_t | dist_slot_1 & 1 as uint32_t) << footer_bits;
         let price: uint32_t = rc_bittree_reverse_price(
             (&raw mut (*coder).dist_special as *mut probability)
                 .offset(base as isize)
@@ -558,11 +528,9 @@ unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
         ) as uint32_t;
         let mut dist_state_0: uint32_t = 0 as uint32_t;
         while dist_state_0 < DIST_STATES as uint32_t {
-            (*coder).dist_prices[dist_state_0 as usize][i_0 as usize] = price
-                .wrapping_add(
-                    (*coder)
-                        .dist_slot_prices[dist_state_0 as usize][dist_slot_1 as usize],
-                );
+            (*coder).dist_prices[dist_state_0 as usize][i_0 as usize] = price.wrapping_add(
+                (*coder).dist_slot_prices[dist_state_0 as usize][dist_slot_1 as usize],
+            );
             dist_state_0 = dist_state_0.wrapping_add(1);
         }
         i_0 = i_0.wrapping_add(1);
@@ -606,18 +574,14 @@ unsafe extern "C" fn backward(
                 (&raw mut (*coder).opts as *mut lzma_optimal).offset(pos_mem as isize)
                     as *mut lzma_optimal,
             );
-            (*coder).opts[pos_mem as usize].pos_prev = pos_mem
-                .wrapping_sub(1 as uint32_t);
+            (*coder).opts[pos_mem as usize].pos_prev = pos_mem.wrapping_sub(1 as uint32_t);
             if (*coder).opts[cur as usize].prev_2 {
-                (*coder)
-                    .opts[pos_mem.wrapping_sub(1 as uint32_t) as usize]
-                    .prev_1_is_literal = false_0 != 0;
-                (*coder).opts[pos_mem.wrapping_sub(1 as uint32_t) as usize].pos_prev = (*coder)
-                    .opts[cur as usize]
-                    .pos_prev_2;
-                (*coder).opts[pos_mem.wrapping_sub(1 as uint32_t) as usize].back_prev = (*coder)
-                    .opts[cur as usize]
-                    .back_prev_2;
+                (*coder).opts[pos_mem.wrapping_sub(1 as uint32_t) as usize].prev_1_is_literal =
+                    false_0 != 0;
+                (*coder).opts[pos_mem.wrapping_sub(1 as uint32_t) as usize].pos_prev =
+                    (*coder).opts[cur as usize].pos_prev_2;
+                (*coder).opts[pos_mem.wrapping_sub(1 as uint32_t) as usize].back_prev =
+                    (*coder).opts[cur as usize].back_prev_2;
             }
         }
         let pos_prev: uint32_t = pos_mem;
@@ -631,9 +595,7 @@ unsafe extern "C" fn backward(
             break;
         }
     }
-    (*coder).opts_current_index = (*coder)
-        .opts[0 as ::core::ffi::c_int as usize]
-        .pos_prev;
+    (*coder).opts_current_index = (*coder).opts[0 as ::core::ffi::c_int as usize].pos_prev;
     *len_res = (*coder).opts[0 as ::core::ffi::c_int as usize].pos_prev;
     *back_res = (*coder).opts[0 as ::core::ffi::c_int as usize].back_prev;
 }
@@ -689,17 +651,11 @@ unsafe extern "C" fn helper1(
         if *buf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             != *buf_back.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             || *buf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                != *buf_back.offset(1 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int
+                != *buf_back.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
         {
             rep_lens[i as usize] = 0 as uint32_t;
         } else {
-            rep_lens[i as usize] = lzma_memcmplen(
-                buf,
-                buf_back,
-                2 as uint32_t,
-                buf_avail,
-            );
+            rep_lens[i as usize] = lzma_memcmplen(buf, buf_back, 2 as uint32_t, buf_avail);
             if rep_lens[i as usize] > rep_lens[rep_max_index as usize] {
                 rep_max_index = i;
             }
@@ -713,8 +669,7 @@ unsafe extern "C" fn helper1(
         return UINT32_MAX as uint32_t;
     }
     if len_main >= nice_len {
-        *back_res = (*coder)
-            .matches[matches_count.wrapping_sub(1 as uint32_t) as usize]
+        *back_res = (*coder).matches[matches_count.wrapping_sub(1 as uint32_t) as usize]
             .dist
             .wrapping_add(REPS as uint32_t);
         *len_res = len_main;
@@ -735,36 +690,28 @@ unsafe extern "C" fn helper1(
     }
     (*coder).opts[0 as ::core::ffi::c_int as usize].state = (*coder).state;
     let pos_state: uint32_t = position & (*coder).pos_mask;
-    (*coder).opts[1 as ::core::ffi::c_int as usize].price = rc_bit_0_price(
-            (*coder).is_match[(*coder).state as usize][pos_state as usize],
-        )
-        .wrapping_add(
-            get_literal_price(
+    (*coder).opts[1 as ::core::ffi::c_int as usize].price =
+        rc_bit_0_price((*coder).is_match[(*coder).state as usize][pos_state as usize])
+            .wrapping_add(get_literal_price(
                 coder,
                 position,
                 *buf.offset(-(1 as ::core::ffi::c_int) as isize) as uint32_t,
-                !(((*coder).state as ::core::ffi::c_uint)
-                    < LIT_STATES as ::core::ffi::c_uint),
+                !(((*coder).state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint),
                 match_byte as uint32_t,
                 current_byte as uint32_t,
-            ),
-        );
+            ));
     make_literal(
-        (&raw mut (*coder).opts as *mut lzma_optimal)
-            .offset(1 as ::core::ffi::c_int as isize) as *mut lzma_optimal,
+        (&raw mut (*coder).opts as *mut lzma_optimal).offset(1 as ::core::ffi::c_int as isize)
+            as *mut lzma_optimal,
     );
-    let match_price: uint32_t = rc_bit_1_price(
-        (*coder).is_match[(*coder).state as usize][pos_state as usize],
-    ) as uint32_t;
+    let match_price: uint32_t =
+        rc_bit_1_price((*coder).is_match[(*coder).state as usize][pos_state as usize]) as uint32_t;
     let rep_match_price: uint32_t = match_price
-        .wrapping_add(
-            rc_bit_1_price((*coder).is_rep[(*coder).state as usize]) as uint32_t,
-        );
+        .wrapping_add(rc_bit_1_price((*coder).is_rep[(*coder).state as usize]) as uint32_t);
     if match_byte as ::core::ffi::c_int == current_byte as ::core::ffi::c_int {
-        let short_rep_price: uint32_t = rep_match_price
-            .wrapping_add(
-                get_short_rep_price(coder, (*coder).state, pos_state) as uint32_t,
-            );
+        let short_rep_price: uint32_t =
+            rep_match_price
+                .wrapping_add(get_short_rep_price(coder, (*coder).state, pos_state) as uint32_t);
         if short_rep_price < (*coder).opts[1 as ::core::ffi::c_int as usize].price {
             (*coder).opts[1 as ::core::ffi::c_int as usize].price = short_rep_price;
             make_short_rep(
@@ -786,8 +733,8 @@ unsafe extern "C" fn helper1(
     (*coder).opts[1 as ::core::ffi::c_int as usize].pos_prev = 0 as uint32_t;
     let mut i_0: uint32_t = 0 as uint32_t;
     while i_0 < REPS as uint32_t {
-        (*coder).opts[0 as ::core::ffi::c_int as usize].backs[i_0 as usize] = (*coder)
-            .reps[i_0 as usize];
+        (*coder).opts[0 as ::core::ffi::c_int as usize].backs[i_0 as usize] =
+            (*coder).reps[i_0 as usize];
         i_0 = i_0.wrapping_add(1);
     }
     let mut len: uint32_t = len_end;
@@ -802,19 +749,18 @@ unsafe extern "C" fn helper1(
     while i_1 < REPS as uint32_t {
         let mut rep_len: uint32_t = rep_lens[i_1 as usize];
         if !(rep_len < 2 as uint32_t) {
-            let price: uint32_t = rep_match_price
-                .wrapping_add(
-                    get_pure_rep_price(coder, i_1, (*coder).state, pos_state) as uint32_t,
-                );
+            let price: uint32_t = rep_match_price.wrapping_add(get_pure_rep_price(
+                coder,
+                i_1,
+                (*coder).state,
+                pos_state,
+            ) as uint32_t);
             loop {
-                let cur_and_len_price: uint32_t = price
-                    .wrapping_add(
-                        get_len_price(
-                            &raw mut (*coder).rep_len_encoder,
-                            rep_len,
-                            pos_state,
-                        ) as uint32_t,
-                    );
+                let cur_and_len_price: uint32_t = price.wrapping_add(get_len_price(
+                    &raw mut (*coder).rep_len_encoder,
+                    rep_len,
+                    pos_state,
+                ) as uint32_t);
                 if cur_and_len_price < (*coder).opts[rep_len as usize].price {
                     (*coder).opts[rep_len as usize].price = cur_and_len_price;
                     (*coder).opts[rep_len as usize].pos_prev = 0 as uint32_t;
@@ -830,9 +776,7 @@ unsafe extern "C" fn helper1(
         i_1 = i_1.wrapping_add(1);
     }
     let normal_match_price: uint32_t = match_price
-        .wrapping_add(
-            rc_bit_0_price((*coder).is_rep[(*coder).state as usize]) as uint32_t,
-        );
+        .wrapping_add(rc_bit_0_price((*coder).is_rep[(*coder).state as usize]) as uint32_t);
     len = if rep_lens[0 as ::core::ffi::c_int as usize] >= 2 as uint32_t {
         rep_lens[0 as ::core::ffi::c_int as usize].wrapping_add(1 as uint32_t)
     } else {
@@ -846,14 +790,11 @@ unsafe extern "C" fn helper1(
         loop {
             let dist: uint32_t = (*coder).matches[i_2 as usize].dist;
             let cur_and_len_price_0: uint32_t = normal_match_price
-                .wrapping_add(
-                    get_dist_len_price(coder, dist, len, pos_state) as uint32_t,
-                );
+                .wrapping_add(get_dist_len_price(coder, dist, len, pos_state) as uint32_t);
             if cur_and_len_price_0 < (*coder).opts[len as usize].price {
                 (*coder).opts[len as usize].price = cur_and_len_price_0;
                 (*coder).opts[len as usize].pos_prev = 0 as uint32_t;
-                (*coder).opts[len as usize].back_prev = dist
-                    .wrapping_add(REPS as uint32_t);
+                (*coder).opts[len as usize].back_prev = dist.wrapping_add(REPS as uint32_t);
                 (*coder).opts[len as usize].prev_1_is_literal = false_0 != 0;
             }
             if len == (*coder).matches[i_2 as usize].len {
@@ -887,17 +828,13 @@ unsafe extern "C" fn helper2(
         if (*coder).opts[cur as usize].prev_2 {
             state = (*coder).opts[(*coder).opts[cur as usize].pos_prev_2 as usize].state;
             if (*coder).opts[cur as usize].back_prev_2 < REPS as uint32_t {
-                state = (if (state as ::core::ffi::c_uint)
-                    < LIT_STATES as ::core::ffi::c_uint
-                {
+                state = (if (state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
                     STATE_LIT_LONGREP as ::core::ffi::c_int
                 } else {
                     STATE_NONLIT_REP as ::core::ffi::c_int
                 }) as lzma_lzma_state;
             } else {
-                state = (if (state as ::core::ffi::c_uint)
-                    < LIT_STATES as ::core::ffi::c_uint
-                {
+                state = (if (state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
                     STATE_LIT_MATCH as ::core::ffi::c_int
                 } else {
                     STATE_NONLIT_MATCH as ::core::ffi::c_int
@@ -922,9 +859,7 @@ unsafe extern "C" fn helper2(
     }
     if pos_prev == cur.wrapping_sub(1 as uint32_t) {
         if (*coder).opts[cur as usize].back_prev == 0 as uint32_t {
-            state = (if (state as ::core::ffi::c_uint)
-                < LIT_STATES as ::core::ffi::c_uint
-            {
+            state = (if (state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
                 STATE_LIT_SHORTREP as ::core::ffi::c_int
             } else {
                 STATE_NONLIT_REP as ::core::ffi::c_int
@@ -949,9 +884,7 @@ unsafe extern "C" fn helper2(
         {
             pos_prev = (*coder).opts[cur as usize].pos_prev_2;
             pos = (*coder).opts[cur as usize].back_prev_2;
-            state = (if (state as ::core::ffi::c_uint)
-                < LIT_STATES as ::core::ffi::c_uint
-            {
+            state = (if (state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
                 STATE_LIT_LONGREP as ::core::ffi::c_int
             } else {
                 STATE_NONLIT_REP as ::core::ffi::c_int
@@ -959,17 +892,13 @@ unsafe extern "C" fn helper2(
         } else {
             pos = (*coder).opts[cur as usize].back_prev;
             if pos < REPS as uint32_t {
-                state = (if (state as ::core::ffi::c_uint)
-                    < LIT_STATES as ::core::ffi::c_uint
-                {
+                state = (if (state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
                     STATE_LIT_LONGREP as ::core::ffi::c_int
                 } else {
                     STATE_NONLIT_REP as ::core::ffi::c_int
                 }) as lzma_lzma_state;
             } else {
-                state = (if (state as ::core::ffi::c_uint)
-                    < LIT_STATES as ::core::ffi::c_uint
-                {
+                state = (if (state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
                     STATE_LIT_MATCH as ::core::ffi::c_int
                 } else {
                     STATE_NONLIT_MATCH as ::core::ffi::c_int
@@ -977,31 +906,25 @@ unsafe extern "C" fn helper2(
             }
         }
         if pos < REPS as uint32_t {
-            *reps.offset(0 as ::core::ffi::c_int as isize) = (*coder)
-                .opts[pos_prev as usize]
-                .backs[pos as usize];
+            *reps.offset(0 as ::core::ffi::c_int as isize) =
+                (*coder).opts[pos_prev as usize].backs[pos as usize];
             let mut i: uint32_t = 0;
             i = 1 as uint32_t;
             while i <= pos {
-                *reps.offset(i as isize) = (*coder)
-                    .opts[pos_prev as usize]
-                    .backs[i.wrapping_sub(1 as uint32_t) as usize];
+                *reps.offset(i as isize) =
+                    (*coder).opts[pos_prev as usize].backs[i.wrapping_sub(1 as uint32_t) as usize];
                 i = i.wrapping_add(1);
             }
             while i < REPS as uint32_t {
-                *reps.offset(i as isize) = (*coder)
-                    .opts[pos_prev as usize]
-                    .backs[i as usize];
+                *reps.offset(i as isize) = (*coder).opts[pos_prev as usize].backs[i as usize];
                 i = i.wrapping_add(1);
             }
         } else {
-            *reps.offset(0 as ::core::ffi::c_int as isize) = pos
-                .wrapping_sub(REPS as uint32_t);
+            *reps.offset(0 as ::core::ffi::c_int as isize) = pos.wrapping_sub(REPS as uint32_t);
             let mut i_0: uint32_t = 1 as uint32_t;
             while i_0 < REPS as uint32_t {
-                *reps.offset(i_0 as isize) = (*coder)
-                    .opts[pos_prev as usize]
-                    .backs[i_0.wrapping_sub(1 as uint32_t) as usize];
+                *reps.offset(i_0 as isize) = (*coder).opts[pos_prev as usize].backs
+                    [i_0.wrapping_sub(1 as uint32_t) as usize];
                 i_0 = i_0.wrapping_add(1);
             }
         }
@@ -1020,19 +943,16 @@ unsafe extern "C" fn helper2(
     let pos_state: uint32_t = position & (*coder).pos_mask;
     let cur_and_1_price: uint32_t = cur_price
         .wrapping_add(
-            rc_bit_0_price((*coder).is_match[state as usize][pos_state as usize])
-                as uint32_t,
+            rc_bit_0_price((*coder).is_match[state as usize][pos_state as usize]) as uint32_t,
         )
-        .wrapping_add(
-            get_literal_price(
-                coder,
-                position,
-                *buf.offset(-(1 as ::core::ffi::c_int) as isize) as uint32_t,
-                !((state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint),
-                match_byte as uint32_t,
-                current_byte as uint32_t,
-            ) as uint32_t,
-        );
+        .wrapping_add(get_literal_price(
+            coder,
+            position,
+            *buf.offset(-(1 as ::core::ffi::c_int) as isize) as uint32_t,
+            !((state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint),
+            match_byte as uint32_t,
+            current_byte as uint32_t,
+        ) as uint32_t);
     let mut next_is_literal: bool = false_0 != 0;
     if cur_and_1_price < (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].price {
         (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].price = cur_and_1_price;
@@ -1043,23 +963,18 @@ unsafe extern "C" fn helper2(
         );
         next_is_literal = true_0 != 0;
     }
-    let match_price: uint32_t = cur_price
-        .wrapping_add(
-            rc_bit_1_price((*coder).is_match[state as usize][pos_state as usize])
-                as uint32_t,
-        );
-    let rep_match_price: uint32_t = match_price
-        .wrapping_add(rc_bit_1_price((*coder).is_rep[state as usize]) as uint32_t);
+    let match_price: uint32_t = cur_price.wrapping_add(rc_bit_1_price(
+        (*coder).is_match[state as usize][pos_state as usize],
+    ) as uint32_t);
+    let rep_match_price: uint32_t =
+        match_price.wrapping_add(rc_bit_1_price((*coder).is_rep[state as usize]) as uint32_t);
     if match_byte as ::core::ffi::c_int == current_byte as ::core::ffi::c_int
         && !((*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].pos_prev < cur
-            && (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].back_prev
-                == 0 as uint32_t)
+            && (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].back_prev == 0 as uint32_t)
     {
-        let short_rep_price: uint32_t = rep_match_price
-            .wrapping_add(get_short_rep_price(coder, state, pos_state) as uint32_t);
-        if short_rep_price
-            <= (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].price
-        {
+        let short_rep_price: uint32_t =
+            rep_match_price.wrapping_add(get_short_rep_price(coder, state, pos_state) as uint32_t);
+        if short_rep_price <= (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].price {
             (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].price = short_rep_price;
             (*coder).opts[cur.wrapping_add(1 as uint32_t) as usize].pos_prev = cur;
             make_short_rep(
@@ -1078,9 +993,7 @@ unsafe extern "C" fn helper2(
     } else {
         nice_len
     };
-    if !next_is_literal
-        && match_byte as ::core::ffi::c_int != current_byte as ::core::ffi::c_int
-    {
+    if !next_is_literal && match_byte as ::core::ffi::c_int != current_byte as ::core::ffi::c_int {
         let buf_back: *const uint8_t = buf
             .offset(-(*reps.offset(0 as ::core::ffi::c_int as isize) as isize))
             .offset(-(1 as ::core::ffi::c_int as isize));
@@ -1089,8 +1002,7 @@ unsafe extern "C" fn helper2(
         } else {
             nice_len.wrapping_add(1 as uint32_t)
         };
-        let len_test: uint32_t = (lzma_memcmplen(buf, buf_back, 1 as uint32_t, limit)
-            as uint32_t)
+        let len_test: uint32_t = (lzma_memcmplen(buf, buf_back, 1 as uint32_t, limit) as uint32_t)
             .wrapping_sub(1 as uint32_t);
         if len_test >= 2 as uint32_t {
             let mut state_2: lzma_lzma_state = state;
@@ -1105,38 +1017,28 @@ unsafe extern "C" fn helper2(
             } else {
                 (state_2 as ::core::ffi::c_uint).wrapping_sub(6 as ::core::ffi::c_uint)
             }) as lzma_lzma_state;
-            let pos_state_next: uint32_t = position.wrapping_add(1 as uint32_t)
-                & (*coder).pos_mask;
+            let pos_state_next: uint32_t = position.wrapping_add(1 as uint32_t) & (*coder).pos_mask;
             let next_rep_match_price: uint32_t = cur_and_1_price
-                .wrapping_add(
-                    rc_bit_1_price(
-                        (*coder).is_match[state_2 as usize][pos_state_next as usize],
-                    ) as uint32_t,
-                )
-                .wrapping_add(
-                    rc_bit_1_price((*coder).is_rep[state_2 as usize]) as uint32_t,
-                );
-            let offset: uint32_t = cur
-                .wrapping_add(1 as uint32_t)
-                .wrapping_add(len_test);
+                .wrapping_add(rc_bit_1_price(
+                    (*coder).is_match[state_2 as usize][pos_state_next as usize],
+                ) as uint32_t)
+                .wrapping_add(rc_bit_1_price((*coder).is_rep[state_2 as usize]) as uint32_t);
+            let offset: uint32_t = cur.wrapping_add(1 as uint32_t).wrapping_add(len_test);
             while len_end < offset {
                 len_end = len_end.wrapping_add(1);
                 (*coder).opts[len_end as usize].price = RC_INFINITY_PRICE as uint32_t;
             }
-            let cur_and_len_price: uint32_t = next_rep_match_price
-                .wrapping_add(
-                    get_rep_price(
-                        coder,
-                        0 as uint32_t,
-                        len_test,
-                        state_2,
-                        pos_state_next,
-                    ) as uint32_t,
-                );
+            let cur_and_len_price: uint32_t = next_rep_match_price.wrapping_add(get_rep_price(
+                coder,
+                0 as uint32_t,
+                len_test,
+                state_2,
+                pos_state_next,
+            )
+                as uint32_t);
             if cur_and_len_price < (*coder).opts[offset as usize].price {
                 (*coder).opts[offset as usize].price = cur_and_len_price;
-                (*coder).opts[offset as usize].pos_prev = cur
-                    .wrapping_add(1 as uint32_t);
+                (*coder).opts[offset as usize].pos_prev = cur.wrapping_add(1 as uint32_t);
                 (*coder).opts[offset as usize].back_prev = 0 as uint32_t;
                 (*coder).opts[offset as usize].prev_1_is_literal = true_0 != 0;
                 (*coder).opts[offset as usize].prev_2 = false_0 != 0;
@@ -1152,42 +1054,32 @@ unsafe extern "C" fn helper2(
         if !(*buf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             != *buf_back_0.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             || *buf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                != *buf_back_0.offset(1 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int)
+                != *buf_back_0.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int)
         {
-            let mut len_test_0: uint32_t = lzma_memcmplen(
-                buf,
-                buf_back_0,
-                2 as uint32_t,
-                buf_avail,
-            );
+            let mut len_test_0: uint32_t =
+                lzma_memcmplen(buf, buf_back_0, 2 as uint32_t, buf_avail);
             while len_end < cur.wrapping_add(len_test_0) {
                 len_end = len_end.wrapping_add(1);
                 (*coder).opts[len_end as usize].price = RC_INFINITY_PRICE as uint32_t;
             }
             let len_test_temp: uint32_t = len_test_0;
             let price: uint32_t = rep_match_price
-                .wrapping_add(
-                    get_pure_rep_price(coder, rep_index, state, pos_state) as uint32_t,
-                );
+                .wrapping_add(get_pure_rep_price(coder, rep_index, state, pos_state) as uint32_t);
             loop {
-                let cur_and_len_price_0: uint32_t = price
-                    .wrapping_add(
-                        get_len_price(
-                            &raw mut (*coder).rep_len_encoder,
-                            len_test_0,
-                            pos_state,
-                        ) as uint32_t,
-                    );
-                if cur_and_len_price_0
-                    < (*coder).opts[cur.wrapping_add(len_test_0) as usize].price
+                let cur_and_len_price_0: uint32_t = price.wrapping_add(get_len_price(
+                    &raw mut (*coder).rep_len_encoder,
+                    len_test_0,
+                    pos_state,
+                )
+                    as uint32_t);
+                if cur_and_len_price_0 < (*coder).opts[cur.wrapping_add(len_test_0) as usize].price
                 {
-                    (*coder).opts[cur.wrapping_add(len_test_0) as usize].price = cur_and_len_price_0;
+                    (*coder).opts[cur.wrapping_add(len_test_0) as usize].price =
+                        cur_and_len_price_0;
                     (*coder).opts[cur.wrapping_add(len_test_0) as usize].pos_prev = cur;
                     (*coder).opts[cur.wrapping_add(len_test_0) as usize].back_prev = rep_index;
-                    (*coder)
-                        .opts[cur.wrapping_add(len_test_0) as usize]
-                        .prev_1_is_literal = false_0 != 0;
+                    (*coder).opts[cur.wrapping_add(len_test_0) as usize].prev_1_is_literal =
+                        false_0 != 0;
                 }
                 len_test_0 = len_test_0.wrapping_sub(1);
                 if !(len_test_0 >= 2 as uint32_t) {
@@ -1199,8 +1091,7 @@ unsafe extern "C" fn helper2(
                 start_len = len_test_0.wrapping_add(1 as uint32_t);
             }
             let mut len_test_2: uint32_t = len_test_0.wrapping_add(1 as uint32_t);
-            let limit_0: uint32_t = if buf_avail_full < len_test_2.wrapping_add(nice_len)
-            {
+            let limit_0: uint32_t = if buf_avail_full < len_test_2.wrapping_add(nice_len) {
                 buf_avail_full
             } else {
                 len_test_2.wrapping_add(nice_len)
@@ -1211,91 +1102,71 @@ unsafe extern "C" fn helper2(
             len_test_2 = len_test_2.wrapping_sub(len_test_0.wrapping_add(1 as uint32_t));
             if len_test_2 >= 2 as uint32_t {
                 let mut state_2_0: lzma_lzma_state = state;
-                state_2_0 = (if (state_2_0 as ::core::ffi::c_uint)
-                    < LIT_STATES as ::core::ffi::c_uint
-                {
-                    STATE_LIT_LONGREP as ::core::ffi::c_int
-                } else {
-                    STATE_NONLIT_REP as ::core::ffi::c_int
-                }) as lzma_lzma_state;
-                let mut pos_state_next_0: uint32_t = position.wrapping_add(len_test_0)
-                    & (*coder).pos_mask;
+                state_2_0 =
+                    (if (state_2_0 as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
+                        STATE_LIT_LONGREP as ::core::ffi::c_int
+                    } else {
+                        STATE_NONLIT_REP as ::core::ffi::c_int
+                    }) as lzma_lzma_state;
+                let mut pos_state_next_0: uint32_t =
+                    position.wrapping_add(len_test_0) & (*coder).pos_mask;
                 let cur_and_len_literal_price: uint32_t = price
-                    .wrapping_add(
-                        get_len_price(
-                            &raw mut (*coder).rep_len_encoder,
-                            len_test_0,
-                            pos_state,
-                        ) as uint32_t,
-                    )
-                    .wrapping_add(
-                        rc_bit_0_price(
-                            (*coder)
-                                .is_match[state_2_0 as usize][pos_state_next_0 as usize],
-                        ) as uint32_t,
-                    )
-                    .wrapping_add(
-                        get_literal_price(
-                            coder,
-                            position.wrapping_add(len_test_0),
-                            *buf.offset(len_test_0.wrapping_sub(1 as uint32_t) as isize)
-                                as uint32_t,
-                            true_0 != 0,
-                            *buf_back_0.offset(len_test_0 as isize) as uint32_t,
-                            *buf.offset(len_test_0 as isize) as uint32_t,
-                        ) as uint32_t,
-                    );
+                    .wrapping_add(get_len_price(
+                        &raw mut (*coder).rep_len_encoder,
+                        len_test_0,
+                        pos_state,
+                    ) as uint32_t)
+                    .wrapping_add(rc_bit_0_price(
+                        (*coder).is_match[state_2_0 as usize][pos_state_next_0 as usize],
+                    ) as uint32_t)
+                    .wrapping_add(get_literal_price(
+                        coder,
+                        position.wrapping_add(len_test_0),
+                        *buf.offset(len_test_0.wrapping_sub(1 as uint32_t) as isize) as uint32_t,
+                        true_0 != 0,
+                        *buf_back_0.offset(len_test_0 as isize) as uint32_t,
+                        *buf.offset(len_test_0 as isize) as uint32_t,
+                    ) as uint32_t);
                 state_2_0 = (if state_2_0 as ::core::ffi::c_uint
-                    <= STATE_SHORTREP_LIT_LIT as ::core::ffi::c_int
-                        as ::core::ffi::c_uint
+                    <= STATE_SHORTREP_LIT_LIT as ::core::ffi::c_int as ::core::ffi::c_uint
                 {
                     STATE_LIT_LIT as ::core::ffi::c_int as ::core::ffi::c_uint
                 } else if state_2_0 as ::core::ffi::c_uint
                     <= STATE_LIT_SHORTREP as ::core::ffi::c_int as ::core::ffi::c_uint
                 {
-                    (state_2_0 as ::core::ffi::c_uint)
-                        .wrapping_sub(3 as ::core::ffi::c_uint)
+                    (state_2_0 as ::core::ffi::c_uint).wrapping_sub(3 as ::core::ffi::c_uint)
                 } else {
-                    (state_2_0 as ::core::ffi::c_uint)
-                        .wrapping_sub(6 as ::core::ffi::c_uint)
+                    (state_2_0 as ::core::ffi::c_uint).wrapping_sub(6 as ::core::ffi::c_uint)
                 }) as lzma_lzma_state;
                 pos_state_next_0 = position
                     .wrapping_add(len_test_0)
-                    .wrapping_add(1 as uint32_t) & (*coder).pos_mask;
+                    .wrapping_add(1 as uint32_t)
+                    & (*coder).pos_mask;
                 let next_rep_match_price_0: uint32_t = cur_and_len_literal_price
-                    .wrapping_add(
-                        rc_bit_1_price(
-                            (*coder)
-                                .is_match[state_2_0 as usize][pos_state_next_0 as usize],
-                        ) as uint32_t,
-                    )
-                    .wrapping_add(
-                        rc_bit_1_price((*coder).is_rep[state_2_0 as usize]) as uint32_t,
-                    );
+                    .wrapping_add(rc_bit_1_price(
+                        (*coder).is_match[state_2_0 as usize][pos_state_next_0 as usize],
+                    ) as uint32_t)
+                    .wrapping_add(rc_bit_1_price((*coder).is_rep[state_2_0 as usize]) as uint32_t);
                 let offset_0: uint32_t = cur
                     .wrapping_add(len_test_0)
                     .wrapping_add(1 as uint32_t)
                     .wrapping_add(len_test_2);
                 while len_end < offset_0 {
                     len_end = len_end.wrapping_add(1);
-                    (*coder).opts[len_end as usize].price = RC_INFINITY_PRICE
-                        as uint32_t;
+                    (*coder).opts[len_end as usize].price = RC_INFINITY_PRICE as uint32_t;
                 }
-                let cur_and_len_price_1: uint32_t = next_rep_match_price_0
-                    .wrapping_add(
-                        get_rep_price(
-                            coder,
-                            0 as uint32_t,
-                            len_test_2,
-                            state_2_0,
-                            pos_state_next_0,
-                        ) as uint32_t,
-                    );
+                let cur_and_len_price_1: uint32_t =
+                    next_rep_match_price_0.wrapping_add(get_rep_price(
+                        coder,
+                        0 as uint32_t,
+                        len_test_2,
+                        state_2_0,
+                        pos_state_next_0,
+                    ) as uint32_t);
                 if cur_and_len_price_1 < (*coder).opts[offset_0 as usize].price {
                     (*coder).opts[offset_0 as usize].price = cur_and_len_price_1;
-                    (*coder).opts[offset_0 as usize].pos_prev = cur
-                        .wrapping_add(len_test_0)
-                        .wrapping_add(1 as uint32_t);
+                    (*coder).opts[offset_0 as usize].pos_prev =
+                        cur.wrapping_add(len_test_0).wrapping_add(1 as uint32_t);
                     (*coder).opts[offset_0 as usize].back_prev = 0 as uint32_t;
                     (*coder).opts[offset_0 as usize].prev_1_is_literal = true_0 != 0;
                     (*coder).opts[offset_0 as usize].prev_2 = true_0 != 0;
@@ -1317,8 +1188,8 @@ unsafe extern "C" fn helper2(
         (*coder).matches[fresh0 as usize].len = new_len;
     }
     if new_len >= start_len {
-        let normal_match_price: uint32_t = match_price
-            .wrapping_add(rc_bit_0_price((*coder).is_rep[state as usize]) as uint32_t);
+        let normal_match_price: uint32_t =
+            match_price.wrapping_add(rc_bit_0_price((*coder).is_rep[state as usize]) as uint32_t);
         while len_end < cur.wrapping_add(new_len) {
             len_end = len_end.wrapping_add(1);
             (*coder).opts[len_end as usize].price = RC_INFINITY_PRICE as uint32_t;
@@ -1331,41 +1202,29 @@ unsafe extern "C" fn helper2(
         loop {
             let cur_back: uint32_t = (*coder).matches[i_2 as usize].dist;
             let mut cur_and_len_price_2: uint32_t = normal_match_price
-                .wrapping_add(
-                    get_dist_len_price(coder, cur_back, len_test_1, pos_state),
-                );
-            if cur_and_len_price_2
-                < (*coder).opts[cur.wrapping_add(len_test_1) as usize].price
-            {
+                .wrapping_add(get_dist_len_price(coder, cur_back, len_test_1, pos_state));
+            if cur_and_len_price_2 < (*coder).opts[cur.wrapping_add(len_test_1) as usize].price {
                 (*coder).opts[cur.wrapping_add(len_test_1) as usize].price = cur_and_len_price_2;
                 (*coder).opts[cur.wrapping_add(len_test_1) as usize].pos_prev = cur;
-                (*coder).opts[cur.wrapping_add(len_test_1) as usize].back_prev = cur_back
-                    .wrapping_add(REPS as uint32_t);
-                (*coder).opts[cur.wrapping_add(len_test_1) as usize].prev_1_is_literal = false_0
-                    != 0;
+                (*coder).opts[cur.wrapping_add(len_test_1) as usize].back_prev =
+                    cur_back.wrapping_add(REPS as uint32_t);
+                (*coder).opts[cur.wrapping_add(len_test_1) as usize].prev_1_is_literal =
+                    false_0 != 0;
             }
             if len_test_1 == (*coder).matches[i_2 as usize].len {
                 let buf_back_1: *const uint8_t = buf
                     .offset(-(cur_back as isize))
                     .offset(-(1 as ::core::ffi::c_int as isize));
                 let mut len_test_2_0: uint32_t = len_test_1.wrapping_add(1 as uint32_t);
-                let limit_1: uint32_t = if buf_avail_full
-                    < len_test_2_0.wrapping_add(nice_len)
-                {
+                let limit_1: uint32_t = if buf_avail_full < len_test_2_0.wrapping_add(nice_len) {
                     buf_avail_full
                 } else {
                     len_test_2_0.wrapping_add(nice_len)
                 };
                 if len_test_2_0 < limit_1 {
-                    len_test_2_0 = lzma_memcmplen(
-                        buf,
-                        buf_back_1,
-                        len_test_2_0,
-                        limit_1,
-                    );
+                    len_test_2_0 = lzma_memcmplen(buf, buf_back_1, len_test_2_0, limit_1);
                 }
-                len_test_2_0 = len_test_2_0
-                    .wrapping_sub(len_test_1.wrapping_add(1 as uint32_t));
+                len_test_2_0 = len_test_2_0.wrapping_sub(len_test_1.wrapping_add(1 as uint32_t));
                 if len_test_2_0 >= 2 as uint32_t {
                     let mut state_2_1: lzma_lzma_state = state;
                     state_2_1 = (if (state_2_1 as ::core::ffi::c_uint)
@@ -1375,53 +1234,40 @@ unsafe extern "C" fn helper2(
                     } else {
                         STATE_NONLIT_MATCH as ::core::ffi::c_int
                     }) as lzma_lzma_state;
-                    let mut pos_state_next_1: uint32_t = position
-                        .wrapping_add(len_test_1) & (*coder).pos_mask;
+                    let mut pos_state_next_1: uint32_t =
+                        position.wrapping_add(len_test_1) & (*coder).pos_mask;
                     let cur_and_len_literal_price_0: uint32_t = cur_and_len_price_2
-                        .wrapping_add(
-                            rc_bit_0_price(
-                                (*coder)
-                                    .is_match[state_2_1 as usize][pos_state_next_1 as usize],
-                            ) as uint32_t,
-                        )
-                        .wrapping_add(
-                            get_literal_price(
-                                coder,
-                                position.wrapping_add(len_test_1),
-                                *buf.offset(len_test_1.wrapping_sub(1 as uint32_t) as isize)
-                                    as uint32_t,
-                                true_0 != 0,
-                                *buf_back_1.offset(len_test_1 as isize) as uint32_t,
-                                *buf.offset(len_test_1 as isize) as uint32_t,
-                            ) as uint32_t,
-                        );
+                        .wrapping_add(rc_bit_0_price(
+                            (*coder).is_match[state_2_1 as usize][pos_state_next_1 as usize],
+                        ) as uint32_t)
+                        .wrapping_add(get_literal_price(
+                            coder,
+                            position.wrapping_add(len_test_1),
+                            *buf.offset(len_test_1.wrapping_sub(1 as uint32_t) as isize)
+                                as uint32_t,
+                            true_0 != 0,
+                            *buf_back_1.offset(len_test_1 as isize) as uint32_t,
+                            *buf.offset(len_test_1 as isize) as uint32_t,
+                        ) as uint32_t);
                     state_2_1 = (if state_2_1 as ::core::ffi::c_uint
-                        <= STATE_SHORTREP_LIT_LIT as ::core::ffi::c_int
-                            as ::core::ffi::c_uint
+                        <= STATE_SHORTREP_LIT_LIT as ::core::ffi::c_int as ::core::ffi::c_uint
                     {
                         STATE_LIT_LIT as ::core::ffi::c_int as ::core::ffi::c_uint
                     } else if state_2_1 as ::core::ffi::c_uint
-                        <= STATE_LIT_SHORTREP as ::core::ffi::c_int
-                            as ::core::ffi::c_uint
+                        <= STATE_LIT_SHORTREP as ::core::ffi::c_int as ::core::ffi::c_uint
                     {
-                        (state_2_1 as ::core::ffi::c_uint)
-                            .wrapping_sub(3 as ::core::ffi::c_uint)
+                        (state_2_1 as ::core::ffi::c_uint).wrapping_sub(3 as ::core::ffi::c_uint)
                     } else {
-                        (state_2_1 as ::core::ffi::c_uint)
-                            .wrapping_sub(6 as ::core::ffi::c_uint)
+                        (state_2_1 as ::core::ffi::c_uint).wrapping_sub(6 as ::core::ffi::c_uint)
                     }) as lzma_lzma_state;
-                    pos_state_next_1 = pos_state_next_1.wrapping_add(1 as uint32_t)
-                        & (*coder).pos_mask;
+                    pos_state_next_1 =
+                        pos_state_next_1.wrapping_add(1 as uint32_t) & (*coder).pos_mask;
                     let next_rep_match_price_1: uint32_t = cur_and_len_literal_price_0
+                        .wrapping_add(rc_bit_1_price(
+                            (*coder).is_match[state_2_1 as usize][pos_state_next_1 as usize],
+                        ) as uint32_t)
                         .wrapping_add(
-                            rc_bit_1_price(
-                                (*coder)
-                                    .is_match[state_2_1 as usize][pos_state_next_1 as usize],
-                            ) as uint32_t,
-                        )
-                        .wrapping_add(
-                            rc_bit_1_price((*coder).is_rep[state_2_1 as usize])
-                                as uint32_t,
+                            rc_bit_1_price((*coder).is_rep[state_2_1 as usize]) as uint32_t
                         );
                     let offset_1: uint32_t = cur
                         .wrapping_add(len_test_1)
@@ -1429,30 +1275,25 @@ unsafe extern "C" fn helper2(
                         .wrapping_add(len_test_2_0);
                     while len_end < offset_1 {
                         len_end = len_end.wrapping_add(1);
-                        (*coder).opts[len_end as usize].price = RC_INFINITY_PRICE
-                            as uint32_t;
+                        (*coder).opts[len_end as usize].price = RC_INFINITY_PRICE as uint32_t;
                     }
-                    cur_and_len_price_2 = next_rep_match_price_1
-                        .wrapping_add(
-                            get_rep_price(
-                                coder,
-                                0 as uint32_t,
-                                len_test_2_0,
-                                state_2_1,
-                                pos_state_next_1,
-                            ),
-                        );
+                    cur_and_len_price_2 = next_rep_match_price_1.wrapping_add(get_rep_price(
+                        coder,
+                        0 as uint32_t,
+                        len_test_2_0,
+                        state_2_1,
+                        pos_state_next_1,
+                    ));
                     if cur_and_len_price_2 < (*coder).opts[offset_1 as usize].price {
                         (*coder).opts[offset_1 as usize].price = cur_and_len_price_2;
-                        (*coder).opts[offset_1 as usize].pos_prev = cur
-                            .wrapping_add(len_test_1)
-                            .wrapping_add(1 as uint32_t);
+                        (*coder).opts[offset_1 as usize].pos_prev =
+                            cur.wrapping_add(len_test_1).wrapping_add(1 as uint32_t);
                         (*coder).opts[offset_1 as usize].back_prev = 0 as uint32_t;
                         (*coder).opts[offset_1 as usize].prev_1_is_literal = true_0 != 0;
                         (*coder).opts[offset_1 as usize].prev_2 = true_0 != 0;
                         (*coder).opts[offset_1 as usize].pos_prev_2 = cur;
-                        (*coder).opts[offset_1 as usize].back_prev_2 = cur_back
-                            .wrapping_add(REPS as uint32_t);
+                        (*coder).opts[offset_1 as usize].back_prev_2 =
+                            cur_back.wrapping_add(REPS as uint32_t);
                     }
                 }
                 i_2 = i_2.wrapping_add(1);
@@ -1474,14 +1315,11 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
     mut position: uint32_t,
 ) {
     if (*coder).opts_end_index != (*coder).opts_current_index {
-        *len_res = (*coder)
-            .opts[(*coder).opts_current_index as usize]
+        *len_res = (*coder).opts[(*coder).opts_current_index as usize]
             .pos_prev
             .wrapping_sub((*coder).opts_current_index);
         *back_res = (*coder).opts[(*coder).opts_current_index as usize].back_prev;
-        (*coder).opts_current_index = (*coder)
-            .opts[(*coder).opts_current_index as usize]
-            .pos_prev;
+        (*coder).opts_current_index = (*coder).opts[(*coder).opts_current_index as usize].pos_prev;
         return;
     }
     if (*mf).read_ahead == 0 as uint32_t {
@@ -1530,8 +1368,8 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
             {
                 mf_avail(mf).wrapping_add(1 as uint32_t)
             } else {
-                ((((1 as ::core::ffi::c_int) << 12 as ::core::ffi::c_int)
-                    - 1 as ::core::ffi::c_int) as uint32_t)
+                ((((1 as ::core::ffi::c_int) << 12 as ::core::ffi::c_int) - 1 as ::core::ffi::c_int)
+                    as uint32_t)
                     .wrapping_sub(cur)
             },
         );

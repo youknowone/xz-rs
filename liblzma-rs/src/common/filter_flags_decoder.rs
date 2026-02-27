@@ -43,15 +43,10 @@ pub const LZMA_OK: lzma_ret = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 #[derive(Copy, Clone)]
@@ -61,12 +56,10 @@ pub struct lzma_filter {
     pub options: *mut ::core::ffi::c_void,
 }
 pub type lzma_vli = uint64_t;
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
-pub const LZMA_FILTER_RESERVED_START: ::core::ffi::c_ulonglong = (1
-    as ::core::ffi::c_ulonglong) << 62 as ::core::ffi::c_int;
+pub const LZMA_FILTER_RESERVED_START: ::core::ffi::c_ulonglong =
+    (1 as ::core::ffi::c_ulonglong) << 62 as ::core::ffi::c_int;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filter_flags_decode(
     mut filter: *mut lzma_filter,
@@ -83,9 +76,7 @@ pub unsafe extern "C" fn lzma_filter_flags_decode(
         in_pos,
         in_size,
     ) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     if (*filter).id >= LZMA_FILTER_RESERVED_START as lzma_vli {
@@ -99,9 +90,7 @@ pub unsafe extern "C" fn lzma_filter_flags_decode(
         in_pos,
         in_size,
     ) as lzma_ret;
-    if ret__0 as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret__0 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret__0;
     }
     if (in_size.wrapping_sub(*in_pos) as lzma_vli) < props_size {

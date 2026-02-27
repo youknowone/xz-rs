@@ -25,14 +25,11 @@ pub const LZMA_NO_CHECK: lzma_ret = 2;
 pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
 pub type lzma_vli = uint64_t;
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
-pub const LZMA_VLI_MAX: ::core::ffi::c_ulonglong = UINT64_MAX
-    .wrapping_div(2 as ::core::ffi::c_ulonglong);
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
+pub const LZMA_VLI_MAX: ::core::ffi::c_ulonglong =
+    UINT64_MAX.wrapping_div(2 as ::core::ffi::c_ulonglong);
 pub const LZMA_VLI_BYTES_MAX: ::core::ffi::c_int = 9 as ::core::ffi::c_int;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_vli_encode(
@@ -49,7 +46,7 @@ pub unsafe extern "C" fn lzma_vli_encode(
             return LZMA_PROG_ERROR;
         }
     } else if *out_pos >= out_size {
-        return LZMA_BUF_ERROR
+        return LZMA_BUF_ERROR;
     }
     if *vli_pos >= LZMA_VLI_BYTES_MAX as size_t || vli > LZMA_VLI_MAX as lzma_vli {
         return LZMA_PROG_ERROR;
@@ -57,8 +54,8 @@ pub unsafe extern "C" fn lzma_vli_encode(
     vli >>= (*vli_pos).wrapping_mul(7 as size_t);
     while vli >= 0x80 as lzma_vli {
         *vli_pos = (*vli_pos).wrapping_add(1);
-        *out.offset(*out_pos as isize) = (vli as uint8_t as ::core::ffi::c_int
-            | 0x80 as ::core::ffi::c_int) as uint8_t;
+        *out.offset(*out_pos as isize) =
+            (vli as uint8_t as ::core::ffi::c_int | 0x80 as ::core::ffi::c_int) as uint8_t;
         vli >>= 7 as ::core::ffi::c_int;
         *out_pos = (*out_pos).wrapping_add(1);
         if *out_pos == out_size {

@@ -1,8 +1,5 @@
 extern "C" {
-    fn lzma_alloc(
-        size: size_t,
-        allocator: *const lzma_allocator,
-    ) -> *mut ::core::ffi::c_void;
+    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut ::core::ffi::c_void;
     fn lzma_free(ptr: *mut ::core::ffi::c_void, allocator: *const lzma_allocator);
 }
 pub type __darwin_size_t = usize;
@@ -35,15 +32,10 @@ pub const LZMA_OK: lzma_ret = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 #[derive(Copy, Clone)]
@@ -51,22 +43,14 @@ pub struct lzma_allocator {
 pub struct lzma_options_bcj {
     pub start_offset: uint32_t,
 }
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
 #[inline]
 unsafe extern "C" fn read32le(mut buf: *const uint8_t) -> uint32_t {
     let mut num: uint32_t = *buf.offset(0 as ::core::ffi::c_int as isize) as uint32_t;
-    num
-        |= (*buf.offset(1 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 16 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(3 as ::core::ffi::c_int as isize) as uint32_t)
-            << 24 as ::core::ffi::c_int;
+    num |= (*buf.offset(1 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int;
+    num |= (*buf.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 16 as ::core::ffi::c_int;
+    num |= (*buf.offset(3 as ::core::ffi::c_int as isize) as uint32_t) << 24 as ::core::ffi::c_int;
     return num;
 }
 #[no_mangle]

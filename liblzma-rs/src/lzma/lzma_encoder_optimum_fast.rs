@@ -4,11 +4,7 @@ extern "C" {
         __s2: *const ::core::ffi::c_void,
         __n: size_t,
     ) -> ::core::ffi::c_int;
-    fn lzma_mf_find(
-        mf: *mut lzma_mf,
-        count: *mut uint32_t,
-        matches: *mut lzma_match,
-    ) -> uint32_t;
+    fn lzma_mf_find(mf: *mut lzma_mf, count: *mut uint32_t, matches: *mut lzma_match) -> uint32_t;
 }
 pub type __darwin_size_t = usize;
 pub type size_t = __darwin_size_t;
@@ -239,11 +235,9 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
         if !(*buf.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             != *buf_back.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
             || *buf.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                != *buf_back.offset(1 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int)
+                != *buf_back.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int)
         {
-            let len: uint32_t = lzma_memcmplen(buf, buf_back, 2 as uint32_t, buf_avail)
-                as uint32_t;
+            let len: uint32_t = lzma_memcmplen(buf, buf_back, 2 as uint32_t, buf_avail) as uint32_t;
             if len >= nice_len {
                 *back_res = i;
                 *len_res = len;
@@ -258,8 +252,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
         i = i.wrapping_add(1);
     }
     if len_main >= nice_len {
-        *back_res = (*coder)
-            .matches[matches_count.wrapping_sub(1 as uint32_t) as usize]
+        *back_res = (*coder).matches[matches_count.wrapping_sub(1 as uint32_t) as usize]
             .dist
             .wrapping_add(REPS as uint32_t);
         *len_res = len_main;
@@ -268,30 +261,21 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     }
     let mut back_main: uint32_t = 0 as uint32_t;
     if len_main >= 2 as uint32_t {
-        back_main = (*coder)
-            .matches[matches_count.wrapping_sub(1 as uint32_t) as usize]
-            .dist;
+        back_main = (*coder).matches[matches_count.wrapping_sub(1 as uint32_t) as usize].dist;
         while matches_count > 1 as uint32_t
             && len_main
-                == (*coder)
-                    .matches[matches_count.wrapping_sub(2 as uint32_t) as usize]
+                == (*coder).matches[matches_count.wrapping_sub(2 as uint32_t) as usize]
                     .len
                     .wrapping_add(1 as uint32_t)
         {
             if !(back_main >> 7 as ::core::ffi::c_int
-                > (*coder)
-                    .matches[matches_count.wrapping_sub(2 as uint32_t) as usize]
-                    .dist)
+                > (*coder).matches[matches_count.wrapping_sub(2 as uint32_t) as usize].dist)
             {
                 break;
             }
             matches_count = matches_count.wrapping_sub(1);
-            len_main = (*coder)
-                .matches[matches_count.wrapping_sub(1 as uint32_t) as usize]
-                .len;
-            back_main = (*coder)
-                .matches[matches_count.wrapping_sub(1 as uint32_t) as usize]
-                .dist;
+            len_main = (*coder).matches[matches_count.wrapping_sub(1 as uint32_t) as usize].len;
+            back_main = (*coder).matches[matches_count.wrapping_sub(1 as uint32_t) as usize].dist;
         }
         if len_main == 2 as uint32_t && back_main >= 0x80 as uint32_t {
             len_main = 1 as uint32_t;
@@ -321,9 +305,8 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
         &raw mut (*coder).matches as *mut lzma_match,
     );
     if (*coder).longest_match_length >= 2 as uint32_t {
-        let new_dist: uint32_t = (*coder)
-            .matches[(*coder).matches_count.wrapping_sub(1 as uint32_t) as usize]
-            .dist;
+        let new_dist: uint32_t =
+            (*coder).matches[(*coder).matches_count.wrapping_sub(1 as uint32_t) as usize].dist;
         if (*coder).longest_match_length >= len_main && new_dist < back_main
             || (*coder).longest_match_length == len_main.wrapping_add(1 as uint32_t)
                 && !(new_dist >> 7 as ::core::ffi::c_int > back_main)
@@ -347,8 +330,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     while i_0 < REPS as uint32_t {
         if memcmp(
             buf as *const ::core::ffi::c_void,
-            buf
-                .offset(-((*coder).reps[i_0 as usize] as isize))
+            buf.offset(-((*coder).reps[i_0 as usize] as isize))
                 .offset(-(1 as ::core::ffi::c_int as isize))
                 as *const ::core::ffi::c_void,
             limit as size_t,

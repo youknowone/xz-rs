@@ -16,14 +16,8 @@ extern "C" {
     ) -> *mut ::core::ffi::c_void;
     fn strlen(__s: *const ::core::ffi::c_char) -> size_t;
     fn lzma_lzma_preset(options: *mut lzma_options_lzma, preset: uint32_t) -> lzma_bool;
-    fn lzma_alloc(
-        size: size_t,
-        allocator: *const lzma_allocator,
-    ) -> *mut ::core::ffi::c_void;
-    fn lzma_alloc_zero(
-        size: size_t,
-        allocator: *const lzma_allocator,
-    ) -> *mut ::core::ffi::c_void;
+    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut ::core::ffi::c_void;
+    fn lzma_alloc_zero(size: size_t, allocator: *const lzma_allocator) -> *mut ::core::ffi::c_void;
     fn lzma_free(ptr: *mut ::core::ffi::c_void, allocator: *const lzma_allocator);
     fn lzma_validate_chain(filters: *const lzma_filter, count: *mut size_t) -> lzma_ret;
 }
@@ -62,15 +56,10 @@ pub const LZMA_OK: lzma_ret = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 #[derive(Copy, Clone)]
@@ -192,13 +181,10 @@ pub struct lzma_str {
 }
 pub type C2RustUnnamed_2 = ::core::ffi::c_uint;
 pub const OPTMAP_TYPE_UINT32: C2RustUnnamed_2 = 0;
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
 pub const UINT32_MAX: ::core::ffi::c_uint = 4294967295 as ::core::ffi::c_uint;
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
 pub const INT_MAX: ::core::ffi::c_int = 2147483647 as ::core::ffi::c_int;
 pub const true_0: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
 pub const false_0: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
@@ -211,50 +197,44 @@ pub const LZMA_STR_DECODER: ::core::ffi::c_uint = 0x20 as ::core::ffi::c_uint;
 pub const LZMA_STR_GETOPT_LONG: ::core::ffi::c_uint = 0x40 as ::core::ffi::c_uint;
 pub const LZMA_STR_NO_SPACES: ::core::ffi::c_uint = 0x80 as ::core::ffi::c_uint;
 pub const LZMA_FILTER_X86: ::core::ffi::c_ulonglong = 0x4 as ::core::ffi::c_ulonglong;
-pub const LZMA_FILTER_POWERPC: ::core::ffi::c_ulonglong = 0x5
-    as ::core::ffi::c_ulonglong;
+pub const LZMA_FILTER_POWERPC: ::core::ffi::c_ulonglong = 0x5 as ::core::ffi::c_ulonglong;
 pub const LZMA_FILTER_IA64: ::core::ffi::c_ulonglong = 0x6 as ::core::ffi::c_ulonglong;
 pub const LZMA_FILTER_ARM: ::core::ffi::c_ulonglong = 0x7 as ::core::ffi::c_ulonglong;
-pub const LZMA_FILTER_ARMTHUMB: ::core::ffi::c_ulonglong = 0x8
-    as ::core::ffi::c_ulonglong;
+pub const LZMA_FILTER_ARMTHUMB: ::core::ffi::c_ulonglong = 0x8 as ::core::ffi::c_ulonglong;
 pub const LZMA_FILTER_SPARC: ::core::ffi::c_ulonglong = 0x9 as ::core::ffi::c_ulonglong;
 pub const LZMA_FILTER_ARM64: ::core::ffi::c_ulonglong = 0xa as ::core::ffi::c_ulonglong;
 pub const LZMA_FILTER_RISCV: ::core::ffi::c_ulonglong = 0xb as ::core::ffi::c_ulonglong;
 pub const LZMA_FILTER_DELTA: ::core::ffi::c_ulonglong = 0x3 as ::core::ffi::c_ulonglong;
 pub const LZMA_DELTA_DIST_MIN: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
 pub const LZMA_DELTA_DIST_MAX: ::core::ffi::c_int = 256 as ::core::ffi::c_int;
-pub const LZMA_FILTER_LZMA1: ::core::ffi::c_ulonglong = 0x4000000000000001
-    as ::core::ffi::c_ulonglong;
+pub const LZMA_FILTER_LZMA1: ::core::ffi::c_ulonglong =
+    0x4000000000000001 as ::core::ffi::c_ulonglong;
 pub const LZMA_FILTER_LZMA2: ::core::ffi::c_ulonglong = 0x21 as ::core::ffi::c_ulonglong;
 pub const LZMA_DICT_SIZE_MIN: ::core::ffi::c_uint = 4096 as ::core::ffi::c_uint;
-pub const LZMA_DICT_SIZE_DEFAULT: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 23 as ::core::ffi::c_int;
+pub const LZMA_DICT_SIZE_DEFAULT: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << 23 as ::core::ffi::c_int;
 pub const LZMA_LCLP_MIN: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 pub const LZMA_LCLP_MAX: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const LZMA_PB_MIN: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 pub const LZMA_PB_MAX: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const LZMA_PRESET_DEFAULT: ::core::ffi::c_uint = 6 as ::core::ffi::c_uint;
-pub const LZMA_PRESET_EXTREME: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 31 as ::core::ffi::c_int;
-pub const LZMA_FILTER_RESERVED_START: ::core::ffi::c_ulonglong = (1
-    as ::core::ffi::c_ulonglong) << 62 as ::core::ffi::c_int;
+pub const LZMA_PRESET_EXTREME: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << 31 as ::core::ffi::c_int;
+pub const LZMA_FILTER_RESERVED_START: ::core::ffi::c_ulonglong =
+    (1 as ::core::ffi::c_ulonglong) << 62 as ::core::ffi::c_int;
 pub const STR_ALLOC_SIZE: ::core::ffi::c_int = 800 as ::core::ffi::c_int;
 unsafe extern "C" fn str_init(
     mut str: *mut lzma_str,
     mut allocator: *const lzma_allocator,
 ) -> lzma_ret {
-    (*str).buf = lzma_alloc(STR_ALLOC_SIZE as size_t, allocator)
-        as *mut ::core::ffi::c_char;
+    (*str).buf = lzma_alloc(STR_ALLOC_SIZE as size_t, allocator) as *mut ::core::ffi::c_char;
     if (*str).buf.is_null() {
         return LZMA_MEM_ERROR;
     }
     (*str).pos = 0 as size_t;
     return LZMA_OK;
 }
-unsafe extern "C" fn str_free(
-    mut str: *mut lzma_str,
-    mut allocator: *const lzma_allocator,
-) {
+unsafe extern "C" fn str_free(mut str: *mut lzma_str, mut allocator: *const lzma_allocator) {
     lzma_free((*str).buf as *mut ::core::ffi::c_void, allocator);
 }
 unsafe extern "C" fn str_is_full(mut str: *const lzma_str) -> bool {
@@ -274,13 +254,10 @@ unsafe extern "C" fn str_finish(
     *dest = (*str).buf;
     return LZMA_OK;
 }
-unsafe extern "C" fn str_append_str(
-    mut str: *mut lzma_str,
-    mut s: *const ::core::ffi::c_char,
-) {
+unsafe extern "C" fn str_append_str(mut str: *mut lzma_str, mut s: *const ::core::ffi::c_char) {
     let len: size_t = strlen(s) as size_t;
-    let limit: size_t = ((STR_ALLOC_SIZE - 1 as ::core::ffi::c_int) as size_t)
-        .wrapping_sub((*str).pos);
+    let limit: size_t =
+        ((STR_ALLOC_SIZE - 1 as ::core::ffi::c_int) as size_t).wrapping_sub((*str).pos);
     let copy_size: size_t = if len < limit { len } else { limit };
     memcpy(
         (*str).buf.offset((*str).pos as isize) as *mut ::core::ffi::c_void,
@@ -299,10 +276,7 @@ unsafe extern "C" fn str_append_u32(
     } else {
         static mut suffixes: [[::core::ffi::c_char; 4]; 4] = unsafe {
             [
-                ::core::mem::transmute::<
-                    [u8; 4],
-                    [::core::ffi::c_char; 4],
-                >(*b"\0\0\0\0"),
+                ::core::mem::transmute::<[u8; 4], [::core::ffi::c_char; 4]>(*b"\0\0\0\0"),
                 ::core::mem::transmute::<[u8; 4], [::core::ffi::c_char; 4]>(*b"KiB\0"),
                 ::core::mem::transmute::<[u8; 4], [::core::ffi::c_char; 4]>(*b"MiB\0"),
                 ::core::mem::transmute::<[u8; 4], [::core::ffi::c_char; 4]>(*b"GiB\0"),
@@ -313,9 +287,7 @@ unsafe extern "C" fn str_append_u32(
             while v & 1023 as uint32_t == 0 as uint32_t
                 && suf
                     < (::core::mem::size_of::<[[::core::ffi::c_char; 4]; 4]>() as usize)
-                        .wrapping_div(
-                            ::core::mem::size_of::<[::core::ffi::c_char; 4]>() as usize,
-                        )
+                        .wrapping_div(::core::mem::size_of::<[::core::ffi::c_char; 4]>() as usize)
                         .wrapping_sub(1 as usize)
             {
                 v >>= 10 as ::core::ffi::c_int;
@@ -326,13 +298,13 @@ unsafe extern "C" fn str_append_u32(
             [u8; 16],
             [::core::ffi::c_char; 16],
         >(*b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
-        let mut pos: size_t = (::core::mem::size_of::<[::core::ffi::c_char; 16]>()
-            as size_t)
+        let mut pos: size_t = (::core::mem::size_of::<[::core::ffi::c_char; 16]>() as size_t)
             .wrapping_sub(1 as size_t);
         loop {
             pos = pos.wrapping_sub(1);
             buf[pos as usize] = ('0' as i32 as uint32_t)
-                .wrapping_add(v.wrapping_rem(10 as uint32_t)) as ::core::ffi::c_char;
+                .wrapping_add(v.wrapping_rem(10 as uint32_t))
+                as ::core::ffi::c_char;
             v = v.wrapping_div(10 as uint32_t);
             if !(v != 0 as uint32_t) {
                 break;
@@ -354,23 +326,20 @@ pub const OPTMAP_USE_NAME_VALUE_MAP: ::core::ffi::c_int = 0x1 as ::core::ffi::c_
 pub const OPTMAP_USE_BYTE_SUFFIX: ::core::ffi::c_int = 0x2 as ::core::ffi::c_int;
 pub const OPTMAP_NO_STRFY_ZERO: ::core::ffi::c_int = 0x4 as ::core::ffi::c_int;
 static mut bcj_optmap: [option_map; 1] = unsafe {
-    [
-        option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"start\0\0\0\0\0\0\0"),
-            type_0: 0,
-            flags: (OPTMAP_NO_STRFY_ZERO | OPTMAP_USE_BYTE_SUFFIX) as uint8_t,
-            offset: 0 as ::core::ffi::c_ulong as uint16_t,
-            u: C2RustUnnamed_0 {
-                range: C2RustUnnamed_1 {
-                    min: 0 as uint32_t,
-                    max: UINT32_MAX as uint32_t,
-                },
+    [option_map {
+        name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+            *b"start\0\0\0\0\0\0\0",
+        ),
+        type_0: 0,
+        flags: (OPTMAP_NO_STRFY_ZERO | OPTMAP_USE_BYTE_SUFFIX) as uint8_t,
+        offset: 0 as ::core::ffi::c_ulong as uint16_t,
+        u: C2RustUnnamed_0 {
+            range: C2RustUnnamed_1 {
+                min: 0 as uint32_t,
+                max: UINT32_MAX as uint32_t,
             },
         },
-    ]
+    }]
 };
 unsafe extern "C" fn parse_bcj(
     str: *mut *const ::core::ffi::c_char,
@@ -387,23 +356,20 @@ unsafe extern "C" fn parse_bcj(
     );
 }
 static mut delta_optmap: [option_map; 1] = unsafe {
-    [
-        option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"dist\0\0\0\0\0\0\0\0"),
-            type_0: 0,
-            flags: 0,
-            offset: 4 as ::core::ffi::c_ulong as uint16_t,
-            u: C2RustUnnamed_0 {
-                range: C2RustUnnamed_1 {
-                    min: LZMA_DELTA_DIST_MIN as uint32_t,
-                    max: LZMA_DELTA_DIST_MAX as uint32_t,
-                },
+    [option_map {
+        name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+            *b"dist\0\0\0\0\0\0\0\0",
+        ),
+        type_0: 0,
+        flags: 0,
+        offset: 4 as ::core::ffi::c_ulong as uint16_t,
+        u: C2RustUnnamed_0 {
+            range: C2RustUnnamed_1 {
+                min: LZMA_DELTA_DIST_MIN as uint32_t,
+                max: LZMA_DELTA_DIST_MAX as uint32_t,
             },
         },
-    ]
+    }]
 };
 unsafe extern "C" fn parse_delta(
     str: *mut *const ::core::ffi::c_char,
@@ -422,17 +388,14 @@ unsafe extern "C" fn parse_delta(
             .wrapping_div(::core::mem::size_of::<option_map>() as size_t),
     );
 }
-pub const LZMA12_PRESET_STR: [::core::ffi::c_char; 7] = unsafe {
-    ::core::mem::transmute::<[u8; 7], [::core::ffi::c_char; 7]>(*b"0-9[e]\0")
-};
+pub const LZMA12_PRESET_STR: [::core::ffi::c_char; 7] =
+    unsafe { ::core::mem::transmute::<[u8; 7], [::core::ffi::c_char; 7]>(*b"0-9[e]\0") };
 unsafe extern "C" fn parse_lzma12_preset(
     str: *mut *const ::core::ffi::c_char,
     mut str_end: *const ::core::ffi::c_char,
     mut preset: *mut uint32_t,
 ) -> *const ::core::ffi::c_char {
-    if !(**str as ::core::ffi::c_int >= '0' as i32
-        && **str as ::core::ffi::c_int <= '9' as i32)
-    {
+    if !(**str as ::core::ffi::c_int >= '0' as i32 && **str as ::core::ffi::c_int <= '9' as i32) {
         return b"Unsupported preset\0" as *const u8 as *const ::core::ffi::c_char;
     }
     *preset = (**str as ::core::ffi::c_int - '0' as i32) as uint32_t;
@@ -443,8 +406,7 @@ unsafe extern "C" fn parse_lzma12_preset(
         }
         match **str as ::core::ffi::c_int {
             101 => {
-                *preset = (*preset as ::core::ffi::c_uint | LZMA_PRESET_EXTREME)
-                    as uint32_t;
+                *preset = (*preset as ::core::ffi::c_uint | LZMA_PRESET_EXTREME) as uint32_t;
             }
             _ => {
                 return b"Unsupported flag in the preset\0" as *const u8
@@ -460,11 +422,7 @@ unsafe extern "C" fn set_lzma12_preset(
     mut filter_options: *mut ::core::ffi::c_void,
 ) -> *const ::core::ffi::c_char {
     let mut preset: uint32_t = 0;
-    let mut errmsg: *const ::core::ffi::c_char = parse_lzma12_preset(
-        str,
-        str_end,
-        &raw mut preset,
-    );
+    let mut errmsg: *const ::core::ffi::c_char = parse_lzma12_preset(str, str_end, &raw mut preset);
     if !errmsg.is_null() {
         return errmsg;
     }
@@ -477,24 +435,21 @@ unsafe extern "C" fn set_lzma12_preset(
 static mut lzma12_mode_map: [name_value_map; 3] = unsafe {
     [
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"fast\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"fast\0\0\0\0\0\0\0\0",
+            ),
             value: LZMA_MODE_FAST as ::core::ffi::c_int as uint32_t,
         },
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"normal\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"normal\0\0\0\0\0\0",
+            ),
             value: LZMA_MODE_NORMAL as ::core::ffi::c_int as uint32_t,
         },
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"\0\0\0\0\0\0\0\0\0\0\0\0",
+            ),
             value: 0 as uint32_t,
         },
     ]
@@ -502,45 +457,39 @@ static mut lzma12_mode_map: [name_value_map; 3] = unsafe {
 static mut lzma12_mf_map: [name_value_map; 6] = unsafe {
     [
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"hc3\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"hc3\0\0\0\0\0\0\0\0\0",
+            ),
             value: LZMA_MF_HC3 as ::core::ffi::c_int as uint32_t,
         },
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"hc4\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"hc4\0\0\0\0\0\0\0\0\0",
+            ),
             value: LZMA_MF_HC4 as ::core::ffi::c_int as uint32_t,
         },
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"bt2\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"bt2\0\0\0\0\0\0\0\0\0",
+            ),
             value: LZMA_MF_BT2 as ::core::ffi::c_int as uint32_t,
         },
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"bt3\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"bt3\0\0\0\0\0\0\0\0\0",
+            ),
             value: LZMA_MF_BT3 as ::core::ffi::c_int as uint32_t,
         },
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"bt4\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"bt4\0\0\0\0\0\0\0\0\0",
+            ),
             value: LZMA_MF_BT4 as ::core::ffi::c_int as uint32_t,
         },
         name_value_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"\0\0\0\0\0\0\0\0\0\0\0\0",
+            ),
             value: 0 as uint32_t,
         },
     ]
@@ -581,10 +530,9 @@ unsafe extern "C" fn parse_lzma12(
 static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
     [
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"lzma1\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"lzma1\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_lzma>() as uint32_t,
             id: LZMA_FILTER_LZMA1 as lzma_vli,
             parse: Some(
@@ -601,10 +549,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: false_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"lzma2\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"lzma2\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_lzma>() as uint32_t,
             id: LZMA_FILTER_LZMA2 as lzma_vli,
             parse: Some(
@@ -621,10 +568,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: false_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"x86\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"x86\0\0\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_X86 as lzma_vli,
             parse: Some(
@@ -641,10 +587,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"arm\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"arm\0\0\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_ARM as lzma_vli,
             parse: Some(
@@ -661,10 +606,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"armthumb\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"armthumb\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_ARMTHUMB as lzma_vli,
             parse: Some(
@@ -681,10 +625,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"arm64\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"arm64\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_ARM64 as lzma_vli,
             parse: Some(
@@ -701,10 +644,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"riscv\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"riscv\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_RISCV as lzma_vli,
             parse: Some(
@@ -721,10 +663,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"powerpc\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"powerpc\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_POWERPC as lzma_vli,
             parse: Some(
@@ -741,10 +682,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"ia64\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"ia64\0\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_IA64 as lzma_vli,
             parse: Some(
@@ -761,10 +701,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"sparc\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"sparc\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_bcj>() as uint32_t,
             id: LZMA_FILTER_SPARC as lzma_vli,
             parse: Some(
@@ -781,10 +720,9 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true_0 != 0,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"delta\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"delta\0\0\0\0\0\0\0",
+            ),
             opts_size: ::core::mem::size_of::<lzma_options_delta>() as uint32_t,
             id: LZMA_FILTER_DELTA as lzma_vli,
             parse: Some(
@@ -813,13 +751,10 @@ unsafe extern "C" fn parse_options(
         if **str as ::core::ffi::c_int == ',' as i32 {
             *str = (*str).offset(1);
         } else {
-            let str_len: size_t = str_end.offset_from(*str) as ::core::ffi::c_long
-                as size_t;
-            let mut name_eq_value_end: *const ::core::ffi::c_char = memchr(
-                *str as *const ::core::ffi::c_void,
-                ',' as i32,
-                str_len,
-            ) as *const ::core::ffi::c_char;
+            let str_len: size_t = str_end.offset_from(*str) as ::core::ffi::c_long as size_t;
+            let mut name_eq_value_end: *const ::core::ffi::c_char =
+                memchr(*str as *const ::core::ffi::c_void, ',' as i32, str_len)
+                    as *const ::core::ffi::c_char;
             if name_eq_value_end.is_null() {
                 name_eq_value_end = str_end;
             }
@@ -827,39 +762,37 @@ unsafe extern "C" fn parse_options(
                 *str as *const ::core::ffi::c_void,
                 '=' as i32,
                 name_eq_value_end.offset_from(*str) as ::core::ffi::c_long as size_t,
-            ) as *const ::core::ffi::c_char;
+            )
+                as *const ::core::ffi::c_char;
             if equals_sign.is_null() || **str as ::core::ffi::c_int == '=' as i32 {
-                return b"Options must be 'name=value' pairs separated with commas\0"
-                    as *const u8 as *const ::core::ffi::c_char;
-            }
-            let name_len: size_t = equals_sign.offset_from(*str) as ::core::ffi::c_long
-                as size_t;
-            if name_len > NAME_LEN_MAX as size_t {
-                return b"Unknown option name\0" as *const u8
+                return b"Options must be 'name=value' pairs separated with commas\0" as *const u8
                     as *const ::core::ffi::c_char;
+            }
+            let name_len: size_t = equals_sign.offset_from(*str) as ::core::ffi::c_long as size_t;
+            if name_len > NAME_LEN_MAX as size_t {
+                return b"Unknown option name\0" as *const u8 as *const ::core::ffi::c_char;
             }
             let mut i: size_t = 0 as size_t;
             loop {
                 if i == optmap_size {
-                    return b"Unknown option name\0" as *const u8
-                        as *const ::core::ffi::c_char;
+                    return b"Unknown option name\0" as *const u8 as *const ::core::ffi::c_char;
                 }
                 if memcmp(
                     *str as *const ::core::ffi::c_void,
-                    &raw const (*optmap.offset(i as isize)).name
-                        as *const ::core::ffi::c_char as *const ::core::ffi::c_void,
+                    &raw const (*optmap.offset(i as isize)).name as *const ::core::ffi::c_char
+                        as *const ::core::ffi::c_void,
                     name_len,
                 ) == 0 as ::core::ffi::c_int
-                    && (*optmap.offset(i as isize)).name[name_len as usize]
-                        as ::core::ffi::c_int == '\0' as i32
+                    && (*optmap.offset(i as isize)).name[name_len as usize] as ::core::ffi::c_int
+                        == '\0' as i32
                 {
                     break;
                 }
                 i = i.wrapping_add(1);
             }
             *str = equals_sign.offset(1 as ::core::ffi::c_int as isize);
-            let value_len: size_t = name_eq_value_end.offset_from(*str)
-                as ::core::ffi::c_long as size_t;
+            let value_len: size_t =
+                name_eq_value_end.offset_from(*str) as ::core::ffi::c_long as size_t;
             if value_len == 0 as size_t {
                 return b"Option value cannot be empty\0" as *const u8
                     as *const ::core::ffi::c_char;
@@ -867,30 +800,26 @@ unsafe extern "C" fn parse_options(
             if (*optmap.offset(i as isize)).type_0 as ::core::ffi::c_int
                 == OPTMAP_TYPE_LZMA_PRESET as ::core::ffi::c_int
             {
-                let mut errmsg: *const ::core::ffi::c_char = set_lzma12_preset(
-                    str,
-                    name_eq_value_end,
-                    filter_options,
-                );
+                let mut errmsg: *const ::core::ffi::c_char =
+                    set_lzma12_preset(str, name_eq_value_end, filter_options);
                 if !errmsg.is_null() {
                     return errmsg;
                 }
             } else {
                 let mut v: uint32_t = 0;
                 if (*optmap.offset(i as isize)).flags as ::core::ffi::c_int
-                    & OPTMAP_USE_NAME_VALUE_MAP != 0
+                    & OPTMAP_USE_NAME_VALUE_MAP
+                    != 0
                 {
                     if value_len > NAME_LEN_MAX as size_t {
                         return b"Invalid option value\0" as *const u8
                             as *const ::core::ffi::c_char;
                     }
-                    let mut map: *const name_value_map = (*optmap.offset(i as isize))
-                        .u
-                        .map;
+                    let mut map: *const name_value_map = (*optmap.offset(i as isize)).u.map;
                     let mut j: size_t = 0 as size_t;
                     loop {
-                        if (*map.offset(j as isize))
-                            .name[0 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                        if (*map.offset(j as isize)).name[0 as ::core::ffi::c_int as usize]
+                            as ::core::ffi::c_int
                             == '\0' as i32
                         {
                             return b"Invalid option value\0" as *const u8
@@ -898,12 +827,13 @@ unsafe extern "C" fn parse_options(
                         }
                         if memcmp(
                             *str as *const ::core::ffi::c_void,
-                            &raw const (*map.offset(j as isize)).name
-                                as *const ::core::ffi::c_char as *const ::core::ffi::c_void,
+                            &raw const (*map.offset(j as isize)).name as *const ::core::ffi::c_char
+                                as *const ::core::ffi::c_void,
                             value_len,
                         ) == 0 as ::core::ffi::c_int
                             && (*map.offset(j as isize)).name[value_len as usize]
-                                as ::core::ffi::c_int == '\0' as i32
+                                as ::core::ffi::c_int
+                                == '\0' as i32
                         {
                             v = (*map.offset(j as isize)).value;
                             break;
@@ -915,7 +845,7 @@ unsafe extern "C" fn parse_options(
                     || **str as ::core::ffi::c_int > '9' as i32
                 {
                     return b"Value is not a non-negative decimal integer\0" as *const u8
-                        as *const ::core::ffi::c_char
+                        as *const ::core::ffi::c_char;
                 } else {
                     let mut p: *const ::core::ffi::c_char = *str;
                     v = 0 as uint32_t;
@@ -925,8 +855,7 @@ unsafe extern "C" fn parse_options(
                                 as *const ::core::ffi::c_char;
                         }
                         v = v.wrapping_mul(10 as uint32_t);
-                        let add: uint32_t = (*p as ::core::ffi::c_int - '0' as i32)
-                            as uint32_t;
+                        let add: uint32_t = (*p as ::core::ffi::c_int - '0' as i32) as uint32_t;
                         if (UINT32_MAX as uint32_t).wrapping_sub(add) < v {
                             return b"Value out of range\0" as *const u8
                                 as *const ::core::ffi::c_char;
@@ -943,11 +872,13 @@ unsafe extern "C" fn parse_options(
                     if p < name_eq_value_end {
                         let mut multiplier_start: *const ::core::ffi::c_char = p;
                         if (*optmap.offset(i as isize)).flags as ::core::ffi::c_int
-                            & OPTMAP_USE_BYTE_SUFFIX == 0 as ::core::ffi::c_int
+                            & OPTMAP_USE_BYTE_SUFFIX
+                            == 0 as ::core::ffi::c_int
                         {
                             *str = multiplier_start;
                             return b"This option does not support any multiplier suffixes\0"
-                                as *const u8 as *const ::core::ffi::c_char;
+                                as *const u8
+                                as *const ::core::ffi::c_char;
                         }
                         let mut shift: uint32_t = 0;
                         match *p as ::core::ffi::c_int {
@@ -963,24 +894,21 @@ unsafe extern "C" fn parse_options(
                             _ => {
                                 *str = multiplier_start;
                                 return b"Invalid multiplier suffix (KiB, MiB, or GiB)\0"
-                                    as *const u8 as *const ::core::ffi::c_char;
+                                    as *const u8
+                                    as *const ::core::ffi::c_char;
                             }
                         }
                         p = p.offset(1);
-                        if p < name_eq_value_end
-                            && *p as ::core::ffi::c_int == 'i' as i32
-                        {
+                        if p < name_eq_value_end && *p as ::core::ffi::c_int == 'i' as i32 {
                             p = p.offset(1);
                         }
-                        if p < name_eq_value_end
-                            && *p as ::core::ffi::c_int == 'B' as i32
-                        {
+                        if p < name_eq_value_end && *p as ::core::ffi::c_int == 'B' as i32 {
                             p = p.offset(1);
                         }
                         if p < name_eq_value_end {
                             *str = multiplier_start;
-                            return b"Invalid multiplier suffix (KiB, MiB, or GiB)\0"
-                                as *const u8 as *const ::core::ffi::c_char;
+                            return b"Invalid multiplier suffix (KiB, MiB, or GiB)\0" as *const u8
+                                as *const ::core::ffi::c_char;
                         }
                         if v > UINT32_MAX as uint32_t >> shift {
                             return b"Value out of range\0" as *const u8
@@ -991,16 +919,12 @@ unsafe extern "C" fn parse_options(
                     if v < (*optmap.offset(i as isize)).u.range.min
                         || v > (*optmap.offset(i as isize)).u.range.max
                     {
-                        return b"Value out of range\0" as *const u8
-                            as *const ::core::ffi::c_char;
+                        return b"Value out of range\0" as *const u8 as *const ::core::ffi::c_char;
                     }
                 }
-                let mut ptr: *mut ::core::ffi::c_void = (filter_options
-                    as *mut ::core::ffi::c_char)
-                    .offset(
-                        (*optmap.offset(i as isize)).offset as ::core::ffi::c_int
-                            as isize,
-                    ) as *mut ::core::ffi::c_void;
+                let mut ptr: *mut ::core::ffi::c_void = (filter_options as *mut ::core::ffi::c_char)
+                    .offset((*optmap.offset(i as isize)).offset as ::core::ffi::c_int as isize)
+                    as *mut ::core::ffi::c_void;
                 match (*optmap.offset(i as isize)).type_0 as ::core::ffi::c_int {
                     1 => {
                         *(ptr as *mut lzma_mode) = v as lzma_mode;
@@ -1029,9 +953,7 @@ unsafe extern "C" fn parse_filter(
     let mut opts_start: *const ::core::ffi::c_char = str_end;
     let mut p: *const ::core::ffi::c_char = *str;
     while p < str_end {
-        if *p as ::core::ffi::c_int == ':' as i32
-            || *p as ::core::ffi::c_int == '=' as i32
-        {
+        if *p as ::core::ffi::c_int == ':' as i32 || *p as ::core::ffi::c_int == '=' as i32 {
             name_end = p;
             opts_start = p.offset(1 as ::core::ffi::c_int as isize);
             break;
@@ -1050,8 +972,7 @@ unsafe extern "C" fn parse_filter(
     {
         if memcmp(
             *str as *const ::core::ffi::c_void,
-            &raw const (*(&raw const filter_name_map as *const C2RustUnnamed)
-                .offset(i as isize))
+            &raw const (*(&raw const filter_name_map as *const C2RustUnnamed).offset(i as isize))
                 .name as *const ::core::ffi::c_char as *const ::core::ffi::c_void,
             name_len,
         ) == 0 as ::core::ffi::c_int
@@ -1059,24 +980,21 @@ unsafe extern "C" fn parse_filter(
                 == '\0' as i32
         {
             if only_xz as ::core::ffi::c_int != 0
-                && filter_name_map[i as usize].id
-                    >= LZMA_FILTER_RESERVED_START as lzma_vli
+                && filter_name_map[i as usize].id >= LZMA_FILTER_RESERVED_START as lzma_vli
             {
                 return b"This filter cannot be used in the .xz format\0" as *const u8
                     as *const ::core::ffi::c_char;
             }
-            let mut options: *mut ::core::ffi::c_void = lzma_alloc_zero(
-                filter_name_map[i as usize].opts_size as size_t,
-                allocator,
-            );
+            let mut options: *mut ::core::ffi::c_void =
+                lzma_alloc_zero(filter_name_map[i as usize].opts_size as size_t, allocator);
             if options.is_null() {
-                return b"Memory allocation failed\0" as *const u8
-                    as *const ::core::ffi::c_char;
+                return b"Memory allocation failed\0" as *const u8 as *const ::core::ffi::c_char;
             }
             *str = opts_start;
-            let mut errmsg: *const ::core::ffi::c_char = filter_name_map[i as usize]
-                .parse
-                .expect("non-null function pointer")(str, str_end, options);
+            let mut errmsg: *const ::core::ffi::c_char =
+                filter_name_map[i as usize]
+                    .parse
+                    .expect("non-null function pointer")(str, str_end, options);
             if !errmsg.is_null() {
                 lzma_free(options, allocator);
                 return errmsg;
@@ -1096,18 +1014,15 @@ unsafe extern "C" fn str_to_filters(
     mut allocator: *const lzma_allocator,
 ) -> *const ::core::ffi::c_char {
     let mut current_block: u64;
-    let mut errmsg: *const ::core::ffi::c_char = ::core::ptr::null::<
-        ::core::ffi::c_char,
-    >();
+    let mut errmsg: *const ::core::ffi::c_char = ::core::ptr::null::<::core::ffi::c_char>();
     while **str as ::core::ffi::c_int == ' ' as i32 {
         *str = (*str).offset(1);
     }
     if **str as ::core::ffi::c_int == '\0' as i32 {
-        return b"Empty string is not allowed, try '6' if a default value is needed\0"
-            as *const u8 as *const ::core::ffi::c_char;
+        return b"Empty string is not allowed, try '6' if a default value is needed\0" as *const u8
+            as *const ::core::ffi::c_char;
     }
-    if **str as ::core::ffi::c_int >= '0' as i32
-        && **str as ::core::ffi::c_int <= '9' as i32
+    if **str as ::core::ffi::c_int >= '0' as i32 && **str as ::core::ffi::c_int <= '9' as i32
         || **str as ::core::ffi::c_int == '-' as i32
             && (*(*str).offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
                 >= '0' as i32
@@ -1118,17 +1033,14 @@ unsafe extern "C" fn str_to_filters(
             *str = (*str).offset(1);
         }
         let str_len: size_t = strlen(*str) as size_t;
-        let mut str_end: *const ::core::ffi::c_char = memchr(
-            *str as *const ::core::ffi::c_void,
-            ' ' as i32,
-            str_len,
-        ) as *const ::core::ffi::c_char;
+        let mut str_end: *const ::core::ffi::c_char =
+            memchr(*str as *const ::core::ffi::c_void, ' ' as i32, str_len)
+                as *const ::core::ffi::c_char;
         if !str_end.is_null() {
             let mut i: size_t = 1 as size_t;
             while *str_end.offset(i as isize) as ::core::ffi::c_int != '\0' as i32 {
                 if *str_end.offset(i as isize) as ::core::ffi::c_int != ' ' as i32 {
-                    return b"Unsupported preset\0" as *const u8
-                        as *const ::core::ffi::c_char;
+                    return b"Unsupported preset\0" as *const u8 as *const ::core::ffi::c_char;
                 }
                 i = i.wrapping_add(1);
             }
@@ -1145,19 +1057,16 @@ unsafe extern "C" fn str_to_filters(
             allocator,
         ) as *mut lzma_options_lzma;
         if opts.is_null() {
-            return b"Memory allocation failed\0" as *const u8
-                as *const ::core::ffi::c_char;
+            return b"Memory allocation failed\0" as *const u8 as *const ::core::ffi::c_char;
         }
         if lzma_lzma_preset(opts, preset) != 0 {
             lzma_free(opts as *mut ::core::ffi::c_void, allocator);
             return b"Unsupported preset\0" as *const u8 as *const ::core::ffi::c_char;
         }
-        (*filters.offset(0 as ::core::ffi::c_int as isize)).id = LZMA_FILTER_LZMA2
-            as lzma_vli;
+        (*filters.offset(0 as ::core::ffi::c_int as isize)).id = LZMA_FILTER_LZMA2 as lzma_vli;
         let ref mut fresh0 = (*filters.offset(0 as ::core::ffi::c_int as isize)).options;
         *fresh0 = opts as *mut ::core::ffi::c_void;
-        (*filters.offset(1 as ::core::ffi::c_int as isize)).id = LZMA_VLI_UNKNOWN
-            as lzma_vli;
+        (*filters.offset(1 as ::core::ffi::c_int as isize)).id = LZMA_VLI_UNKNOWN as lzma_vli;
         let ref mut fresh1 = (*filters.offset(1 as ::core::ffi::c_int as isize)).options;
         *fresh1 = NULL;
         return ::core::ptr::null::<::core::ffi::c_char>();
@@ -1175,31 +1084,29 @@ unsafe extern "C" fn str_to_filters(
             current_block = 6100283484465977373;
             break;
         } else {
-            if *(*str).offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
-                == '-' as i32
+            if *(*str).offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int == '-' as i32
                 && *(*str).offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
                     == '-' as i32
             {
                 *str = (*str).offset(2 as ::core::ffi::c_int as isize);
             }
             let mut filter_end: *const ::core::ffi::c_char = *str;
-            while *filter_end.offset(0 as ::core::ffi::c_int as isize)
-                as ::core::ffi::c_int != '\0' as i32
+            while *filter_end.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                != '\0' as i32
             {
-                if *filter_end.offset(0 as ::core::ffi::c_int as isize)
-                    as ::core::ffi::c_int == '-' as i32
-                    && *filter_end.offset(1 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == '-' as i32
-                    || *filter_end.offset(0 as ::core::ffi::c_int as isize)
-                        as ::core::ffi::c_int == ' ' as i32
+                if *filter_end.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                    == '-' as i32
+                    && *filter_end.offset(1 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        == '-' as i32
+                    || *filter_end.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
+                        == ' ' as i32
                 {
                     break;
                 }
                 filter_end = filter_end.offset(1);
             }
             if filter_end == *str {
-                errmsg = b"Filter name is missing\0" as *const u8
-                    as *const ::core::ffi::c_char;
+                errmsg = b"Filter name is missing\0" as *const u8 as *const ::core::ffi::c_char;
                 current_block = 6100283484465977373;
                 break;
             } else {
@@ -1232,15 +1139,14 @@ unsafe extern "C" fn str_to_filters(
             temp_filters[i_0 as usize].options = NULL;
             if flags & LZMA_STR_NO_VALIDATION as uint32_t == 0 as uint32_t {
                 let mut dummy: size_t = 0;
-                let ret: lzma_ret = lzma_validate_chain(
-                    &raw mut temp_filters as *mut lzma_filter,
-                    &raw mut dummy,
-                ) as lzma_ret;
+                let ret: lzma_ret =
+                    lzma_validate_chain(&raw mut temp_filters as *mut lzma_filter, &raw mut dummy)
+                        as lzma_ret;
                 if ret as ::core::ffi::c_uint
                     != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
                 {
-                    errmsg = b"Invalid filter chain ('lzma2' missing at the end?)\0"
-                        as *const u8 as *const ::core::ffi::c_char;
+                    errmsg = b"Invalid filter chain ('lzma2' missing at the end?)\0" as *const u8
+                        as *const ::core::ffi::c_char;
                     current_block = 6100283484465977373;
                 } else {
                     current_block = 12381812505308290051;
@@ -1253,13 +1159,9 @@ unsafe extern "C" fn str_to_filters(
                 _ => {
                     memcpy(
                         filters as *mut ::core::ffi::c_void,
-                        &raw mut temp_filters as *mut lzma_filter
-                            as *const ::core::ffi::c_void,
-                        i_0
-                            .wrapping_add(1 as size_t)
-                            .wrapping_mul(
-                                ::core::mem::size_of::<lzma_filter>() as size_t,
-                            ),
+                        &raw mut temp_filters as *mut lzma_filter as *const ::core::ffi::c_void,
+                        i_0.wrapping_add(1 as size_t)
+                            .wrapping_mul(::core::mem::size_of::<lzma_filter>() as size_t),
                     );
                     return ::core::ptr::null::<::core::ffi::c_char>();
                 }
@@ -1289,22 +1191,18 @@ pub unsafe extern "C" fn lzma_str_to_filters(
         *error_pos = 0 as ::core::ffi::c_int;
     }
     if str.is_null() || filters.is_null() {
-        return b"Unexpected NULL pointer argument(s) to lzma_str_to_filters()\0"
-            as *const u8 as *const ::core::ffi::c_char;
+        return b"Unexpected NULL pointer argument(s) to lzma_str_to_filters()\0" as *const u8
+            as *const ::core::ffi::c_char;
     }
-    let supported_flags: uint32_t = LZMA_STR_ALL_FILTERS as uint32_t
-        | LZMA_STR_NO_VALIDATION as uint32_t;
+    let supported_flags: uint32_t =
+        LZMA_STR_ALL_FILTERS as uint32_t | LZMA_STR_NO_VALIDATION as uint32_t;
     if flags & !supported_flags != 0 {
         return b"Unsupported flags to lzma_str_to_filters()\0" as *const u8
             as *const ::core::ffi::c_char;
     }
     let mut used: *const ::core::ffi::c_char = str;
-    let mut errmsg: *const ::core::ffi::c_char = str_to_filters(
-        &raw mut used,
-        filters,
-        flags,
-        allocator,
-    );
+    let mut errmsg: *const ::core::ffi::c_char =
+        str_to_filters(&raw mut used, filters, flags, allocator);
     if !error_pos.is_null() {
         let n: size_t = used.offset_from(str) as ::core::ffi::c_long as size_t;
         *error_pos = if n > INT_MAX as size_t {
@@ -1328,11 +1226,9 @@ unsafe extern "C" fn strfy_filter(
             == OPTMAP_TYPE_LZMA_PRESET as ::core::ffi::c_int)
         {
             let mut v: uint32_t = 0;
-            let mut ptr: *const ::core::ffi::c_void = (filter_options
-                as *const ::core::ffi::c_char)
-                .offset(
-                    (*optmap.offset(i as isize)).offset as ::core::ffi::c_int as isize,
-                ) as *const ::core::ffi::c_void;
+            let mut ptr: *const ::core::ffi::c_void = (filter_options as *const ::core::ffi::c_char)
+                .offset((*optmap.offset(i as isize)).offset as ::core::ffi::c_int as isize)
+                as *const ::core::ffi::c_void;
             match (*optmap.offset(i as isize)).type_0 as ::core::ffi::c_int {
                 1 => {
                     v = *(ptr as *const lzma_mode) as uint32_t;
@@ -1345,27 +1241,25 @@ unsafe extern "C" fn strfy_filter(
                 }
             }
             if !(v == 0 as uint32_t
-                && (*optmap.offset(i as isize)).flags as ::core::ffi::c_int
-                    & OPTMAP_NO_STRFY_ZERO != 0)
+                && (*optmap.offset(i as isize)).flags as ::core::ffi::c_int & OPTMAP_NO_STRFY_ZERO
+                    != 0)
             {
                 str_append_str(dest, delimiter);
                 delimiter = b",\0" as *const u8 as *const ::core::ffi::c_char;
                 str_append_str(
                     dest,
-                    &raw const (*optmap.offset(i as isize)).name
-                        as *const ::core::ffi::c_char,
+                    &raw const (*optmap.offset(i as isize)).name as *const ::core::ffi::c_char,
                 );
                 str_append_str(dest, b"=\0" as *const u8 as *const ::core::ffi::c_char);
                 if (*optmap.offset(i as isize)).flags as ::core::ffi::c_int
-                    & OPTMAP_USE_NAME_VALUE_MAP != 0
+                    & OPTMAP_USE_NAME_VALUE_MAP
+                    != 0
                 {
-                    let mut map: *const name_value_map = (*optmap.offset(i as isize))
-                        .u
-                        .map;
+                    let mut map: *const name_value_map = (*optmap.offset(i as isize)).u.map;
                     let mut j: size_t = 0 as size_t;
                     loop {
-                        if (*map.offset(j as isize))
-                            .name[0 as ::core::ffi::c_int as usize] as ::core::ffi::c_int
+                        if (*map.offset(j as isize)).name[0 as ::core::ffi::c_int as usize]
+                            as ::core::ffi::c_int
                             == '\0' as i32
                         {
                             str_append_str(
@@ -1389,7 +1283,8 @@ unsafe extern "C" fn strfy_filter(
                         dest,
                         v,
                         (*optmap.offset(i as isize)).flags as ::core::ffi::c_int
-                            & OPTMAP_USE_BYTE_SUFFIX != 0,
+                            & OPTMAP_USE_BYTE_SUFFIX
+                            != 0,
                     );
                 }
             }
@@ -1412,14 +1307,13 @@ pub unsafe extern "C" fn lzma_str_from_filters(
         return LZMA_PROG_ERROR;
     }
     let supported_flags: uint32_t = LZMA_STR_ENCODER as uint32_t
-        | LZMA_STR_DECODER as uint32_t | LZMA_STR_GETOPT_LONG as uint32_t
+        | LZMA_STR_DECODER as uint32_t
+        | LZMA_STR_GETOPT_LONG as uint32_t
         | LZMA_STR_NO_SPACES as uint32_t;
     if flags & !supported_flags != 0 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*filters.offset(0 as ::core::ffi::c_int as isize)).id
-        == LZMA_VLI_UNKNOWN as lzma_vli
-    {
+    if (*filters.offset(0 as ::core::ffi::c_int as isize)).id == LZMA_VLI_UNKNOWN as lzma_vli {
         return LZMA_OPTIONS_ERROR;
     }
     let mut dest: lzma_str = lzma_str {
@@ -1427,15 +1321,12 @@ pub unsafe extern "C" fn lzma_str_from_filters(
         pos: 0,
     };
     let ret_: lzma_ret = str_init(&raw mut dest, allocator) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
-    let show_opts: bool = flags
-        & (LZMA_STR_ENCODER as uint32_t | LZMA_STR_DECODER as uint32_t) != 0;
-    let mut opt_delim: *const ::core::ffi::c_char = if flags
-        & LZMA_STR_GETOPT_LONG as uint32_t != 0
+    let show_opts: bool =
+        flags & (LZMA_STR_ENCODER as uint32_t | LZMA_STR_DECODER as uint32_t) != 0;
+    let mut opt_delim: *const ::core::ffi::c_char = if flags & LZMA_STR_GETOPT_LONG as uint32_t != 0
     {
         b"=\0" as *const u8 as *const ::core::ffi::c_char
     } else {
@@ -1463,9 +1354,8 @@ pub unsafe extern "C" fn lzma_str_from_filters(
         }
         let mut j: size_t = 0 as size_t;
         loop {
-            if j
-                == (::core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
-                    .wrapping_div(::core::mem::size_of::<C2RustUnnamed>() as usize)
+            if j == (::core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
+                .wrapping_div(::core::mem::size_of::<C2RustUnnamed>() as usize)
             {
                 str_free(&raw mut dest, allocator);
                 return LZMA_OPTIONS_ERROR;
@@ -1475,7 +1365,7 @@ pub unsafe extern "C" fn lzma_str_from_filters(
                     &raw mut dest,
                     &raw const (*(&raw const filter_name_map as *const C2RustUnnamed)
                         .offset(j as isize))
-                        .name as *const ::core::ffi::c_char,
+                    .name as *const ::core::ffi::c_char,
                 );
                 if !show_opts {
                     break;
@@ -1487,9 +1377,7 @@ pub unsafe extern "C" fn lzma_str_from_filters(
                     }
                     break;
                 } else {
-                    let optmap_count: size_t = (if flags & LZMA_STR_ENCODER as uint32_t
-                        != 0
-                    {
+                    let optmap_count: size_t = (if flags & LZMA_STR_ENCODER as uint32_t != 0 {
                         filter_name_map[j as usize].strfy_encoder as ::core::ffi::c_int
                     } else {
                         filter_name_map[j as usize].strfy_decoder as ::core::ffi::c_int
@@ -1523,7 +1411,8 @@ pub unsafe extern "C" fn lzma_str_list_filters(
     }
     *output_str = ::core::ptr::null_mut::<::core::ffi::c_char>();
     let supported_flags: uint32_t = LZMA_STR_ALL_FILTERS as uint32_t
-        | LZMA_STR_ENCODER as uint32_t | LZMA_STR_DECODER as uint32_t
+        | LZMA_STR_ENCODER as uint32_t
+        | LZMA_STR_DECODER as uint32_t
         | LZMA_STR_GETOPT_LONG as uint32_t;
     if flags & !supported_flags != 0 {
         return LZMA_OPTIONS_ERROR;
@@ -1533,22 +1422,17 @@ pub unsafe extern "C" fn lzma_str_list_filters(
         pos: 0,
     };
     let ret_: lzma_ret = str_init(&raw mut dest, allocator) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
-    let show_opts: bool = flags
-        & (LZMA_STR_ENCODER as uint32_t | LZMA_STR_DECODER as uint32_t) != 0;
-    let mut filter_delim: *const ::core::ffi::c_char = if show_opts as ::core::ffi::c_int
-        != 0
-    {
+    let show_opts: bool =
+        flags & (LZMA_STR_ENCODER as uint32_t | LZMA_STR_DECODER as uint32_t) != 0;
+    let mut filter_delim: *const ::core::ffi::c_char = if show_opts as ::core::ffi::c_int != 0 {
         b"\n\0" as *const u8 as *const ::core::ffi::c_char
     } else {
         b" \0" as *const u8 as *const ::core::ffi::c_char
     };
-    let mut opt_delim: *const ::core::ffi::c_char = if flags
-        & LZMA_STR_GETOPT_LONG as uint32_t != 0
+    let mut opt_delim: *const ::core::ffi::c_char = if flags & LZMA_STR_GETOPT_LONG as uint32_t != 0
     {
         b"=\0" as *const u8 as *const ::core::ffi::c_char
     } else {
@@ -1581,11 +1465,10 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                     &raw mut dest,
                     &raw const (*(&raw const filter_name_map as *const C2RustUnnamed)
                         .offset(i as isize))
-                        .name as *const ::core::ffi::c_char,
+                    .name as *const ::core::ffi::c_char,
                 );
                 if show_opts {
-                    let mut optmap: *const option_map = filter_name_map[i as usize]
-                        .optmap;
+                    let mut optmap: *const option_map = filter_name_map[i as usize].optmap;
                     let mut d: *const ::core::ffi::c_char = opt_delim;
                     let end: size_t = (if flags & LZMA_STR_ENCODER as uint32_t != 0 {
                         filter_name_map[i as usize].strfy_encoder as ::core::ffi::c_int
@@ -1609,17 +1492,15 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                             == OPTMAP_TYPE_LZMA_PRESET as ::core::ffi::c_int
                         {
                             str_append_str(&raw mut dest, LZMA12_PRESET_STR.as_ptr());
-                        } else if (*optmap.offset(j as isize)).flags
-                            as ::core::ffi::c_int & OPTMAP_USE_NAME_VALUE_MAP != 0
+                        } else if (*optmap.offset(j as isize)).flags as ::core::ffi::c_int
+                            & OPTMAP_USE_NAME_VALUE_MAP
+                            != 0
                         {
-                            let mut m: *const name_value_map = (*optmap
-                                .offset(j as isize))
-                                .u
-                                .map;
+                            let mut m: *const name_value_map = (*optmap.offset(j as isize)).u.map;
                             let mut k: size_t = 0 as size_t;
-                            while (*m.offset(k as isize))
-                                .name[0 as ::core::ffi::c_int as usize]
-                                as ::core::ffi::c_int != '\0' as i32
+                            while (*m.offset(k as isize)).name[0 as ::core::ffi::c_int as usize]
+                                as ::core::ffi::c_int
+                                != '\0' as i32
                             {
                                 if k > 0 as size_t {
                                     str_append_str(
@@ -1635,8 +1516,10 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                                 k = k.wrapping_add(1);
                             }
                         } else {
-                            let use_byte_suffix: bool = (*optmap.offset(j as isize))
-                                .flags as ::core::ffi::c_int & OPTMAP_USE_BYTE_SUFFIX != 0;
+                            let use_byte_suffix: bool = (*optmap.offset(j as isize)).flags
+                                as ::core::ffi::c_int
+                                & OPTMAP_USE_BYTE_SUFFIX
+                                != 0;
                             str_append_u32(
                                 &raw mut dest,
                                 (*optmap.offset(j as isize)).u.range.min,
@@ -1672,10 +1555,9 @@ pub unsafe extern "C" fn lzma_str_list_filters(
 unsafe extern "C" fn run_static_initializers() {
     lzma12_optmap = [
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"preset\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"preset\0\0\0\0\0\0",
+            ),
             type_0: OPTMAP_TYPE_LZMA_PRESET as ::core::ffi::c_int as uint8_t,
             flags: 0,
             offset: 0,
@@ -1684,10 +1566,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"dict\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"dict\0\0\0\0\0\0\0\0",
+            ),
             type_0: 0,
             flags: OPTMAP_USE_BYTE_SUFFIX as uint8_t,
             offset: 0 as ::core::ffi::c_ulong as uint16_t,
@@ -1700,10 +1581,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"lc\0\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"lc\0\0\0\0\0\0\0\0\0\0",
+            ),
             type_0: 0,
             flags: 0,
             offset: 20 as ::core::ffi::c_ulong as uint16_t,
@@ -1715,10 +1595,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"lp\0\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"lp\0\0\0\0\0\0\0\0\0\0",
+            ),
             type_0: 0,
             flags: 0,
             offset: 24 as ::core::ffi::c_ulong as uint16_t,
@@ -1730,10 +1609,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"pb\0\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"pb\0\0\0\0\0\0\0\0\0\0",
+            ),
             type_0: 0,
             flags: 0,
             offset: 28 as ::core::ffi::c_ulong as uint16_t,
@@ -1745,10 +1623,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"mode\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"mode\0\0\0\0\0\0\0\0",
+            ),
             type_0: OPTMAP_TYPE_LZMA_MODE as ::core::ffi::c_int as uint8_t,
             flags: OPTMAP_USE_NAME_VALUE_MAP as uint8_t,
             offset: 32 as ::core::ffi::c_ulong as uint16_t,
@@ -1757,10 +1634,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"nice\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"nice\0\0\0\0\0\0\0\0",
+            ),
             type_0: 0,
             flags: 0,
             offset: 36 as ::core::ffi::c_ulong as uint16_t,
@@ -1772,10 +1648,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"mf\0\0\0\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"mf\0\0\0\0\0\0\0\0\0\0",
+            ),
             type_0: OPTMAP_TYPE_LZMA_MATCH_FINDER as ::core::ffi::c_int as uint8_t,
             flags: OPTMAP_USE_NAME_VALUE_MAP as uint8_t,
             offset: 40 as ::core::ffi::c_ulong as uint16_t,
@@ -1784,10 +1659,9 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<
-                [u8; 12],
-                [::core::ffi::c_char; 12],
-            >(*b"depth\0\0\0\0\0\0\0"),
+            name: ::core::mem::transmute::<[u8; 12], [::core::ffi::c_char; 12]>(
+                *b"depth\0\0\0\0\0\0\0",
+            ),
             type_0: 0,
             flags: 0,
             offset: 44 as ::core::ffi::c_ulong as uint16_t,

@@ -2,11 +2,7 @@ extern "C" {
     fn lzma_crc32(buf: *const uint8_t, size: size_t, crc: uint32_t) -> uint32_t;
     fn lzma_crc64(buf: *const uint8_t, size: size_t, crc: uint64_t) -> uint64_t;
     fn lzma_sha256_init(check: *mut lzma_check_state);
-    fn lzma_sha256_update(
-        buf: *const uint8_t,
-        size: size_t,
-        check: *mut lzma_check_state,
-    );
+    fn lzma_sha256_update(buf: *const uint8_t, size: size_t, check: *mut lzma_check_state);
     fn lzma_sha256_finish(check: *mut lzma_check_state);
 }
 pub type __darwin_size_t = usize;
@@ -101,10 +97,7 @@ pub unsafe extern "C" fn lzma_check_size(mut type_0: lzma_check) -> uint32_t {
     return check_sizes[type_0 as ::core::ffi::c_uint as usize] as uint32_t;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_check_init(
-    mut check: *mut lzma_check_state,
-    mut type_0: lzma_check,
-) {
+pub unsafe extern "C" fn lzma_check_init(mut check: *mut lzma_check_state, mut type_0: lzma_check) {
     match type_0 as ::core::ffi::c_uint {
         1 => {
             (*check).state.crc32 = 0 as uint32_t;
@@ -145,14 +138,10 @@ pub unsafe extern "C" fn lzma_check_finish(
 ) {
     match type_0 as ::core::ffi::c_uint {
         1 => {
-            (*check).buffer.u32_0[0 as ::core::ffi::c_int as usize] = (*check)
-                .state
-                .crc32;
+            (*check).buffer.u32_0[0 as ::core::ffi::c_int as usize] = (*check).state.crc32;
         }
         4 => {
-            (*check).buffer.u64_0[0 as ::core::ffi::c_int as usize] = (*check)
-                .state
-                .crc64;
+            (*check).buffer.u64_0[0 as ::core::ffi::c_int as usize] = (*check).state.crc64;
         }
         10 => {
             lzma_sha256_finish(check);

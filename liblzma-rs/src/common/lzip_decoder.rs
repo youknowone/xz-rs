@@ -1,10 +1,7 @@
 extern "C" {
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_crc32(buf: *const uint8_t, size: size_t, crc: uint32_t) -> uint32_t;
-    fn lzma_alloc(
-        size: size_t,
-        allocator: *const lzma_allocator,
-    ) -> *mut ::core::ffi::c_void;
+    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut ::core::ffi::c_void;
     fn lzma_free(ptr: *mut ::core::ffi::c_void, allocator: *const lzma_allocator);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
     fn lzma_next_filter_init(
@@ -26,9 +23,7 @@ extern "C" {
         allocator: *const lzma_allocator,
         filters: *const lzma_filter_info,
     ) -> lzma_ret;
-    fn lzma_lzma_decoder_memusage_nocheck(
-        options: *const ::core::ffi::c_void,
-    ) -> uint64_t;
+    fn lzma_lzma_decoder_memusage_nocheck(options: *const ::core::ffi::c_void) -> uint64_t;
 }
 pub type __darwin_size_t = usize;
 pub type uintptr_t = usize;
@@ -70,15 +65,10 @@ pub const LZMA_RUN: lzma_action = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 #[derive(Copy, Clone)]
@@ -107,16 +97,9 @@ pub struct lzma_next_coder_s {
     pub init: uintptr_t,
     pub code: lzma_code_function,
     pub end: lzma_end_function,
-    pub get_progress: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            *mut uint64_t,
-        ) -> (),
-    >,
-    pub get_check: Option<
-        unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check,
-    >,
+    pub get_progress:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, *mut uint64_t) -> ()>,
+    pub get_check: Option<unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check>,
     pub memconfig: Option<
         unsafe extern "C" fn(
             *mut ::core::ffi::c_void,
@@ -133,13 +116,8 @@ pub struct lzma_next_coder_s {
             *const lzma_filter,
         ) -> lzma_ret,
     >,
-    pub set_out_limit: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            uint64_t,
-        ) -> lzma_ret,
-    >,
+    pub set_out_limit:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -153,9 +131,8 @@ pub const LZMA_CHECK_SHA256: lzma_check = 10;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
 pub const LZMA_CHECK_NONE: lzma_check = 0;
-pub type lzma_end_function = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
->;
+pub type lzma_end_function =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> ()>;
 pub type lzma_code_function = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -270,68 +247,48 @@ pub type lzma_init_function = Option<
         *const lzma_filter_info,
     ) -> lzma_ret,
 >;
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
 pub const true_0: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
 pub const false_0: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 #[inline]
 unsafe extern "C" fn read32le(mut buf: *const uint8_t) -> uint32_t {
     let mut num: uint32_t = *buf.offset(0 as ::core::ffi::c_int as isize) as uint32_t;
-    num
-        |= (*buf.offset(1 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 16 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(3 as ::core::ffi::c_int as isize) as uint32_t)
-            << 24 as ::core::ffi::c_int;
+    num |= (*buf.offset(1 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int;
+    num |= (*buf.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 16 as ::core::ffi::c_int;
+    num |= (*buf.offset(3 as ::core::ffi::c_int as isize) as uint32_t) << 24 as ::core::ffi::c_int;
     return num;
 }
 #[inline]
 unsafe extern "C" fn read64le(mut buf: *const uint8_t) -> uint64_t {
     let mut num: uint64_t = *buf.offset(0 as ::core::ffi::c_int as isize) as uint64_t;
-    num
-        |= (*buf.offset(1 as ::core::ffi::c_int as isize) as uint64_t)
-            << 8 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(2 as ::core::ffi::c_int as isize) as uint64_t)
-            << 16 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(3 as ::core::ffi::c_int as isize) as uint64_t)
-            << 24 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(4 as ::core::ffi::c_int as isize) as uint64_t)
-            << 32 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(5 as ::core::ffi::c_int as isize) as uint64_t)
-            << 40 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(6 as ::core::ffi::c_int as isize) as uint64_t)
-            << 48 as ::core::ffi::c_int;
-    num
-        |= (*buf.offset(7 as ::core::ffi::c_int as isize) as uint64_t)
-            << 56 as ::core::ffi::c_int;
+    num |= (*buf.offset(1 as ::core::ffi::c_int as isize) as uint64_t) << 8 as ::core::ffi::c_int;
+    num |= (*buf.offset(2 as ::core::ffi::c_int as isize) as uint64_t) << 16 as ::core::ffi::c_int;
+    num |= (*buf.offset(3 as ::core::ffi::c_int as isize) as uint64_t) << 24 as ::core::ffi::c_int;
+    num |= (*buf.offset(4 as ::core::ffi::c_int as isize) as uint64_t) << 32 as ::core::ffi::c_int;
+    num |= (*buf.offset(5 as ::core::ffi::c_int as isize) as uint64_t) << 40 as ::core::ffi::c_int;
+    num |= (*buf.offset(6 as ::core::ffi::c_int as isize) as uint64_t) << 48 as ::core::ffi::c_int;
+    num |= (*buf.offset(7 as ::core::ffi::c_int as isize) as uint64_t) << 56 as ::core::ffi::c_int;
     return num;
 }
 pub const LZMA_VLI_UNKNOWN: ::core::ffi::c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTER_LZMA1: ::core::ffi::c_ulonglong = 0x4000000000000001
-    as ::core::ffi::c_ulonglong;
+pub const LZMA_FILTER_LZMA1: ::core::ffi::c_ulonglong =
+    0x4000000000000001 as ::core::ffi::c_ulonglong;
 pub const LZMA_TELL_NO_CHECK: ::core::ffi::c_uint = 0x1 as ::core::ffi::c_uint;
 pub const LZMA_TELL_UNSUPPORTED_CHECK: ::core::ffi::c_uint = 0x2 as ::core::ffi::c_uint;
 pub const LZMA_TELL_ANY_CHECK: ::core::ffi::c_uint = 0x4 as ::core::ffi::c_uint;
 pub const LZMA_IGNORE_CHECK: ::core::ffi::c_uint = 0x10 as ::core::ffi::c_uint;
 pub const LZMA_CONCATENATED: ::core::ffi::c_uint = 0x8 as ::core::ffi::c_uint;
 pub const LZMA_FAIL_FAST: ::core::ffi::c_uint = 0x20 as ::core::ffi::c_uint;
-pub const LZMA_MEMUSAGE_BASE: ::core::ffi::c_ulonglong = (1 as ::core::ffi::c_ulonglong)
-    << 15 as ::core::ffi::c_int;
+pub const LZMA_MEMUSAGE_BASE: ::core::ffi::c_ulonglong =
+    (1 as ::core::ffi::c_ulonglong) << 15 as ::core::ffi::c_int;
 pub const LZMA_SUPPORTED_FLAGS: ::core::ffi::c_uint = LZMA_TELL_NO_CHECK
-    | LZMA_TELL_UNSUPPORTED_CHECK | LZMA_TELL_ANY_CHECK | LZMA_IGNORE_CHECK
-    | LZMA_CONCATENATED | LZMA_FAIL_FAST;
+    | LZMA_TELL_UNSUPPORTED_CHECK
+    | LZMA_TELL_ANY_CHECK
+    | LZMA_IGNORE_CHECK
+    | LZMA_CONCATENATED
+    | LZMA_FAIL_FAST;
 pub const LZIP_V0_FOOTER_SIZE: ::core::ffi::c_int = 12 as ::core::ffi::c_int;
 pub const LZIP_V1_FOOTER_SIZE: ::core::ffi::c_int = 20 as ::core::ffi::c_int;
 pub const LZIP_LC: ::core::ffi::c_int = 3 as ::core::ffi::c_int;
@@ -385,8 +342,7 @@ unsafe extern "C" fn lzip_decode(
                 (*coder).pos = 0 as size_t;
                 (*coder).crc32 = 0 as uint32_t;
                 (*coder).uncompressed_size = 0 as uint64_t;
-                (*coder).member_size = ::core::mem::size_of::<[uint8_t; 4]>()
-                    as uint64_t;
+                (*coder).member_size = ::core::mem::size_of::<[uint8_t; 4]>() as uint64_t;
                 (*coder).sequence = SEQ_VERSION;
                 current_block_80 = 11220331375136032509;
             }
@@ -438,7 +394,8 @@ unsafe extern "C" fn lzip_decode(
                 (*coder).member_size = (*coder).member_size.wrapping_add(1);
                 let b2log: uint32_t = ds & 0x1f as uint32_t;
                 let fracnum: uint32_t = ds >> 5 as ::core::ffi::c_int;
-                if b2log < 12 as uint32_t || b2log > 29 as uint32_t
+                if b2log < 12 as uint32_t
+                    || b2log > 29 as uint32_t
                     || b2log == 12 as uint32_t && fracnum > 0 as uint32_t
                 {
                     return LZMA_DATA_ERROR;
@@ -450,9 +407,9 @@ unsafe extern "C" fn lzip_decode(
                 (*coder).options.lp = LZIP_LP as uint32_t;
                 (*coder).options.pb = LZIP_PB as uint32_t;
                 (*coder).memusage = lzma_lzma_decoder_memusage_nocheck(
-                        &raw mut (*coder).options as *const ::core::ffi::c_void,
-                    )
-                    .wrapping_add(LZMA_MEMUSAGE_BASE as uint64_t);
+                    &raw mut (*coder).options as *const ::core::ffi::c_void,
+                )
+                .wrapping_add(LZMA_MEMUSAGE_BASE as uint64_t);
                 (*coder).sequence = SEQ_CODER_INIT;
                 current_block_80 = 15476230294461844687;
             }
@@ -472,7 +429,8 @@ unsafe extern "C" fn lzip_decode(
                                     *mut lzma_next_coder,
                                     *const lzma_allocator,
                                     *const lzma_filter_info,
-                                ) -> lzma_ret,
+                                )
+                                    -> lzma_ret,
                         ),
                         options: &raw mut (*coder).options as *mut ::core::ffi::c_void,
                     },
@@ -505,9 +463,7 @@ unsafe extern "C" fn lzip_decode(
                 let ret: lzma_ret = (*coder)
                     .lzma_decoder
                     .code
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                    .expect("non-null function pointer")(
                     (*coder).lzma_decoder.coder,
                     allocator,
                     in_0,
@@ -526,11 +482,8 @@ unsafe extern "C" fn lzip_decode(
                     .uncompressed_size
                     .wrapping_add(out_used as uint64_t);
                 if !(*coder).ignore_check && out_used > 0 as size_t {
-                    (*coder).crc32 = lzma_crc32(
-                        out.offset(out_start as isize),
-                        out_used,
-                        (*coder).crc32,
-                    );
+                    (*coder).crc32 =
+                        lzma_crc32(out.offset(out_start as isize), out_used, (*coder).crc32);
                 }
                 if ret as ::core::ffi::c_uint
                     != LZMA_STREAM_END as ::core::ffi::c_int as ::core::ffi::c_uint
@@ -558,22 +511,21 @@ unsafe extern "C" fn lzip_decode(
             return LZMA_OK;
         }
         (*coder).pos = 0 as size_t;
-        (*coder).member_size = (*coder)
-            .member_size
-            .wrapping_add(footer_size as uint64_t);
+        (*coder).member_size = (*coder).member_size.wrapping_add(footer_size as uint64_t);
         if !(*coder).ignore_check
             && (*coder).crc32
                 != read32le(
                     (&raw mut (*coder).buffer as *mut uint8_t)
-                        .offset(0 as ::core::ffi::c_int as isize) as *mut uint8_t,
+                        .offset(0 as ::core::ffi::c_int as isize)
+                        as *mut uint8_t,
                 )
         {
             return LZMA_DATA_ERROR;
         }
         if (*coder).uncompressed_size
             != read64le(
-                (&raw mut (*coder).buffer as *mut uint8_t)
-                    .offset(4 as ::core::ffi::c_int as isize) as *mut uint8_t,
+                (&raw mut (*coder).buffer as *mut uint8_t).offset(4 as ::core::ffi::c_int as isize)
+                    as *mut uint8_t,
             )
         {
             return LZMA_DATA_ERROR;
@@ -582,7 +534,8 @@ unsafe extern "C" fn lzip_decode(
             if (*coder).member_size
                 != read64le(
                     (&raw mut (*coder).buffer as *mut uint8_t)
-                        .offset(12 as ::core::ffi::c_int as isize) as *mut uint8_t,
+                        .offset(12 as ::core::ffi::c_int as isize)
+                        as *mut uint8_t,
                 )
             {
                 return LZMA_DATA_ERROR;
@@ -593,7 +546,7 @@ unsafe extern "C" fn lzip_decode(
         }
         (*coder).first_member = false_0 != 0;
         (*coder).sequence = SEQ_ID_STRING;
-    };
+    }
 }
 unsafe extern "C" fn lzip_decoder_end(
     mut coder_ptr: *mut ::core::ffi::c_void,
@@ -642,17 +595,15 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
             ) -> lzma_ret,
         >,
         uintptr_t,
-    >(
-        Some(
-            lzma_lzip_decoder_init
-                as unsafe extern "C" fn(
-                    *mut lzma_next_coder,
-                    *const lzma_allocator,
-                    uint64_t,
-                    uint32_t,
-                ) -> lzma_ret,
-        ),
-    ) != (*next).init
+    >(Some(
+        lzma_lzip_decoder_init
+            as unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                uint64_t,
+                uint32_t,
+            ) -> lzma_ret,
+    )) != (*next).init
     {
         lzma_next_end(next, allocator);
     }
@@ -666,17 +617,15 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
             ) -> lzma_ret,
         >,
         uintptr_t,
-    >(
-        Some(
-            lzma_lzip_decoder_init
-                as unsafe extern "C" fn(
-                    *mut lzma_next_coder,
-                    *const lzma_allocator,
-                    uint64_t,
-                    uint32_t,
-                ) -> lzma_ret,
-        ),
-    );
+    >(Some(
+        lzma_lzip_decoder_init
+            as unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                uint64_t,
+                uint32_t,
+            ) -> lzma_ret,
+    ));
     if flags & !(LZMA_SUPPORTED_FLAGS as uint32_t) != 0 {
         return LZMA_OPTIONS_ERROR;
     }
@@ -706,15 +655,13 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
         ) as lzma_code_function;
         (*next).end = Some(
             lzip_decoder_end
-                as unsafe extern "C" fn(
-                    *mut ::core::ffi::c_void,
-                    *const lzma_allocator,
-                ) -> (),
+                as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
         ) as lzma_end_function;
         (*next).get_check = Some(
             lzip_decoder_get_check
                 as unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check,
-        ) as Option<unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check>;
+        )
+            as Option<unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check>;
         (*next).memconfig = Some(
             lzip_decoder_memconfig
                 as unsafe extern "C" fn(
@@ -746,7 +693,11 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
         };
     }
     (*coder).sequence = SEQ_ID_STRING;
-    (*coder).memlimit = if 1 as uint64_t > memlimit { 1 as uint64_t } else { memlimit };
+    (*coder).memlimit = if 1 as uint64_t > memlimit {
+        1 as uint64_t
+    } else {
+        memlimit
+    };
     (*coder).memusage = LZMA_MEMUSAGE_BASE as uint64_t;
     (*coder).tell_any_check = flags & LZMA_TELL_ANY_CHECK as uint32_t != 0 as uint32_t;
     (*coder).ignore_check = flags & LZMA_IGNORE_CHECK as uint32_t != 0 as uint32_t;
@@ -762,9 +713,7 @@ pub unsafe extern "C" fn lzma_lzip_decoder(
     mut flags: uint32_t,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     let ret__0: lzma_ret = lzma_lzip_decoder_init(
@@ -773,15 +722,11 @@ pub unsafe extern "C" fn lzma_lzip_decoder(
         memlimit,
         flags,
     ) as lzma_ret;
-    if ret__0 as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret__0 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         lzma_end(strm);
         return ret__0;
     }
-    (*(*strm).internal).supported_actions[LZMA_RUN as ::core::ffi::c_int as usize] = true_0
-        != 0;
-    (*(*strm).internal).supported_actions[LZMA_FINISH as ::core::ffi::c_int as usize] = true_0
-        != 0;
+    (*(*strm).internal).supported_actions[LZMA_RUN as ::core::ffi::c_int as usize] = true_0 != 0;
+    (*(*strm).internal).supported_actions[LZMA_FINISH as ::core::ffi::c_int as usize] = true_0 != 0;
     return LZMA_OK;
 }

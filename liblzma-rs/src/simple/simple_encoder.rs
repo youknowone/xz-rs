@@ -27,19 +27,14 @@ pub const LZMA_OK: lzma_ret = 0;
 pub struct lzma_options_bcj {
     pub start_offset: uint32_t,
 }
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
 #[inline]
 unsafe extern "C" fn write32le(mut buf: *mut uint8_t, mut num: uint32_t) {
     *buf.offset(0 as ::core::ffi::c_int as isize) = num as uint8_t;
-    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int)
-        as uint8_t;
+    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int) as uint8_t;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_simple_props_size(

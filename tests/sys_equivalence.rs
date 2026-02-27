@@ -520,8 +520,7 @@ fn differential_roundtrip_across_backends() {
             let (c_enc_ret, c_encoded) = c_encode_easy(&input);
             let (rs_enc_ret, rs_encoded) = rs_encode_easy(&input);
             assert_eq!(
-                c_enc_ret,
-                rs_enc_ret,
+                c_enc_ret, rs_enc_ret,
                 "encoder ret mismatch at case {case}: c={c_enc_ret} rs={rs_enc_ret}"
             );
             assert_eq!(
@@ -544,10 +543,22 @@ fn differential_roundtrip_across_backends() {
                 "decode(rs_encoded) ret mismatch at case {case}: c={c_from_rs_ret} rs={rs_from_rs_ret}"
             );
 
-            assert_eq!(c_from_c, input, "C decode(C encode) payload mismatch at case {case}");
-            assert_eq!(rs_from_c, input, "RS decode(C encode) payload mismatch at case {case}");
-            assert_eq!(c_from_rs, input, "C decode(RS encode) payload mismatch at case {case}");
-            assert_eq!(rs_from_rs, input, "RS decode(RS encode) payload mismatch at case {case}");
+            assert_eq!(
+                c_from_c, input,
+                "C decode(C encode) payload mismatch at case {case}"
+            );
+            assert_eq!(
+                rs_from_c, input,
+                "RS decode(C encode) payload mismatch at case {case}"
+            );
+            assert_eq!(
+                c_from_rs, input,
+                "C decode(RS encode) payload mismatch at case {case}"
+            );
+            assert_eq!(
+                rs_from_rs, input,
+                "RS decode(RS encode) payload mismatch at case {case}"
+            );
         }
     }
 }
@@ -575,9 +586,12 @@ fn differential_error_codes_on_invalid_corpus() {
             let (c_ret, _) = c_decode_stream_buffer(&data, 4096);
             let (rs_ret, _) = rs_decode_stream_buffer(&data, 4096);
             assert_eq!(
-                c_ret, rs_ret,
+                c_ret,
+                rs_ret,
                 "error ret mismatch for {}: c={} rs={}",
-                path.display(), c_ret, rs_ret
+                path.display(),
+                c_ret,
+                rs_ret
             );
         }
     }

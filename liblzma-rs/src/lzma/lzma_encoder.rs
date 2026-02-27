@@ -1,8 +1,5 @@
 extern "C" {
-    fn lzma_alloc(
-        size: size_t,
-        allocator: *const lzma_allocator,
-    ) -> *mut ::core::ffi::c_void;
+    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut ::core::ffi::c_void;
     fn lzma_lz_encoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -76,15 +73,10 @@ pub const LZMA_RUN: lzma_action = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 pub type lzma_next_coder = lzma_next_coder_s;
@@ -96,16 +88,9 @@ pub struct lzma_next_coder_s {
     pub init: uintptr_t,
     pub code: lzma_code_function,
     pub end: lzma_end_function,
-    pub get_progress: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            *mut uint64_t,
-        ) -> (),
-    >,
-    pub get_check: Option<
-        unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check,
-    >,
+    pub get_progress:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, *mut uint64_t) -> ()>,
+    pub get_check: Option<unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check>,
     pub memconfig: Option<
         unsafe extern "C" fn(
             *mut ::core::ffi::c_void,
@@ -122,13 +107,8 @@ pub struct lzma_next_coder_s {
             *const lzma_filter,
         ) -> lzma_ret,
     >,
-    pub set_out_limit: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            uint64_t,
-        ) -> lzma_ret,
-    >,
+    pub set_out_limit:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -142,9 +122,8 @@ pub const LZMA_CHECK_SHA256: lzma_check = 10;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
 pub const LZMA_CHECK_NONE: lzma_check = 0;
-pub type lzma_end_function = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
->;
+pub type lzma_end_function =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> ()>;
 pub type lzma_code_function = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -270,19 +249,11 @@ pub struct lzma_lz_encoder {
             size_t,
         ) -> lzma_ret,
     >,
-    pub end: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
-    >,
-    pub options_update: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_filter) -> lzma_ret,
-    >,
-    pub set_out_limit: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            uint64_t,
-        ) -> lzma_ret,
-    >,
+    pub end: Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> ()>,
+    pub options_update:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_filter) -> lzma_ret>,
+    pub set_out_limit:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret>,
 }
 pub type probability = uint16_t;
 #[derive(Copy, Clone)]
@@ -384,34 +355,28 @@ pub struct lzma_length_encoder {
     pub counters: [uint32_t; 16],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
 pub const UINT32_MAX: ::core::ffi::c_uint = 4294967295 as ::core::ffi::c_uint;
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
 pub const true_0: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
 pub const false_0: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 #[inline]
 unsafe extern "C" fn write32le(mut buf: *mut uint8_t, mut num: uint32_t) {
     *buf.offset(0 as ::core::ffi::c_int as isize) = num as uint8_t;
-    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int)
-        as uint8_t;
+    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int) as uint8_t;
 }
-pub const LZMA_FILTER_LZMA1: ::core::ffi::c_ulonglong = 0x4000000000000001
-    as ::core::ffi::c_ulonglong;
-pub const LZMA_FILTER_LZMA1EXT: ::core::ffi::c_ulonglong = 0x4000000000000002
-    as ::core::ffi::c_ulonglong;
+pub const LZMA_FILTER_LZMA1: ::core::ffi::c_ulonglong =
+    0x4000000000000001 as ::core::ffi::c_ulonglong;
+pub const LZMA_FILTER_LZMA1EXT: ::core::ffi::c_ulonglong =
+    0x4000000000000002 as ::core::ffi::c_ulonglong;
 pub const LZMA_LCLP_MAX: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const LZMA_PB_MAX: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: ::core::ffi::c_uint = 0x1 as ::core::ffi::c_uint;
-pub const LZMA2_CHUNK_MAX: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 16 as ::core::ffi::c_int;
+pub const LZMA2_CHUNK_MAX: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << 16 as ::core::ffi::c_int;
 #[inline]
 unsafe extern "C" fn mf_get_hash_bytes(mut match_finder: lzma_match_finder) -> uint32_t {
     return match_finder as uint32_t & 0xf as uint32_t;
@@ -427,8 +392,8 @@ pub const RC_SHIFT_BITS: ::core::ffi::c_int = 8 as ::core::ffi::c_int;
 pub const RC_TOP_BITS: ::core::ffi::c_int = 24 as ::core::ffi::c_int;
 pub const RC_TOP_VALUE: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint) << RC_TOP_BITS;
 pub const RC_BIT_MODEL_TOTAL_BITS: ::core::ffi::c_int = 11 as ::core::ffi::c_int;
-pub const RC_BIT_MODEL_TOTAL: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << RC_BIT_MODEL_TOTAL_BITS;
+pub const RC_BIT_MODEL_TOTAL: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_BITS: ::core::ffi::c_int = 5 as ::core::ffi::c_int;
 pub const RC_MOVE_REDUCING_BITS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 #[inline]
@@ -456,8 +421,8 @@ unsafe extern "C" fn rc_bittree_price(
     mut symbol: uint32_t,
 ) -> uint32_t {
     let mut price: uint32_t = 0 as uint32_t;
-    symbol = (symbol as ::core::ffi::c_uint)
-        .wrapping_add((1 as ::core::ffi::c_uint) << bit_levels) as uint32_t as uint32_t;
+    symbol = (symbol as ::core::ffi::c_uint).wrapping_add((1 as ::core::ffi::c_uint) << bit_levels)
+        as uint32_t as uint32_t;
     loop {
         let bit: uint32_t = symbol & 1 as uint32_t;
         symbol >>= 1 as ::core::ffi::c_int;
@@ -503,12 +468,16 @@ unsafe extern "C" fn rc_bittree(
     loop {
         bit_count = bit_count.wrapping_sub(1);
         let bit: uint32_t = symbol >> bit_count & 1 as uint32_t;
-        rc_bit(rc, probs.offset(model_index as isize) as *mut probability, bit);
+        rc_bit(
+            rc,
+            probs.offset(model_index as isize) as *mut probability,
+            bit,
+        );
         model_index = (model_index << 1 as ::core::ffi::c_int).wrapping_add(bit);
         if !(bit_count != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }
 #[inline]
 unsafe extern "C" fn rc_bittree_reverse(
@@ -521,13 +490,17 @@ unsafe extern "C" fn rc_bittree_reverse(
     loop {
         let bit: uint32_t = symbol & 1 as uint32_t;
         symbol >>= 1 as ::core::ffi::c_int;
-        rc_bit(rc, probs.offset(model_index as isize) as *mut probability, bit);
+        rc_bit(
+            rc,
+            probs.offset(model_index as isize) as *mut probability,
+            bit,
+        );
         model_index = (model_index << 1 as ::core::ffi::c_int).wrapping_add(bit);
         bit_count = bit_count.wrapping_sub(1);
         if !(bit_count != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }
 #[inline]
 unsafe extern "C" fn rc_direct(
@@ -540,11 +513,12 @@ unsafe extern "C" fn rc_direct(
         let fresh0 = (*rc).count;
         (*rc).count = (*rc).count.wrapping_add(1);
         (*rc).symbols[fresh0 as usize] = (RC_DIRECT_0 as ::core::ffi::c_int as uint32_t)
-            .wrapping_add(value >> bit_count & 1 as uint32_t) as C2RustUnnamed;
+            .wrapping_add(value >> bit_count & 1 as uint32_t)
+            as C2RustUnnamed;
         if !(bit_count != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }
 #[inline]
 unsafe extern "C" fn rc_flush(mut rc: *mut lzma_range_encoder) {
@@ -571,8 +545,8 @@ unsafe extern "C" fn rc_shift_low(
                 return true_0 != 0;
             }
             *out.offset(*out_pos as isize) = ((*rc).cache as ::core::ffi::c_int
-                + ((*rc).low >> 32 as ::core::ffi::c_int) as uint8_t
-                    as ::core::ffi::c_int) as uint8_t;
+                + ((*rc).low >> 32 as ::core::ffi::c_int) as uint8_t as ::core::ffi::c_int)
+                as uint8_t;
             *out_pos = (*out_pos).wrapping_add(1);
             (*rc).out_total = (*rc).out_total.wrapping_add(1);
             (*rc).cache = 0xff as uint8_t;
@@ -581,8 +555,7 @@ unsafe extern "C" fn rc_shift_low(
                 break;
             }
         }
-        (*rc).cache = ((*rc).low >> 24 as ::core::ffi::c_int & 0xff as uint64_t)
-            as uint8_t;
+        (*rc).cache = ((*rc).low >> 24 as ::core::ffi::c_int & 0xff as uint64_t) as uint8_t;
     }
     (*rc).cache_size = (*rc).cache_size.wrapping_add(1);
     (*rc).low = ((*rc).low & 0xffffff as uint64_t) << RC_SHIFT_BITS;
@@ -633,23 +606,22 @@ unsafe extern "C" fn rc_encode(
         match (*rc).symbols[(*rc).pos as usize] as ::core::ffi::c_uint {
             0 => {
                 let mut prob: probability = *(*rc).probs[(*rc).pos as usize];
-                (*rc).range = ((*rc).range >> RC_BIT_MODEL_TOTAL_BITS)
-                    .wrapping_mul(prob as uint32_t);
-                prob = (prob as ::core::ffi::c_uint)
-                    .wrapping_add(
-                        RC_BIT_MODEL_TOTAL.wrapping_sub(prob as ::core::ffi::c_uint)
-                            >> RC_MOVE_BITS,
-                    ) as probability as probability;
+                (*rc).range =
+                    ((*rc).range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(prob as uint32_t);
+                prob = (prob as ::core::ffi::c_uint).wrapping_add(
+                    RC_BIT_MODEL_TOTAL.wrapping_sub(prob as ::core::ffi::c_uint) >> RC_MOVE_BITS,
+                ) as probability as probability;
                 *(*rc).probs[(*rc).pos as usize] = prob;
             }
             1 => {
                 let mut prob_0: probability = *(*rc).probs[(*rc).pos as usize];
-                let bound: uint32_t = (prob_0 as uint32_t)
-                    .wrapping_mul((*rc).range >> RC_BIT_MODEL_TOTAL_BITS);
+                let bound: uint32_t =
+                    (prob_0 as uint32_t).wrapping_mul((*rc).range >> RC_BIT_MODEL_TOTAL_BITS);
                 (*rc).low = (*rc).low.wrapping_add(bound as uint64_t);
                 (*rc).range = (*rc).range.wrapping_sub(bound);
                 prob_0 = (prob_0 as ::core::ffi::c_int
-                    - (prob_0 as ::core::ffi::c_int >> RC_MOVE_BITS)) as probability;
+                    - (prob_0 as ::core::ffi::c_int >> RC_MOVE_BITS))
+                    as probability;
                 *(*rc).probs[(*rc).pos as usize] = prob_0;
             }
             2 => {
@@ -711,13 +683,12 @@ unsafe extern "C" fn rc_encode_dummy(
         match (*rc).symbols[pos as usize] as ::core::ffi::c_uint {
             0 => {
                 let mut prob: probability = *(*rc).probs[pos as usize];
-                range = (range >> RC_BIT_MODEL_TOTAL_BITS)
-                    .wrapping_mul(prob as uint32_t);
+                range = (range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(prob as uint32_t);
             }
             1 => {
                 let mut prob_0: probability = *(*rc).probs[pos as usize];
-                let bound: uint32_t = (prob_0 as uint32_t)
-                    .wrapping_mul(range >> RC_BIT_MODEL_TOTAL_BITS);
+                let bound: uint32_t =
+                    (prob_0 as uint32_t).wrapping_mul(range >> RC_BIT_MODEL_TOTAL_BITS);
                 low = low.wrapping_add(bound as uint64_t);
                 range = range.wrapping_sub(bound);
             }
@@ -749,7 +720,10 @@ unsafe extern "C" fn rc_encode_dummy(
 }
 #[inline]
 unsafe extern "C" fn rc_pending(mut rc: *const lzma_range_encoder) -> uint64_t {
-    return (*rc).cache_size.wrapping_add(5 as uint64_t).wrapping_sub(1 as uint64_t);
+    return (*rc)
+        .cache_size
+        .wrapping_add(5 as uint64_t)
+        .wrapping_sub(1 as uint64_t);
 }
 #[inline]
 unsafe extern "C" fn is_lclppb_valid(mut options: *const lzma_options_lzma) -> bool {
@@ -762,47 +736,34 @@ pub const STATES: ::core::ffi::c_int = 12 as ::core::ffi::c_int;
 pub const LIT_STATES: ::core::ffi::c_int = 7 as ::core::ffi::c_int;
 pub const LITERAL_CODER_SIZE: ::core::ffi::c_uint = 0x300 as ::core::ffi::c_uint;
 #[inline]
-unsafe extern "C" fn literal_init(
-    mut probs: *mut probability,
-    mut lc: uint32_t,
-    mut lp: uint32_t,
-) {
+unsafe extern "C" fn literal_init(mut probs: *mut probability, mut lc: uint32_t, mut lp: uint32_t) {
     let coders: size_t = (LITERAL_CODER_SIZE << lc.wrapping_add(lp)) as size_t;
     let mut i: size_t = 0 as size_t;
     while i < coders {
-        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int)
-            as probability;
+        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
         i = i.wrapping_add(1);
     }
 }
 pub const MATCH_LEN_MIN: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
 pub const LEN_LOW_BITS: ::core::ffi::c_int = 3 as ::core::ffi::c_int;
-pub const LEN_LOW_SYMBOLS: ::core::ffi::c_int = (1 as ::core::ffi::c_int)
-    << LEN_LOW_BITS;
+pub const LEN_LOW_SYMBOLS: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << LEN_LOW_BITS;
 pub const LEN_MID_BITS: ::core::ffi::c_int = 3 as ::core::ffi::c_int;
-pub const LEN_MID_SYMBOLS: ::core::ffi::c_int = (1 as ::core::ffi::c_int)
-    << LEN_MID_BITS;
+pub const LEN_MID_SYMBOLS: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << LEN_MID_BITS;
 pub const LEN_HIGH_BITS: ::core::ffi::c_int = 8 as ::core::ffi::c_int;
-pub const LEN_HIGH_SYMBOLS: ::core::ffi::c_int = (1 as ::core::ffi::c_int)
-    << LEN_HIGH_BITS;
-pub const LEN_SYMBOLS: ::core::ffi::c_int = LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS
-    + LEN_HIGH_SYMBOLS;
-pub const MATCH_LEN_MAX: ::core::ffi::c_int = MATCH_LEN_MIN + LEN_SYMBOLS
-    - 1 as ::core::ffi::c_int;
+pub const LEN_HIGH_SYMBOLS: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << LEN_HIGH_BITS;
+pub const LEN_SYMBOLS: ::core::ffi::c_int = LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS + LEN_HIGH_SYMBOLS;
+pub const MATCH_LEN_MAX: ::core::ffi::c_int = MATCH_LEN_MIN + LEN_SYMBOLS - 1 as ::core::ffi::c_int;
 pub const DIST_STATES: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const DIST_SLOT_BITS: ::core::ffi::c_int = 6 as ::core::ffi::c_int;
 pub const DIST_MODEL_START: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const DIST_MODEL_END: ::core::ffi::c_int = 14 as ::core::ffi::c_int;
-pub const FULL_DISTANCES_BITS: ::core::ffi::c_int = DIST_MODEL_END
-    / 2 as ::core::ffi::c_int;
-pub const FULL_DISTANCES: ::core::ffi::c_int = (1 as ::core::ffi::c_int)
-    << FULL_DISTANCES_BITS;
+pub const FULL_DISTANCES_BITS: ::core::ffi::c_int = DIST_MODEL_END / 2 as ::core::ffi::c_int;
+pub const FULL_DISTANCES: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << FULL_DISTANCES_BITS;
 pub const ALIGN_BITS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 pub const ALIGN_SIZE: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << ALIGN_BITS;
 pub const ALIGN_MASK: ::core::ffi::c_int = ALIGN_SIZE - 1 as ::core::ffi::c_int;
 pub const REPS: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
-pub const OPTS: ::core::ffi::c_int = (1 as ::core::ffi::c_int)
-    << 12 as ::core::ffi::c_int;
+pub const OPTS: ::core::ffi::c_int = (1 as ::core::ffi::c_int) << 12 as ::core::ffi::c_int;
 pub const FASTPOS_BITS: ::core::ffi::c_int = 13 as ::core::ffi::c_int;
 #[inline]
 unsafe extern "C" fn get_dist_slot(mut dist: uint32_t) -> uint32_t {
@@ -827,8 +788,8 @@ unsafe extern "C" fn get_dist_slot(mut dist: uint32_t) -> uint32_t {
             .wrapping_add(
                 (2 as ::core::ffi::c_int
                     * (0 as ::core::ffi::c_int
-                        + 1 as ::core::ffi::c_int
-                            * (FASTPOS_BITS - 1 as ::core::ffi::c_int))) as uint32_t,
+                        + 1 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int)))
+                    as uint32_t,
             );
     }
     return (lzma_fastpos[(dist
@@ -838,8 +799,8 @@ unsafe extern "C" fn get_dist_slot(mut dist: uint32_t) -> uint32_t {
         .wrapping_add(
             (2 as ::core::ffi::c_int
                 * (0 as ::core::ffi::c_int
-                    + 2 as ::core::ffi::c_int
-                        * (FASTPOS_BITS - 1 as ::core::ffi::c_int))) as uint32_t,
+                    + 2 as ::core::ffi::c_int * (FASTPOS_BITS - 1 as ::core::ffi::c_int)))
+                as uint32_t,
         );
 }
 #[inline]
@@ -851,8 +812,8 @@ unsafe extern "C" fn literal_matched(
 ) {
     let mut offset: uint32_t = 0x100 as uint32_t;
     symbol = (symbol as ::core::ffi::c_uint)
-        .wrapping_add((1 as ::core::ffi::c_uint) << 8 as ::core::ffi::c_int) as uint32_t
-        as uint32_t;
+        .wrapping_add((1 as ::core::ffi::c_uint) << 8 as ::core::ffi::c_int)
+        as uint32_t as uint32_t;
     loop {
         match_byte <<= 1 as ::core::ffi::c_int;
         let match_bit: uint32_t = match_byte & offset;
@@ -860,13 +821,17 @@ unsafe extern "C" fn literal_matched(
             .wrapping_add(match_bit)
             .wrapping_add(symbol >> 8 as ::core::ffi::c_int);
         let bit: uint32_t = symbol >> 7 as ::core::ffi::c_int & 1 as uint32_t;
-        rc_bit(rc, subcoder.offset(subcoder_index as isize) as *mut probability, bit);
+        rc_bit(
+            rc,
+            subcoder.offset(subcoder_index as isize) as *mut probability,
+            bit,
+        );
         symbol <<= 1 as ::core::ffi::c_int;
         offset &= !(match_byte ^ symbol);
         if !(symbol < (1 as uint32_t) << 16 as ::core::ffi::c_int) {
             break;
         }
-    };
+    }
 }
 #[inline]
 unsafe extern "C" fn literal(
@@ -877,52 +842,48 @@ unsafe extern "C" fn literal(
     let cur_byte: uint8_t = *(*mf)
         .buffer
         .offset((*mf).read_pos.wrapping_sub((*mf).read_ahead) as isize);
-    let mut subcoder: *mut probability = (&raw mut (*coder).literal as *mut probability)
-        .offset(
-            (3 as uint32_t)
-                .wrapping_mul(
-                    ((position << 8 as ::core::ffi::c_int)
-                        .wrapping_add(
-                            *(*mf)
-                                .buffer
-                                .offset(
-                                    (*mf)
-                                        .read_pos
-                                        .wrapping_sub((*mf).read_ahead)
-                                        .wrapping_sub(1 as uint32_t) as isize,
-                                ) as uint32_t,
-                        ) & (*coder).literal_mask) << (*coder).literal_context_bits,
-                ) as isize,
-        );
+    let mut subcoder: *mut probability = (&raw mut (*coder).literal as *mut probability).offset(
+        (3 as uint32_t).wrapping_mul(
+            ((position << 8 as ::core::ffi::c_int).wrapping_add(
+                *(*mf).buffer.offset(
+                    (*mf)
+                        .read_pos
+                        .wrapping_sub((*mf).read_ahead)
+                        .wrapping_sub(1 as uint32_t) as isize,
+                ) as uint32_t,
+            ) & (*coder).literal_mask)
+                << (*coder).literal_context_bits,
+        ) as isize,
+    );
     if ((*coder).state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
         (*coder).state = (if (*coder).state as ::core::ffi::c_uint
             <= STATE_SHORTREP_LIT_LIT as ::core::ffi::c_int as ::core::ffi::c_uint
         {
             STATE_LIT_LIT as ::core::ffi::c_int as ::core::ffi::c_uint
         } else {
-            ((*coder).state as ::core::ffi::c_uint)
-                .wrapping_sub(3 as ::core::ffi::c_uint)
+            ((*coder).state as ::core::ffi::c_uint).wrapping_sub(3 as ::core::ffi::c_uint)
         }) as lzma_lzma_state;
-        rc_bittree(&raw mut (*coder).rc, subcoder, 8 as uint32_t, cur_byte as uint32_t);
+        rc_bittree(
+            &raw mut (*coder).rc,
+            subcoder,
+            8 as uint32_t,
+            cur_byte as uint32_t,
+        );
     } else {
         (*coder).state = (if (*coder).state as ::core::ffi::c_uint
             <= STATE_LIT_SHORTREP as ::core::ffi::c_int as ::core::ffi::c_uint
         {
-            ((*coder).state as ::core::ffi::c_uint)
-                .wrapping_sub(3 as ::core::ffi::c_uint)
+            ((*coder).state as ::core::ffi::c_uint).wrapping_sub(3 as ::core::ffi::c_uint)
         } else {
-            ((*coder).state as ::core::ffi::c_uint)
-                .wrapping_sub(6 as ::core::ffi::c_uint)
+            ((*coder).state as ::core::ffi::c_uint).wrapping_sub(6 as ::core::ffi::c_uint)
         }) as lzma_lzma_state;
-        let match_byte: uint8_t = *(*mf)
-            .buffer
-            .offset(
-                (*mf)
-                    .read_pos
-                    .wrapping_sub((*coder).reps[0 as ::core::ffi::c_int as usize])
-                    .wrapping_sub(1 as uint32_t)
-                    .wrapping_sub((*mf).read_ahead) as isize,
-            );
+        let match_byte: uint8_t = *(*mf).buffer.offset(
+            (*mf)
+                .read_pos
+                .wrapping_sub((*coder).reps[0 as ::core::ffi::c_int as usize])
+                .wrapping_sub(1 as uint32_t)
+                .wrapping_sub((*mf).read_ahead) as isize,
+        );
         literal_matched(
             &raw mut (*coder).rc,
             subcoder,
@@ -931,10 +892,7 @@ unsafe extern "C" fn literal(
         );
     };
 }
-unsafe extern "C" fn length_update_prices(
-    mut lc: *mut lzma_length_encoder,
-    pos_state: uint32_t,
-) {
+unsafe extern "C" fn length_update_prices(mut lc: *mut lzma_length_encoder, pos_state: uint32_t) {
     let table_size: uint32_t = (*lc).table_size;
     (*lc).counters[pos_state as usize] = table_size;
     let a0: uint32_t = rc_bit_0_price((*lc).choice) as uint32_t;
@@ -946,40 +904,30 @@ unsafe extern "C" fn length_update_prices(
     let mut i: uint32_t = 0;
     i = 0 as uint32_t;
     while i < table_size && i < LEN_LOW_SYMBOLS as uint32_t {
-        *prices.offset(i as isize) = a0
-            .wrapping_add(
-                rc_bittree_price(
-                    &raw mut *(&raw mut (*lc).low as *mut [probability; 8])
-                        .offset(pos_state as isize) as *mut probability,
-                    LEN_LOW_BITS as uint32_t,
-                    i,
-                ),
-            );
+        *prices.offset(i as isize) = a0.wrapping_add(rc_bittree_price(
+            &raw mut *(&raw mut (*lc).low as *mut [probability; 8]).offset(pos_state as isize)
+                as *mut probability,
+            LEN_LOW_BITS as uint32_t,
+            i,
+        ));
         i = i.wrapping_add(1);
     }
     while i < table_size && i < (LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS) as uint32_t {
-        *prices.offset(i as isize) = b0
-            .wrapping_add(
-                rc_bittree_price(
-                    &raw mut *(&raw mut (*lc).mid as *mut [probability; 8])
-                        .offset(pos_state as isize) as *mut probability,
-                    LEN_MID_BITS as uint32_t,
-                    i.wrapping_sub(LEN_LOW_SYMBOLS as uint32_t),
-                ),
-            );
+        *prices.offset(i as isize) = b0.wrapping_add(rc_bittree_price(
+            &raw mut *(&raw mut (*lc).mid as *mut [probability; 8]).offset(pos_state as isize)
+                as *mut probability,
+            LEN_MID_BITS as uint32_t,
+            i.wrapping_sub(LEN_LOW_SYMBOLS as uint32_t),
+        ));
         i = i.wrapping_add(1);
     }
     while i < table_size {
-        *prices.offset(i as isize) = b1
-            .wrapping_add(
-                rc_bittree_price(
-                    &raw mut (*lc).high as *mut probability,
-                    LEN_HIGH_BITS as uint32_t,
-                    i
-                        .wrapping_sub(LEN_LOW_SYMBOLS as uint32_t)
-                        .wrapping_sub(LEN_MID_SYMBOLS as uint32_t),
-                ),
-            );
+        *prices.offset(i as isize) = b1.wrapping_add(rc_bittree_price(
+            &raw mut (*lc).high as *mut probability,
+            LEN_HIGH_BITS as uint32_t,
+            i.wrapping_sub(LEN_LOW_SYMBOLS as uint32_t)
+                .wrapping_sub(LEN_MID_SYMBOLS as uint32_t),
+        ));
         i = i.wrapping_add(1);
     }
 }
@@ -996,8 +944,8 @@ unsafe extern "C" fn length(
         rc_bit(rc, &raw mut (*lc).choice, 0 as uint32_t);
         rc_bittree(
             rc,
-            &raw mut *(&raw mut (*lc).low as *mut [probability; 8])
-                .offset(pos_state as isize) as *mut probability,
+            &raw mut *(&raw mut (*lc).low as *mut [probability; 8]).offset(pos_state as isize)
+                as *mut probability,
             LEN_LOW_BITS as uint32_t,
             len,
         );
@@ -1008,8 +956,8 @@ unsafe extern "C" fn length(
             rc_bit(rc, &raw mut (*lc).choice2, 0 as uint32_t);
             rc_bittree(
                 rc,
-                &raw mut *(&raw mut (*lc).mid as *mut [probability; 8])
-                    .offset(pos_state as isize) as *mut probability,
+                &raw mut *(&raw mut (*lc).mid as *mut [probability; 8]).offset(pos_state as isize)
+                    as *mut probability,
                 LEN_MID_BITS as uint32_t,
                 len,
             );
@@ -1025,9 +973,7 @@ unsafe extern "C" fn length(
         }
     }
     if !fast_mode {
-        (*lc).counters[pos_state as usize] = (*lc)
-            .counters[pos_state as usize]
-            .wrapping_sub(1);
+        (*lc).counters[pos_state as usize] = (*lc).counters[pos_state as usize].wrapping_sub(1);
         if (*lc).counters[pos_state as usize] == 0 as uint32_t {
             length_update_prices(lc, pos_state);
         }
@@ -1040,8 +986,7 @@ unsafe extern "C" fn match_0(
     distance: uint32_t,
     len: uint32_t,
 ) {
-    (*coder).state = (if ((*coder).state as ::core::ffi::c_uint)
-        < LIT_STATES as ::core::ffi::c_uint
+    (*coder).state = (if ((*coder).state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint
     {
         STATE_LIT_MATCH as ::core::ffi::c_int
     } else {
@@ -1068,8 +1013,8 @@ unsafe extern "C" fn match_0(
         dist_slot,
     );
     if dist_slot >= DIST_MODEL_START as uint32_t {
-        let footer_bits: uint32_t = (dist_slot >> 1 as ::core::ffi::c_int)
-            .wrapping_sub(1 as uint32_t);
+        let footer_bits: uint32_t =
+            (dist_slot >> 1 as ::core::ffi::c_int).wrapping_sub(1 as uint32_t);
         let base: uint32_t = (2 as uint32_t | dist_slot & 1 as uint32_t) << footer_bits;
         let dist_reduced: uint32_t = distance.wrapping_sub(base);
         if dist_slot < DIST_MODEL_END as uint32_t {
@@ -1097,12 +1042,12 @@ unsafe extern "C" fn match_0(
             (*coder).align_price_count = (*coder).align_price_count.wrapping_add(1);
         }
     }
-    (*coder).reps[3 as ::core::ffi::c_int as usize] = (*coder)
-        .reps[2 as ::core::ffi::c_int as usize];
-    (*coder).reps[2 as ::core::ffi::c_int as usize] = (*coder)
-        .reps[1 as ::core::ffi::c_int as usize];
-    (*coder).reps[1 as ::core::ffi::c_int as usize] = (*coder)
-        .reps[0 as ::core::ffi::c_int as usize];
+    (*coder).reps[3 as ::core::ffi::c_int as usize] =
+        (*coder).reps[2 as ::core::ffi::c_int as usize];
+    (*coder).reps[2 as ::core::ffi::c_int as usize] =
+        (*coder).reps[1 as ::core::ffi::c_int as usize];
+    (*coder).reps[1 as ::core::ffi::c_int as usize] =
+        (*coder).reps[0 as ::core::ffi::c_int as usize];
     (*coder).reps[0 as ::core::ffi::c_int as usize] = distance;
     (*coder).match_price_count = (*coder).match_price_count.wrapping_add(1);
 }
@@ -1116,8 +1061,8 @@ unsafe extern "C" fn rep_match(
     if rep == 0 as uint32_t {
         rc_bit(
             &raw mut (*coder).rc,
-            (&raw mut (*coder).is_rep0 as *mut probability)
-                .offset((*coder).state as isize) as *mut probability,
+            (&raw mut (*coder).is_rep0 as *mut probability).offset((*coder).state as isize)
+                as *mut probability,
             0 as uint32_t,
         );
         rc_bit(
@@ -1131,49 +1076,48 @@ unsafe extern "C" fn rep_match(
         let distance: uint32_t = (*coder).reps[rep as usize];
         rc_bit(
             &raw mut (*coder).rc,
-            (&raw mut (*coder).is_rep0 as *mut probability)
-                .offset((*coder).state as isize) as *mut probability,
+            (&raw mut (*coder).is_rep0 as *mut probability).offset((*coder).state as isize)
+                as *mut probability,
             1 as uint32_t,
         );
         if rep == 1 as uint32_t {
             rc_bit(
                 &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep1 as *mut probability)
-                    .offset((*coder).state as isize) as *mut probability,
+                (&raw mut (*coder).is_rep1 as *mut probability).offset((*coder).state as isize)
+                    as *mut probability,
                 0 as uint32_t,
             );
         } else {
             rc_bit(
                 &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep1 as *mut probability)
-                    .offset((*coder).state as isize) as *mut probability,
+                (&raw mut (*coder).is_rep1 as *mut probability).offset((*coder).state as isize)
+                    as *mut probability,
                 1 as uint32_t,
             );
             rc_bit(
                 &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep2 as *mut probability)
-                    .offset((*coder).state as isize) as *mut probability,
+                (&raw mut (*coder).is_rep2 as *mut probability).offset((*coder).state as isize)
+                    as *mut probability,
                 rep.wrapping_sub(2 as uint32_t),
             );
             if rep == 3 as uint32_t {
-                (*coder).reps[3 as ::core::ffi::c_int as usize] = (*coder)
-                    .reps[2 as ::core::ffi::c_int as usize];
+                (*coder).reps[3 as ::core::ffi::c_int as usize] =
+                    (*coder).reps[2 as ::core::ffi::c_int as usize];
             }
-            (*coder).reps[2 as ::core::ffi::c_int as usize] = (*coder)
-                .reps[1 as ::core::ffi::c_int as usize];
+            (*coder).reps[2 as ::core::ffi::c_int as usize] =
+                (*coder).reps[1 as ::core::ffi::c_int as usize];
         }
-        (*coder).reps[1 as ::core::ffi::c_int as usize] = (*coder)
-            .reps[0 as ::core::ffi::c_int as usize];
+        (*coder).reps[1 as ::core::ffi::c_int as usize] =
+            (*coder).reps[0 as ::core::ffi::c_int as usize];
         (*coder).reps[0 as ::core::ffi::c_int as usize] = distance;
     }
     if len == 1 as uint32_t {
-        (*coder).state = (if ((*coder).state as ::core::ffi::c_uint)
-            < LIT_STATES as ::core::ffi::c_uint
-        {
-            STATE_LIT_SHORTREP as ::core::ffi::c_int
-        } else {
-            STATE_NONLIT_REP as ::core::ffi::c_int
-        }) as lzma_lzma_state;
+        (*coder).state =
+            (if ((*coder).state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
+                STATE_LIT_SHORTREP as ::core::ffi::c_int
+            } else {
+                STATE_NONLIT_REP as ::core::ffi::c_int
+            }) as lzma_lzma_state;
     } else {
         length(
             &raw mut (*coder).rc,
@@ -1182,13 +1126,12 @@ unsafe extern "C" fn rep_match(
             len,
             (*coder).fast_mode,
         );
-        (*coder).state = (if ((*coder).state as ::core::ffi::c_uint)
-            < LIT_STATES as ::core::ffi::c_uint
-        {
-            STATE_LIT_LONGREP as ::core::ffi::c_int
-        } else {
-            STATE_NONLIT_REP as ::core::ffi::c_int
-        }) as lzma_lzma_state;
+        (*coder).state =
+            (if ((*coder).state as ::core::ffi::c_uint) < LIT_STATES as ::core::ffi::c_uint {
+                STATE_LIT_LONGREP as ::core::ffi::c_int
+            } else {
+                STATE_NONLIT_REP as ::core::ffi::c_int
+            }) as lzma_lzma_state;
     };
 }
 unsafe extern "C" fn encode_symbol(
@@ -1219,16 +1162,16 @@ unsafe extern "C" fn encode_symbol(
         if back < REPS as uint32_t {
             rc_bit(
                 &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep as *mut probability)
-                    .offset((*coder).state as isize) as *mut probability,
+                (&raw mut (*coder).is_rep as *mut probability).offset((*coder).state as isize)
+                    as *mut probability,
                 1 as uint32_t,
             );
             rep_match(coder, pos_state, back, len);
         } else {
             rc_bit(
                 &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep as *mut probability)
-                    .offset((*coder).state as isize) as *mut probability,
+                (&raw mut (*coder).is_rep as *mut probability).offset((*coder).state as isize)
+                    as *mut probability,
                 0 as uint32_t,
             );
             match_0(coder, pos_state, back.wrapping_sub(REPS as uint32_t), len);
@@ -1236,10 +1179,7 @@ unsafe extern "C" fn encode_symbol(
     }
     (*mf).read_ahead = (*mf).read_ahead.wrapping_sub(len);
 }
-unsafe extern "C" fn encode_init(
-    mut coder: *mut lzma_lzma1_encoder,
-    mut mf: *mut lzma_mf,
-) -> bool {
+unsafe extern "C" fn encode_init(mut coder: *mut lzma_lzma1_encoder, mut mf: *mut lzma_mf) -> bool {
     if (*mf).read_pos == (*mf).read_limit {
         if (*mf).action as ::core::ffi::c_uint
             == LZMA_RUN as ::core::ffi::c_int as ::core::ffi::c_uint
@@ -1268,10 +1208,7 @@ unsafe extern "C" fn encode_init(
     (*coder).is_initialized = true_0 != 0;
     return true_0 != 0;
 }
-unsafe extern "C" fn encode_eopm(
-    mut coder: *mut lzma_lzma1_encoder,
-    mut position: uint32_t,
-) {
+unsafe extern "C" fn encode_eopm(mut coder: *mut lzma_lzma1_encoder, mut position: uint32_t) {
     let pos_state: uint32_t = position & (*coder).pos_mask;
     rc_bit(
         &raw mut (*coder).rc,
@@ -1286,7 +1223,12 @@ unsafe extern "C" fn encode_eopm(
             as *mut probability,
         0 as uint32_t,
     );
-    match_0(coder, pos_state, UINT32_MAX as uint32_t, MATCH_LEN_MIN as uint32_t);
+    match_0(
+        coder,
+        pos_state,
+        UINT32_MAX as uint32_t,
+        MATCH_LEN_MIN as uint32_t,
+    );
 }
 pub const LOOP_INPUT_MAX: ::core::ffi::c_int = OPTS + 1 as ::core::ffi::c_int;
 #[no_mangle]
@@ -1310,8 +1252,7 @@ pub unsafe extern "C" fn lzma_lzma_encode(
     while !(limit != UINT32_MAX as uint32_t
         && ((*mf).read_pos.wrapping_sub((*mf).read_ahead) >= limit
             || (*out_pos as uint64_t).wrapping_add(rc_pending(&raw mut (*coder).rc))
-                >= LZMA2_CHUNK_MAX.wrapping_sub(LOOP_INPUT_MAX as ::core::ffi::c_uint)
-                    as uint64_t))
+                >= LZMA2_CHUNK_MAX.wrapping_sub(LOOP_INPUT_MAX as ::core::ffi::c_uint) as uint64_t))
     {
         if (*mf).read_pos >= (*mf).read_limit {
             if (*mf).action as ::core::ffi::c_uint
@@ -1338,8 +1279,7 @@ pub unsafe extern "C" fn lzma_lzma_encode(
         }
         encode_symbol(coder, mf, back, len, (*coder).uncomp_size as uint32_t);
         if (*coder).out_limit != 0 as uint64_t
-            && rc_encode_dummy(&raw mut (*coder).rc, (*coder).out_limit)
-                as ::core::ffi::c_int != 0
+            && rc_encode_dummy(&raw mut (*coder).rc, (*coder).out_limit) as ::core::ffi::c_int != 0
         {
             rc_forget(&raw mut (*coder).rc);
             break;
@@ -1372,7 +1312,8 @@ unsafe extern "C" fn lzma_encode(
 ) -> lzma_ret {
     if ((*mf).action as ::core::ffi::c_uint
         == LZMA_SYNC_FLUSH as ::core::ffi::c_int as ::core::ffi::c_uint)
-        as ::core::ffi::c_int as ::core::ffi::c_long != 0
+        as ::core::ffi::c_int as ::core::ffi::c_long
+        != 0
     {
         return LZMA_OPTIONS_ERROR;
     }
@@ -1437,23 +1378,22 @@ unsafe extern "C" fn length_encoder_reset(
     while pos_state < num_pos_states as size_t {
         let mut bt_i: uint32_t = 0 as uint32_t;
         while bt_i < ((1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int) as uint32_t {
-            (*lencoder).low[pos_state as usize][bt_i as usize] = (RC_BIT_MODEL_TOTAL
-                >> 1 as ::core::ffi::c_int) as probability;
+            (*lencoder).low[pos_state as usize][bt_i as usize] =
+                (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
             bt_i = bt_i.wrapping_add(1);
         }
         let mut bt_i_0: uint32_t = 0 as uint32_t;
-        while bt_i_0 < ((1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int) as uint32_t
-        {
-            (*lencoder).mid[pos_state as usize][bt_i_0 as usize] = (RC_BIT_MODEL_TOTAL
-                >> 1 as ::core::ffi::c_int) as probability;
+        while bt_i_0 < ((1 as ::core::ffi::c_int) << 3 as ::core::ffi::c_int) as uint32_t {
+            (*lencoder).mid[pos_state as usize][bt_i_0 as usize] =
+                (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
             bt_i_0 = bt_i_0.wrapping_add(1);
         }
         pos_state = pos_state.wrapping_add(1);
     }
     let mut bt_i_1: uint32_t = 0 as uint32_t;
     while bt_i_1 < ((1 as ::core::ffi::c_int) << 8 as ::core::ffi::c_int) as uint32_t {
-        (*lencoder).high[bt_i_1 as usize] = (RC_BIT_MODEL_TOTAL
-            >> 1 as ::core::ffi::c_int) as probability;
+        (*lencoder).high[bt_i_1 as usize] =
+            (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
         bt_i_1 = bt_i_1.wrapping_add(1);
     }
     if !fast_mode {
@@ -1476,7 +1416,8 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
         .wrapping_sub(1 as ::core::ffi::c_uint) as uint32_t;
     (*coder).literal_context_bits = (*options).lc;
     (*coder).literal_mask = ((0x100 as ::core::ffi::c_uint) << (*options).lp)
-        .wrapping_sub(0x100 as ::core::ffi::c_uint >> (*options).lc) as uint32_t;
+        .wrapping_sub(0x100 as ::core::ffi::c_uint >> (*options).lc)
+        as uint32_t;
     rc_reset(&raw mut (*coder).rc);
     (*coder).state = STATE_LIT_LIT;
     let mut i: size_t = 0 as size_t;
@@ -1493,42 +1434,42 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
     while i_0 < STATES as size_t {
         let mut j: size_t = 0 as size_t;
         while j <= (*coder).pos_mask as size_t {
-            (*coder).is_match[i_0 as usize][j as usize] = (RC_BIT_MODEL_TOTAL
-                >> 1 as ::core::ffi::c_int) as probability;
-            (*coder).is_rep0_long[i_0 as usize][j as usize] = (RC_BIT_MODEL_TOTAL
-                >> 1 as ::core::ffi::c_int) as probability;
+            (*coder).is_match[i_0 as usize][j as usize] =
+                (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
+            (*coder).is_rep0_long[i_0 as usize][j as usize] =
+                (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
             j = j.wrapping_add(1);
         }
-        (*coder).is_rep[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int)
-            as probability;
-        (*coder).is_rep0[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int)
-            as probability;
-        (*coder).is_rep1[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int)
-            as probability;
-        (*coder).is_rep2[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int)
-            as probability;
+        (*coder).is_rep[i_0 as usize] =
+            (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
+        (*coder).is_rep0[i_0 as usize] =
+            (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
+        (*coder).is_rep1[i_0 as usize] =
+            (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
+        (*coder).is_rep2[i_0 as usize] =
+            (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
         i_0 = i_0.wrapping_add(1);
     }
     let mut i_1: size_t = 0 as size_t;
     while i_1 < (FULL_DISTANCES - DIST_MODEL_END) as size_t {
-        (*coder).dist_special[i_1 as usize] = (RC_BIT_MODEL_TOTAL
-            >> 1 as ::core::ffi::c_int) as probability;
+        (*coder).dist_special[i_1 as usize] =
+            (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
         i_1 = i_1.wrapping_add(1);
     }
     let mut i_2: size_t = 0 as size_t;
     while i_2 < DIST_STATES as size_t {
         let mut bt_i: uint32_t = 0 as uint32_t;
         while bt_i < ((1 as ::core::ffi::c_int) << 6 as ::core::ffi::c_int) as uint32_t {
-            (*coder).dist_slot[i_2 as usize][bt_i as usize] = (RC_BIT_MODEL_TOTAL
-                >> 1 as ::core::ffi::c_int) as probability;
+            (*coder).dist_slot[i_2 as usize][bt_i as usize] =
+                (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
             bt_i = bt_i.wrapping_add(1);
         }
         i_2 = i_2.wrapping_add(1);
     }
     let mut bt_i_0: uint32_t = 0 as uint32_t;
     while bt_i_0 < ((1 as ::core::ffi::c_int) << 4 as ::core::ffi::c_int) as uint32_t {
-        (*coder).dist_align[bt_i_0 as usize] = (RC_BIT_MODEL_TOTAL
-            >> 1 as ::core::ffi::c_int) as probability;
+        (*coder).dist_align[bt_i_0 as usize] =
+            (RC_BIT_MODEL_TOTAL >> 1 as ::core::ffi::c_int) as probability;
         bt_i_0 = bt_i_0.wrapping_add(1);
     }
     length_encoder_reset(
@@ -1541,10 +1482,8 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
         (1 as uint32_t) << (*options).pb,
         (*coder).fast_mode,
     );
-    (*coder).match_price_count = UINT32_MAX.wrapping_div(2 as ::core::ffi::c_uint)
-        as uint32_t;
-    (*coder).align_price_count = UINT32_MAX.wrapping_div(2 as ::core::ffi::c_uint)
-        as uint32_t;
+    (*coder).match_price_count = UINT32_MAX.wrapping_div(2 as ::core::ffi::c_uint) as uint32_t;
+    (*coder).align_price_count = UINT32_MAX.wrapping_div(2 as ::core::ffi::c_uint) as uint32_t;
     (*coder).opts_end_index = 0 as uint32_t;
     (*coder).opts_current_index = 0 as uint32_t;
     return LZMA_OK;
@@ -1584,9 +1523,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_create(
                 log_size = log_size.wrapping_add(1);
             }
             (*coder).dist_table_size = log_size.wrapping_mul(2 as uint32_t);
-            let nice_len: uint32_t = if mf_get_hash_bytes((*options).mf)
-                > (*options).nice_len
-            {
+            let nice_len: uint32_t = if mf_get_hash_bytes((*options).mf) > (*options).nice_len {
                 mf_get_hash_bytes((*options).mf) as uint32_t
             } else {
                 (*options).nice_len
@@ -1600,8 +1537,8 @@ pub unsafe extern "C" fn lzma_lzma_encoder_create(
         }
         _ => return LZMA_OPTIONS_ERROR,
     }
-    (*coder).is_initialized = !(*options).preset_dict.is_null()
-        && (*options).preset_dict_size > 0 as uint32_t;
+    (*coder).is_initialized =
+        !(*options).preset_dict.is_null() && (*options).preset_dict_size > 0 as uint32_t;
     (*coder).is_flushed = false_0 != 0;
     (*coder).uncomp_size = 0 as uint64_t;
     (*coder).uncomp_size_ptr = ::core::ptr::null_mut::<uint64_t>();
@@ -1611,8 +1548,8 @@ pub unsafe extern "C" fn lzma_lzma_encoder_create(
         if (*options).ext_flags & !(LZMA_LZMA1EXT_ALLOW_EOPM as uint32_t) != 0 {
             return LZMA_OPTIONS_ERROR;
         }
-        (*coder).use_eopm = (*options).ext_flags & LZMA_LZMA1EXT_ALLOW_EOPM as uint32_t
-            != 0 as uint32_t;
+        (*coder).use_eopm =
+            (*options).ext_flags & LZMA_LZMA1EXT_ALLOW_EOPM as uint32_t != 0 as uint32_t;
     }
     set_lz_options(lz_options, options);
     return lzma_lzma_encoder_reset(coder, options);
@@ -1648,18 +1585,10 @@ unsafe extern "C" fn lzma_encoder_init(
         >;
     (*lz).set_out_limit = Some(
         lzma_lzma_set_out_limit
-            as unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *mut uint64_t,
-                uint64_t,
-            ) -> lzma_ret,
+            as unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret,
     )
         as Option<
-            unsafe extern "C" fn(
-                *mut ::core::ffi::c_void,
-                *mut uint64_t,
-                uint64_t,
-            ) -> lzma_ret,
+            unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret,
         >;
     return lzma_lzma_encoder_create(
         &raw mut (*lz).coder,
@@ -1710,13 +1639,11 @@ pub unsafe extern "C" fn lzma_lzma_encoder_memusage(
         preset_dict_size: 0,
     };
     set_lz_options(&raw mut lz_options, options as *const lzma_options_lzma);
-    let lz_memusage: uint64_t = lzma_lz_encoder_memusage(&raw mut lz_options)
-        as uint64_t;
+    let lz_memusage: uint64_t = lzma_lz_encoder_memusage(&raw mut lz_options) as uint64_t;
     if lz_memusage == UINT64_MAX as uint64_t {
         return UINT64_MAX as uint64_t;
     }
-    return (::core::mem::size_of::<lzma_lzma1_encoder>() as uint64_t)
-        .wrapping_add(lz_memusage);
+    return (::core::mem::size_of::<lzma_lzma1_encoder>() as uint64_t).wrapping_add(lz_memusage);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_lclppb_encode(
@@ -1746,7 +1673,10 @@ pub unsafe extern "C" fn lzma_lzma_props_encode(
     if lzma_lzma_lclppb_encode(opt, out) {
         return LZMA_PROG_ERROR;
     }
-    write32le(out.offset(1 as ::core::ffi::c_int as isize), (*opt).dict_size);
+    write32le(
+        out.offset(1 as ::core::ffi::c_int as isize),
+        (*opt).dict_size,
+    );
     return LZMA_OK;
 }
 #[no_mangle]

@@ -94,11 +94,7 @@ unsafe fn rs_decode(compressed: &[u8], out_size: usize) -> Vec<u8> {
 }
 
 fn bench_encode(c: &mut Criterion) {
-    let sizes: &[(usize, &str)] = &[
-        (1024, "1KB"),
-        (64 * 1024, "64KB"),
-        (1024 * 1024, "1MB"),
-    ];
+    let sizes: &[(usize, &str)] = &[(1024, "1KB"), (64 * 1024, "64KB"), (1024 * 1024, "1MB")];
 
     let mut group = c.benchmark_group("encode");
     for &(size, label) in sizes {
@@ -116,11 +112,7 @@ fn bench_encode(c: &mut Criterion) {
 }
 
 fn bench_decode(c: &mut Criterion) {
-    let sizes: &[(usize, &str)] = &[
-        (1024, "1KB"),
-        (64 * 1024, "64KB"),
-        (1024 * 1024, "1MB"),
-    ];
+    let sizes: &[(usize, &str)] = &[(1024, "1KB"), (64 * 1024, "64KB"), (1024 * 1024, "1MB")];
 
     let mut group = c.benchmark_group("decode");
     for &(size, label) in sizes {
@@ -132,19 +124,17 @@ fn bench_decode(c: &mut Criterion) {
         group.bench_with_input(BenchmarkId::new("c", label), &c_compressed, |b, data| {
             b.iter(|| unsafe { c_decode(black_box(data), size) })
         });
-        group.bench_with_input(BenchmarkId::new("rust", label), &rs_compressed, |b, data| {
-            b.iter(|| unsafe { rs_decode(black_box(data), size) })
-        });
+        group.bench_with_input(
+            BenchmarkId::new("rust", label),
+            &rs_compressed,
+            |b, data| b.iter(|| unsafe { rs_decode(black_box(data), size) }),
+        );
     }
     group.finish();
 }
 
 fn bench_crc32(c: &mut Criterion) {
-    let sizes: &[(usize, &str)] = &[
-        (1024, "1KB"),
-        (64 * 1024, "64KB"),
-        (1024 * 1024, "1MB"),
-    ];
+    let sizes: &[(usize, &str)] = &[(1024, "1KB"), (64 * 1024, "64KB"), (1024 * 1024, "1MB")];
 
     let mut group = c.benchmark_group("crc32");
     for &(size, label) in sizes {
@@ -162,11 +152,7 @@ fn bench_crc32(c: &mut Criterion) {
 }
 
 fn bench_crc64(c: &mut Criterion) {
-    let sizes: &[(usize, &str)] = &[
-        (1024, "1KB"),
-        (64 * 1024, "64KB"),
-        (1024 * 1024, "1MB"),
-    ];
+    let sizes: &[(usize, &str)] = &[(1024, "1KB"), (64 * 1024, "64KB"), (1024 * 1024, "1MB")];
 
     let mut group = c.benchmark_group("crc64");
     for &(size, label) in sizes {
@@ -183,5 +169,11 @@ fn bench_crc64(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_encode, bench_decode, bench_crc32, bench_crc64);
+criterion_group!(
+    benches,
+    bench_encode,
+    bench_decode,
+    bench_crc32,
+    bench_crc64
+);
 criterion_main!(benches);

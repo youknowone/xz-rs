@@ -40,9 +40,7 @@ pub struct lzma_options_lzma {
     pub reserved_ptr1: *mut ::core::ffi::c_void,
     pub reserved_ptr2: *mut ::core::ffi::c_void,
 }
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
 pub const true_0: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
 pub const false_0: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
@@ -50,8 +48,8 @@ pub const LZMA_LC_DEFAULT: ::core::ffi::c_int = 3 as ::core::ffi::c_int;
 pub const LZMA_LP_DEFAULT: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 pub const LZMA_PB_DEFAULT: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
 pub const LZMA_PRESET_LEVEL_MASK: ::core::ffi::c_uint = 0x1f as ::core::ffi::c_uint;
-pub const LZMA_PRESET_EXTREME: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 31 as ::core::ffi::c_int;
+pub const LZMA_PRESET_EXTREME: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << 31 as ::core::ffi::c_int;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_preset(
     mut options: *mut lzma_options_lzma,
@@ -80,8 +78,8 @@ pub unsafe extern "C" fn lzma_lzma_preset(
         25 as ::core::ffi::c_int as uint8_t,
         26 as ::core::ffi::c_int as uint8_t,
     ];
-    (*options).dict_size = ((1 as ::core::ffi::c_uint)
-        << dict_pow2[level as usize] as ::core::ffi::c_int) as uint32_t;
+    (*options).dict_size =
+        ((1 as ::core::ffi::c_uint) << dict_pow2[level as usize] as ::core::ffi::c_int) as uint32_t;
     if level <= 3 as uint32_t {
         (*options).mode = LZMA_MODE_FAST;
         (*options).mf = (if level == 0 as uint32_t {

@@ -37,10 +37,7 @@ pub union C2RustUnnamed_0 {
     pub u64_0: [uint64_t; 8],
 }
 #[inline]
-unsafe extern "C" fn rotr_32(
-    mut num: uint32_t,
-    mut amount: ::core::ffi::c_uint,
-) -> uint32_t {
+unsafe extern "C" fn rotr_32(mut num: uint32_t, mut amount: ::core::ffi::c_uint) -> uint32_t {
     return num >> amount | num << (32 as ::core::ffi::c_uint).wrapping_sub(amount);
 }
 static mut SHA256_K: [uint32_t; 64] = [
@@ -118,847 +115,837 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
         ::core::mem::size_of::<[uint32_t; 8]>() as size_t,
     );
     W[0 as ::core::ffi::c_int as usize] = (*data.offset(0 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(0 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(0 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(0 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(0 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[0 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(0 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[0 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[1 as ::core::ffi::c_int as usize] = (*data.offset(1 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(1 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(1 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(1 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(1 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[1 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(1 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[1 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[2 as ::core::ffi::c_int as usize] = (*data.offset(2 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(2 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(2 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(2 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(2 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[2 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(2 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[2 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[3 as ::core::ffi::c_int as usize] = (*data.offset(3 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(3 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(3 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(3 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(3 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[3 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(3 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[3 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[4 as ::core::ffi::c_int as usize] = (*data.offset(4 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(4 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(4 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(4 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(4 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[4 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(4 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[4 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[5 as ::core::ffi::c_int as usize] = (*data.offset(5 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(5 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(5 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(5 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(5 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[5 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(5 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[5 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[6 as ::core::ffi::c_int as usize] = (*data.offset(6 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(6 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(6 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(6 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(6 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[6 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(6 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[6 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[7 as ::core::ffi::c_int as usize] = (*data.offset(7 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(7 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(7 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(7 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(7 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[7 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(7 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[7 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[8 as ::core::ffi::c_int as usize] = (*data.offset(8 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(8 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(8 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(8 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(8 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[8 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(8 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[8 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
     W[9 as ::core::ffi::c_int as usize] = (*data.offset(9 as ::core::ffi::c_int as isize)
-        & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
         | (*data.offset(9 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
         | (*data.offset(9 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
             >> 8 as ::core::ffi::c_int
         | (*data.offset(9 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    14 as ::core::ffi::c_uint,
-                                ),
-                            5 as ::core::ffi::c_uint,
-                        ),
-                    6 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(5 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
-                )
-                .wrapping_add(
-                    SHA256_K[(9 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[9 as ::core::ffi::c_int as usize]),
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(9 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[9 as ::core::ffi::c_int as usize]),
         );
-    T[(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
+            T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
         );
-    T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                                    9 as ::core::ffi::c_uint,
-                                ),
-                            11 as ::core::ffi::c_uint,
-                        ),
-                    2 as ::core::ffi::c_uint,
-                )
-                .wrapping_add(
-                    (T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
-                        & (T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
-                        .wrapping_add(
-                            T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
-                        ),
-                ),
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
         );
-    W[10 as ::core::ffi::c_int as usize] = (*data
-        .offset(10 as ::core::ffi::c_int as isize) & 0xff as uint32_t)
+    W[10 as ::core::ffi::c_int as usize] = (*data.offset(10 as ::core::ffi::c_int as isize)
+        & 0xff as uint32_t)
         << 24 as ::core::ffi::c_int
         | (*data.offset(10 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
             << 8 as ::core::ffi::c_int
@@ -966,19 +953,1725 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
             >> 8 as ::core::ffi::c_int
         | (*data.offset(10 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
             >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-            & 7 as ::core::ffi::c_int) as usize]
+    T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
         .wrapping_add(
             rotr_32(
-                    T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
                         & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(10 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[10 as ::core::ffi::c_int as usize]),
+        );
+    T[(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
+        );
+    T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
+        );
+    W[11 as ::core::ffi::c_int as usize] = (*data.offset(11 as ::core::ffi::c_int as isize)
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
+        | (*data.offset(11 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
+            << 8 as ::core::ffi::c_int
+        | (*data.offset(11 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
+            >> 8 as ::core::ffi::c_int
+        | (*data.offset(11 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
+            >> 24 as ::core::ffi::c_int;
+    T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(11 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[11 as ::core::ffi::c_int as usize]),
+        );
+    T[(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
+        );
+    T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
+        );
+    W[12 as ::core::ffi::c_int as usize] = (*data.offset(12 as ::core::ffi::c_int as isize)
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
+        | (*data.offset(12 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
+            << 8 as ::core::ffi::c_int
+        | (*data.offset(12 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
+            >> 8 as ::core::ffi::c_int
+        | (*data.offset(12 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
+            >> 24 as ::core::ffi::c_int;
+    T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(12 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[12 as ::core::ffi::c_int as usize]),
+        );
+    T[(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
+        );
+    T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
+        );
+    W[13 as ::core::ffi::c_int as usize] = (*data.offset(13 as ::core::ffi::c_int as isize)
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
+        | (*data.offset(13 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
+            << 8 as ::core::ffi::c_int
+        | (*data.offset(13 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
+            >> 8 as ::core::ffi::c_int
+        | (*data.offset(13 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
+            >> 24 as ::core::ffi::c_int;
+    T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(13 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[13 as ::core::ffi::c_int as usize]),
+        );
+    T[(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
+        );
+    T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
+        );
+    W[14 as ::core::ffi::c_int as usize] = (*data.offset(14 as ::core::ffi::c_int as isize)
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
+        | (*data.offset(14 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
+            << 8 as ::core::ffi::c_int
+        | (*data.offset(14 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
+            >> 8 as ::core::ffi::c_int
+        | (*data.offset(14 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
+            >> 24 as ::core::ffi::c_int;
+    T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(14 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[14 as ::core::ffi::c_int as usize]),
+        );
+    T[(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
+        );
+    T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
+        );
+    W[15 as ::core::ffi::c_int as usize] = (*data.offset(15 as ::core::ffi::c_int as isize)
+        & 0xff as uint32_t)
+        << 24 as ::core::ffi::c_int
+        | (*data.offset(15 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
+            << 8 as ::core::ffi::c_int
+        | (*data.offset(15 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
+            >> 8 as ::core::ffi::c_int
+        | (*data.offset(15 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
+            >> 24 as ::core::ffi::c_int;
+    T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                14 as ::core::ffi::c_uint,
+                            ),
+                        5 as ::core::ffi::c_uint,
+                    ),
+                6 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                T[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        & (T[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]),
+            )
+            .wrapping_add(SHA256_K[(15 as ::core::ffi::c_int + 0 as ::core::ffi::c_int) as usize])
+            .wrapping_add(W[15 as ::core::ffi::c_int as usize]),
+        );
+    T[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize],
+        );
+    T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] = T
+        [(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize]
+        .wrapping_add(
+            rotr_32(
+                T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    ^ rotr_32(
+                        T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
+                                9 as ::core::ffi::c_uint,
+                            ),
+                        11 as ::core::ffi::c_uint,
+                    ),
+                2 as ::core::ffi::c_uint,
+            )
+            .wrapping_add(
+                (T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize]
+                    & (T[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                        & 7 as ::core::ffi::c_int) as usize]
+                        ^ T[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]))
+                    .wrapping_add(
+                        T[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & T[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize],
+                    ),
+            ),
+        );
+    let mut j: ::core::ffi::c_uint = 16 as ::core::ffi::c_uint;
+    while j < 64 as ::core::ffi::c_uint {
+        W[(0 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(0 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(0 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(0 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(1 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(1 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(1 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(1 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(2 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(3 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(3 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(3 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(3 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(4 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(4 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(4 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(4 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(5 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(5 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(5 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(5 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(5 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(6 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(6 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(6 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(6 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(7 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(7 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(7 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(7 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(8 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(8 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(8 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(8 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(8 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(8 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(8 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(8 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(8 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(8 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(8 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(9 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(9 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(9 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int)
+                        as usize]
+                        ^ rotr_32(
+                            W[(9 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(9 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(9 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(9 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(9 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(9 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        14 as ::core::ffi::c_uint,
+                                    ),
+                                5 as ::core::ffi::c_uint,
+                            ),
+                        6 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                & (T[(5 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize]),
+                    )
+                    .wrapping_add(SHA256_K[(9 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                    .wrapping_add(W[(9 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+                );
+        T[(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize],
+                );
+        T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize] =
+            T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                as usize]
+                .wrapping_add(
+                    rotr_32(
+                        T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            ^ rotr_32(
+                                T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    ^ rotr_32(
+                                        T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                            & 7 as ::core::ffi::c_int)
+                                            as usize],
+                                        9 as ::core::ffi::c_uint,
+                                    ),
+                                11 as ::core::ffi::c_uint,
+                            ),
+                        2 as ::core::ffi::c_uint,
+                    )
+                    .wrapping_add(
+                        (T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                            & 7 as ::core::ffi::c_int) as usize]
+                            & (T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
+                                ^ T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]))
+                            .wrapping_add(
+                                T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]
+                                    & T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
+                            ),
+                    ),
+                );
+        W[(10 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(10 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(10 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 15 as ::core::ffi::c_int) as usize]
+                        ^ rotr_32(
+                            W[(10 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(10 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(10 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(10 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(10 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(10 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+            & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     14 as ::core::ffi::c_uint,
                                 ),
                             5 as ::core::ffi::c_uint,
@@ -986,41 +2679,41 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                     6 as ::core::ffi::c_uint,
                 )
                 .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+                    T[(6 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             & (T[(5 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
                                 ^ T[(6 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]),
                 )
-                .wrapping_add(
-                    SHA256_K[(10 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[10 as ::core::ffi::c_int as usize]),
-        );
-    T[(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+                .wrapping_add(SHA256_K[(10 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                .wrapping_add(W[(10 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+            );
+        T[(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
-    T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
+            .wrapping_add(
+                T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize],
+            );
+        T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     9 as ::core::ffi::c_uint,
                                 ),
                             11 as ::core::ffi::c_uint,
@@ -1033,37 +2726,65 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                         & (T[(1 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             ^ T[(2 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
+                                & 7 as ::core::ffi::c_int)
+                                as usize]))
                         .wrapping_add(
                             T[(1 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 & T[(2 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
                         ),
                 ),
-        );
-    W[11 as ::core::ffi::c_int as usize] = (*data
-        .offset(11 as ::core::ffi::c_int as isize) & 0xff as uint32_t)
-        << 24 as ::core::ffi::c_int
-        | (*data.offset(11 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
-            << 8 as ::core::ffi::c_int
-        | (*data.offset(11 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
-            >> 8 as ::core::ffi::c_int
-        | (*data.offset(11 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
-            >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+            );
+        W[(11 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(11 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(11 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 15 as ::core::ffi::c_int) as usize]
+                        ^ rotr_32(
+                            W[(11 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(11 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(11 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(11 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(11 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(11 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     14 as ::core::ffi::c_uint,
                                 ),
                             5 as ::core::ffi::c_uint,
@@ -1071,41 +2792,41 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                     6 as ::core::ffi::c_uint,
                 )
                 .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+                    T[(6 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             & (T[(5 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
                                 ^ T[(6 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]),
                 )
-                .wrapping_add(
-                    SHA256_K[(11 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[11 as ::core::ffi::c_int as usize]),
-        );
-    T[(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+                .wrapping_add(SHA256_K[(11 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                .wrapping_add(W[(11 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+            );
+        T[(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
-    T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
+            .wrapping_add(
+                T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize],
+            );
+        T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     9 as ::core::ffi::c_uint,
                                 ),
                             11 as ::core::ffi::c_uint,
@@ -1118,37 +2839,65 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                         & (T[(1 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             ^ T[(2 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
+                                & 7 as ::core::ffi::c_int)
+                                as usize]))
                         .wrapping_add(
                             T[(1 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 & T[(2 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
                         ),
                 ),
-        );
-    W[12 as ::core::ffi::c_int as usize] = (*data
-        .offset(12 as ::core::ffi::c_int as isize) & 0xff as uint32_t)
-        << 24 as ::core::ffi::c_int
-        | (*data.offset(12 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
-            << 8 as ::core::ffi::c_int
-        | (*data.offset(12 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
-            >> 8 as ::core::ffi::c_int
-        | (*data.offset(12 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
-            >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+            );
+        W[(12 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(12 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(12 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 15 as ::core::ffi::c_int) as usize]
+                        ^ rotr_32(
+                            W[(12 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(12 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(12 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(12 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(12 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(12 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     14 as ::core::ffi::c_uint,
                                 ),
                             5 as ::core::ffi::c_uint,
@@ -1156,41 +2905,41 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                     6 as ::core::ffi::c_uint,
                 )
                 .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+                    T[(6 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             & (T[(5 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
                                 ^ T[(6 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]),
                 )
-                .wrapping_add(
-                    SHA256_K[(12 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[12 as ::core::ffi::c_int as usize]),
-        );
-    T[(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+                .wrapping_add(SHA256_K[(12 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                .wrapping_add(W[(12 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+            );
+        T[(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
-    T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
+            .wrapping_add(
+                T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize],
+            );
+        T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     9 as ::core::ffi::c_uint,
                                 ),
                             11 as ::core::ffi::c_uint,
@@ -1203,37 +2952,65 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                         & (T[(1 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             ^ T[(2 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
+                                & 7 as ::core::ffi::c_int)
+                                as usize]))
                         .wrapping_add(
                             T[(1 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 & T[(2 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
                         ),
                 ),
-        );
-    W[13 as ::core::ffi::c_int as usize] = (*data
-        .offset(13 as ::core::ffi::c_int as isize) & 0xff as uint32_t)
-        << 24 as ::core::ffi::c_int
-        | (*data.offset(13 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
-            << 8 as ::core::ffi::c_int
-        | (*data.offset(13 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
-            >> 8 as ::core::ffi::c_int
-        | (*data.offset(13 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
-            >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+            );
+        W[(13 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(13 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(13 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 15 as ::core::ffi::c_int) as usize]
+                        ^ rotr_32(
+                            W[(13 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(13 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(13 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(13 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(13 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(13 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     14 as ::core::ffi::c_uint,
                                 ),
                             5 as ::core::ffi::c_uint,
@@ -1241,41 +3018,41 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                     6 as ::core::ffi::c_uint,
                 )
                 .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+                    T[(6 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             & (T[(5 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
                                 ^ T[(6 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]),
                 )
-                .wrapping_add(
-                    SHA256_K[(13 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[13 as ::core::ffi::c_int as usize]),
-        );
-    T[(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+                .wrapping_add(SHA256_K[(13 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                .wrapping_add(W[(13 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+            );
+        T[(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
-    T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
+            .wrapping_add(
+                T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize],
+            );
+        T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     9 as ::core::ffi::c_uint,
                                 ),
                             11 as ::core::ffi::c_uint,
@@ -1288,37 +3065,65 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                         & (T[(1 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             ^ T[(2 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
+                                & 7 as ::core::ffi::c_int)
+                                as usize]))
                         .wrapping_add(
                             T[(1 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 & T[(2 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
                         ),
                 ),
-        );
-    W[14 as ::core::ffi::c_int as usize] = (*data
-        .offset(14 as ::core::ffi::c_int as isize) & 0xff as uint32_t)
-        << 24 as ::core::ffi::c_int
-        | (*data.offset(14 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
-            << 8 as ::core::ffi::c_int
-        | (*data.offset(14 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
-            >> 8 as ::core::ffi::c_int
-        | (*data.offset(14 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
-            >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+            );
+        W[(14 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(14 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(14 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 15 as ::core::ffi::c_int) as usize]
+                        ^ rotr_32(
+                            W[(14 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(14 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(14 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(14 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(14 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(14 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     14 as ::core::ffi::c_uint,
                                 ),
                             5 as ::core::ffi::c_uint,
@@ -1326,41 +3131,41 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                     6 as ::core::ffi::c_uint,
                 )
                 .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+                    T[(6 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             & (T[(5 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
                                 ^ T[(6 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]),
                 )
-                .wrapping_add(
-                    SHA256_K[(14 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[14 as ::core::ffi::c_int as usize]),
-        );
-    T[(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+                .wrapping_add(SHA256_K[(14 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                .wrapping_add(W[(14 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+            );
+        T[(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
-    T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
+            .wrapping_add(
+                T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize],
+            );
+        T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     9 as ::core::ffi::c_uint,
                                 ),
                             11 as ::core::ffi::c_uint,
@@ -1373,37 +3178,65 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                         & (T[(1 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             ^ T[(2 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
+                                & 7 as ::core::ffi::c_int)
+                                as usize]))
                         .wrapping_add(
                             T[(1 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 & T[(2 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
                         ),
                 ),
-        );
-    W[15 as ::core::ffi::c_int as usize] = (*data
-        .offset(15 as ::core::ffi::c_int as isize) & 0xff as uint32_t)
-        << 24 as ::core::ffi::c_int
-        | (*data.offset(15 as ::core::ffi::c_int as isize) & 0xff00 as uint32_t)
-            << 8 as ::core::ffi::c_int
-        | (*data.offset(15 as ::core::ffi::c_int as isize) & 0xff0000 as uint32_t)
-            >> 8 as ::core::ffi::c_int
-        | (*data.offset(15 as ::core::ffi::c_int as isize) & 0xff000000 as uint32_t)
-            >> 24 as ::core::ffi::c_int;
-    T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+            );
+        W[(15 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] =
+            W[(15 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize].wrapping_add(
+                (rotr_32(
+                    W[(15 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                        & 15 as ::core::ffi::c_int) as usize]
+                        ^ rotr_32(
+                            W[(15 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize],
+                            2 as ::core::ffi::c_uint,
+                        ),
+                    17 as ::core::ffi::c_uint,
+                ) ^ W[(15 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
+                    & 15 as ::core::ffi::c_int) as usize]
+                    >> 10 as ::core::ffi::c_int)
+                    .wrapping_add(
+                        W[(15 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize],
+                    )
+                    .wrapping_add(
+                        rotr_32(
+                            W[(15 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                & 15 as ::core::ffi::c_int) as usize]
+                                ^ rotr_32(
+                                    W[(15 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                                        & 15 as ::core::ffi::c_int)
+                                        as usize],
+                                    11 as ::core::ffi::c_uint,
+                                ),
+                            7 as ::core::ffi::c_uint,
+                        ) ^ W[(15 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                            & 15 as ::core::ffi::c_int) as usize]
+                            >> 3 as ::core::ffi::c_int,
+                    ),
+            );
+        T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     14 as ::core::ffi::c_uint,
                                 ),
                             5 as ::core::ffi::c_uint,
@@ -1411,41 +3244,41 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                     6 as ::core::ffi::c_uint,
                 )
                 .wrapping_add(
-                    T[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+                    T[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             & (T[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
+                                & 7 as ::core::ffi::c_int)
+                                as usize]
                                 ^ T[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]),
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize]),
                 )
-                .wrapping_add(
-                    SHA256_K[(15 as ::core::ffi::c_int + 0 as ::core::ffi::c_int)
-                        as usize],
-                )
-                .wrapping_add(W[15 as ::core::ffi::c_int as usize]),
-        );
-    T[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+                .wrapping_add(SHA256_K[(15 as ::core::ffi::c_uint).wrapping_add(j) as usize])
+                .wrapping_add(W[(15 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]),
+            );
+        T[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
-    T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-        as usize] = T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
+            .wrapping_add(
+                T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                    as usize],
+            );
+        T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+            as usize] = T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
             & 7 as ::core::ffi::c_int) as usize]
-        .wrapping_add(
-            rotr_32(
-                    T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                        & 7 as ::core::ffi::c_int) as usize]
+            .wrapping_add(
+                rotr_32(
+                    T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
+                        as usize]
                         ^ rotr_32(
                             T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 ^ rotr_32(
                                     T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
+                                        & 7 as ::core::ffi::c_int)
+                                        as usize],
                                     9 as ::core::ffi::c_uint,
                                 ),
                             11 as ::core::ffi::c_uint,
@@ -1458,1875 +3291,51 @@ unsafe extern "C" fn transform(mut state: *mut uint32_t, mut data: *const uint32
                         & (T[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
                             & 7 as ::core::ffi::c_int) as usize]
                             ^ T[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]))
+                                & 7 as ::core::ffi::c_int)
+                                as usize]))
                         .wrapping_add(
                             T[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
                                 & 7 as ::core::ffi::c_int) as usize]
                                 & T[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize],
+                                    & 7 as ::core::ffi::c_int)
+                                    as usize],
                         ),
                 ),
-        );
-    let mut j: ::core::ffi::c_uint = 16 as ::core::ffi::c_uint;
-    while j < 64 as ::core::ffi::c_uint {
-        W[(0 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(0
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(0 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(0 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(1 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(1
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(1 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(1 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 1 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(2
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(2 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(2 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(3 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(3
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(3 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(3 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(3 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 3 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(4 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(4
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(4 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(4 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(4 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 4 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(5 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(5
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(5 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(5 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(5 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(5 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 5 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(6 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(6
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(6 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(6 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(6 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 6 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(7 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(7
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(7 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(7 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(7 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(8 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(8
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(8 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(8 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(8 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(8 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(8 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(8 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(8 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(8 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(8 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 8 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(9 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(9
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(9 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(9 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(9 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(9 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(9 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(9 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(9 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(9 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(9 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 9 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(10 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(10
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(10 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(10 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(10 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(10 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(10 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(10 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(10 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(10 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(10 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 10 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(11 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(11
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(11 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(11 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(11 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(11 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(11 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(11 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(11 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(11 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(11 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 11 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(12 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(12
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(12 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(12 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(12 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(12 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(12 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(12 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(12 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(12 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(12 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 12 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(13 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(13
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(13 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(13 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(13 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(13 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(13 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(13 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(13 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(13 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(13 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 13 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(14 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(14
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(14 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(14 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(14 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(14 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(14 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(14 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(14 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(14 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(14 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 14 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
-            );
-        W[(15 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize] = W[(15
-                as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                (rotr_32(
-                    W[(15 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        ^ rotr_32(
-                            W[(15 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize],
-                            2 as ::core::ffi::c_uint,
-                        ),
-                    17 as ::core::ffi::c_uint,
-                )
-                    ^ W[(15 as ::core::ffi::c_int - 2 as ::core::ffi::c_int
-                        & 15 as ::core::ffi::c_int) as usize]
-                        >> 10 as ::core::ffi::c_int)
-                    .wrapping_add(
-                        W[(15 as ::core::ffi::c_int - 7 as ::core::ffi::c_int
-                            & 15 as ::core::ffi::c_int) as usize],
-                    )
-                    .wrapping_add(
-                        rotr_32(
-                            W[(15 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                ^ rotr_32(
-                                    W[(15 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 15 as ::core::ffi::c_int) as usize],
-                                    11 as ::core::ffi::c_uint,
-                                ),
-                            7 as ::core::ffi::c_uint,
-                        )
-                            ^ W[(15 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 15 as ::core::ffi::c_int) as usize]
-                                >> 3 as ::core::ffi::c_int,
-                    ),
-            );
-        T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        14 as ::core::ffi::c_uint,
-                                    ),
-                                5 as ::core::ffi::c_uint,
-                            ),
-                        6 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        T[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ T[(4 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                & (T[(5 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ T[(6 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize]),
-                    )
-                    .wrapping_add(
-                        SHA256_K[(15 as ::core::ffi::c_uint).wrapping_add(j) as usize],
-                    )
-                    .wrapping_add(
-                        W[(15 as ::core::ffi::c_int & 15 as ::core::ffi::c_int) as usize],
-                    ),
-            );
-        T[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(3 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                    & 7 as ::core::ffi::c_int) as usize],
-            );
-        T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int & 7 as ::core::ffi::c_int)
-            as usize] = T[(7 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize]
-            .wrapping_add(
-                rotr_32(
-                        T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            ^ rotr_32(
-                                T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    ^ rotr_32(
-                                        T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                            & 7 as ::core::ffi::c_int) as usize],
-                                        9 as ::core::ffi::c_uint,
-                                    ),
-                                11 as ::core::ffi::c_uint,
-                            ),
-                        2 as ::core::ffi::c_uint,
-                    )
-                    .wrapping_add(
-                        (T[(0 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                            & 7 as ::core::ffi::c_int) as usize]
-                            & (T[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                & 7 as ::core::ffi::c_int) as usize]
-                                ^ T[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]))
-                            .wrapping_add(
-                                T[(1 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                    & 7 as ::core::ffi::c_int) as usize]
-                                    & T[(2 as ::core::ffi::c_int - 15 as ::core::ffi::c_int
-                                        & 7 as ::core::ffi::c_int) as usize],
-                            ),
-                    ),
             );
         j = j.wrapping_add(16 as ::core::ffi::c_uint);
     }
     let ref mut fresh0 = *state.offset(0 as ::core::ffi::c_int as isize);
-    *fresh0 = (*fresh0)
-        .wrapping_add(
-            T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh0 = (*fresh0).wrapping_add(
+        T[(0 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
     let ref mut fresh1 = *state.offset(1 as ::core::ffi::c_int as isize);
-    *fresh1 = (*fresh1)
-        .wrapping_add(
-            T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh1 = (*fresh1).wrapping_add(
+        T[(1 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
     let ref mut fresh2 = *state.offset(2 as ::core::ffi::c_int as isize);
-    *fresh2 = (*fresh2)
-        .wrapping_add(
-            T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh2 = (*fresh2).wrapping_add(
+        T[(2 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
     let ref mut fresh3 = *state.offset(3 as ::core::ffi::c_int as isize);
-    *fresh3 = (*fresh3)
-        .wrapping_add(
-            T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh3 = (*fresh3).wrapping_add(
+        T[(3 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
     let ref mut fresh4 = *state.offset(4 as ::core::ffi::c_int as isize);
-    *fresh4 = (*fresh4)
-        .wrapping_add(
-            T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh4 = (*fresh4).wrapping_add(
+        T[(4 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
     let ref mut fresh5 = *state.offset(5 as ::core::ffi::c_int as isize);
-    *fresh5 = (*fresh5)
-        .wrapping_add(
-            T[(5 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh5 = (*fresh5).wrapping_add(
+        T[(5 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
     let ref mut fresh6 = *state.offset(6 as ::core::ffi::c_int as isize);
-    *fresh6 = (*fresh6)
-        .wrapping_add(
-            T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh6 = (*fresh6).wrapping_add(
+        T[(6 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
     let ref mut fresh7 = *state.offset(7 as ::core::ffi::c_int as isize);
-    *fresh7 = (*fresh7)
-        .wrapping_add(
-            T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int
-                & 7 as ::core::ffi::c_int) as usize],
-        );
+    *fresh7 = (*fresh7).wrapping_add(
+        T[(7 as ::core::ffi::c_int - 0 as ::core::ffi::c_int & 7 as ::core::ffi::c_int) as usize],
+    );
 }
 unsafe extern "C" fn process(mut check: *mut lzma_check_state) {
     transform(
@@ -3347,8 +3356,7 @@ pub unsafe extern "C" fn lzma_sha256_init(mut check: *mut lzma_check_state) {
         0x5be0cd19 as ::core::ffi::c_int as uint32_t,
     ];
     memcpy(
-        &raw mut (*check).state.sha256.state as *mut uint32_t
-            as *mut ::core::ffi::c_void,
+        &raw mut (*check).state.sha256.state as *mut uint32_t as *mut ::core::ffi::c_void,
         &raw const s as *const uint32_t as *const ::core::ffi::c_void,
         ::core::mem::size_of::<[uint32_t; 8]>() as size_t,
     );
@@ -3361,8 +3369,7 @@ pub unsafe extern "C" fn lzma_sha256_update(
     mut check: *mut lzma_check_state,
 ) {
     while size > 0 as size_t {
-        let copy_start: size_t = ((*check).state.sha256.size & 0x3f as uint64_t)
-            as size_t;
+        let copy_start: size_t = ((*check).state.sha256.size & 0x3f as uint64_t) as size_t;
         let mut copy_size: size_t = (64 as size_t).wrapping_sub(copy_start);
         if copy_size > size {
             copy_size = size;
@@ -3401,28 +3408,22 @@ pub unsafe extern "C" fn lzma_sha256_finish(mut check: *mut lzma_check_state) {
         (*check).buffer.u8_0[fresh9 as usize] = 0 as uint8_t;
     }
     (*check).state.sha256.size = (*check).state.sha256.size.wrapping_mul(8 as uint64_t);
-    (*check)
-        .buffer
-        .u64_0[((64 as ::core::ffi::c_int - 8 as ::core::ffi::c_int)
-        / 8 as ::core::ffi::c_int) as usize] = ((*check).state.sha256.size
-        & 0xff as uint64_t) << 56 as ::core::ffi::c_int
+    (*check).buffer.u64_0[((64 as ::core::ffi::c_int - 8 as ::core::ffi::c_int)
+        / 8 as ::core::ffi::c_int) as usize] = ((*check).state.sha256.size & 0xff as uint64_t)
+        << 56 as ::core::ffi::c_int
         | ((*check).state.sha256.size & 0xff00 as uint64_t) << 40 as ::core::ffi::c_int
         | ((*check).state.sha256.size & 0xff0000 as uint64_t) << 24 as ::core::ffi::c_int
-        | ((*check).state.sha256.size & 0xff000000 as uint64_t)
-            << 8 as ::core::ffi::c_int
-        | ((*check).state.sha256.size & 0xff00000000 as uint64_t)
-            >> 8 as ::core::ffi::c_int
-        | ((*check).state.sha256.size & 0xff0000000000 as uint64_t)
-            >> 24 as ::core::ffi::c_int
-        | ((*check).state.sha256.size & 0xff000000000000 as uint64_t)
-            >> 40 as ::core::ffi::c_int
-        | ((*check).state.sha256.size & 0xff00000000000000 as uint64_t)
-            >> 56 as ::core::ffi::c_int;
+        | ((*check).state.sha256.size & 0xff000000 as uint64_t) << 8 as ::core::ffi::c_int
+        | ((*check).state.sha256.size & 0xff00000000 as uint64_t) >> 8 as ::core::ffi::c_int
+        | ((*check).state.sha256.size & 0xff0000000000 as uint64_t) >> 24 as ::core::ffi::c_int
+        | ((*check).state.sha256.size & 0xff000000000000 as uint64_t) >> 40 as ::core::ffi::c_int
+        | ((*check).state.sha256.size & 0xff00000000000000 as uint64_t) >> 56 as ::core::ffi::c_int;
     process(check);
     let mut i: size_t = 0 as size_t;
     while i < 8 as size_t {
         (*check).buffer.u32_0[i as usize] = ((*check).state.sha256.state[i as usize]
-            & 0xff as uint32_t) << 24 as ::core::ffi::c_int
+            & 0xff as uint32_t)
+            << 24 as ::core::ffi::c_int
             | ((*check).state.sha256.state[i as usize] & 0xff00 as uint32_t)
                 << 8 as ::core::ffi::c_int
             | ((*check).state.sha256.state[i as usize] & 0xff0000 as uint32_t)

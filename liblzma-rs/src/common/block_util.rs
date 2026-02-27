@@ -75,20 +75,17 @@ pub struct lzma_block {
     pub reserved_bool7: lzma_bool,
     pub reserved_bool8: lzma_bool,
 }
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
-pub const LZMA_VLI_MAX: ::core::ffi::c_ulonglong = UINT64_MAX
-    .wrapping_div(2 as ::core::ffi::c_ulonglong);
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
+pub const LZMA_VLI_MAX: ::core::ffi::c_ulonglong =
+    UINT64_MAX.wrapping_div(2 as ::core::ffi::c_ulonglong);
 pub const LZMA_VLI_UNKNOWN: ::core::ffi::c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: ::core::ffi::c_int = 15 as ::core::ffi::c_int;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: ::core::ffi::c_int = 8 as ::core::ffi::c_int;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: ::core::ffi::c_int = 1024 as ::core::ffi::c_int;
-pub const UNPADDED_SIZE_MAX: ::core::ffi::c_ulonglong = LZMA_VLI_MAX
-    & !(3 as ::core::ffi::c_ulonglong);
+pub const UNPADDED_SIZE_MAX: ::core::ffi::c_ulonglong =
+    LZMA_VLI_MAX & !(3 as ::core::ffi::c_ulonglong);
 #[inline]
 unsafe extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
@@ -107,8 +104,7 @@ pub unsafe extern "C" fn lzma_block_compressed_size(
     if unpadded_size <= container_size as lzma_vli {
         return LZMA_DATA_ERROR;
     }
-    let compressed_size: lzma_vli = unpadded_size
-        .wrapping_sub(container_size as lzma_vli);
+    let compressed_size: lzma_vli = unpadded_size.wrapping_sub(container_size as lzma_vli);
     if (*block).compressed_size != LZMA_VLI_UNKNOWN as lzma_vli
         && (*block).compressed_size != compressed_size
     {
@@ -118,18 +114,16 @@ pub unsafe extern "C" fn lzma_block_compressed_size(
     return LZMA_OK;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_block_unpadded_size(
-    mut block: *const lzma_block,
-) -> lzma_vli {
-    if block.is_null() || (*block).version > 1 as uint32_t
+pub unsafe extern "C" fn lzma_block_unpadded_size(mut block: *const lzma_block) -> lzma_vli {
+    if block.is_null()
+        || (*block).version > 1 as uint32_t
         || (*block).header_size < LZMA_BLOCK_HEADER_SIZE_MIN as uint32_t
         || (*block).header_size > LZMA_BLOCK_HEADER_SIZE_MAX as uint32_t
         || (*block).header_size & 3 as uint32_t != 0
         || !((*block).compressed_size <= LZMA_VLI_MAX as lzma_vli
             || (*block).compressed_size == LZMA_VLI_UNKNOWN as lzma_vli)
         || (*block).compressed_size == 0 as lzma_vli
-        || (*block).check as ::core::ffi::c_uint
-            > LZMA_CHECK_ID_MAX as ::core::ffi::c_uint
+        || (*block).check as ::core::ffi::c_uint > LZMA_CHECK_ID_MAX as ::core::ffi::c_uint
     {
         return 0 as lzma_vli;
     }
@@ -146,9 +140,7 @@ pub unsafe extern "C" fn lzma_block_unpadded_size(
     return unpadded_size;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_block_total_size(
-    mut block: *const lzma_block,
-) -> lzma_vli {
+pub unsafe extern "C" fn lzma_block_total_size(mut block: *const lzma_block) -> lzma_vli {
     let mut unpadded_size: lzma_vli = lzma_block_unpadded_size(block);
     if unpadded_size != LZMA_VLI_UNKNOWN as lzma_vli {
         unpadded_size = vli_ceil4(unpadded_size);

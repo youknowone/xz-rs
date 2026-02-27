@@ -1,5 +1,7 @@
 #[repr(C)]
-pub struct lzma_index_s { _opaque: [u8; 0] }
+pub struct lzma_index_s {
+    _opaque: [u8; 0],
+}
 extern "C" {
     fn memcpy(
         __dst: *mut ::core::ffi::c_void,
@@ -13,14 +15,8 @@ extern "C" {
         allocator: *const lzma_allocator,
     ) -> lzma_ret;
     fn lzma_filters_free(filters: *mut lzma_filter, allocator: *const lzma_allocator);
-    fn lzma_stream_header_encode(
-        options: *const lzma_stream_flags,
-        out: *mut uint8_t,
-    ) -> lzma_ret;
-    fn lzma_stream_footer_encode(
-        options: *const lzma_stream_flags,
-        out: *mut uint8_t,
-    ) -> lzma_ret;
+    fn lzma_stream_header_encode(options: *const lzma_stream_flags, out: *mut uint8_t) -> lzma_ret;
+    fn lzma_stream_footer_encode(options: *const lzma_stream_flags, out: *mut uint8_t) -> lzma_ret;
     fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret;
     fn lzma_block_header_encode(block: *const lzma_block, out: *mut uint8_t) -> lzma_ret;
     fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
@@ -33,10 +29,7 @@ extern "C" {
         uncompressed_size: lzma_vli,
     ) -> lzma_ret;
     fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
-    fn lzma_alloc(
-        size: size_t,
-        allocator: *const lzma_allocator,
-    ) -> *mut ::core::ffi::c_void;
+    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut ::core::ffi::c_void;
     fn lzma_free(ptr: *mut ::core::ffi::c_void, allocator: *const lzma_allocator);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
     fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
@@ -100,15 +93,10 @@ pub const LZMA_RUN: lzma_action = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 #[derive(Copy, Clone)]
@@ -137,16 +125,9 @@ pub struct lzma_next_coder_s {
     pub init: uintptr_t,
     pub code: lzma_code_function,
     pub end: lzma_end_function,
-    pub get_progress: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            *mut uint64_t,
-        ) -> (),
-    >,
-    pub get_check: Option<
-        unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check,
-    >,
+    pub get_progress:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, *mut uint64_t) -> ()>,
+    pub get_check: Option<unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check>,
     pub memconfig: Option<
         unsafe extern "C" fn(
             *mut ::core::ffi::c_void,
@@ -163,13 +144,8 @@ pub struct lzma_next_coder_s {
             *const lzma_filter,
         ) -> lzma_ret,
     >,
-    pub set_out_limit: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            uint64_t,
-        ) -> lzma_ret,
-    >,
+    pub set_out_limit:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -183,9 +159,8 @@ pub const LZMA_CHECK_SHA256: lzma_check = 10;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
 pub const LZMA_CHECK_NONE: lzma_check = 0;
-pub type lzma_end_function = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
->;
+pub type lzma_end_function =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> ()>;
 pub type lzma_code_function = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -299,12 +274,9 @@ pub struct lzma_stream_flags {
     pub reserved_int1: uint32_t,
     pub reserved_int2: uint32_t,
 }
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
 pub const true_0: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
 pub const false_0: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 pub const LZMA_VLI_UNKNOWN: ::core::ffi::c_ulonglong = UINT64_MAX;
@@ -315,11 +287,8 @@ unsafe extern "C" fn block_encoder_init(
 ) -> lzma_ret {
     (*coder).block_options.compressed_size = LZMA_VLI_UNKNOWN as lzma_vli;
     (*coder).block_options.uncompressed_size = LZMA_VLI_UNKNOWN as lzma_vli;
-    let ret_: lzma_ret = lzma_block_header_size(&raw mut (*coder).block_options)
-        as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    let ret_: lzma_ret = lzma_block_header_size(&raw mut (*coder).block_options) as lzma_ret;
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     return lzma_block_encoder_init(
@@ -388,8 +357,7 @@ unsafe extern "C" fn stream_encode(
                     (*coder).sequence = SEQ_INDEX_ENCODE;
                 } else {
                     if !(*coder).block_encoder_is_initialized {
-                        let ret__0: lzma_ret = block_encoder_init(coder, allocator)
-                            as lzma_ret;
+                        let ret__0: lzma_ret = block_encoder_init(coder, allocator) as lzma_ret;
                         if ret__0 as ::core::ffi::c_uint
                             != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
                         {
@@ -420,9 +388,7 @@ unsafe extern "C" fn stream_encode(
                 let ret: lzma_ret = (*coder)
                     .block_encoder
                     .code
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                    .expect("non-null function pointer")(
                     (*coder).block_encoder.coder,
                     allocator,
                     in_0,
@@ -440,9 +406,8 @@ unsafe extern "C" fn stream_encode(
                 {
                     return ret;
                 }
-                let unpadded_size: lzma_vli = lzma_block_unpadded_size(
-                    &raw mut (*coder).block_options,
-                ) as lzma_vli;
+                let unpadded_size: lzma_vli =
+                    lzma_block_unpadded_size(&raw mut (*coder).block_options) as lzma_vli;
                 let ret__1: lzma_ret = lzma_index_append(
                     (*coder).index,
                     allocator,
@@ -460,9 +425,7 @@ unsafe extern "C" fn stream_encode(
                 let ret_0: lzma_ret = (*coder)
                     .index_encoder
                     .code
-                    .expect(
-                        "non-null function pointer",
-                    )(
+                    .expect("non-null function pointer")(
                     (*coder).index_encoder.coder,
                     allocator,
                     ::core::ptr::null::<uint8_t>(),
@@ -537,14 +500,9 @@ unsafe extern "C" fn stream_encoder_update(
         id: 0,
         options: ::core::ptr::null_mut::<::core::ffi::c_void>(),
     }; 5];
-    let ret_: lzma_ret = lzma_filters_copy(
-        filters,
-        &raw mut temp as *mut lzma_filter,
-        allocator,
-    ) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    let ret_: lzma_ret =
+        lzma_filters_copy(filters, &raw mut temp as *mut lzma_filter, allocator) as lzma_ret;
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     if (*coder).sequence as ::core::ffi::c_uint
@@ -554,9 +512,7 @@ unsafe extern "C" fn stream_encoder_update(
         (*coder).block_options.filters = &raw mut temp as *mut lzma_filter;
         ret = block_encoder_init(coder, allocator);
         (*coder).block_options.filters = &raw mut (*coder).filters as *mut lzma_filter;
-        if ret as ::core::ffi::c_uint
-            != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-        {
+        if ret as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
             current_block = 9913398440939854562;
         } else {
             (*coder).block_encoder_is_initialized = true_0 != 0;
@@ -568,12 +524,13 @@ unsafe extern "C" fn stream_encoder_update(
         ret = (*coder)
             .block_encoder
             .update
-            .expect(
-                "non-null function pointer",
-            )((*coder).block_encoder.coder, allocator, filters, reversed_filters);
-        if ret as ::core::ffi::c_uint
-            != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-        {
+            .expect("non-null function pointer")(
+            (*coder).block_encoder.coder,
+            allocator,
+            filters,
+            reversed_filters,
+        );
+        if ret as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
             current_block = 9913398440939854562;
         } else {
             current_block = 8236137900636309791;
@@ -590,8 +547,7 @@ unsafe extern "C" fn stream_encoder_update(
         _ => {
             lzma_filters_free(&raw mut (*coder).filters as *mut lzma_filter, allocator);
             memcpy(
-                &raw mut (*coder).filters as *mut lzma_filter
-                    as *mut ::core::ffi::c_void,
+                &raw mut (*coder).filters as *mut lzma_filter as *mut ::core::ffi::c_void,
                 &raw mut temp as *mut lzma_filter as *const ::core::ffi::c_void,
                 ::core::mem::size_of::<[lzma_filter; 5]>() as size_t,
             );
@@ -615,17 +571,15 @@ unsafe extern "C" fn stream_encoder_init(
             ) -> lzma_ret,
         >,
         uintptr_t,
-    >(
-        Some(
-            stream_encoder_init
-                as unsafe extern "C" fn(
-                    *mut lzma_next_coder,
-                    *const lzma_allocator,
-                    *const lzma_filter,
-                    lzma_check,
-                ) -> lzma_ret,
-        ),
-    ) != (*next).init
+    >(Some(
+        stream_encoder_init
+            as unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                *const lzma_filter,
+                lzma_check,
+            ) -> lzma_ret,
+    )) != (*next).init
     {
         lzma_next_end(next, allocator);
     }
@@ -639,17 +593,15 @@ unsafe extern "C" fn stream_encoder_init(
             ) -> lzma_ret,
         >,
         uintptr_t,
-    >(
-        Some(
-            stream_encoder_init
-                as unsafe extern "C" fn(
-                    *mut lzma_next_coder,
-                    *const lzma_allocator,
-                    *const lzma_filter,
-                    lzma_check,
-                ) -> lzma_ret,
-        ),
-    );
+    >(Some(
+        stream_encoder_init
+            as unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                *const lzma_filter,
+                lzma_check,
+            ) -> lzma_ret,
+    ));
     if filters.is_null() {
         return LZMA_PROG_ERROR;
     }
@@ -679,10 +631,7 @@ unsafe extern "C" fn stream_encoder_init(
         ) as lzma_code_function;
         (*next).end = Some(
             stream_encoder_end
-                as unsafe extern "C" fn(
-                    *mut ::core::ffi::c_void,
-                    *const lzma_allocator,
-                ) -> (),
+                as unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
         ) as lzma_end_function;
         (*next).update = Some(
             stream_encoder_update
@@ -701,8 +650,7 @@ unsafe extern "C" fn stream_encoder_init(
                     *const lzma_filter,
                 ) -> lzma_ret,
             >;
-        (*coder).filters[0 as ::core::ffi::c_int as usize].id = LZMA_VLI_UNKNOWN
-            as lzma_vli;
+        (*coder).filters[0 as ::core::ffi::c_int as usize].id = LZMA_VLI_UNKNOWN as lzma_vli;
         (*coder).block_encoder = lzma_next_coder_s {
             coder: NULL,
             id: LZMA_VLI_UNKNOWN as lzma_vli,
@@ -760,9 +708,7 @@ unsafe extern "C" fn stream_encoder_init(
         &raw mut stream_flags,
         &raw mut (*coder).buffer as *mut uint8_t,
     ) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     (*coder).buffer_pos = 0 as size_t;
@@ -781,9 +727,7 @@ pub unsafe extern "C" fn lzma_stream_encoder(
     mut check: lzma_check,
 ) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     let ret__0: lzma_ret = stream_encoder_init(
@@ -792,22 +736,17 @@ pub unsafe extern "C" fn lzma_stream_encoder(
         filters,
         check,
     ) as lzma_ret;
-    if ret__0 as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret__0 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         lzma_end(strm);
         return ret__0;
     }
-    (*(*strm).internal).supported_actions[LZMA_RUN as ::core::ffi::c_int as usize] = true_0
-        != 0;
-    (*(*strm).internal)
-        .supported_actions[LZMA_SYNC_FLUSH as ::core::ffi::c_int as usize] = true_0 != 0;
-    (*(*strm).internal)
-        .supported_actions[LZMA_FULL_FLUSH as ::core::ffi::c_int as usize] = true_0 != 0;
-    (*(*strm).internal)
-        .supported_actions[LZMA_FULL_BARRIER as ::core::ffi::c_int as usize] = true_0
-        != 0;
-    (*(*strm).internal).supported_actions[LZMA_FINISH as ::core::ffi::c_int as usize] = true_0
-        != 0;
+    (*(*strm).internal).supported_actions[LZMA_RUN as ::core::ffi::c_int as usize] = true_0 != 0;
+    (*(*strm).internal).supported_actions[LZMA_SYNC_FLUSH as ::core::ffi::c_int as usize] =
+        true_0 != 0;
+    (*(*strm).internal).supported_actions[LZMA_FULL_FLUSH as ::core::ffi::c_int as usize] =
+        true_0 != 0;
+    (*(*strm).internal).supported_actions[LZMA_FULL_BARRIER as ::core::ffi::c_int as usize] =
+        true_0 != 0;
+    (*(*strm).internal).supported_actions[LZMA_FINISH as ::core::ffi::c_int as usize] = true_0 != 0;
     return LZMA_OK;
 }

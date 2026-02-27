@@ -54,16 +54,12 @@ unsafe extern "C" fn mf_ptr(mut mf: *const lzma_mf) -> *const uint8_t {
 unsafe extern "C" fn mf_avail(mut mf: *const lzma_mf) -> uint32_t {
     return (*mf).write_pos.wrapping_sub((*mf).read_pos);
 }
-pub const HASH_2_SIZE: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 10 as ::core::ffi::c_int;
-pub const HASH_3_SIZE: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 16 as ::core::ffi::c_int;
-pub const HASH_2_MASK: ::core::ffi::c_uint = HASH_2_SIZE
-    .wrapping_sub(1 as ::core::ffi::c_uint);
-pub const HASH_3_MASK: ::core::ffi::c_uint = HASH_3_SIZE
-    .wrapping_sub(1 as ::core::ffi::c_uint);
-pub const FIX_3_HASH_SIZE: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint)
-    << 10 as ::core::ffi::c_int;
+pub const HASH_2_SIZE: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint) << 10 as ::core::ffi::c_int;
+pub const HASH_3_SIZE: ::core::ffi::c_uint = (1 as ::core::ffi::c_uint) << 16 as ::core::ffi::c_int;
+pub const HASH_2_MASK: ::core::ffi::c_uint = HASH_2_SIZE.wrapping_sub(1 as ::core::ffi::c_uint);
+pub const HASH_3_MASK: ::core::ffi::c_uint = HASH_3_SIZE.wrapping_sub(1 as ::core::ffi::c_uint);
+pub const FIX_3_HASH_SIZE: ::core::ffi::c_uint =
+    (1 as ::core::ffi::c_uint) << 10 as ::core::ffi::c_int;
 pub const FIX_4_HASH_SIZE: ::core::ffi::c_uint = HASH_2_SIZE.wrapping_add(HASH_3_SIZE);
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
@@ -86,8 +82,7 @@ pub unsafe extern "C" fn lzma_mf_find(
     mut count_ptr: *mut uint32_t,
     mut matches: *mut lzma_match,
 ) -> uint32_t {
-    let count: uint32_t = (*mf).find.expect("non-null function pointer")(mf, matches)
-        as uint32_t;
+    let count: uint32_t = (*mf).find.expect("non-null function pointer")(mf, matches) as uint32_t;
     let mut len_best: uint32_t = 0 as uint32_t;
     if count > 0 as uint32_t {
         len_best = (*matches.offset(count.wrapping_sub(1 as uint32_t) as isize)).len;
@@ -96,12 +91,10 @@ pub unsafe extern "C" fn lzma_mf_find(
             if limit > (*mf).match_len_max {
                 limit = (*mf).match_len_max;
             }
-            let mut p1: *const uint8_t = mf_ptr(mf)
-                .offset(-(1 as ::core::ffi::c_int as isize));
+            let mut p1: *const uint8_t = mf_ptr(mf).offset(-(1 as ::core::ffi::c_int as isize));
             let mut p2: *const uint8_t = p1
                 .offset(
-                    -((*matches.offset(count.wrapping_sub(1 as uint32_t) as isize)).dist
-                        as isize),
+                    -((*matches.offset(count.wrapping_sub(1 as uint32_t) as isize)).dist as isize),
                 )
                 .offset(-(1 as ::core::ffi::c_int as isize));
             len_best = lzma_memcmplen(p1, p2, len_best, limit);
@@ -114,8 +107,7 @@ pub unsafe extern "C" fn lzma_mf_find(
 pub const EMPTY_HASH_VALUE: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 pub const MUST_NORMALIZE_POS: ::core::ffi::c_uint = UINT32_MAX;
 unsafe extern "C" fn normalize(mut mf: *mut lzma_mf) {
-    let subvalue: uint32_t = (MUST_NORMALIZE_POS as uint32_t)
-        .wrapping_sub((*mf).cyclic_size);
+    let subvalue: uint32_t = (MUST_NORMALIZE_POS as uint32_t).wrapping_sub((*mf).cyclic_size);
     let mut i: uint32_t = 0 as uint32_t;
     while i < (*mf).hash_count {
         if *(*mf).hash.offset(i as isize) <= subvalue {
@@ -144,8 +136,9 @@ unsafe extern "C" fn move_pos(mut mf: *mut lzma_mf) {
         (*mf).cyclic_pos = 0 as uint32_t;
     }
     (*mf).read_pos = (*mf).read_pos.wrapping_add(1);
-    if ((*mf).read_pos.wrapping_add((*mf).offset) == 4294967295 as uint32_t)
-        as ::core::ffi::c_int as ::core::ffi::c_long != 0
+    if ((*mf).read_pos.wrapping_add((*mf).offset) == 4294967295 as uint32_t) as ::core::ffi::c_int
+        as ::core::ffi::c_long
+        != 0
     {
         normalize(mf);
     }
@@ -175,14 +168,13 @@ unsafe extern "C" fn hc_find_func(
             return matches;
         }
         let pb: *const uint8_t = cur.offset(-(delta as isize));
-        cur_match = *son
-            .offset(
-                cyclic_pos
-                    .wrapping_sub(delta)
-                    .wrapping_add(
-                        (if delta > cyclic_pos { cyclic_size } else { 0 as uint32_t }),
-                    ) as isize,
-            );
+        cur_match = *son.offset(cyclic_pos.wrapping_sub(delta).wrapping_add(
+            (if delta > cyclic_pos {
+                cyclic_size
+            } else {
+                0 as uint32_t
+            }),
+        ) as isize);
         if *pb.offset(len_best as isize) as ::core::ffi::c_int
             == *cur.offset(len_best as isize) as ::core::ffi::c_int
             && *pb.offset(0 as ::core::ffi::c_int as isize) as ::core::ffi::c_int
@@ -199,7 +191,7 @@ unsafe extern "C" fn hc_find_func(
                 }
             }
         }
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mf_hc3_find(
@@ -220,13 +212,13 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
     let mut cur: *const uint8_t = mf_ptr(mf);
     let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: uint32_t = 0 as uint32_t;
-    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-        as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+        [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
         ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
     let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
     let hash_value: uint32_t = (temp
-        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int) & (*mf).hash_mask;
+        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int)
+        & (*mf).hash_mask;
     let delta2: uint32_t = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
     let cur_match: uint32_t = *(*mf)
         .hash
@@ -237,18 +229,12 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
         .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
     let mut len_best: uint32_t = 2 as uint32_t;
     if delta2 < (*mf).cyclic_size
-        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int
-            == *cur as ::core::ffi::c_int
+        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int == *cur as ::core::ffi::c_int
     {
-        len_best = lzma_memcmplen(
-            cur.offset(-(delta2 as isize)),
-            cur,
-            len_best,
-            len_limit,
-        );
+        len_best = lzma_memcmplen(cur.offset(-(delta2 as isize)), cur, len_best, len_limit);
         (*matches.offset(0 as ::core::ffi::c_int as isize)).len = len_best;
-        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist = delta2
-            .wrapping_sub(1 as uint32_t);
+        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist =
+            delta2.wrapping_sub(1 as uint32_t);
         matches_count = 1 as uint32_t;
         if len_best == len_limit {
             *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
@@ -257,18 +243,18 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
         }
     }
     matches_count = hc_find_func(
-            len_limit,
-            pos,
-            cur,
-            cur_match,
-            (*mf).depth,
-            (*mf).son,
-            (*mf).cyclic_pos,
-            (*mf).cyclic_size,
-            matches.offset(matches_count as isize),
-            len_best,
-        )
-        .offset_from(matches) as ::core::ffi::c_long as uint32_t;
+        len_limit,
+        pos,
+        cur,
+        cur_match,
+        (*mf).depth,
+        (*mf).son,
+        (*mf).cyclic_pos,
+        (*mf).cyclic_size,
+        matches.offset(matches_count as isize),
+        len_best,
+    )
+    .offset_from(matches) as ::core::ffi::c_long as uint32_t;
     move_pos(mf);
     return matches_count;
 }
@@ -280,22 +266,21 @@ pub unsafe extern "C" fn lzma_mf_hc3_skip(mut mf: *mut lzma_mf, mut amount: uint
         } else {
             let mut cur: *const uint8_t = mf_ptr(mf);
             let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
-            let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-                as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+            let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+                [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
                 ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
             let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
             let hash_value: uint32_t = (temp
                 ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-                    << 8 as ::core::ffi::c_int) & (*mf).hash_mask;
+                    << 8 as ::core::ffi::c_int)
+                & (*mf).hash_mask;
             let cur_match: uint32_t = *(*mf)
                 .hash
                 .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize);
             *(*mf).hash.offset(hash_2_value as isize) = pos;
             *(*mf)
                 .hash
-                .offset(
-                    (FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize,
-                ) = pos;
+                .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
             *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
             move_pos(mf);
         }
@@ -303,7 +288,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_skip(mut mf: *mut lzma_mf, mut amount: uint
         if !(amount != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mf_hc4_find(
@@ -324,29 +309,25 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
     let mut cur: *const uint8_t = mf_ptr(mf);
     let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: uint32_t = 0 as uint32_t;
-    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-        as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+        [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
         ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
     let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
     let hash_3_value: uint32_t = (temp
-        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int) & HASH_3_MASK as uint32_t;
+        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int)
+        & HASH_3_MASK as uint32_t;
     let hash_value: uint32_t = (temp
-        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int
-        ^ lzma_crc32_table[0 as ::core::ffi::c_int
-            as usize][*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
-            << 5 as ::core::ffi::c_int) & (*mf).hash_mask;
-    let mut delta2: uint32_t = pos
-        .wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
-    let delta3: uint32_t = pos
-        .wrapping_sub(
-            *(*mf)
-                .hash
-                .offset(
-                    (FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize,
-                ),
-        );
+        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int
+        ^ lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+            [*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
+            << 5 as ::core::ffi::c_int)
+        & (*mf).hash_mask;
+    let mut delta2: uint32_t = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
+    let delta3: uint32_t = pos.wrapping_sub(
+        *(*mf)
+            .hash
+            .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize),
+    );
     let cur_match: uint32_t = *(*mf)
         .hash
         .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize);
@@ -359,18 +340,17 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
         .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
     let mut len_best: uint32_t = 1 as uint32_t;
     if delta2 < (*mf).cyclic_size
-        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int
-            == *cur as ::core::ffi::c_int
+        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int == *cur as ::core::ffi::c_int
     {
         len_best = 2 as uint32_t;
         (*matches.offset(0 as ::core::ffi::c_int as isize)).len = 2 as uint32_t;
-        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist = delta2
-            .wrapping_sub(1 as uint32_t);
+        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist =
+            delta2.wrapping_sub(1 as uint32_t);
         matches_count = 1 as uint32_t;
     }
-    if delta2 != delta3 && delta3 < (*mf).cyclic_size
-        && *cur.offset(-(delta3 as isize)) as ::core::ffi::c_int
-            == *cur as ::core::ffi::c_int
+    if delta2 != delta3
+        && delta3 < (*mf).cyclic_size
+        && *cur.offset(-(delta3 as isize)) as ::core::ffi::c_int == *cur as ::core::ffi::c_int
     {
         len_best = 3 as uint32_t;
         let fresh3 = matches_count;
@@ -379,12 +359,7 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
         delta2 = delta3;
     }
     if matches_count != 0 as uint32_t {
-        len_best = lzma_memcmplen(
-            cur.offset(-(delta2 as isize)),
-            cur,
-            len_best,
-            len_limit,
-        );
+        len_best = lzma_memcmplen(cur.offset(-(delta2 as isize)), cur, len_best, len_limit);
         (*matches.offset(matches_count.wrapping_sub(1 as uint32_t) as isize)).len = len_best;
         if len_best == len_limit {
             *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
@@ -396,18 +371,18 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
         len_best = 3 as uint32_t;
     }
     matches_count = hc_find_func(
-            len_limit,
-            pos,
-            cur,
-            cur_match,
-            (*mf).depth,
-            (*mf).son,
-            (*mf).cyclic_pos,
-            (*mf).cyclic_size,
-            matches.offset(matches_count as isize),
-            len_best,
-        )
-        .offset_from(matches) as ::core::ffi::c_long as uint32_t;
+        len_limit,
+        pos,
+        cur,
+        cur_match,
+        (*mf).depth,
+        (*mf).son,
+        (*mf).cyclic_pos,
+        (*mf).cyclic_size,
+        matches.offset(matches_count as isize),
+        len_best,
+    )
+    .offset_from(matches) as ::core::ffi::c_long as uint32_t;
     move_pos(mf);
     return matches_count;
 }
@@ -419,33 +394,31 @@ pub unsafe extern "C" fn lzma_mf_hc4_skip(mut mf: *mut lzma_mf, mut amount: uint
         } else {
             let mut cur: *const uint8_t = mf_ptr(mf);
             let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
-            let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-                as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+            let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+                [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
                 ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
             let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
             let hash_3_value: uint32_t = (temp
                 ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-                    << 8 as ::core::ffi::c_int) & HASH_3_MASK as uint32_t;
+                    << 8 as ::core::ffi::c_int)
+                & HASH_3_MASK as uint32_t;
             let hash_value: uint32_t = (temp
                 ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
                     << 8 as ::core::ffi::c_int
-                ^ lzma_crc32_table[0 as ::core::ffi::c_int
-                    as usize][*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
-                    << 5 as ::core::ffi::c_int) & (*mf).hash_mask;
+                ^ lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+                    [*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
+                    << 5 as ::core::ffi::c_int)
+                & (*mf).hash_mask;
             let cur_match: uint32_t = *(*mf)
                 .hash
                 .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize);
             *(*mf).hash.offset(hash_2_value as isize) = pos;
             *(*mf)
                 .hash
-                .offset(
-                    (FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize,
-                ) = pos;
+                .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize) = pos;
             *(*mf)
                 .hash
-                .offset(
-                    (FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize,
-                ) = pos;
+                .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
             *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
             move_pos(mf);
         }
@@ -453,7 +426,7 @@ pub unsafe extern "C" fn lzma_mf_hc4_skip(mut mf: *mut lzma_mf, mut amount: uint
         if !(amount != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }
 unsafe extern "C" fn bt_find_func(
     len_limit: uint32_t,
@@ -470,8 +443,7 @@ unsafe extern "C" fn bt_find_func(
     let mut ptr0: *mut uint32_t = son
         .offset((cyclic_pos << 1 as ::core::ffi::c_int) as isize)
         .offset(1 as ::core::ffi::c_int as isize);
-    let mut ptr1: *mut uint32_t = son
-        .offset((cyclic_pos << 1 as ::core::ffi::c_int) as isize);
+    let mut ptr1: *mut uint32_t = son.offset((cyclic_pos << 1 as ::core::ffi::c_int) as isize);
     let mut len0: uint32_t = 0 as uint32_t;
     let mut len1: uint32_t = 0 as uint32_t;
     loop {
@@ -483,14 +455,15 @@ unsafe extern "C" fn bt_find_func(
             *ptr1 = EMPTY_HASH_VALUE as uint32_t;
             return matches;
         }
-        let pair: *mut uint32_t = son
-            .offset(
-                (cyclic_pos
-                    .wrapping_sub(delta)
-                    .wrapping_add(
-                        (if delta > cyclic_pos { cyclic_size } else { 0 as uint32_t }),
-                    ) << 1 as ::core::ffi::c_int) as isize,
-            );
+        let pair: *mut uint32_t = son.offset(
+            (cyclic_pos.wrapping_sub(delta).wrapping_add(
+                (if delta > cyclic_pos {
+                    cyclic_size
+                } else {
+                    0 as uint32_t
+                }),
+            ) << 1 as ::core::ffi::c_int) as isize,
+        );
         let pb: *const uint8_t = cur.offset(-(delta as isize));
         let mut len: uint32_t = if len0 < len1 { len0 } else { len1 };
         if *pb.offset(len as isize) as ::core::ffi::c_int
@@ -522,7 +495,7 @@ unsafe extern "C" fn bt_find_func(
             cur_match = *ptr0;
             len0 = len;
         }
-    };
+    }
 }
 unsafe extern "C" fn bt_skip_func(
     len_limit: uint32_t,
@@ -537,8 +510,7 @@ unsafe extern "C" fn bt_skip_func(
     let mut ptr0: *mut uint32_t = son
         .offset((cyclic_pos << 1 as ::core::ffi::c_int) as isize)
         .offset(1 as ::core::ffi::c_int as isize);
-    let mut ptr1: *mut uint32_t = son
-        .offset((cyclic_pos << 1 as ::core::ffi::c_int) as isize);
+    let mut ptr1: *mut uint32_t = son.offset((cyclic_pos << 1 as ::core::ffi::c_int) as isize);
     let mut len0: uint32_t = 0 as uint32_t;
     let mut len1: uint32_t = 0 as uint32_t;
     loop {
@@ -550,14 +522,15 @@ unsafe extern "C" fn bt_skip_func(
             *ptr1 = EMPTY_HASH_VALUE as uint32_t;
             return;
         }
-        let mut pair: *mut uint32_t = son
-            .offset(
-                (cyclic_pos
-                    .wrapping_sub(delta)
-                    .wrapping_add(
-                        (if delta > cyclic_pos { cyclic_size } else { 0 as uint32_t }),
-                    ) << 1 as ::core::ffi::c_int) as isize,
-            );
+        let mut pair: *mut uint32_t = son.offset(
+            (cyclic_pos.wrapping_sub(delta).wrapping_add(
+                (if delta > cyclic_pos {
+                    cyclic_size
+                } else {
+                    0 as uint32_t
+                }),
+            ) << 1 as ::core::ffi::c_int) as isize,
+        );
         let mut pb: *const uint8_t = cur.offset(-(delta as isize));
         let mut len: uint32_t = if len0 < len1 { len0 } else { len1 };
         if *pb.offset(len as isize) as ::core::ffi::c_int
@@ -583,7 +556,7 @@ unsafe extern "C" fn bt_skip_func(
             cur_match = *ptr0;
             len0 = len;
         }
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mf_bt2_find(
@@ -605,23 +578,22 @@ pub unsafe extern "C" fn lzma_mf_bt2_find(
     let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: uint32_t = 0 as uint32_t;
     let hash_value: uint32_t = *cur.offset(0 as ::core::ffi::c_int as isize) as uint32_t
-        | (*cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int;
+        | (*cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int;
     let cur_match: uint32_t = *(*mf).hash.offset(hash_value as isize);
     *(*mf).hash.offset(hash_value as isize) = pos;
     matches_count = bt_find_func(
-            len_limit,
-            pos,
-            cur,
-            cur_match,
-            (*mf).depth,
-            (*mf).son,
-            (*mf).cyclic_pos,
-            (*mf).cyclic_size,
-            matches.offset(matches_count as isize),
-            1 as uint32_t,
-        )
-        .offset_from(matches) as ::core::ffi::c_long as uint32_t;
+        len_limit,
+        pos,
+        cur,
+        cur_match,
+        (*mf).depth,
+        (*mf).son,
+        (*mf).cyclic_pos,
+        (*mf).cyclic_size,
+        matches.offset(matches_count as isize),
+        1 as uint32_t,
+    )
+    .offset_from(matches) as ::core::ffi::c_long as uint32_t;
     move_pos(mf);
     return matches_count;
 }
@@ -671,7 +643,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_skip(mut mf: *mut lzma_mf, mut amount: uint
         if !(amount != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mf_bt3_find(
@@ -692,13 +664,13 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
     let mut cur: *const uint8_t = mf_ptr(mf);
     let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: uint32_t = 0 as uint32_t;
-    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-        as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+        [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
         ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
     let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
     let hash_value: uint32_t = (temp
-        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int) & (*mf).hash_mask;
+        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int)
+        & (*mf).hash_mask;
     let delta2: uint32_t = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
     let cur_match: uint32_t = *(*mf)
         .hash
@@ -709,18 +681,12 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
         .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
     let mut len_best: uint32_t = 2 as uint32_t;
     if delta2 < (*mf).cyclic_size
-        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int
-            == *cur as ::core::ffi::c_int
+        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int == *cur as ::core::ffi::c_int
     {
-        len_best = lzma_memcmplen(
-            cur,
-            cur.offset(-(delta2 as isize)),
-            len_best,
-            len_limit,
-        );
+        len_best = lzma_memcmplen(cur, cur.offset(-(delta2 as isize)), len_best, len_limit);
         (*matches.offset(0 as ::core::ffi::c_int as isize)).len = len_best;
-        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist = delta2
-            .wrapping_sub(1 as uint32_t);
+        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist =
+            delta2.wrapping_sub(1 as uint32_t);
         matches_count = 1 as uint32_t;
         if len_best == len_limit {
             bt_skip_func(
@@ -738,18 +704,18 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
         }
     }
     matches_count = bt_find_func(
-            len_limit,
-            pos,
-            cur,
-            cur_match,
-            (*mf).depth,
-            (*mf).son,
-            (*mf).cyclic_pos,
-            (*mf).cyclic_size,
-            matches.offset(matches_count as isize),
-            len_best,
-        )
-        .offset_from(matches) as ::core::ffi::c_long as uint32_t;
+        len_limit,
+        pos,
+        cur,
+        cur_match,
+        (*mf).depth,
+        (*mf).son,
+        (*mf).cyclic_pos,
+        (*mf).cyclic_size,
+        matches.offset(matches_count as isize),
+        len_best,
+    )
+    .offset_from(matches) as ::core::ffi::c_long as uint32_t;
     move_pos(mf);
     return matches_count;
 }
@@ -775,24 +741,21 @@ pub unsafe extern "C" fn lzma_mf_bt3_skip(mut mf: *mut lzma_mf, mut amount: uint
             11875828834189669668 => {
                 let mut cur: *const uint8_t = mf_ptr(mf);
                 let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
-                let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-                    as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+                let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+                    [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
                     ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
                 let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
                 let hash_value: uint32_t = (temp
                     ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-                        << 8 as ::core::ffi::c_int) & (*mf).hash_mask;
+                        << 8 as ::core::ffi::c_int)
+                    & (*mf).hash_mask;
                 let cur_match: uint32_t = *(*mf)
                     .hash
-                    .offset(
-                        (FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize,
-                    );
+                    .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize);
                 *(*mf).hash.offset(hash_2_value as isize) = pos;
                 *(*mf)
                     .hash
-                    .offset(
-                        (FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize,
-                    ) = pos;
+                    .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
                 bt_skip_func(
                     len_limit,
                     pos,
@@ -811,7 +774,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_skip(mut mf: *mut lzma_mf, mut amount: uint
         if !(amount != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mf_bt4_find(
@@ -832,29 +795,25 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
     let mut cur: *const uint8_t = mf_ptr(mf);
     let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: uint32_t = 0 as uint32_t;
-    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-        as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+    let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+        [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
         ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
     let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
     let hash_3_value: uint32_t = (temp
-        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int) & HASH_3_MASK as uint32_t;
+        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int)
+        & HASH_3_MASK as uint32_t;
     let hash_value: uint32_t = (temp
-        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-            << 8 as ::core::ffi::c_int
-        ^ lzma_crc32_table[0 as ::core::ffi::c_int
-            as usize][*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
-            << 5 as ::core::ffi::c_int) & (*mf).hash_mask;
-    let mut delta2: uint32_t = pos
-        .wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
-    let delta3: uint32_t = pos
-        .wrapping_sub(
-            *(*mf)
-                .hash
-                .offset(
-                    (FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize,
-                ),
-        );
+        ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t) << 8 as ::core::ffi::c_int
+        ^ lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+            [*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
+            << 5 as ::core::ffi::c_int)
+        & (*mf).hash_mask;
+    let mut delta2: uint32_t = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
+    let delta3: uint32_t = pos.wrapping_sub(
+        *(*mf)
+            .hash
+            .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize),
+    );
     let cur_match: uint32_t = *(*mf)
         .hash
         .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize);
@@ -867,18 +826,17 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
         .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
     let mut len_best: uint32_t = 1 as uint32_t;
     if delta2 < (*mf).cyclic_size
-        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int
-            == *cur as ::core::ffi::c_int
+        && *cur.offset(-(delta2 as isize)) as ::core::ffi::c_int == *cur as ::core::ffi::c_int
     {
         len_best = 2 as uint32_t;
         (*matches.offset(0 as ::core::ffi::c_int as isize)).len = 2 as uint32_t;
-        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist = delta2
-            .wrapping_sub(1 as uint32_t);
+        (*matches.offset(0 as ::core::ffi::c_int as isize)).dist =
+            delta2.wrapping_sub(1 as uint32_t);
         matches_count = 1 as uint32_t;
     }
-    if delta2 != delta3 && delta3 < (*mf).cyclic_size
-        && *cur.offset(-(delta3 as isize)) as ::core::ffi::c_int
-            == *cur as ::core::ffi::c_int
+    if delta2 != delta3
+        && delta3 < (*mf).cyclic_size
+        && *cur.offset(-(delta3 as isize)) as ::core::ffi::c_int == *cur as ::core::ffi::c_int
     {
         len_best = 3 as uint32_t;
         let fresh6 = matches_count;
@@ -887,12 +845,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
         delta2 = delta3;
     }
     if matches_count != 0 as uint32_t {
-        len_best = lzma_memcmplen(
-            cur,
-            cur.offset(-(delta2 as isize)),
-            len_best,
-            len_limit,
-        );
+        len_best = lzma_memcmplen(cur, cur.offset(-(delta2 as isize)), len_best, len_limit);
         (*matches.offset(matches_count.wrapping_sub(1 as uint32_t) as isize)).len = len_best;
         if len_best == len_limit {
             bt_skip_func(
@@ -913,18 +866,18 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
         len_best = 3 as uint32_t;
     }
     matches_count = bt_find_func(
-            len_limit,
-            pos,
-            cur,
-            cur_match,
-            (*mf).depth,
-            (*mf).son,
-            (*mf).cyclic_pos,
-            (*mf).cyclic_size,
-            matches.offset(matches_count as isize),
-            len_best,
-        )
-        .offset_from(matches) as ::core::ffi::c_long as uint32_t;
+        len_limit,
+        pos,
+        cur,
+        cur_match,
+        (*mf).depth,
+        (*mf).son,
+        (*mf).cyclic_pos,
+        (*mf).cyclic_size,
+        matches.offset(matches_count as isize),
+        len_best,
+    )
+    .offset_from(matches) as ::core::ffi::c_long as uint32_t;
     move_pos(mf);
     return matches_count;
 }
@@ -950,35 +903,32 @@ pub unsafe extern "C" fn lzma_mf_bt4_skip(mut mf: *mut lzma_mf, mut amount: uint
             11875828834189669668 => {
                 let mut cur: *const uint8_t = mf_ptr(mf);
                 let pos: uint32_t = (*mf).read_pos.wrapping_add((*mf).offset);
-                let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int
-                    as usize][*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
+                let temp: uint32_t = lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+                    [*cur.offset(0 as ::core::ffi::c_int as isize) as usize]
                     ^ *cur.offset(1 as ::core::ffi::c_int as isize) as uint32_t;
                 let hash_2_value: uint32_t = temp & HASH_2_MASK as uint32_t;
                 let hash_3_value: uint32_t = (temp
                     ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
-                        << 8 as ::core::ffi::c_int) & HASH_3_MASK as uint32_t;
+                        << 8 as ::core::ffi::c_int)
+                    & HASH_3_MASK as uint32_t;
                 let hash_value: uint32_t = (temp
                     ^ (*cur.offset(2 as ::core::ffi::c_int as isize) as uint32_t)
                         << 8 as ::core::ffi::c_int
-                    ^ lzma_crc32_table[0 as ::core::ffi::c_int
-                        as usize][*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
-                        << 5 as ::core::ffi::c_int) & (*mf).hash_mask;
+                    ^ lzma_crc32_table[0 as ::core::ffi::c_int as usize]
+                        [*cur.offset(3 as ::core::ffi::c_int as isize) as usize]
+                        << 5 as ::core::ffi::c_int)
+                    & (*mf).hash_mask;
                 let cur_match: uint32_t = *(*mf)
                     .hash
-                    .offset(
-                        (FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize,
-                    );
+                    .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize);
                 *(*mf).hash.offset(hash_2_value as isize) = pos;
                 *(*mf)
                     .hash
-                    .offset(
-                        (FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize,
-                    ) = pos;
+                    .offset((FIX_3_HASH_SIZE as uint32_t).wrapping_add(hash_3_value) as isize) =
+                    pos;
                 *(*mf)
                     .hash
-                    .offset(
-                        (FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize,
-                    ) = pos;
+                    .offset((FIX_4_HASH_SIZE as uint32_t).wrapping_add(hash_value) as isize) = pos;
                 bt_skip_func(
                     len_limit,
                     pos,
@@ -997,5 +947,5 @@ pub unsafe extern "C" fn lzma_mf_bt4_skip(mut mf: *mut lzma_mf, mut amount: uint
         if !(amount != 0 as uint32_t) {
             break;
         }
-    };
+    }
 }

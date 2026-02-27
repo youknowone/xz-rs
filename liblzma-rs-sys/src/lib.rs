@@ -12,7 +12,7 @@
     non_snake_case,
     non_upper_case_globals,
     unused_imports,
-    clippy::all,
+    clippy::all
 )]
 
 use core::ffi::{c_char, c_uchar, c_uint, c_void};
@@ -36,12 +36,12 @@ pub type lzma_bool = c_uchar;
 pub type lzma_vli = u64;
 
 // === Canonical struct re-exports ===
-pub use liblzma_rs::common::common::lzma_stream;
 pub use liblzma_rs::common::common::lzma_allocator;
+pub use liblzma_rs::common::common::lzma_stream;
 pub use liblzma_rs::common::filter_common::lzma_options_lzma;
-pub use liblzma_rs::delta::delta_common::lzma_filter;
 pub use liblzma_rs::common::index_decoder::lzma_index;
 pub use liblzma_rs::common::stream_flags_decoder::lzma_stream_flags;
+pub use liblzma_rs::delta::delta_common::lzma_filter;
 
 #[repr(C)]
 pub struct lzma_options_bcj {
@@ -65,18 +65,15 @@ pub const LZMA_MEM_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_MEM_ERROR 
 pub const LZMA_MEMLIMIT_ERROR: lzma_ret =
     liblzma_rs::common::common::LZMA_MEMLIMIT_ERROR as lzma_ret;
 pub const LZMA_FORMAT_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_FORMAT_ERROR as lzma_ret;
-pub const LZMA_OPTIONS_ERROR: lzma_ret =
-    liblzma_rs::common::common::LZMA_OPTIONS_ERROR as lzma_ret;
+pub const LZMA_OPTIONS_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_OPTIONS_ERROR as lzma_ret;
 pub const LZMA_DATA_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_DATA_ERROR as lzma_ret;
 pub const LZMA_BUF_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_BUF_ERROR as lzma_ret;
 pub const LZMA_PROG_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_PROG_ERROR as lzma_ret;
 pub const LZMA_SEEK_NEEDED: lzma_ret = liblzma_rs::common::common::LZMA_SEEK_NEEDED as lzma_ret;
 
 pub const LZMA_RUN: lzma_action = liblzma_rs::common::common::LZMA_RUN as lzma_action;
-pub const LZMA_SYNC_FLUSH: lzma_action =
-    liblzma_rs::common::common::LZMA_SYNC_FLUSH as lzma_action;
-pub const LZMA_FULL_FLUSH: lzma_action =
-    liblzma_rs::common::common::LZMA_FULL_FLUSH as lzma_action;
+pub const LZMA_SYNC_FLUSH: lzma_action = liblzma_rs::common::common::LZMA_SYNC_FLUSH as lzma_action;
+pub const LZMA_FULL_FLUSH: lzma_action = liblzma_rs::common::common::LZMA_FULL_FLUSH as lzma_action;
 pub const LZMA_FULL_BARRIER: lzma_action =
     liblzma_rs::common::common::LZMA_FULL_BARRIER as lzma_action;
 pub const LZMA_FINISH: lzma_action = liblzma_rs::common::common::LZMA_FINISH as lzma_action;
@@ -85,8 +82,7 @@ pub const LZMA_FINISH: lzma_action = liblzma_rs::common::common::LZMA_FINISH as 
 pub const LZMA_CHECK_NONE: lzma_check = liblzma_rs::check::check::LZMA_CHECK_NONE as lzma_check;
 pub const LZMA_CHECK_CRC32: lzma_check = liblzma_rs::check::check::LZMA_CHECK_CRC32 as lzma_check;
 pub const LZMA_CHECK_CRC64: lzma_check = liblzma_rs::check::check::LZMA_CHECK_CRC64 as lzma_check;
-pub const LZMA_CHECK_SHA256: lzma_check =
-    liblzma_rs::check::check::LZMA_CHECK_SHA256 as lzma_check;
+pub const LZMA_CHECK_SHA256: lzma_check = liblzma_rs::check::check::LZMA_CHECK_SHA256 as lzma_check;
 
 // --- Modes / match finders / filter IDs ---
 pub const LZMA_MODE_FAST: lzma_mode =
@@ -128,8 +124,7 @@ pub const LZMA_FILTER_LZMA2: lzma_vli =
     liblzma_rs::common::filter_common::LZMA_FILTER_LZMA2 as lzma_vli;
 
 // --- Decoder flags ---
-pub const LZMA_TELL_NO_CHECK: u32 =
-    liblzma_rs::common::auto_decoder::LZMA_TELL_NO_CHECK as u32;
+pub const LZMA_TELL_NO_CHECK: u32 = liblzma_rs::common::auto_decoder::LZMA_TELL_NO_CHECK as u32;
 pub const LZMA_TELL_UNSUPPORTED_CHECK: u32 =
     liblzma_rs::common::auto_decoder::LZMA_TELL_UNSUPPORTED_CHECK as u32;
 pub const LZMA_TELL_ANY_CHECK: u32 = liblzma_rs::common::auto_decoder::LZMA_TELL_ANY_CHECK as u32;
@@ -149,14 +144,11 @@ pub const LZMA_DICT_SIZE_DEFAULT: u32 =
     liblzma_rs::common::string_conversion::LZMA_DICT_SIZE_DEFAULT as u32;
 pub const LZMA_LCLP_MIN: u32 = liblzma_rs::common::string_conversion::LZMA_LCLP_MIN as u32;
 pub const LZMA_LCLP_MAX: u32 = liblzma_rs::common::string_conversion::LZMA_LCLP_MAX as u32;
-pub const LZMA_LC_DEFAULT: u32 =
-    liblzma_rs::lzma::lzma_encoder_presets::LZMA_LC_DEFAULT as u32;
-pub const LZMA_LP_DEFAULT: u32 =
-    liblzma_rs::lzma::lzma_encoder_presets::LZMA_LP_DEFAULT as u32;
+pub const LZMA_LC_DEFAULT: u32 = liblzma_rs::lzma::lzma_encoder_presets::LZMA_LC_DEFAULT as u32;
+pub const LZMA_LP_DEFAULT: u32 = liblzma_rs::lzma::lzma_encoder_presets::LZMA_LP_DEFAULT as u32;
 pub const LZMA_PB_MIN: u32 = liblzma_rs::common::string_conversion::LZMA_PB_MIN as u32;
 pub const LZMA_PB_MAX: u32 = liblzma_rs::common::string_conversion::LZMA_PB_MAX as u32;
-pub const LZMA_PB_DEFAULT: u32 =
-    liblzma_rs::lzma::lzma_encoder_presets::LZMA_PB_DEFAULT as u32;
+pub const LZMA_PB_DEFAULT: u32 = liblzma_rs::lzma::lzma_encoder_presets::LZMA_PB_DEFAULT as u32;
 
 // --- Backward size / VLI ---
 pub const LZMA_BACKWARD_SIZE_MIN: lzma_vli =
@@ -180,9 +172,7 @@ pub const LZMA_STREAM_HEADER_SIZE: u32 = liblzma_rs::common::index::LZMA_STREAM_
 // but nominally different, so we provide thin wrappers with pointer casts.
 
 // --- Direct re-exports (canonical types from common::common) ---
-pub use liblzma_rs::common::common::{
-    lzma_code, lzma_end, lzma_memlimit_get, lzma_memlimit_set,
-};
+pub use liblzma_rs::common::common::{lzma_code, lzma_end, lzma_memlimit_get, lzma_memlimit_set};
 
 // --- Version ---
 
@@ -272,7 +262,14 @@ pub unsafe fn lzma_easy_buffer_encode(
     out_size: size_t,
 ) -> lzma_ret {
     liblzma_rs::common::easy_buffer_encoder::lzma_easy_buffer_encode(
-        preset, check, allocator.cast(), input, in_size, out, out_pos, out_size,
+        preset,
+        check,
+        allocator.cast(),
+        input,
+        in_size,
+        out,
+        out_pos,
+        out_size,
     )
 }
 
@@ -288,11 +285,7 @@ pub unsafe fn lzma_stream_encoder(
 }
 
 #[inline]
-pub unsafe fn lzma_stream_decoder(
-    strm: *mut lzma_stream,
-    memlimit: u64,
-    flags: u32,
-) -> lzma_ret {
+pub unsafe fn lzma_stream_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret {
     liblzma_rs::common::stream_decoder::lzma_stream_decoder(strm.cast(), memlimit, flags)
 }
 
@@ -307,30 +300,19 @@ pub unsafe fn lzma_alone_encoder(
 }
 
 #[inline]
-pub unsafe fn lzma_alone_decoder(
-    strm: *mut lzma_stream,
-    memlimit: u64,
-) -> lzma_ret {
+pub unsafe fn lzma_alone_decoder(strm: *mut lzma_stream, memlimit: u64) -> lzma_ret {
     liblzma_rs::common::alone_decoder::lzma_alone_decoder(strm.cast(), memlimit)
 }
 
 // --- Auto/lzip decoder ---
 
 #[inline]
-pub unsafe fn lzma_auto_decoder(
-    strm: *mut lzma_stream,
-    memlimit: u64,
-    flags: u32,
-) -> lzma_ret {
+pub unsafe fn lzma_auto_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret {
     liblzma_rs::common::auto_decoder::lzma_auto_decoder(strm.cast(), memlimit, flags)
 }
 
 #[inline]
-pub unsafe fn lzma_lzip_decoder(
-    strm: *mut lzma_stream,
-    memlimit: u64,
-    flags: u32,
-) -> lzma_ret {
+pub unsafe fn lzma_lzip_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret {
     liblzma_rs::common::lzip_decoder::lzma_lzip_decoder(strm.cast(), memlimit, flags)
 }
 
@@ -353,7 +335,14 @@ pub unsafe fn lzma_stream_buffer_encode(
     out_size: size_t,
 ) -> lzma_ret {
     liblzma_rs::common::stream_buffer_encoder::lzma_stream_buffer_encode(
-        filters.cast(), check, allocator.cast(), input, in_size, out, out_pos, out_size,
+        filters.cast(),
+        check,
+        allocator.cast(),
+        input,
+        in_size,
+        out,
+        out_pos,
+        out_size,
     )
 }
 
@@ -370,7 +359,15 @@ pub unsafe fn lzma_stream_buffer_decode(
     out_size: size_t,
 ) -> lzma_ret {
     liblzma_rs::common::stream_buffer_decoder::lzma_stream_buffer_decode(
-        memlimit, flags, allocator.cast(), input, in_pos, in_size, out, out_pos, out_size,
+        memlimit,
+        flags,
+        allocator.cast(),
+        input,
+        in_pos,
+        in_size,
+        out,
+        out_pos,
+        out_size,
     )
 }
 
@@ -392,9 +389,7 @@ pub unsafe fn lzma_filters_copy(
     dest: *mut lzma_filter,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {
-    liblzma_rs::common::filter_common::lzma_filters_copy(
-        src.cast(), dest.cast(), allocator.cast(),
-    )
+    liblzma_rs::common::filter_common::lzma_filters_copy(src.cast(), dest.cast(), allocator.cast())
 }
 
 #[inline]
@@ -408,26 +403,17 @@ pub unsafe fn lzma_raw_decoder_memusage(filters: *const lzma_filter) -> u64 {
 }
 
 #[inline]
-pub unsafe fn lzma_raw_encoder(
-    strm: *mut lzma_stream,
-    filters: *const lzma_filter,
-) -> lzma_ret {
+pub unsafe fn lzma_raw_encoder(strm: *mut lzma_stream, filters: *const lzma_filter) -> lzma_ret {
     liblzma_rs::common::filter_encoder::lzma_raw_encoder(strm.cast(), filters.cast())
 }
 
 #[inline]
-pub unsafe fn lzma_raw_decoder(
-    strm: *mut lzma_stream,
-    filters: *const lzma_filter,
-) -> lzma_ret {
+pub unsafe fn lzma_raw_decoder(strm: *mut lzma_stream, filters: *const lzma_filter) -> lzma_ret {
     liblzma_rs::common::filter_decoder::lzma_raw_decoder(strm.cast(), filters.cast())
 }
 
 #[inline]
-pub unsafe fn lzma_filters_update(
-    strm: *mut lzma_stream,
-    filters: *const lzma_filter,
-) -> lzma_ret {
+pub unsafe fn lzma_filters_update(strm: *mut lzma_stream, filters: *const lzma_filter) -> lzma_ret {
     liblzma_rs::common::filter_encoder::lzma_filters_update(strm.cast(), filters.cast())
 }
 
@@ -444,7 +430,13 @@ pub unsafe fn lzma_raw_buffer_encode(
     out_size: size_t,
 ) -> lzma_ret {
     liblzma_rs::common::filter_buffer_encoder::lzma_raw_buffer_encode(
-        filters.cast(), allocator.cast(), input, in_size, out, out_pos, out_size,
+        filters.cast(),
+        allocator.cast(),
+        input,
+        in_size,
+        out,
+        out_pos,
+        out_size,
     )
 }
 
@@ -460,25 +452,26 @@ pub unsafe fn lzma_raw_buffer_decode(
     out_size: size_t,
 ) -> lzma_ret {
     liblzma_rs::common::filter_buffer_decoder::lzma_raw_buffer_decode(
-        filters.cast(), allocator.cast(), input, in_pos, in_size, out, out_pos, out_size,
+        filters.cast(),
+        allocator.cast(),
+        input,
+        in_pos,
+        in_size,
+        out,
+        out_pos,
+        out_size,
     )
 }
 
 // --- Properties ---
 
 #[inline]
-pub unsafe fn lzma_properties_size(
-    size: *mut u32,
-    filter: *const lzma_filter,
-) -> lzma_ret {
+pub unsafe fn lzma_properties_size(size: *mut u32, filter: *const lzma_filter) -> lzma_ret {
     liblzma_rs::common::filter_encoder::lzma_properties_size(size, filter.cast())
 }
 
 #[inline]
-pub unsafe fn lzma_properties_encode(
-    filter: *const lzma_filter,
-    props: *mut u8,
-) -> lzma_ret {
+pub unsafe fn lzma_properties_encode(filter: *const lzma_filter, props: *mut u8) -> lzma_ret {
     liblzma_rs::common::filter_encoder::lzma_properties_encode(filter.cast(), props)
 }
 
@@ -490,24 +483,22 @@ pub unsafe fn lzma_properties_decode(
     props_size: size_t,
 ) -> lzma_ret {
     liblzma_rs::common::filter_decoder::lzma_properties_decode(
-        filter.cast(), allocator.cast(), props, props_size,
+        filter.cast(),
+        allocator.cast(),
+        props,
+        props_size,
     )
 }
 
 #[inline]
-pub unsafe fn lzma_mt_block_size(
-    filters: *const lzma_filter,
-) -> u64 {
+pub unsafe fn lzma_mt_block_size(filters: *const lzma_filter) -> u64 {
     liblzma_rs::common::filter_encoder::lzma_mt_block_size(filters.cast())
 }
 
 // --- LZMA preset ---
 
 #[inline]
-pub unsafe fn lzma_lzma_preset(
-    options: *mut lzma_options_lzma,
-    preset: u32,
-) -> lzma_bool {
+pub unsafe fn lzma_lzma_preset(options: *mut lzma_options_lzma, preset: u32) -> lzma_bool {
     liblzma_rs::lzma::lzma_encoder_presets::lzma_lzma_preset(options.cast(), preset)
 }
 
@@ -611,7 +602,12 @@ pub unsafe fn lzma_index_buffer_decode(
     in_size: size_t,
 ) -> lzma_ret {
     liblzma_rs::common::index_decoder::lzma_index_buffer_decode(
-        i.cast(), memlimit, allocator.cast(), input, in_pos, in_size,
+        i.cast(),
+        memlimit,
+        allocator.cast(),
+        input,
+        in_pos,
+        in_size,
     )
 }
 
@@ -626,7 +622,7 @@ pub unsafe fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocato
 }
 
 // =========================================================================
-// Multithreaded (stubs - _mt files not yet transpiled)
+// Multithreaded API
 // =========================================================================
 
 #[cfg(feature = "parallel")]
@@ -657,24 +653,16 @@ pub struct lzma_mt {
 }
 
 #[cfg(feature = "parallel")]
-pub unsafe fn lzma_stream_encoder_mt(
-    _strm: *mut lzma_stream,
-    _options: *const lzma_mt,
-) -> lzma_ret {
-    unimplemented!("lzma_stream_encoder_mt not yet available in liblzma-rs")
+pub unsafe fn lzma_stream_encoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret {
+    liblzma_rs::common::stream_mt::lzma_stream_encoder_mt(strm.cast(), options.cast())
 }
 
 #[cfg(feature = "parallel")]
-pub unsafe fn lzma_stream_decoder_mt(
-    _strm: *mut lzma_stream,
-    _options: *const lzma_mt,
-) -> lzma_ret {
-    unimplemented!("lzma_stream_decoder_mt not yet available in liblzma-rs")
+pub unsafe fn lzma_stream_decoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret {
+    liblzma_rs::common::stream_mt::lzma_stream_decoder_mt(strm.cast(), options.cast())
 }
 
 #[cfg(feature = "parallel")]
-pub unsafe fn lzma_stream_encoder_mt_memusage(
-    _options: *const lzma_mt,
-) -> u64 {
-    unimplemented!("lzma_stream_encoder_mt_memusage not yet available in liblzma-rs")
+pub unsafe fn lzma_stream_encoder_mt_memusage(options: *const lzma_mt) -> u64 {
+    liblzma_rs::common::stream_mt::lzma_stream_encoder_mt_memusage(options.cast())
 }

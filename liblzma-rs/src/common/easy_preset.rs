@@ -57,8 +57,7 @@ pub struct lzma_options_easy {
     pub filters: [lzma_filter; 5],
     pub opt_lzma: lzma_options_lzma,
 }
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
 pub const true_0: ::core::ffi::c_int = 1 as ::core::ffi::c_int;
 pub const false_0: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 pub const LZMA_VLI_UNKNOWN: ::core::ffi::c_ulonglong = UINT64_MAX;
@@ -71,11 +70,9 @@ pub unsafe extern "C" fn lzma_easy_preset(
     if lzma_lzma_preset(&raw mut (*opt_easy).opt_lzma, preset) != 0 {
         return true_0 != 0;
     }
-    (*opt_easy).filters[0 as ::core::ffi::c_int as usize].id = LZMA_FILTER_LZMA2
-        as lzma_vli;
-    (*opt_easy).filters[0 as ::core::ffi::c_int as usize].options = &raw mut (*opt_easy)
-        .opt_lzma as *mut ::core::ffi::c_void;
-    (*opt_easy).filters[1 as ::core::ffi::c_int as usize].id = LZMA_VLI_UNKNOWN
-        as lzma_vli;
+    (*opt_easy).filters[0 as ::core::ffi::c_int as usize].id = LZMA_FILTER_LZMA2 as lzma_vli;
+    (*opt_easy).filters[0 as ::core::ffi::c_int as usize].options =
+        &raw mut (*opt_easy).opt_lzma as *mut ::core::ffi::c_void;
+    (*opt_easy).filters[1 as ::core::ffi::c_int as usize].id = LZMA_VLI_UNKNOWN as lzma_vli;
     return false_0 != 0;
 }

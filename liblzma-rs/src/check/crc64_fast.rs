@@ -1053,27 +1053,26 @@ unsafe extern "C" fn lzma_crc64_generic(
         while buf as uintptr_t & 3 as ::core::ffi::c_int as uintptr_t != 0 {
             let fresh0 = buf;
             buf = buf.offset(1);
-            crc = lzma_crc64_table[0 as ::core::ffi::c_int
-                as usize][(*fresh0 as uint64_t ^ crc & 0xff as uint64_t) as usize]
+            crc = lzma_crc64_table[0 as ::core::ffi::c_int as usize]
+                [(*fresh0 as uint64_t ^ crc & 0xff as uint64_t) as usize]
                 ^ crc >> 8 as ::core::ffi::c_int;
             size = size.wrapping_sub(1);
         }
-        let limit: *const uint8_t = buf
-            .offset((size & !(3 as ::core::ffi::c_int as size_t)) as isize);
+        let limit: *const uint8_t =
+            buf.offset((size & !(3 as ::core::ffi::c_int as size_t)) as isize);
         size &= 3 as ::core::ffi::c_int as size_t;
         while buf < limit {
             let tmp: uint32_t = crc as uint32_t ^ aligned_read32ne(buf) as uint32_t;
             buf = buf.offset(4 as ::core::ffi::c_int as isize);
-            crc = lzma_crc64_table[3 as ::core::ffi::c_int
-                as usize][(tmp & 0xff as uint32_t) as usize]
-                ^ lzma_crc64_table[2 as ::core::ffi::c_int
-                    as usize][(tmp >> 8 as ::core::ffi::c_int & 0xff as uint32_t)
-                    as usize] ^ crc >> 32 as ::core::ffi::c_int
-                ^ lzma_crc64_table[1 as ::core::ffi::c_int
-                    as usize][(tmp >> 16 as ::core::ffi::c_int & 0xff as uint32_t)
-                    as usize]
-                ^ lzma_crc64_table[0 as ::core::ffi::c_int
-                    as usize][(tmp >> 24 as ::core::ffi::c_int) as usize];
+            crc = lzma_crc64_table[3 as ::core::ffi::c_int as usize]
+                [(tmp & 0xff as uint32_t) as usize]
+                ^ lzma_crc64_table[2 as ::core::ffi::c_int as usize]
+                    [(tmp >> 8 as ::core::ffi::c_int & 0xff as uint32_t) as usize]
+                ^ crc >> 32 as ::core::ffi::c_int
+                ^ lzma_crc64_table[1 as ::core::ffi::c_int as usize]
+                    [(tmp >> 16 as ::core::ffi::c_int & 0xff as uint32_t) as usize]
+                ^ lzma_crc64_table[0 as ::core::ffi::c_int as usize]
+                    [(tmp >> 24 as ::core::ffi::c_int) as usize];
         }
     }
     loop {
@@ -1084,8 +1083,8 @@ unsafe extern "C" fn lzma_crc64_generic(
         }
         let fresh2 = buf;
         buf = buf.offset(1);
-        crc = lzma_crc64_table[0 as ::core::ffi::c_int
-            as usize][(*fresh2 as uint64_t ^ crc & 0xff as uint64_t) as usize]
+        crc = lzma_crc64_table[0 as ::core::ffi::c_int as usize]
+            [(*fresh2 as uint64_t ^ crc & 0xff as uint64_t) as usize]
             ^ crc >> 8 as ::core::ffi::c_int;
     }
     return !crc;

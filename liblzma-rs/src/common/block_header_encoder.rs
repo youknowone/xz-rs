@@ -13,10 +13,7 @@ extern "C" {
     ) -> lzma_ret;
     fn lzma_vli_size(vli: lzma_vli) -> uint32_t;
     fn lzma_crc32(buf: *const uint8_t, size: size_t, crc: uint32_t) -> uint32_t;
-    fn lzma_filter_flags_size(
-        size: *mut uint32_t,
-        filter: *const lzma_filter,
-    ) -> lzma_ret;
+    fn lzma_filter_flags_size(size: *mut uint32_t, filter: *const lzma_filter) -> lzma_ret;
     fn lzma_filter_flags_encode(
         filter: *const lzma_filter,
         out: *mut uint8_t,
@@ -101,24 +98,18 @@ pub struct lzma_block {
     pub reserved_bool7: lzma_bool,
     pub reserved_bool8: lzma_bool,
 }
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
 #[inline]
 unsafe extern "C" fn write32le(mut buf: *mut uint8_t, mut num: uint32_t) {
     *buf.offset(0 as ::core::ffi::c_int as isize) = num as uint8_t;
-    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int)
-        as uint8_t;
+    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int) as uint8_t;
 }
-pub const LZMA_VLI_MAX: ::core::ffi::c_ulonglong = UINT64_MAX
-    .wrapping_div(2 as ::core::ffi::c_ulonglong);
+pub const LZMA_VLI_MAX: ::core::ffi::c_ulonglong =
+    UINT64_MAX.wrapping_div(2 as ::core::ffi::c_ulonglong);
 pub const LZMA_VLI_UNKNOWN: ::core::ffi::c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTERS_MAX: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
 #[no_mangle]
@@ -126,8 +117,8 @@ pub unsafe extern "C" fn lzma_block_header_size(mut block: *mut lzma_block) -> l
     if (*block).version > 1 as uint32_t {
         return LZMA_OPTIONS_ERROR;
     }
-    let mut size: uint32_t = (1 as ::core::ffi::c_int + 1 as ::core::ffi::c_int
-        + 4 as ::core::ffi::c_int) as uint32_t;
+    let mut size: uint32_t =
+        (1 as ::core::ffi::c_int + 1 as ::core::ffi::c_int + 4 as ::core::ffi::c_int) as uint32_t;
     if (*block).compressed_size != LZMA_VLI_UNKNOWN as lzma_vli {
         let add: uint32_t = lzma_vli_size((*block).compressed_size) as uint32_t;
         if add == 0 as uint32_t || (*block).compressed_size == 0 as lzma_vli {
@@ -154,13 +145,9 @@ pub unsafe extern "C" fn lzma_block_header_size(mut block: *mut lzma_block) -> l
             return LZMA_PROG_ERROR;
         }
         let mut add_1: uint32_t = 0;
-        let ret_: lzma_ret = lzma_filter_flags_size(
-            &raw mut add_1,
-            (*block).filters.offset(i as isize),
-        ) as lzma_ret;
-        if ret_ as ::core::ffi::c_uint
-            != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-        {
+        let ret_: lzma_ret =
+            lzma_filter_flags_size(&raw mut add_1, (*block).filters.offset(i as isize)) as lzma_ret;
+        if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
             return ret_;
         }
         size = size.wrapping_add(add_1);
@@ -181,8 +168,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
         return LZMA_PROG_ERROR;
     }
     let out_size: size_t = (*block).header_size.wrapping_sub(4 as uint32_t) as size_t;
-    *out.offset(0 as ::core::ffi::c_int as isize) = out_size.wrapping_div(4 as size_t)
-        as uint8_t;
+    *out.offset(0 as ::core::ffi::c_int as isize) = out_size.wrapping_div(4 as size_t) as uint8_t;
     *out.offset(1 as ::core::ffi::c_int as isize) = 0 as uint8_t;
     let mut out_pos: size_t = 2 as size_t;
     if (*block).compressed_size != LZMA_VLI_UNKNOWN as lzma_vli {
@@ -193,14 +179,11 @@ pub unsafe extern "C" fn lzma_block_header_encode(
             &raw mut out_pos,
             out_size,
         ) as lzma_ret;
-        if ret_ as ::core::ffi::c_uint
-            != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-        {
+        if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
             return ret_;
         }
         let ref mut fresh0 = *out.offset(1 as ::core::ffi::c_int as isize);
-        *fresh0 = (*fresh0 as ::core::ffi::c_int | 0x40 as ::core::ffi::c_int)
-            as uint8_t;
+        *fresh0 = (*fresh0 as ::core::ffi::c_int | 0x40 as ::core::ffi::c_int) as uint8_t;
     }
     if (*block).uncompressed_size != LZMA_VLI_UNKNOWN as lzma_vli {
         let ret__0: lzma_ret = lzma_vli_encode(
@@ -210,14 +193,11 @@ pub unsafe extern "C" fn lzma_block_header_encode(
             &raw mut out_pos,
             out_size,
         ) as lzma_ret;
-        if ret__0 as ::core::ffi::c_uint
-            != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-        {
+        if ret__0 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
             return ret__0;
         }
         let ref mut fresh1 = *out.offset(1 as ::core::ffi::c_int as isize);
-        *fresh1 = (*fresh1 as ::core::ffi::c_int | 0x80 as ::core::ffi::c_int)
-            as uint8_t;
+        *fresh1 = (*fresh1 as ::core::ffi::c_int | 0x80 as ::core::ffi::c_int) as uint8_t;
     }
     if (*block).filters.is_null()
         || (*(*block).filters.offset(0 as ::core::ffi::c_int as isize)).id
@@ -236,15 +216,11 @@ pub unsafe extern "C" fn lzma_block_header_encode(
             &raw mut out_pos,
             out_size,
         ) as lzma_ret;
-        if ret__1 as ::core::ffi::c_uint
-            != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-        {
+        if ret__1 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
             return ret__1;
         }
         filter_count = filter_count.wrapping_add(1);
-        if !((*(*block).filters.offset(filter_count as isize)).id
-            != LZMA_VLI_UNKNOWN as lzma_vli)
-        {
+        if !((*(*block).filters.offset(filter_count as isize)).id != LZMA_VLI_UNKNOWN as lzma_vli) {
             break;
         }
     }
@@ -255,6 +231,9 @@ pub unsafe extern "C" fn lzma_block_header_encode(
         0 as ::core::ffi::c_int,
         out_size.wrapping_sub(out_pos),
     );
-    write32le(out.offset(out_size as isize), lzma_crc32(out, out_size, 0 as uint32_t));
+    write32le(
+        out.offset(out_size as isize),
+        lzma_crc32(out, out_size, 0 as uint32_t),
+    );
     return LZMA_OK;
 }

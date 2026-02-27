@@ -53,17 +53,14 @@ pub struct lzma_stream_flags {
     pub reserved_int1: uint32_t,
     pub reserved_int2: uint32_t,
 }
-pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615
-    as ::core::ffi::c_ulonglong;
+pub const UINT64_MAX: ::core::ffi::c_ulonglong = 18446744073709551615 as ::core::ffi::c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: ::core::ffi::c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: ::core::ffi::c_int = 15 as ::core::ffi::c_int;
 pub const LZMA_BACKWARD_SIZE_MIN: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
-pub const LZMA_BACKWARD_SIZE_MAX: ::core::ffi::c_ulonglong = (1
-    as ::core::ffi::c_ulonglong) << 34 as ::core::ffi::c_int;
+pub const LZMA_BACKWARD_SIZE_MAX: ::core::ffi::c_ulonglong =
+    (1 as ::core::ffi::c_ulonglong) << 34 as ::core::ffi::c_int;
 #[inline]
-unsafe extern "C" fn is_backward_size_valid(
-    mut options: *const lzma_stream_flags,
-) -> bool {
+unsafe extern "C" fn is_backward_size_valid(mut options: *const lzma_stream_flags) -> bool {
     return (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
         && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX as lzma_vli
         && (*options).backward_size & 3 as lzma_vli == 0 as lzma_vli;

@@ -25,9 +25,7 @@ pub const LZMA_NO_CHECK: lzma_ret = 2;
 pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
 pub type lzma_vli = uint64_t;
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
 pub const LZMA_VLI_BYTES_MAX: ::core::ffi::c_int = 9 as ::core::ffi::c_int;
 #[no_mangle]
@@ -61,18 +59,13 @@ pub unsafe extern "C" fn lzma_vli_decode(
     loop {
         let byte: uint8_t = *in_0.offset(*in_pos as isize);
         *in_pos = (*in_pos).wrapping_add(1);
-        *vli = (*vli)
-            .wrapping_add(
-                ((byte as ::core::ffi::c_int & 0x7f as ::core::ffi::c_int) as lzma_vli)
-                    << (*vli_pos).wrapping_mul(7 as size_t),
-            );
+        *vli = (*vli).wrapping_add(
+            ((byte as ::core::ffi::c_int & 0x7f as ::core::ffi::c_int) as lzma_vli)
+                << (*vli_pos).wrapping_mul(7 as size_t),
+        );
         *vli_pos = (*vli_pos).wrapping_add(1);
-        if byte as ::core::ffi::c_int & 0x80 as ::core::ffi::c_int
-            == 0 as ::core::ffi::c_int
-        {
-            if byte as ::core::ffi::c_int == 0 as ::core::ffi::c_int
-                && *vli_pos > 1 as size_t
-            {
+        if byte as ::core::ffi::c_int & 0x80 as ::core::ffi::c_int == 0 as ::core::ffi::c_int {
+            if byte as ::core::ffi::c_int == 0 as ::core::ffi::c_int && *vli_pos > 1 as size_t {
                 return LZMA_DATA_ERROR;
             }
             return (if vli_pos == &raw mut vli_pos_internal {

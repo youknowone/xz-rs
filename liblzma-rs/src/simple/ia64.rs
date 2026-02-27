@@ -56,15 +56,10 @@ pub const LZMA_RUN: lzma_action = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 pub type lzma_next_coder = lzma_next_coder_s;
@@ -76,16 +71,9 @@ pub struct lzma_next_coder_s {
     pub init: uintptr_t,
     pub code: lzma_code_function,
     pub end: lzma_end_function,
-    pub get_progress: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            *mut uint64_t,
-        ) -> (),
-    >,
-    pub get_check: Option<
-        unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check,
-    >,
+    pub get_progress:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, *mut uint64_t) -> ()>,
+    pub get_check: Option<unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check>,
     pub memconfig: Option<
         unsafe extern "C" fn(
             *mut ::core::ffi::c_void,
@@ -102,13 +90,8 @@ pub struct lzma_next_coder_s {
             *const lzma_filter,
         ) -> lzma_ret,
     >,
-    pub set_out_limit: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            uint64_t,
-        ) -> lzma_ret,
-    >,
+    pub set_out_limit:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -122,9 +105,8 @@ pub const LZMA_CHECK_SHA256: lzma_check = 10;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
 pub const LZMA_CHECK_NONE: lzma_check = 0;
-pub type lzma_end_function = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
->;
+pub type lzma_end_function =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> ()>;
 pub type lzma_code_function = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -212,22 +194,19 @@ unsafe extern "C" fn ia64_code(
                 let mut instruction: uint64_t = 0 as uint64_t;
                 let mut j: size_t = 0 as size_t;
                 while j < 6 as size_t {
-                    instruction = instruction
-                        .wrapping_add(
-                            (*buffer
-                                .offset(i.wrapping_add(j).wrapping_add(byte_pos) as isize)
-                                as uint64_t) << (8 as size_t).wrapping_mul(j),
-                        );
+                    instruction = instruction.wrapping_add(
+                        (*buffer.offset(i.wrapping_add(j).wrapping_add(byte_pos) as isize)
+                            as uint64_t)
+                            << (8 as size_t).wrapping_mul(j),
+                    );
                     j = j.wrapping_add(1);
                 }
                 let mut inst_norm: uint64_t = instruction >> bit_res;
-                if inst_norm >> 37 as ::core::ffi::c_int & 0xf as uint64_t
-                    == 0x5 as uint64_t
-                    && inst_norm >> 9 as ::core::ffi::c_int & 0x7 as uint64_t
-                        == 0 as uint64_t
+                if inst_norm >> 37 as ::core::ffi::c_int & 0xf as uint64_t == 0x5 as uint64_t
+                    && inst_norm >> 9 as ::core::ffi::c_int & 0x7 as uint64_t == 0 as uint64_t
                 {
-                    let mut src: uint32_t = (inst_norm >> 13 as ::core::ffi::c_int
-                        & 0xfffff as uint64_t) as uint32_t;
+                    let mut src: uint32_t =
+                        (inst_norm >> 13 as ::core::ffi::c_int & 0xfffff as uint64_t) as uint32_t;
                     src = (src as uint64_t
                         | (inst_norm >> 36 as ::core::ffi::c_int & 1 as uint64_t)
                             << 20 as ::core::ffi::c_int) as uint32_t;
@@ -239,26 +218,20 @@ unsafe extern "C" fn ia64_code(
                         dest = src.wrapping_sub(now_pos.wrapping_add(i as uint32_t));
                     }
                     dest >>= 4 as ::core::ffi::c_int;
-                    inst_norm
-                        &= !((0x8fffff as ::core::ffi::c_int as uint64_t)
-                            << 13 as ::core::ffi::c_int);
-                    inst_norm
-                        |= ((dest & 0xfffff as uint32_t) as uint64_t)
-                            << 13 as ::core::ffi::c_int;
-                    inst_norm
-                        |= ((dest & 0x100000 as uint32_t) as uint64_t)
-                            << 36 as ::core::ffi::c_int - 20 as ::core::ffi::c_int;
-                    instruction
-                        &= ((1 as ::core::ffi::c_uint) << bit_res)
-                            .wrapping_sub(1 as ::core::ffi::c_uint) as uint64_t;
+                    inst_norm &=
+                        !((0x8fffff as ::core::ffi::c_int as uint64_t) << 13 as ::core::ffi::c_int);
+                    inst_norm |=
+                        ((dest & 0xfffff as uint32_t) as uint64_t) << 13 as ::core::ffi::c_int;
+                    inst_norm |= ((dest & 0x100000 as uint32_t) as uint64_t)
+                        << 36 as ::core::ffi::c_int - 20 as ::core::ffi::c_int;
+                    instruction &= ((1 as ::core::ffi::c_uint) << bit_res)
+                        .wrapping_sub(1 as ::core::ffi::c_uint)
+                        as uint64_t;
                     instruction |= inst_norm << bit_res;
                     let mut j_0: size_t = 0 as size_t;
                     while j_0 < 6 as size_t {
-                        *buffer
-                            .offset(
-                                i.wrapping_add(j_0).wrapping_add(byte_pos) as isize,
-                            ) = (instruction >> (8 as size_t).wrapping_mul(j_0))
-                            as uint8_t;
+                        *buffer.offset(i.wrapping_add(j_0).wrapping_add(byte_pos) as isize) =
+                            (instruction >> (8 as size_t).wrapping_mul(j_0)) as uint8_t;
                         j_0 = j_0.wrapping_add(1);
                     }
                 }

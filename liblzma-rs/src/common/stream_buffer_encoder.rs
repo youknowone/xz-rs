@@ -1,15 +1,11 @@
 #[repr(C)]
-pub struct lzma_index_s { _opaque: [u8; 0] }
+pub struct lzma_index_s {
+    _opaque: [u8; 0],
+}
 extern "C" {
     fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
-    fn lzma_stream_header_encode(
-        options: *const lzma_stream_flags,
-        out: *mut uint8_t,
-    ) -> lzma_ret;
-    fn lzma_stream_footer_encode(
-        options: *const lzma_stream_flags,
-        out: *mut uint8_t,
-    ) -> lzma_ret;
+    fn lzma_stream_header_encode(options: *const lzma_stream_flags, out: *mut uint8_t) -> lzma_ret;
+    fn lzma_stream_footer_encode(options: *const lzma_stream_flags, out: *mut uint8_t) -> lzma_ret;
     fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
     fn lzma_block_buffer_bound(uncompressed_size: size_t) -> size_t;
     fn lzma_block_buffer_encode(
@@ -71,15 +67,10 @@ pub const LZMA_OK: lzma_ret = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 #[derive(Copy, Clone)]
@@ -150,22 +141,21 @@ pub struct lzma_block {
     pub reserved_bool7: lzma_bool,
     pub reserved_bool8: lzma_bool,
 }
-pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<
-    ::core::ffi::c_void,
->();
+pub const __DARWIN_NULL: *mut ::core::ffi::c_void = ::core::ptr::null_mut::<::core::ffi::c_void>();
 pub const NULL: *mut ::core::ffi::c_void = __DARWIN_NULL;
 pub const LZMA_VLI_BYTES_MAX: ::core::ffi::c_int = 9 as ::core::ffi::c_int;
 pub const LZMA_CHECK_ID_MAX: ::core::ffi::c_int = 15 as ::core::ffi::c_int;
 pub const LZMA_STREAM_HEADER_SIZE: ::core::ffi::c_int = 12 as ::core::ffi::c_int;
 pub const INDEX_BOUND: ::core::ffi::c_int = 1 as ::core::ffi::c_int
-    + 1 as ::core::ffi::c_int + 2 as ::core::ffi::c_int * LZMA_VLI_BYTES_MAX
-    + 4 as ::core::ffi::c_int + 3 as ::core::ffi::c_int & !(3 as ::core::ffi::c_int);
-pub const HEADERS_BOUND: ::core::ffi::c_int = 2 as ::core::ffi::c_int
-    * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
+    + 1 as ::core::ffi::c_int
+    + 2 as ::core::ffi::c_int * LZMA_VLI_BYTES_MAX
+    + 4 as ::core::ffi::c_int
+    + 3 as ::core::ffi::c_int
+    & !(3 as ::core::ffi::c_int);
+pub const HEADERS_BOUND: ::core::ffi::c_int =
+    2 as ::core::ffi::c_int * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
 #[no_mangle]
-pub unsafe extern "C" fn lzma_stream_buffer_bound(
-    mut uncompressed_size: size_t,
-) -> size_t {
+pub unsafe extern "C" fn lzma_stream_buffer_bound(mut uncompressed_size: size_t) -> size_t {
     let block_bound: size_t = lzma_block_buffer_bound(uncompressed_size) as size_t;
     if block_bound == 0 as size_t {
         return 0 as size_t;
@@ -179,7 +169,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_bound(
         (18446744073709551615 as ::core::ffi::c_ulonglong)
             .wrapping_div(2 as ::core::ffi::c_ulonglong)
     })
-        .wrapping_sub(block_bound as ::core::ffi::c_ulonglong)
+    .wrapping_sub(block_bound as ::core::ffi::c_ulonglong)
         < HEADERS_BOUND as ::core::ffi::c_ulonglong
     {
         return 0 as size_t;
@@ -199,8 +189,10 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
 ) -> lzma_ret {
     if filters.is_null()
         || check as ::core::ffi::c_uint > LZMA_CHECK_ID_MAX as ::core::ffi::c_uint
-        || in_0.is_null() && in_size != 0 as size_t || out.is_null()
-        || out_pos_ptr.is_null() || *out_pos_ptr > out_size
+        || in_0.is_null() && in_size != 0 as size_t
+        || out.is_null()
+        || out_pos_ptr.is_null()
+        || *out_pos_ptr > out_size
     {
         return LZMA_PROG_ERROR;
     }
@@ -234,7 +226,8 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
         reserved_int2: 0,
     };
     if lzma_stream_header_encode(&raw mut stream_flags, out.offset(out_pos as isize))
-        as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
+        as ::core::ffi::c_uint
+        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
     {
         return LZMA_PROG_ERROR;
     }
@@ -281,9 +274,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
             &raw mut out_pos,
             out_size,
         ) as lzma_ret;
-        if ret_ as ::core::ffi::c_uint
-            != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-        {
+        if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
             return ret_;
         }
     }
@@ -300,18 +291,17 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
             block.uncompressed_size,
         );
     }
-    if ret as ::core::ffi::c_uint == LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret as ::core::ffi::c_uint == LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         ret = lzma_index_buffer_encode(i, out, &raw mut out_pos, out_size);
         stream_flags.backward_size = lzma_index_size(i);
     }
     lzma_index_end(i, allocator);
-    if ret as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret;
     }
     if lzma_stream_footer_encode(&raw mut stream_flags, out.offset(out_pos as isize))
-        as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
+        as ::core::ffi::c_uint
+        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
     {
         return LZMA_PROG_ERROR;
     }

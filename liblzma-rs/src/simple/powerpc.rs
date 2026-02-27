@@ -56,15 +56,10 @@ pub const LZMA_RUN: lzma_action = 0;
 #[repr(C)]
 pub struct lzma_allocator {
     pub alloc: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            size_t,
-            size_t,
-        ) -> *mut ::core::ffi::c_void,
+        unsafe extern "C" fn(*mut ::core::ffi::c_void, size_t, size_t) -> *mut ::core::ffi::c_void,
     >,
-    pub free: Option<
-        unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> (),
-    >,
+    pub free:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut ::core::ffi::c_void) -> ()>,
     pub opaque: *mut ::core::ffi::c_void,
 }
 pub type lzma_next_coder = lzma_next_coder_s;
@@ -76,16 +71,9 @@ pub struct lzma_next_coder_s {
     pub init: uintptr_t,
     pub code: lzma_code_function,
     pub end: lzma_end_function,
-    pub get_progress: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            *mut uint64_t,
-        ) -> (),
-    >,
-    pub get_check: Option<
-        unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check,
-    >,
+    pub get_progress:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, *mut uint64_t) -> ()>,
+    pub get_check: Option<unsafe extern "C" fn(*const ::core::ffi::c_void) -> lzma_check>,
     pub memconfig: Option<
         unsafe extern "C" fn(
             *mut ::core::ffi::c_void,
@@ -102,13 +90,8 @@ pub struct lzma_next_coder_s {
             *const lzma_filter,
         ) -> lzma_ret,
     >,
-    pub set_out_limit: Option<
-        unsafe extern "C" fn(
-            *mut ::core::ffi::c_void,
-            *mut uint64_t,
-            uint64_t,
-        ) -> lzma_ret,
-    >,
+    pub set_out_limit:
+        Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *mut uint64_t, uint64_t) -> lzma_ret>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -122,9 +105,8 @@ pub const LZMA_CHECK_SHA256: lzma_check = 10;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
 pub const LZMA_CHECK_NONE: lzma_check = 0;
-pub type lzma_end_function = Option<
-    unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> (),
->;
+pub type lzma_end_function =
+    Option<unsafe extern "C" fn(*mut ::core::ffi::c_void, *const lzma_allocator) -> ()>;
 pub type lzma_code_function = Option<
     unsafe extern "C" fn(
         *mut ::core::ffi::c_void,
@@ -169,10 +151,12 @@ unsafe extern "C" fn powerpc_code(
         if *buffer.offset(i as isize) as ::core::ffi::c_int >> 2 as ::core::ffi::c_int
             == 0x12 as ::core::ffi::c_int
             && *buffer.offset(i.wrapping_add(3 as size_t) as isize) as ::core::ffi::c_int
-                & 3 as ::core::ffi::c_int == 1 as ::core::ffi::c_int
+                & 3 as ::core::ffi::c_int
+                == 1 as ::core::ffi::c_int
         {
-            let src: uint32_t = (*buffer.offset(i.wrapping_add(0 as size_t) as isize)
-                as uint32_t & 3 as uint32_t) << 24 as ::core::ffi::c_int
+            let src: uint32_t = (*buffer.offset(i.wrapping_add(0 as size_t) as isize) as uint32_t
+                & 3 as uint32_t)
+                << 24 as ::core::ffi::c_int
                 | (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as uint32_t)
                     << 16 as ::core::ffi::c_int
                 | (*buffer.offset(i.wrapping_add(2 as size_t) as isize) as uint32_t)
@@ -185,15 +169,14 @@ unsafe extern "C" fn powerpc_code(
             } else {
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as uint32_t));
             }
-            *buffer.offset(i.wrapping_add(0 as size_t) as isize) = (0x48 as uint32_t
-                | dest >> 24 as ::core::ffi::c_int & 0x3 as uint32_t) as uint8_t;
-            *buffer.offset(i.wrapping_add(1 as size_t) as isize) = (dest
-                >> 16 as ::core::ffi::c_int) as uint8_t;
-            *buffer.offset(i.wrapping_add(2 as size_t) as isize) = (dest
-                >> 8 as ::core::ffi::c_int) as uint8_t;
+            *buffer.offset(i.wrapping_add(0 as size_t) as isize) =
+                (0x48 as uint32_t | dest >> 24 as ::core::ffi::c_int & 0x3 as uint32_t) as uint8_t;
+            *buffer.offset(i.wrapping_add(1 as size_t) as isize) =
+                (dest >> 16 as ::core::ffi::c_int) as uint8_t;
+            *buffer.offset(i.wrapping_add(2 as size_t) as isize) =
+                (dest >> 8 as ::core::ffi::c_int) as uint8_t;
             let ref mut fresh0 = *buffer.offset(i.wrapping_add(3 as size_t) as isize);
-            *fresh0 = (*fresh0 as ::core::ffi::c_int & 0x3 as ::core::ffi::c_int)
-                as uint8_t;
+            *fresh0 = (*fresh0 as ::core::ffi::c_int & 0x3 as ::core::ffi::c_int) as uint8_t;
             let ref mut fresh1 = *buffer.offset(i.wrapping_add(3 as size_t) as isize);
             *fresh1 = (*fresh1 as uint32_t | dest) as uint8_t;
         }

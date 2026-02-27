@@ -8,10 +8,7 @@ extern "C" {
     ) -> lzma_ret;
     fn lzma_vli_size(vli: lzma_vli) -> uint32_t;
     fn lzma_properties_size(size: *mut uint32_t, filter: *const lzma_filter) -> lzma_ret;
-    fn lzma_properties_encode(
-        filter: *const lzma_filter,
-        props: *mut uint8_t,
-    ) -> lzma_ret;
+    fn lzma_properties_encode(filter: *const lzma_filter, props: *mut uint8_t) -> lzma_ret;
 }
 pub type __darwin_size_t = usize;
 pub type size_t = __darwin_size_t;
@@ -47,8 +44,8 @@ pub struct lzma_filter {
     pub options: *mut ::core::ffi::c_void,
 }
 pub type lzma_vli = uint64_t;
-pub const LZMA_FILTER_RESERVED_START: ::core::ffi::c_ulonglong = (1
-    as ::core::ffi::c_ulonglong) << 62 as ::core::ffi::c_int;
+pub const LZMA_FILTER_RESERVED_START: ::core::ffi::c_ulonglong =
+    (1 as ::core::ffi::c_ulonglong) << 62 as ::core::ffi::c_int;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filter_flags_size(
     mut size: *mut uint32_t,
@@ -58,15 +55,11 @@ pub unsafe extern "C" fn lzma_filter_flags_size(
         return LZMA_PROG_ERROR;
     }
     let ret_: lzma_ret = lzma_properties_size(size, filter) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     *size = (*size)
-        .wrapping_add(
-            lzma_vli_size((*filter).id).wrapping_add(lzma_vli_size(*size as lzma_vli)),
-        );
+        .wrapping_add(lzma_vli_size((*filter).id).wrapping_add(lzma_vli_size(*size as lzma_vli)));
     return LZMA_OK;
 }
 #[no_mangle]
@@ -86,16 +79,12 @@ pub unsafe extern "C" fn lzma_filter_flags_encode(
         out_pos,
         out_size,
     ) as lzma_ret;
-    if ret_ as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret_ as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret_;
     }
     let mut props_size: uint32_t = 0;
     let ret__0: lzma_ret = lzma_properties_size(&raw mut props_size, filter) as lzma_ret;
-    if ret__0 as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret__0 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret__0;
     }
     let ret__1: lzma_ret = lzma_vli_encode(
@@ -105,19 +94,15 @@ pub unsafe extern "C" fn lzma_filter_flags_encode(
         out_pos,
         out_size,
     ) as lzma_ret;
-    if ret__1 as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    if ret__1 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret__1;
     }
     if out_size.wrapping_sub(*out_pos) < props_size as size_t {
         return LZMA_PROG_ERROR;
     }
-    let ret__2: lzma_ret = lzma_properties_encode(filter, out.offset(*out_pos as isize))
-        as lzma_ret;
-    if ret__2 as ::core::ffi::c_uint
-        != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint
-    {
+    let ret__2: lzma_ret =
+        lzma_properties_encode(filter, out.offset(*out_pos as isize)) as lzma_ret;
+    if ret__2 as ::core::ffi::c_uint != LZMA_OK as ::core::ffi::c_int as ::core::ffi::c_uint {
         return ret__2;
     }
     *out_pos = (*out_pos).wrapping_add(props_size as size_t);

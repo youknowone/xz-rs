@@ -70,22 +70,17 @@ pub const false_0: ::core::ffi::c_int = 0 as ::core::ffi::c_int;
 #[inline]
 unsafe extern "C" fn write32le(mut buf: *mut uint8_t, mut num: uint32_t) {
     *buf.offset(0 as ::core::ffi::c_int as isize) = num as uint8_t;
-    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int)
-        as uint8_t;
-    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int)
-        as uint8_t;
+    *buf.offset(1 as ::core::ffi::c_int as isize) = (num >> 8 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(2 as ::core::ffi::c_int as isize) = (num >> 16 as ::core::ffi::c_int) as uint8_t;
+    *buf.offset(3 as ::core::ffi::c_int as isize) = (num >> 24 as ::core::ffi::c_int) as uint8_t;
 }
 pub const LZMA_CHECK_ID_MAX: ::core::ffi::c_int = 15 as ::core::ffi::c_int;
 pub const LZMA_BACKWARD_SIZE_MIN: ::core::ffi::c_int = 4 as ::core::ffi::c_int;
-pub const LZMA_BACKWARD_SIZE_MAX: ::core::ffi::c_ulonglong = (1
-    as ::core::ffi::c_ulonglong) << 34 as ::core::ffi::c_int;
+pub const LZMA_BACKWARD_SIZE_MAX: ::core::ffi::c_ulonglong =
+    (1 as ::core::ffi::c_ulonglong) << 34 as ::core::ffi::c_int;
 pub const LZMA_STREAM_FLAGS_SIZE: ::core::ffi::c_int = 2 as ::core::ffi::c_int;
 #[inline]
-unsafe extern "C" fn is_backward_size_valid(
-    mut options: *const lzma_stream_flags,
-) -> bool {
+unsafe extern "C" fn is_backward_size_valid(mut options: *const lzma_stream_flags) -> bool {
     return (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
         && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX as lzma_vli
         && (*options).backward_size & 3 as lzma_vli == 0 as lzma_vli;
@@ -94,8 +89,7 @@ unsafe extern "C" fn stream_flags_encode(
     mut options: *const lzma_stream_flags,
     mut out: *mut uint8_t,
 ) -> bool {
-    if (*options).check as ::core::ffi::c_uint > LZMA_CHECK_ID_MAX as ::core::ffi::c_uint
-    {
+    if (*options).check as ::core::ffi::c_uint > LZMA_CHECK_ID_MAX as ::core::ffi::c_uint {
         return true_0 != 0;
     }
     *out.offset(0 as ::core::ffi::c_int as isize) = 0 as uint8_t;
@@ -127,8 +121,7 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
         0 as uint32_t,
     ) as uint32_t;
     write32le(
-        out
-            .offset(::core::mem::size_of::<[uint8_t; 6]>() as usize as isize)
+        out.offset(::core::mem::size_of::<[uint8_t; 6]>() as usize as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize),
         crc,
     );
@@ -147,8 +140,10 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     }
     write32le(
         out.offset(4 as ::core::ffi::c_int as isize),
-        (*options).backward_size.wrapping_div(4 as lzma_vli).wrapping_sub(1 as lzma_vli)
-            as uint32_t,
+        (*options)
+            .backward_size
+            .wrapping_div(4 as lzma_vli)
+            .wrapping_sub(1 as lzma_vli) as uint32_t,
     );
     if stream_flags_encode(
         options,
@@ -163,8 +158,7 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     ) as uint32_t;
     write32le(out, crc);
     memcpy(
-        out
-            .offset((2 as ::core::ffi::c_int * 4 as ::core::ffi::c_int) as isize)
+        out.offset((2 as ::core::ffi::c_int * 4 as ::core::ffi::c_int) as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *mut ::core::ffi::c_void,
         &raw const lzma_footer_magic as *const uint8_t as *const ::core::ffi::c_void,
         ::core::mem::size_of::<[uint8_t; 2]>() as size_t,
