@@ -1206,29 +1206,33 @@ unsafe extern "C" fn lzma_lzma_set_out_limit(
     (*coder).use_eopm = false;
     return LZMA_OK;
 }
-unsafe extern "C" fn is_options_valid(options: *const lzma_options_lzma) -> bool {
-    return is_lclppb_valid(options) as c_int != 0
-        && (*options).nice_len >= MATCH_LEN_MIN as u32
-        && (*options).nice_len <= MATCH_LEN_MAX as u32
-        && ((*options).mode == LZMA_MODE_FAST || (*options).mode == LZMA_MODE_NORMAL);
+extern "C" fn is_options_valid(options: *const lzma_options_lzma) -> bool {
+    return unsafe {
+        is_lclppb_valid(options) as c_int != 0
+            && (*options).nice_len >= MATCH_LEN_MIN as u32
+            && (*options).nice_len <= MATCH_LEN_MAX as u32
+            && ((*options).mode == LZMA_MODE_FAST || (*options).mode == LZMA_MODE_NORMAL)
+    };
 }
-unsafe extern "C" fn set_lz_options(
+extern "C" fn set_lz_options(
     lz_options: *mut lzma_lz_options,
     options: *const lzma_options_lzma,
 ) {
-    (*lz_options).before_size = OPTS as size_t;
-    (*lz_options).dict_size = (*options).dict_size as size_t;
-    (*lz_options).after_size = LOOP_INPUT_MAX as size_t;
-    (*lz_options).match_len_max = MATCH_LEN_MAX as size_t;
-    (*lz_options).nice_len = (if mf_get_hash_bytes((*options).mf) > (*options).nice_len {
-        mf_get_hash_bytes((*options).mf)
-    } else {
-        (*options).nice_len
-    }) as size_t;
-    (*lz_options).match_finder = (*options).mf;
-    (*lz_options).depth = (*options).depth;
-    (*lz_options).preset_dict = (*options).preset_dict;
-    (*lz_options).preset_dict_size = (*options).preset_dict_size;
+    unsafe {
+        (*lz_options).before_size = OPTS as size_t;
+        (*lz_options).dict_size = (*options).dict_size as size_t;
+        (*lz_options).after_size = LOOP_INPUT_MAX as size_t;
+        (*lz_options).match_len_max = MATCH_LEN_MAX as size_t;
+        (*lz_options).nice_len = (if mf_get_hash_bytes((*options).mf) > (*options).nice_len {
+            mf_get_hash_bytes((*options).mf)
+        } else {
+            (*options).nice_len
+        }) as size_t;
+        (*lz_options).match_finder = (*options).mf;
+        (*lz_options).depth = (*options).depth;
+        (*lz_options).preset_dict = (*options).preset_dict;
+        (*lz_options).preset_dict_size = (*options).preset_dict_size;
+    }
 }
 unsafe extern "C" fn length_encoder_reset(
     lencoder: *mut lzma_length_encoder,
@@ -1467,7 +1471,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_init(
 }
 #[no_mangle]
 pub extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
-    if !unsafe { is_options_valid(options as *const lzma_options_lzma) } {
+    if !is_options_valid(options as *const lzma_options_lzma) {
         return UINT64_MAX as u64;
     }
     let mut lz_options: lzma_lz_options = lzma_lz_options {
@@ -1481,7 +1485,7 @@ pub extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
         preset_dict: ::core::ptr::null::<u8>(),
         preset_dict_size: 0,
     };
-    unsafe { set_lz_options(&raw mut lz_options, options as *const lzma_options_lzma) };
+    set_lz_options(&raw mut lz_options, options as *const lzma_options_lzma);
     let lz_memusage: u64 = unsafe { lzma_lz_encoder_memusage(&raw mut lz_options) } as u64;
     if lz_memusage == UINT64_MAX as u64 {
         return UINT64_MAX as u64;
