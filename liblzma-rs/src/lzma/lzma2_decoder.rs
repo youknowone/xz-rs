@@ -477,9 +477,9 @@ pub unsafe extern "C" fn lzma_lzma2_decoder_init(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_lzma2_decoder_memusage(options: *const c_void) -> u64 {
+pub extern "C" fn lzma_lzma2_decoder_memusage(options: *const c_void) -> u64 {
     return (core::mem::size_of::<lzma_lzma2_coder>() as u64)
-        .wrapping_add(lzma_lzma_decoder_memusage_nocheck(options));
+        .wrapping_add(unsafe { lzma_lzma_decoder_memusage_nocheck(options) });
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma2_props_decode(

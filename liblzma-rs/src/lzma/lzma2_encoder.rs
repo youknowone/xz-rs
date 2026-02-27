@@ -659,8 +659,8 @@ pub unsafe extern "C" fn lzma_lzma2_encoder_init(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_lzma2_encoder_memusage(options: *const c_void) -> u64 {
-    let lzma_mem: u64 = lzma_lzma_encoder_memusage(options) as u64;
+pub extern "C" fn lzma_lzma2_encoder_memusage(options: *const c_void) -> u64 {
+    let lzma_mem: u64 = unsafe { lzma_lzma_encoder_memusage(options) } as u64;
     if lzma_mem == UINT64_MAX as u64 {
         return UINT64_MAX as u64;
     }

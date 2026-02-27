@@ -1466,8 +1466,8 @@ pub unsafe extern "C" fn lzma_lzma_encoder_init(
     );
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
-    if !is_options_valid(options as *const lzma_options_lzma) {
+pub extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
+    if !unsafe { is_options_valid(options as *const lzma_options_lzma) } {
         return UINT64_MAX as u64;
     }
     let mut lz_options: lzma_lz_options = lzma_lz_options {
@@ -1481,8 +1481,8 @@ pub unsafe extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u
         preset_dict: ::core::ptr::null::<u8>(),
         preset_dict_size: 0,
     };
-    set_lz_options(&raw mut lz_options, options as *const lzma_options_lzma);
-    let lz_memusage: u64 = lzma_lz_encoder_memusage(&raw mut lz_options) as u64;
+    unsafe { set_lz_options(&raw mut lz_options, options as *const lzma_options_lzma) };
+    let lz_memusage: u64 = unsafe { lzma_lz_encoder_memusage(&raw mut lz_options) } as u64;
     if lz_memusage == UINT64_MAX as u64 {
         return UINT64_MAX as u64;
     }

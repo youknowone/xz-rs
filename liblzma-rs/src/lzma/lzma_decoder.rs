@@ -3983,14 +3983,16 @@ pub unsafe extern "C" fn lzma_lzma_lclppb_decode(
     return (*options).lc.wrapping_add((*options).lp) > LZMA_LCLP_MAX as u32;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_lzma_decoder_memusage_nocheck(options: *const c_void) -> u64 {
-    let opt: *const lzma_options_lzma = options as *const lzma_options_lzma;
-    return (core::mem::size_of::<lzma_lzma1_decoder>() as u64)
-        .wrapping_add(lzma_lz_decoder_memusage((*opt).dict_size as size_t));
+pub extern "C" fn lzma_lzma_decoder_memusage_nocheck(options: *const c_void) -> u64 {
+    return unsafe {
+        let opt: *const lzma_options_lzma = options as *const lzma_options_lzma;
+        (core::mem::size_of::<lzma_lzma1_decoder>() as u64)
+            .wrapping_add(lzma_lz_decoder_memusage((*opt).dict_size as size_t))
+    };
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_lzma_decoder_memusage(options: *const c_void) -> u64 {
-    if !is_lclppb_valid(options as *const lzma_options_lzma) {
+pub extern "C" fn lzma_lzma_decoder_memusage(options: *const c_void) -> u64 {
+    if !unsafe { is_lclppb_valid(options as *const lzma_options_lzma) } {
         return UINT64_MAX as u64;
     }
     return lzma_lzma_decoder_memusage_nocheck(options);

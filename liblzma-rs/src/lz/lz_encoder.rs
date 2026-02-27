@@ -528,7 +528,7 @@ unsafe extern "C" fn lz_encoder_init(
     return false;
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64 {
+pub extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64 {
     let mut mf: lzma_mf = lzma_mf_s {
         buffer: core::ptr::null_mut(),
         size: 0,
@@ -554,11 +554,13 @@ pub unsafe extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_opt
         hash_count: 0,
         sons_count: 0,
     };
-    if lz_encoder_prepare(
-        &raw mut mf,
-        ::core::ptr::null::<lzma_allocator>(),
-        lz_options,
-    ) {
+    if unsafe {
+        lz_encoder_prepare(
+            &raw mut mf,
+            ::core::ptr::null::<lzma_allocator>(),
+            lz_options,
+        )
+    } {
         return UINT64_MAX as u64;
     }
     return (mf.hash_count as u64)
