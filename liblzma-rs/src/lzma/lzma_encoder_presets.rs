@@ -44,7 +44,7 @@ pub const LZMA_LC_DEFAULT: c_int = 3 as c_int;
 pub const LZMA_LP_DEFAULT: c_int = 0 as c_int;
 pub const LZMA_PB_DEFAULT: c_int = 2 as c_int;
 pub const LZMA_PRESET_LEVEL_MASK: c_uint = 0x1f;
-pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31 as c_int;
+pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_preset(
     mut options: *mut lzma_options_lzma,

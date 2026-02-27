@@ -306,21 +306,19 @@ unsafe extern "C" fn get_dist_slot(mut dist: u32) -> u32 {
         return lzma_fastpos[dist as usize] as u32;
     }
     if dist < (1 as u32) << FASTPOS_BITS + (0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) {
-        return (lzma_fastpos
-            [(dist >> 0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
+        return (lzma_fastpos[(dist >> 0 + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
             as u32)
             .wrapping_add(
                 (2 as c_int * (0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
             );
     }
-    return (lzma_fastpos[(dist >> 0 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
-        as u32)
+    return (lzma_fastpos[(dist >> 0 + 2 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize] as u32)
         .wrapping_add(
             (2 as c_int * (0 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
         );
 }
-pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16 as c_int;
-pub const LZMA2_UNCOMPRESSED_MAX: c_uint = 1u32 << 21 as c_int;
+pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
+pub const LZMA2_UNCOMPRESSED_MAX: c_uint = 1u32 << 21;
 pub const LZMA2_HEADER_MAX: c_int = 6 as c_int;
 pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3 as c_int;
 unsafe extern "C" fn lzma2_header_lzma(mut coder: *mut lzma_lzma2_coder) {
@@ -328,14 +326,14 @@ unsafe extern "C" fn lzma2_header_lzma(mut coder: *mut lzma_lzma2_coder) {
     if (*coder).need_properties {
         pos = 0 as size_t;
         if (*coder).need_dictionary_reset {
-            (*coder).buf[pos as usize] = (0x80 as c_int + ((3 as c_int) << 5 as c_int)) as u8;
+            (*coder).buf[pos as usize] = (0x80 as c_int + ((3 as c_int) << 5)) as u8;
         } else {
-            (*coder).buf[pos as usize] = (0x80 as c_int + ((2 as c_int) << 5 as c_int)) as u8;
+            (*coder).buf[pos as usize] = (0x80 as c_int + ((2 as c_int) << 5)) as u8;
         }
     } else {
         pos = 1 as size_t;
         if (*coder).need_state_reset {
-            (*coder).buf[pos as usize] = (0x80 as c_int + ((1 as c_int) << 5 as c_int)) as u8;
+            (*coder).buf[pos as usize] = (0x80 as c_int + ((1 as c_int) << 5)) as u8;
         } else {
             (*coder).buf[pos as usize] = 0x80 as u8;
         }
@@ -345,17 +343,17 @@ unsafe extern "C" fn lzma2_header_lzma(mut coder: *mut lzma_lzma2_coder) {
     let fresh1 = pos;
     pos = pos.wrapping_add(1);
     (*coder).buf[fresh1 as usize] =
-        ((*coder).buf[fresh1 as usize] as size_t).wrapping_add(size >> 16 as c_int) as u8 as u8;
+        ((*coder).buf[fresh1 as usize] as size_t).wrapping_add(size >> 16) as u8 as u8;
     let fresh2 = pos;
     pos = pos.wrapping_add(1);
-    (*coder).buf[fresh2 as usize] = (size >> 8 as c_int & 0xff as size_t) as u8;
+    (*coder).buf[fresh2 as usize] = (size >> 8 & 0xff as size_t) as u8;
     let fresh3 = pos;
     pos = pos.wrapping_add(1);
     (*coder).buf[fresh3 as usize] = (size & 0xff as size_t) as u8;
     size = (*coder).compressed_size.wrapping_sub(1 as size_t);
     let fresh4 = pos;
     pos = pos.wrapping_add(1);
-    (*coder).buf[fresh4 as usize] = (size >> 8 as c_int) as u8;
+    (*coder).buf[fresh4 as usize] = (size >> 8) as u8;
     let fresh5 = pos;
     pos = pos.wrapping_add(1);
     (*coder).buf[fresh5 as usize] = (size & 0xff as size_t) as u8;
@@ -379,8 +377,7 @@ unsafe extern "C" fn lzma2_header_uncompressed(mut coder: *mut lzma_lzma2_coder)
         (*coder).buf[0 as usize] = 2 as u8;
     }
     (*coder).need_dictionary_reset = false_0 != 0;
-    (*coder).buf[1 as usize] =
-        ((*coder).uncompressed_size.wrapping_sub(1 as size_t) >> 8 as c_int) as u8;
+    (*coder).buf[1 as usize] = ((*coder).uncompressed_size.wrapping_sub(1 as size_t) >> 8) as u8;
     (*coder).buf[2 as usize] =
         ((*coder).uncompressed_size.wrapping_sub(1 as size_t) & 0xff as size_t) as u8;
     (*coder).buf_pos = 0 as size_t;
@@ -692,11 +689,11 @@ pub unsafe extern "C" fn lzma_lzma2_props_encode(
         4096 as u32
     };
     d = d.wrapping_sub(1);
-    d |= d >> 2 as c_int;
-    d |= d >> 3 as c_int;
-    d |= d >> 4 as c_int;
-    d |= d >> 8 as c_int;
-    d |= d >> 16 as c_int;
+    d |= d >> 2;
+    d |= d >> 3;
+    d |= d >> 4;
+    d |= d >> 8;
+    d |= d >> 16;
     if d == UINT32_MAX as u32 {
         *out.offset(0 as isize) = 40 as u8;
     } else {
@@ -709,13 +706,13 @@ pub unsafe extern "C" fn lzma_lzma2_props_encode(
 pub unsafe extern "C" fn lzma_lzma2_block_size(mut options: *const c_void) -> u64 {
     let opt: *const lzma_options_lzma = options as *const lzma_options_lzma;
     if !((*opt).dict_size >= LZMA_DICT_SIZE_MIN as u32
-        && (*opt).dict_size <= ((1 as u32) << 30 as c_int).wrapping_add((1 as u32) << 29 as c_int))
+        && (*opt).dict_size <= ((1 as u32) << 30).wrapping_add((1 as u32) << 29))
     {
         return UINT64_MAX as u64;
     }
-    return if ((*opt).dict_size as u64).wrapping_mul(3 as u64) > (1 as u64) << 20 as c_int {
+    return if ((*opt).dict_size as u64).wrapping_mul(3 as u64) > (1 as u64) << 20 {
         ((*opt).dict_size as u64).wrapping_mul(3 as u64)
     } else {
-        (1 as u64) << 20 as c_int
+        (1 as u64) << 20
     };
 }

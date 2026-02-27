@@ -42,9 +42,9 @@ pub const NULL: *mut c_void = __DARWIN_NULL;
 #[inline]
 unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
     let mut num: u32 = *buf.offset(0 as isize) as u32;
-    num |= (*buf.offset(1 as isize) as u32) << 8 as c_int;
-    num |= (*buf.offset(2 as isize) as u32) << 16 as c_int;
-    num |= (*buf.offset(3 as isize) as u32) << 24 as c_int;
+    num |= (*buf.offset(1 as isize) as u32) << 8;
+    num |= (*buf.offset(2 as isize) as u32) << 16;
+    num |= (*buf.offset(3 as isize) as u32) << 24;
     return num;
 }
 #[no_mangle]

@@ -284,7 +284,7 @@ unsafe extern "C" fn lzma2_decode(
                     return LZMA_DATA_ERROR;
                 }
                 if control >= 0x80 as u32 {
-                    (*coder).uncompressed_size = ((control & 0x1f as u32) << 16 as c_int) as size_t;
+                    (*coder).uncompressed_size = ((control & 0x1f as u32) << 16) as size_t;
                     (*coder).sequence = SEQ_UNCOMPRESSED_1;
                     if control >= 0xc0 as u32 {
                         (*coder).need_properties = false_0 != 0;
@@ -318,7 +318,7 @@ unsafe extern "C" fn lzma2_decode(
                 *in_pos = (*in_pos).wrapping_add(1);
                 (*coder).uncompressed_size = (*coder)
                     .uncompressed_size
-                    .wrapping_add(((*in_0.offset(fresh0 as isize) as u32) << 8 as c_int) as size_t);
+                    .wrapping_add(((*in_0.offset(fresh0 as isize) as u32) << 8) as size_t);
                 (*coder).sequence = SEQ_UNCOMPRESSED_2;
             }
             2 => {
@@ -340,8 +340,7 @@ unsafe extern "C" fn lzma2_decode(
             3 => {
                 let fresh2 = *in_pos;
                 *in_pos = (*in_pos).wrapping_add(1);
-                (*coder).compressed_size =
-                    ((*in_0.offset(fresh2 as isize) as u32) << 8 as c_int) as size_t;
+                (*coder).compressed_size = ((*in_0.offset(fresh2 as isize) as u32) << 8) as size_t;
                 (*coder).sequence = SEQ_COMPRESSED_1;
             }
             4 => {

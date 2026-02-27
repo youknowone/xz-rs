@@ -92,9 +92,9 @@ pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
 #[inline]
 unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
     *buf.offset(0 as isize) = num as u8;
-    *buf.offset(1 as isize) = (num >> 8 as c_int) as u8;
-    *buf.offset(2 as isize) = (num >> 16 as c_int) as u8;
-    *buf.offset(3 as isize) = (num >> 24 as c_int) as u8;
+    *buf.offset(1 as isize) = (num >> 8) as u8;
+    *buf.offset(2 as isize) = (num >> 16) as u8;
+    *buf.offset(3 as isize) = (num >> 24) as u8;
 }
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;

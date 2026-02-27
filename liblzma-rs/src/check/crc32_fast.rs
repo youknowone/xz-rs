@@ -325,8 +325,7 @@ unsafe extern "C" fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mu
         while buf as uintptr_t & 7 as uintptr_t != 0 {
             let fresh0 = buf;
             buf = buf.offset(1);
-            crc = lzma_crc32_table[0 as usize][(*fresh0 as u32 ^ crc & 0xff) as usize]
-                ^ crc >> 8 as c_int;
+            crc = lzma_crc32_table[0 as usize][(*fresh0 as u32 ^ crc & 0xff) as usize] ^ crc >> 8;
             size = size.wrapping_sub(1);
         }
         let limit: *const u8 = buf.offset((size & !(7 as size_t)) as isize);
@@ -335,16 +334,16 @@ unsafe extern "C" fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mu
             crc ^= aligned_read32ne(buf);
             buf = buf.offset(4 as isize);
             crc = lzma_crc32_table[7 as usize][(crc & 0xff) as usize]
-                ^ lzma_crc32_table[6 as usize][(crc >> 8 as c_int & 0xff) as usize]
-                ^ lzma_crc32_table[5 as usize][(crc >> 16 as c_int & 0xff) as usize]
-                ^ lzma_crc32_table[4 as usize][(crc >> 24 as c_int) as usize];
+                ^ lzma_crc32_table[6 as usize][(crc >> 8 & 0xff) as usize]
+                ^ lzma_crc32_table[5 as usize][(crc >> 16 & 0xff) as usize]
+                ^ lzma_crc32_table[4 as usize][(crc >> 24) as usize];
             let tmp: u32 = aligned_read32ne(buf) as u32;
             buf = buf.offset(4 as isize);
             crc = lzma_crc32_table[3 as usize][(tmp & 0xff) as usize]
-                ^ lzma_crc32_table[2 as usize][(tmp >> 8 as c_int & 0xff) as usize]
+                ^ lzma_crc32_table[2 as usize][(tmp >> 8 & 0xff) as usize]
                 ^ crc
-                ^ lzma_crc32_table[1 as usize][(tmp >> 16 as c_int & 0xff) as usize]
-                ^ lzma_crc32_table[0 as usize][(tmp >> 24 as c_int) as usize];
+                ^ lzma_crc32_table[1 as usize][(tmp >> 16 & 0xff) as usize]
+                ^ lzma_crc32_table[0 as usize][(tmp >> 24) as usize];
         }
     }
     loop {
@@ -355,8 +354,7 @@ unsafe extern "C" fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mu
         }
         let fresh2 = buf;
         buf = buf.offset(1);
-        crc = lzma_crc32_table[0 as usize][(*fresh2 as u32 ^ crc & 0xff) as usize]
-            ^ crc >> 8 as c_int;
+        crc = lzma_crc32_table[0 as usize][(*fresh2 as u32 ^ crc & 0xff) as usize] ^ crc >> 8;
     }
     return !crc;
 }

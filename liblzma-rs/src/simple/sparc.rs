@@ -126,10 +126,9 @@ unsafe extern "C" fn sparc_code(
                 && *buffer.offset(i.wrapping_add(1 as size_t) as isize) as c_int & 0xc0 as c_int
                     == 0xc0 as c_int
         {
-            let mut src: u32 = (*buffer.offset(i.wrapping_add(0 as size_t) as isize) as u32)
-                << 24 as c_int
-                | (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32) << 16 as c_int
-                | (*buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32) << 8 as c_int
+            let mut src: u32 = (*buffer.offset(i.wrapping_add(0 as size_t) as isize) as u32) << 24
+                | (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32) << 16
+                | (*buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(3 as size_t) as isize) as u32;
             src <<= 2 as c_int;
             let mut dest: u32 = 0;
@@ -139,13 +138,12 @@ unsafe extern "C" fn sparc_code(
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
             dest >>= 2 as c_int;
-            dest = (0 as u32).wrapping_sub(dest >> 22 as c_int & 1 as u32) << 22 as c_int
-                & 0x3fffffff as u32
+            dest = (0 as u32).wrapping_sub(dest >> 22 & 1 as u32) << 22 & 0x3fffffff as u32
                 | dest & 0x3fffff as u32
                 | 0x40000000 as u32;
-            *buffer.offset(i.wrapping_add(0 as size_t) as isize) = (dest >> 24 as c_int) as u8;
-            *buffer.offset(i.wrapping_add(1 as size_t) as isize) = (dest >> 16 as c_int) as u8;
-            *buffer.offset(i.wrapping_add(2 as size_t) as isize) = (dest >> 8 as c_int) as u8;
+            *buffer.offset(i.wrapping_add(0 as size_t) as isize) = (dest >> 24) as u8;
+            *buffer.offset(i.wrapping_add(1 as size_t) as isize) = (dest >> 16) as u8;
+            *buffer.offset(i.wrapping_add(2 as size_t) as isize) = (dest >> 8) as u8;
             *buffer.offset(i.wrapping_add(3 as size_t) as isize) = dest as u8;
         }
         i = i.wrapping_add(4 as size_t);

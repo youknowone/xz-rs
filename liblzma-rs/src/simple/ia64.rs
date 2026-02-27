@@ -131,7 +131,7 @@ unsafe extern "C" fn ia64_code(
         let mut slot: size_t = 0 as size_t;
         while slot < 3 as size_t {
             if !(mask >> slot & 1 as u32 == 0 as u32) {
-                let byte_pos: size_t = (bit_pos >> 3 as c_int) as size_t;
+                let byte_pos: size_t = (bit_pos >> 3) as size_t;
                 let bit_res: u32 = bit_pos & 0x7 as u32;
                 let mut instruction: u64 = 0 as u64;
                 let mut j: size_t = 0 as size_t;
@@ -143,12 +143,11 @@ unsafe extern "C" fn ia64_code(
                     j = j.wrapping_add(1);
                 }
                 let mut inst_norm: u64 = instruction >> bit_res;
-                if inst_norm >> 37 as c_int & 0xf as u64 == 0x5 as u64
-                    && inst_norm >> 9 as c_int & 0x7 as u64 == 0 as u64
+                if inst_norm >> 37 & 0xf as u64 == 0x5 as u64
+                    && inst_norm >> 9 & 0x7 as u64 == 0 as u64
                 {
-                    let mut src: u32 = (inst_norm >> 13 as c_int & 0xfffff as u64) as u32;
-                    src =
-                        (src as u64 | (inst_norm >> 36 as c_int & 1 as u64) << 20 as c_int) as u32;
+                    let mut src: u32 = (inst_norm >> 13 & 0xfffff as u64) as u32;
+                    src = (src as u64 | (inst_norm >> 36 & 1 as u64) << 20) as u32;
                     src <<= 4 as c_int;
                     let mut dest: u32 = 0;
                     if is_encoder {
@@ -157,9 +156,9 @@ unsafe extern "C" fn ia64_code(
                         dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
                     }
                     dest >>= 4 as c_int;
-                    inst_norm &= !((0x8fffff as u64) << 13 as c_int);
-                    inst_norm |= ((dest & 0xfffff as u32) as u64) << 13 as c_int;
-                    inst_norm |= ((dest & 0x100000 as u32) as u64) << 36 as c_int - 20 as c_int;
+                    inst_norm &= !((0x8fffff as u64) << 13);
+                    inst_norm |= ((dest & 0xfffff as u32) as u64) << 13;
+                    inst_norm |= ((dest & 0x100000 as u32) as u64) << 36 - 20 as c_int;
                     instruction &= (1u32 << bit_res).wrapping_sub(1) as u64;
                     instruction |= inst_norm << bit_res;
                     let mut j_0: size_t = 0 as size_t;

@@ -169,14 +169,12 @@ unsafe extern "C" fn x86_code(
             }
             b = *buffer.offset(buffer_pos.wrapping_add(4 as size_t) as isize);
             if (b as c_int == 0 as c_int || b as c_int == 0xff as c_int)
-                && prev_mask >> 1 as c_int <= 4 as u32
-                && prev_mask >> 1 as c_int != 3 as u32
+                && prev_mask >> 1 <= 4 as u32
+                && prev_mask >> 1 != 3 as u32
             {
-                let mut src: u32 = (b as u32) << 24 as c_int
-                    | (*buffer.offset(buffer_pos.wrapping_add(3 as size_t) as isize) as u32)
-                        << 16 as c_int
-                    | (*buffer.offset(buffer_pos.wrapping_add(2 as size_t) as isize) as u32)
-                        << 8 as c_int
+                let mut src: u32 = (b as u32) << 24
+                    | (*buffer.offset(buffer_pos.wrapping_add(3 as size_t) as isize) as u32) << 16
+                    | (*buffer.offset(buffer_pos.wrapping_add(2 as size_t) as isize) as u32) << 8
                     | *buffer.offset(buffer_pos.wrapping_add(1 as size_t) as isize) as u32;
                 let mut dest: u32 = 0;
                 loop {
@@ -196,7 +194,7 @@ unsafe extern "C" fn x86_code(
                     if prev_mask == 0 as u32 {
                         break;
                     }
-                    let i_0: u32 = MASK_TO_BIT_NUMBER[(prev_mask >> 1 as c_int) as usize];
+                    let i_0: u32 = MASK_TO_BIT_NUMBER[(prev_mask >> 1) as usize];
                     b = (dest >> (24 as u32).wrapping_sub(i_0.wrapping_mul(8 as u32))) as u8;
                     if !(b as c_int == 0 as c_int || b as c_int == 0xff as c_int) {
                         break;
@@ -206,11 +204,9 @@ unsafe extern "C" fn x86_code(
                             .wrapping_sub(1 as u32);
                 }
                 *buffer.offset(buffer_pos.wrapping_add(4 as size_t) as isize) =
-                    !(dest >> 24 as c_int & 1 as u32).wrapping_sub(1 as u32) as u8;
-                *buffer.offset(buffer_pos.wrapping_add(3 as size_t) as isize) =
-                    (dest >> 16 as c_int) as u8;
-                *buffer.offset(buffer_pos.wrapping_add(2 as size_t) as isize) =
-                    (dest >> 8 as c_int) as u8;
+                    !(dest >> 24 & 1 as u32).wrapping_sub(1 as u32) as u8;
+                *buffer.offset(buffer_pos.wrapping_add(3 as size_t) as isize) = (dest >> 16) as u8;
+                *buffer.offset(buffer_pos.wrapping_add(2 as size_t) as isize) = (dest >> 8) as u8;
                 *buffer.offset(buffer_pos.wrapping_add(1 as size_t) as isize) = dest as u8;
                 buffer_pos = buffer_pos.wrapping_add(5 as size_t);
                 prev_mask = 0 as u32;

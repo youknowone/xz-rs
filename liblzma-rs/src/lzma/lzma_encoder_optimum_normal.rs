@@ -165,7 +165,7 @@ pub const RC_BIT_MODEL_TOTAL_BITS: c_int = 11 as c_int;
 pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_REDUCING_BITS: c_int = 4 as c_int;
 pub const RC_BIT_PRICE_SHIFT_BITS: c_int = 4 as c_int;
-pub const RC_INFINITY_PRICE: c_uint = 1u32 << 30 as c_int;
+pub const RC_INFINITY_PRICE: c_uint = 1u32 << 30;
 #[inline]
 unsafe extern "C" fn rc_bit_price(prob: probability, bit: u32) -> u32 {
     return lzma_rc_prices[((prob as u32
@@ -212,7 +212,7 @@ unsafe extern "C" fn rc_bittree_reverse_price(
         let bit: u32 = symbol & 1 as u32;
         symbol >>= 1 as c_int;
         price = price.wrapping_add(rc_bit_price(*probs.offset(model_index as isize), bit));
-        model_index = (model_index << 1 as c_int).wrapping_add(bit);
+        model_index = (model_index << 1).wrapping_add(bit);
         bit_levels = bit_levels.wrapping_sub(1);
         if !(bit_levels != 0 as u32) {
             break;
@@ -243,15 +243,13 @@ unsafe extern "C" fn get_dist_slot(mut dist: u32) -> u32 {
         return lzma_fastpos[dist as usize] as u32;
     }
     if dist < (1 as u32) << FASTPOS_BITS + (0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) {
-        return (lzma_fastpos
-            [(dist >> 0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
+        return (lzma_fastpos[(dist >> 0 + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
             as u32)
             .wrapping_add(
                 (2 as c_int * (0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
             );
     }
-    return (lzma_fastpos[(dist >> 0 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
-        as u32)
+    return (lzma_fastpos[(dist >> 0 + 2 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize] as u32)
         .wrapping_add(
             (2 as c_int * (0 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
         );
@@ -264,7 +262,7 @@ unsafe extern "C" fn get_dist_slot_2(mut dist: u32) -> u32 {
                 + (14 as c_int / 2 as c_int - 1 as c_int + 0 as c_int * (FASTPOS_BITS - 1 as c_int))
     {
         return (lzma_fastpos[(dist
-            >> 14 as c_int / 2 as c_int - 1 as c_int + 0 as c_int * (FASTPOS_BITS - 1 as c_int))
+            >> 14 / 2 as c_int - 1 as c_int + 0 as c_int * (FASTPOS_BITS - 1 as c_int))
             as usize] as u32)
             .wrapping_add(
                 (2 as c_int
@@ -278,7 +276,7 @@ unsafe extern "C" fn get_dist_slot_2(mut dist: u32) -> u32 {
                 + (14 as c_int / 2 as c_int - 1 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int))
     {
         return (lzma_fastpos[(dist
-            >> 14 as c_int / 2 as c_int - 1 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int))
+            >> 14 / 2 as c_int - 1 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int))
             as usize] as u32)
             .wrapping_add(
                 (2 as c_int
@@ -286,9 +284,9 @@ unsafe extern "C" fn get_dist_slot_2(mut dist: u32) -> u32 {
                         + 1 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
             );
     }
-    return (lzma_fastpos[(dist
-        >> 14 as c_int / 2 as c_int - 1 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int))
-        as usize] as u32)
+    return (lzma_fastpos
+        [(dist >> 14 / 2 as c_int - 1 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
+        as u32)
         .wrapping_add(
             (2 as c_int
                 * (14 as c_int / 2 as c_int - 1 as c_int
@@ -318,7 +316,7 @@ unsafe extern "C" fn get_literal_price(
 ) -> u32 {
     let subcoder: *const probability =
         (&raw const (*coder).literal as *const probability).offset((3 as u32).wrapping_mul(
-            ((pos << 8 as c_int).wrapping_add(prev_byte) & (*coder).literal_mask)
+            ((pos << 8).wrapping_add(prev_byte) & (*coder).literal_mask)
                 << (*coder).literal_context_bits,
         ) as isize);
     let mut price: u32 = 0 as u32;
@@ -326,19 +324,17 @@ unsafe extern "C" fn get_literal_price(
         price = rc_bittree_price(subcoder, 8 as u32, symbol);
     } else {
         let mut offset: u32 = 0x100 as u32;
-        symbol = (symbol as c_uint).wrapping_add(1u32 << 8 as c_int) as u32 as u32;
+        symbol = (symbol as c_uint).wrapping_add(1u32 << 8) as u32 as u32;
         loop {
             match_byte <<= 1 as c_int;
             let match_bit: u32 = match_byte & offset;
-            let subcoder_index: u32 = offset
-                .wrapping_add(match_bit)
-                .wrapping_add(symbol >> 8 as c_int);
-            let bit: u32 = symbol >> 7 as c_int & 1 as u32;
+            let subcoder_index: u32 = offset.wrapping_add(match_bit).wrapping_add(symbol >> 8);
+            let bit: u32 = symbol >> 7 & 1 as u32;
             price =
                 price.wrapping_add(rc_bit_price(*subcoder.offset(subcoder_index as isize), bit));
             symbol <<= 1 as c_int;
             offset &= !(match_byte ^ symbol);
-            if !(symbol < (1 as u32) << 16 as c_int) {
+            if !(symbol < (1 as u32) << 16) {
                 break;
             }
         }
@@ -448,7 +444,7 @@ unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
         while dist_slot_0 < (*coder).dist_table_size {
             let ref mut fresh1 = *dist_slot_prices.offset(dist_slot_0 as isize);
             *fresh1 = (*fresh1).wrapping_add(rc_direct_price(
-                (dist_slot_0 >> 1 as c_int)
+                (dist_slot_0 >> 1)
                     .wrapping_sub(1 as u32)
                     .wrapping_sub(ALIGN_BITS as u32),
             ));
@@ -465,7 +461,7 @@ unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
     let mut i_0: u32 = DIST_MODEL_START as u32;
     while i_0 < FULL_DISTANCES as u32 {
         let dist_slot_1: u32 = get_dist_slot(i_0) as u32;
-        let footer_bits: u32 = (dist_slot_1 >> 1 as c_int).wrapping_sub(1 as u32);
+        let footer_bits: u32 = (dist_slot_1 >> 1).wrapping_sub(1 as u32);
         let base: u32 = (2 as u32 | dist_slot_1 & 1 as u32) << footer_bits;
         let price: u32 = rc_bittree_reverse_price(
             (&raw mut (*coder).dist_special as *mut probability)
@@ -570,18 +566,12 @@ unsafe extern "C" fn helper1(
         matches_count = (*coder).matches_count;
     }
     let buf_avail: u32 = if mf_avail(mf).wrapping_add(1 as u32)
-        < (2 as c_int
-            + (((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 8 as c_int))
+        < (2 as c_int + (((1 as c_int) << 3) + ((1 as c_int) << 3) + ((1 as c_int) << 8))
             - 1 as c_int) as u32
     {
         (mf_avail(mf) as u32).wrapping_add(1 as u32)
     } else {
-        (2 as c_int
-            + (((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 8 as c_int))
+        (2 as c_int + (((1 as c_int) << 3) + ((1 as c_int) << 3) + ((1 as c_int) << 8))
             - 1 as c_int) as u32
     };
     if buf_avail < 2 as u32 {
@@ -1228,7 +1218,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
         return;
     }
     if (*mf).read_ahead == 0 as u32 {
-        if (*coder).match_price_count >= ((1 as c_int) << 7 as c_int) as u32 {
+        if (*coder).match_price_count >= ((1 as c_int) << 7) as u32 {
             fill_dist_prices(coder);
         }
         if (*coder).align_price_count >= ALIGN_SIZE as u32 {
@@ -1265,11 +1255,11 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
             cur,
             (*mf).nice_len,
             if mf_avail(mf).wrapping_add(1 as u32)
-                < ((((1 as c_int) << 12 as c_int) - 1 as c_int) as u32).wrapping_sub(cur)
+                < ((((1 as c_int) << 12) - 1 as c_int) as u32).wrapping_sub(cur)
             {
                 mf_avail(mf).wrapping_add(1 as u32)
             } else {
-                ((((1 as c_int) << 12 as c_int) - 1 as c_int) as u32).wrapping_sub(cur)
+                ((((1 as c_int) << 12) - 1 as c_int) as u32).wrapping_sub(cur)
             },
         );
         cur = cur.wrapping_add(1);

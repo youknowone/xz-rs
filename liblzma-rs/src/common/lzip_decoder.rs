@@ -231,21 +231,21 @@ pub const false_0: c_int = 0 as c_int;
 #[inline]
 unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
     let mut num: u32 = *buf.offset(0 as isize) as u32;
-    num |= (*buf.offset(1 as isize) as u32) << 8 as c_int;
-    num |= (*buf.offset(2 as isize) as u32) << 16 as c_int;
-    num |= (*buf.offset(3 as isize) as u32) << 24 as c_int;
+    num |= (*buf.offset(1 as isize) as u32) << 8;
+    num |= (*buf.offset(2 as isize) as u32) << 16;
+    num |= (*buf.offset(3 as isize) as u32) << 24;
     return num;
 }
 #[inline]
 unsafe extern "C" fn read64le(mut buf: *const u8) -> u64 {
     let mut num: u64 = *buf.offset(0 as isize) as u64;
-    num |= (*buf.offset(1 as isize) as u64) << 8 as c_int;
-    num |= (*buf.offset(2 as isize) as u64) << 16 as c_int;
-    num |= (*buf.offset(3 as isize) as u64) << 24 as c_int;
-    num |= (*buf.offset(4 as isize) as u64) << 32 as c_int;
-    num |= (*buf.offset(5 as isize) as u64) << 40 as c_int;
-    num |= (*buf.offset(6 as isize) as u64) << 48 as c_int;
-    num |= (*buf.offset(7 as isize) as u64) << 56 as c_int;
+    num |= (*buf.offset(1 as isize) as u64) << 8;
+    num |= (*buf.offset(2 as isize) as u64) << 16;
+    num |= (*buf.offset(3 as isize) as u64) << 24;
+    num |= (*buf.offset(4 as isize) as u64) << 32;
+    num |= (*buf.offset(5 as isize) as u64) << 40;
+    num |= (*buf.offset(6 as isize) as u64) << 48;
+    num |= (*buf.offset(7 as isize) as u64) << 56;
     return num;
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
@@ -256,7 +256,7 @@ pub const LZMA_TELL_ANY_CHECK: c_uint = 0x4;
 pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
 pub const LZMA_CONCATENATED: c_uint = 0x8;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
-pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15 as c_int;
+pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15;
 pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_TELL_UNSUPPORTED_CHECK
     | LZMA_TELL_ANY_CHECK
@@ -359,7 +359,7 @@ unsafe extern "C" fn lzip_decode(
                 let ds: u32 = *in_0.offset(fresh1 as isize) as u32;
                 (*coder).member_size = (*coder).member_size.wrapping_add(1);
                 let b2log: u32 = ds & 0x1f as u32;
-                let fracnum: u32 = ds >> 5 as c_int;
+                let fracnum: u32 = ds >> 5;
                 if b2log < 12 as u32
                     || b2log > 29 as u32
                     || b2log == 12 as u32 && fracnum > 0 as u32

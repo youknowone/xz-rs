@@ -212,8 +212,8 @@ pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
 unsafe extern "C" fn mf_get_hash_bytes(mut match_finder: lzma_match_finder) -> u32 {
     return match_finder as u32 & 0xf as u32;
 }
-pub const HASH_2_SIZE: c_uint = 1u32 << 10 as c_int;
-pub const HASH_3_SIZE: c_uint = 1u32 << 16 as c_int;
+pub const HASH_2_SIZE: c_uint = 1u32 << 10;
+pub const HASH_3_SIZE: c_uint = 1u32 << 16;
 pub const LZMA_MEMCMPLEN_EXTRA: c_int = 0 as c_int;
 unsafe extern "C" fn move_window(mut mf: *mut lzma_mf) {
     let move_offset: u32 = (*mf).read_pos.wrapping_sub((*mf).keep_size_before) & !(15 as u32);
@@ -332,8 +332,7 @@ unsafe extern "C" fn lz_encoder_prepare(
     mut lz_options: *const lzma_lz_options,
 ) -> bool {
     if !((*lz_options).dict_size >= LZMA_DICT_SIZE_MIN as size_t
-        && (*lz_options).dict_size
-            <= (1u32 << 30 as c_int).wrapping_add(1u32 << 29 as c_int) as size_t)
+        && (*lz_options).dict_size <= (1u32 << 30).wrapping_add(1u32 << 29) as size_t)
         || (*lz_options).nice_len > (*lz_options).match_len_max
     {
         return true_0 != 0;
@@ -345,7 +344,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         .after_size
         .wrapping_add((*lz_options).match_len_max) as u32;
     let mut reserve: u32 = (*lz_options).dict_size.wrapping_div(2 as size_t) as u32;
-    if reserve > (1 as u32) << 30 as c_int {
+    if reserve > (1 as u32) << 30 {
         reserve = reserve.wrapping_div(2 as u32);
     }
     reserve = (reserve as size_t).wrapping_add(
@@ -354,7 +353,7 @@ unsafe extern "C" fn lz_encoder_prepare(
             .wrapping_add((*lz_options).match_len_max)
             .wrapping_add((*lz_options).after_size)
             .wrapping_div(2 as size_t)
-            .wrapping_add((1u32 << 19 as c_int) as size_t),
+            .wrapping_add((1u32 << 19) as size_t),
     ) as u32 as u32;
     let old_size: u32 = (*mf).size;
     (*mf).size = (*mf)
@@ -418,15 +417,15 @@ unsafe extern "C" fn lz_encoder_prepare(
         hs = 0xffff as u32;
     } else {
         hs = (*lz_options).dict_size.wrapping_sub(1 as size_t) as u32;
-        hs |= hs >> 1 as c_int;
-        hs |= hs >> 2 as c_int;
-        hs |= hs >> 4 as c_int;
-        hs |= hs >> 8 as c_int;
+        hs |= hs >> 1;
+        hs |= hs >> 2;
+        hs |= hs >> 4;
+        hs |= hs >> 8;
         hs >>= 1 as c_int;
         hs |= 0xffff as u32;
-        if hs > (1 as u32) << 24 as c_int {
+        if hs > (1 as u32) << 24 {
             if hash_bytes == 3 as u32 {
-                hs = (1u32 << 24 as c_int).wrapping_sub(1) as u32;
+                hs = (1u32 << 24).wrapping_sub(1) as u32;
             } else {
                 hs >>= 1 as c_int;
             }

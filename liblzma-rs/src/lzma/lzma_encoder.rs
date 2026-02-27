@@ -328,16 +328,16 @@ pub const false_0: c_int = 0 as c_int;
 #[inline]
 unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
     *buf.offset(0 as isize) = num as u8;
-    *buf.offset(1 as isize) = (num >> 8 as c_int) as u8;
-    *buf.offset(2 as isize) = (num >> 16 as c_int) as u8;
-    *buf.offset(3 as isize) = (num >> 24 as c_int) as u8;
+    *buf.offset(1 as isize) = (num >> 8) as u8;
+    *buf.offset(2 as isize) = (num >> 16) as u8;
+    *buf.offset(3 as isize) = (num >> 24) as u8;
 }
 pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001 as c_ulonglong;
 pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002 as c_ulonglong;
 pub const LZMA_LCLP_MAX: c_int = 4 as c_int;
 pub const LZMA_PB_MAX: c_int = 4 as c_int;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
-pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16 as c_int;
+pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 #[inline]
 unsafe extern "C" fn mf_get_hash_bytes(mut match_finder: lzma_match_finder) -> u32 {
     return match_finder as u32 & 0xf as u32;
@@ -430,7 +430,7 @@ unsafe extern "C" fn rc_bittree(
             probs.offset(model_index as isize) as *mut probability,
             bit,
         );
-        model_index = (model_index << 1 as c_int).wrapping_add(bit);
+        model_index = (model_index << 1).wrapping_add(bit);
         if !(bit_count != 0 as u32) {
             break;
         }
@@ -452,7 +452,7 @@ unsafe extern "C" fn rc_bittree_reverse(
             probs.offset(model_index as isize) as *mut probability,
             bit,
         );
-        model_index = (model_index << 1 as c_int).wrapping_add(bit);
+        model_index = (model_index << 1).wrapping_add(bit);
         bit_count = bit_count.wrapping_sub(1);
         if !(bit_count != 0 as u32) {
             break;
@@ -493,13 +493,13 @@ unsafe extern "C" fn rc_shift_low(
     mut out_pos: *mut size_t,
     mut out_size: size_t,
 ) -> bool {
-    if ((*rc).low as u32) < 0xff000000 as u32 || ((*rc).low >> 32 as c_int) as u32 != 0 as u32 {
+    if ((*rc).low as u32) < 0xff000000 as u32 || ((*rc).low >> 32) as u32 != 0 as u32 {
         loop {
             if *out_pos == out_size {
                 return true_0 != 0;
             }
             *out.offset(*out_pos as isize) =
-                ((*rc).cache as c_int + ((*rc).low >> 32 as c_int) as u8 as c_int) as u8;
+                ((*rc).cache as c_int + ((*rc).low >> 32) as u8 as c_int) as u8;
             *out_pos = (*out_pos).wrapping_add(1);
             (*rc).out_total = (*rc).out_total.wrapping_add(1);
             (*rc).cache = 0xff as u8;
@@ -508,7 +508,7 @@ unsafe extern "C" fn rc_shift_low(
                 break;
             }
         }
-        (*rc).cache = ((*rc).low >> 24 as c_int & 0xff as u64) as u8;
+        (*rc).cache = ((*rc).low >> 24 & 0xff as u64) as u8;
     }
     (*rc).cache_size = (*rc).cache_size.wrapping_add(1);
     (*rc).low = ((*rc).low & 0xffffff as u64) << RC_SHIFT_BITS;
@@ -522,7 +522,7 @@ unsafe extern "C" fn rc_shift_low_dummy(
     mut out_pos: *mut u64,
     mut out_size: u64,
 ) -> bool {
-    if (*low as u32) < 0xff000000 as u32 || (*low >> 32 as c_int) as u32 != 0 as u32 {
+    if (*low as u32) < 0xff000000 as u32 || (*low >> 32) as u32 != 0 as u32 {
         loop {
             if *out_pos == out_size {
                 return true_0 != 0;
@@ -534,7 +534,7 @@ unsafe extern "C" fn rc_shift_low_dummy(
                 break;
             }
         }
-        *cache = (*low >> 24 as c_int & 0xff as u64) as u8;
+        *cache = (*low >> 24 & 0xff as u64) as u8;
     }
     *cache_size = (*cache_size).wrapping_add(1);
     *low = (*low & 0xffffff as u64) << RC_SHIFT_BITS;
@@ -687,7 +687,7 @@ unsafe extern "C" fn literal_init(mut probs: *mut probability, mut lc: u32, mut 
     let coders: size_t = (LITERAL_CODER_SIZE << lc.wrapping_add(lp)) as size_t;
     let mut i: size_t = 0 as size_t;
     while i < coders {
-        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         i = i.wrapping_add(1);
     }
 }
@@ -710,7 +710,7 @@ pub const ALIGN_BITS: c_int = 4 as c_int;
 pub const ALIGN_SIZE: c_int = (1 as c_int) << ALIGN_BITS;
 pub const ALIGN_MASK: c_int = ALIGN_SIZE - 1 as c_int;
 pub const REPS: c_int = 4 as c_int;
-pub const OPTS: c_int = (1 as c_int) << 12 as c_int;
+pub const OPTS: c_int = (1 as c_int) << 12;
 pub const FASTPOS_BITS: c_int = 13 as c_int;
 #[inline]
 unsafe extern "C" fn get_dist_slot(mut dist: u32) -> u32 {
@@ -718,15 +718,13 @@ unsafe extern "C" fn get_dist_slot(mut dist: u32) -> u32 {
         return lzma_fastpos[dist as usize] as u32;
     }
     if dist < (1 as u32) << FASTPOS_BITS + (0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) {
-        return (lzma_fastpos
-            [(dist >> 0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
+        return (lzma_fastpos[(dist >> 0 + 1 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
             as u32)
             .wrapping_add(
                 (2 as c_int * (0 as c_int + 1 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
             );
     }
-    return (lzma_fastpos[(dist >> 0 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize]
-        as u32)
+    return (lzma_fastpos[(dist >> 0 + 2 as c_int * (FASTPOS_BITS - 1 as c_int)) as usize] as u32)
         .wrapping_add(
             (2 as c_int * (0 as c_int + 2 as c_int * (FASTPOS_BITS - 1 as c_int))) as u32,
         );
@@ -739,14 +737,12 @@ unsafe extern "C" fn literal_matched(
     mut symbol: u32,
 ) {
     let mut offset: u32 = 0x100 as u32;
-    symbol = (symbol as c_uint).wrapping_add(1u32 << 8 as c_int) as u32 as u32;
+    symbol = (symbol as c_uint).wrapping_add(1u32 << 8) as u32 as u32;
     loop {
         match_byte <<= 1 as c_int;
         let match_bit: u32 = match_byte & offset;
-        let subcoder_index: u32 = offset
-            .wrapping_add(match_bit)
-            .wrapping_add(symbol >> 8 as c_int);
-        let bit: u32 = symbol >> 7 as c_int & 1 as u32;
+        let subcoder_index: u32 = offset.wrapping_add(match_bit).wrapping_add(symbol >> 8);
+        let bit: u32 = symbol >> 7 & 1 as u32;
         rc_bit(
             rc,
             subcoder.offset(subcoder_index as isize) as *mut probability,
@@ -754,7 +750,7 @@ unsafe extern "C" fn literal_matched(
         );
         symbol <<= 1 as c_int;
         offset &= !(match_byte ^ symbol);
-        if !(symbol < (1 as u32) << 16 as c_int) {
+        if !(symbol < (1 as u32) << 16) {
             break;
         }
     }
@@ -770,7 +766,7 @@ unsafe extern "C" fn literal(
         .offset((*mf).read_pos.wrapping_sub((*mf).read_ahead) as isize);
     let mut subcoder: *mut probability = (&raw mut (*coder).literal as *mut probability).offset(
         (3 as u32).wrapping_mul(
-            ((position << 8 as c_int).wrapping_add(
+            ((position << 8).wrapping_add(
                 *(*mf).buffer.offset(
                     (*mf)
                         .read_pos
@@ -929,7 +925,7 @@ unsafe extern "C" fn match_0(
         dist_slot,
     );
     if dist_slot >= DIST_MODEL_START as u32 {
-        let footer_bits: u32 = (dist_slot >> 1 as c_int).wrapping_sub(1 as u32);
+        let footer_bits: u32 = (dist_slot >> 1).wrapping_sub(1 as u32);
         let base: u32 = (2 as u32 | dist_slot & 1 as u32) << footer_bits;
         let dist_reduced: u32 = distance.wrapping_sub(base);
         if dist_slot < DIST_MODEL_END as u32 {
@@ -1262,27 +1258,27 @@ unsafe extern "C" fn length_encoder_reset(
     num_pos_states: u32,
     fast_mode: bool,
 ) {
-    (*lencoder).choice = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
-    (*lencoder).choice2 = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+    (*lencoder).choice = (RC_BIT_MODEL_TOTAL >> 1) as probability;
+    (*lencoder).choice2 = (RC_BIT_MODEL_TOTAL >> 1) as probability;
     let mut pos_state: size_t = 0 as size_t;
     while pos_state < num_pos_states as size_t {
         let mut bt_i: u32 = 0 as u32;
-        while bt_i < ((1 as c_int) << 3 as c_int) as u32 {
+        while bt_i < ((1 as c_int) << 3) as u32 {
             (*lencoder).low[pos_state as usize][bt_i as usize] =
-                (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+                (RC_BIT_MODEL_TOTAL >> 1) as probability;
             bt_i = bt_i.wrapping_add(1);
         }
         let mut bt_i_0: u32 = 0 as u32;
-        while bt_i_0 < ((1 as c_int) << 3 as c_int) as u32 {
+        while bt_i_0 < ((1 as c_int) << 3) as u32 {
             (*lencoder).mid[pos_state as usize][bt_i_0 as usize] =
-                (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+                (RC_BIT_MODEL_TOTAL >> 1) as probability;
             bt_i_0 = bt_i_0.wrapping_add(1);
         }
         pos_state = pos_state.wrapping_add(1);
     }
     let mut bt_i_1: u32 = 0 as u32;
-    while bt_i_1 < ((1 as c_int) << 8 as c_int) as u32 {
-        (*lencoder).high[bt_i_1 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+    while bt_i_1 < ((1 as c_int) << 8) as u32 {
+        (*lencoder).high[bt_i_1 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         bt_i_1 = bt_i_1.wrapping_add(1);
     }
     if !fast_mode {
@@ -1321,36 +1317,35 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
     while i_0 < STATES as size_t {
         let mut j: size_t = 0 as size_t;
         while j <= (*coder).pos_mask as size_t {
-            (*coder).is_match[i_0 as usize][j as usize] =
-                (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+            (*coder).is_match[i_0 as usize][j as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
             (*coder).is_rep0_long[i_0 as usize][j as usize] =
-                (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+                (RC_BIT_MODEL_TOTAL >> 1) as probability;
             j = j.wrapping_add(1);
         }
-        (*coder).is_rep[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
-        (*coder).is_rep0[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
-        (*coder).is_rep1[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
-        (*coder).is_rep2[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+        (*coder).is_rep[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
+        (*coder).is_rep0[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
+        (*coder).is_rep1[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
+        (*coder).is_rep2[i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         i_0 = i_0.wrapping_add(1);
     }
     let mut i_1: size_t = 0 as size_t;
     while i_1 < (FULL_DISTANCES - DIST_MODEL_END) as size_t {
-        (*coder).dist_special[i_1 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+        (*coder).dist_special[i_1 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         i_1 = i_1.wrapping_add(1);
     }
     let mut i_2: size_t = 0 as size_t;
     while i_2 < DIST_STATES as size_t {
         let mut bt_i: u32 = 0 as u32;
-        while bt_i < ((1 as c_int) << 6 as c_int) as u32 {
+        while bt_i < ((1 as c_int) << 6) as u32 {
             (*coder).dist_slot[i_2 as usize][bt_i as usize] =
-                (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+                (RC_BIT_MODEL_TOTAL >> 1) as probability;
             bt_i = bt_i.wrapping_add(1);
         }
         i_2 = i_2.wrapping_add(1);
     }
     let mut bt_i_0: u32 = 0 as u32;
-    while bt_i_0 < ((1 as c_int) << 4 as c_int) as u32 {
-        (*coder).dist_align[bt_i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1 as c_int) as probability;
+    while bt_i_0 < ((1 as c_int) << 4) as u32 {
+        (*coder).dist_align[bt_i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         bt_i_0 = bt_i_0.wrapping_add(1);
     }
     length_encoder_reset(
@@ -1393,9 +1388,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_create(
         }
         2 => {
             (*coder).fast_mode = false_0 != 0;
-            if (*options).dict_size
-                > ((1 as u32) << 30 as c_int).wrapping_add((1 as u32) << 29 as c_int)
-            {
+            if (*options).dict_size > ((1 as u32) << 30).wrapping_add((1 as u32) << 29) {
                 return LZMA_OPTIONS_ERROR;
             }
             let mut log_size: u32 = 0 as u32;

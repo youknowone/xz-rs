@@ -53,11 +53,11 @@ unsafe extern "C" fn mf_ptr(mut mf: *const lzma_mf) -> *const u8 {
 unsafe extern "C" fn mf_avail(mut mf: *const lzma_mf) -> u32 {
     return (*mf).write_pos.wrapping_sub((*mf).read_pos);
 }
-pub const HASH_2_SIZE: c_uint = 1u32 << 10 as c_int;
-pub const HASH_3_SIZE: c_uint = 1u32 << 16 as c_int;
+pub const HASH_2_SIZE: c_uint = 1u32 << 10;
+pub const HASH_3_SIZE: c_uint = 1u32 << 16;
 pub const HASH_2_MASK: c_uint = HASH_2_SIZE.wrapping_sub(1);
 pub const HASH_3_MASK: c_uint = HASH_3_SIZE.wrapping_sub(1);
-pub const FIX_3_HASH_SIZE: c_uint = 1u32 << 10 as c_int;
+pub const FIX_3_HASH_SIZE: c_uint = 1u32 << 10;
 pub const FIX_4_HASH_SIZE: c_uint = HASH_2_SIZE.wrapping_add(HASH_3_SIZE);
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
@@ -200,7 +200,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(
     let temp: u32 = lzma_crc32_table[0 as usize][*cur.offset(0 as isize) as usize]
         ^ *cur.offset(1 as isize) as u32;
     let hash_2_value: u32 = temp & HASH_2_MASK as u32;
-    let hash_value: u32 = (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & (*mf).hash_mask;
+    let hash_value: u32 = (temp ^ (*cur.offset(2 as isize) as u32) << 8) & (*mf).hash_mask;
     let delta2: u32 = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
     let cur_match: u32 = *(*mf)
         .hash
@@ -248,8 +248,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_skip(mut mf: *mut lzma_mf, mut amount: u32)
             let temp: u32 = lzma_crc32_table[0 as usize][*cur.offset(0 as isize) as usize]
                 ^ *cur.offset(1 as isize) as u32;
             let hash_2_value: u32 = temp & HASH_2_MASK as u32;
-            let hash_value: u32 =
-                (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & (*mf).hash_mask;
+            let hash_value: u32 = (temp ^ (*cur.offset(2 as isize) as u32) << 8) & (*mf).hash_mask;
             let cur_match: u32 = *(*mf)
                 .hash
                 .offset((FIX_3_HASH_SIZE as u32).wrapping_add(hash_value) as isize);
@@ -284,11 +283,10 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(
     let temp: u32 = lzma_crc32_table[0 as usize][*cur.offset(0 as isize) as usize]
         ^ *cur.offset(1 as isize) as u32;
     let hash_2_value: u32 = temp & HASH_2_MASK as u32;
-    let hash_3_value: u32 =
-        (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & HASH_3_MASK as u32;
+    let hash_3_value: u32 = (temp ^ (*cur.offset(2 as isize) as u32) << 8) & HASH_3_MASK as u32;
     let hash_value: u32 = (temp
-        ^ (*cur.offset(2 as isize) as u32) << 8 as c_int
-        ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5 as c_int)
+        ^ (*cur.offset(2 as isize) as u32) << 8
+        ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5)
         & (*mf).hash_mask;
     let mut delta2: u32 = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
     let delta3: u32 = pos.wrapping_sub(
@@ -363,10 +361,10 @@ pub unsafe extern "C" fn lzma_mf_hc4_skip(mut mf: *mut lzma_mf, mut amount: u32)
                 ^ *cur.offset(1 as isize) as u32;
             let hash_2_value: u32 = temp & HASH_2_MASK as u32;
             let hash_3_value: u32 =
-                (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & HASH_3_MASK as u32;
+                (temp ^ (*cur.offset(2 as isize) as u32) << 8) & HASH_3_MASK as u32;
             let hash_value: u32 = (temp
-                ^ (*cur.offset(2 as isize) as u32) << 8 as c_int
-                ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5 as c_int)
+                ^ (*cur.offset(2 as isize) as u32) << 8
+                ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5)
                 & (*mf).hash_mask;
             let cur_match: u32 = *(*mf)
                 .hash
@@ -399,10 +397,8 @@ unsafe extern "C" fn bt_find_func(
     mut matches: *mut lzma_match,
     mut len_best: u32,
 ) -> *mut lzma_match {
-    let mut ptr0: *mut u32 = son
-        .offset((cyclic_pos << 1 as c_int) as isize)
-        .offset(1 as isize);
-    let mut ptr1: *mut u32 = son.offset((cyclic_pos << 1 as c_int) as isize);
+    let mut ptr0: *mut u32 = son.offset((cyclic_pos << 1) as isize).offset(1 as isize);
+    let mut ptr1: *mut u32 = son.offset((cyclic_pos << 1) as isize);
     let mut len0: u32 = 0 as u32;
     let mut len1: u32 = 0 as u32;
     loop {
@@ -421,7 +417,7 @@ unsafe extern "C" fn bt_find_func(
                 } else {
                     0 as u32
                 }),
-            ) << 1 as c_int) as isize,
+            ) << 1) as isize,
         );
         let pb: *const u8 = cur.offset(-(delta as isize));
         let mut len: u32 = if len0 < len1 { len0 } else { len1 };
@@ -462,10 +458,8 @@ unsafe extern "C" fn bt_skip_func(
     cyclic_pos: u32,
     cyclic_size: u32,
 ) {
-    let mut ptr0: *mut u32 = son
-        .offset((cyclic_pos << 1 as c_int) as isize)
-        .offset(1 as isize);
-    let mut ptr1: *mut u32 = son.offset((cyclic_pos << 1 as c_int) as isize);
+    let mut ptr0: *mut u32 = son.offset((cyclic_pos << 1) as isize).offset(1 as isize);
+    let mut ptr1: *mut u32 = son.offset((cyclic_pos << 1) as isize);
     let mut len0: u32 = 0 as u32;
     let mut len1: u32 = 0 as u32;
     loop {
@@ -484,7 +478,7 @@ unsafe extern "C" fn bt_skip_func(
                 } else {
                     0 as u32
                 }),
-            ) << 1 as c_int) as isize,
+            ) << 1) as isize,
         );
         let mut pb: *const u8 = cur.offset(-(delta as isize));
         let mut len: u32 = if len0 < len1 { len0 } else { len1 };
@@ -524,8 +518,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_find(
     let mut cur: *const u8 = mf_ptr(mf);
     let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
     let mut matches_count: u32 = 0 as u32;
-    let hash_value: u32 =
-        *cur.offset(0 as isize) as u32 | (*cur.offset(1 as isize) as u32) << 8 as c_int;
+    let hash_value: u32 = *cur.offset(0 as isize) as u32 | (*cur.offset(1 as isize) as u32) << 8;
     let cur_match: u32 = *(*mf).hash.offset(hash_value as isize);
     *(*mf).hash.offset(hash_value as isize) = pos;
     matches_count = bt_find_func(
@@ -563,7 +556,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_skip(mut mf: *mut lzma_mf, mut amount: u32)
                 let mut cur: *const u8 = mf_ptr(mf);
                 let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
                 let hash_value: u32 =
-                    *cur.offset(0 as isize) as u32 | (*cur.offset(1 as isize) as u32) << 8 as c_int;
+                    *cur.offset(0 as isize) as u32 | (*cur.offset(1 as isize) as u32) << 8;
                 let cur_match: u32 = *(*mf).hash.offset(hash_value as isize);
                 *(*mf).hash.offset(hash_value as isize) = pos;
                 bt_skip_func(
@@ -604,7 +597,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(
     let temp: u32 = lzma_crc32_table[0 as usize][*cur.offset(0 as isize) as usize]
         ^ *cur.offset(1 as isize) as u32;
     let hash_2_value: u32 = temp & HASH_2_MASK as u32;
-    let hash_value: u32 = (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & (*mf).hash_mask;
+    let hash_value: u32 = (temp ^ (*cur.offset(2 as isize) as u32) << 8) & (*mf).hash_mask;
     let delta2: u32 = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
     let cur_match: u32 = *(*mf)
         .hash
@@ -672,7 +665,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_skip(mut mf: *mut lzma_mf, mut amount: u32)
                     ^ *cur.offset(1 as isize) as u32;
                 let hash_2_value: u32 = temp & HASH_2_MASK as u32;
                 let hash_value: u32 =
-                    (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & (*mf).hash_mask;
+                    (temp ^ (*cur.offset(2 as isize) as u32) << 8) & (*mf).hash_mask;
                 let cur_match: u32 = *(*mf)
                     .hash
                     .offset((FIX_3_HASH_SIZE as u32).wrapping_add(hash_value) as isize);
@@ -718,11 +711,10 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(
     let temp: u32 = lzma_crc32_table[0 as usize][*cur.offset(0 as isize) as usize]
         ^ *cur.offset(1 as isize) as u32;
     let hash_2_value: u32 = temp & HASH_2_MASK as u32;
-    let hash_3_value: u32 =
-        (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & HASH_3_MASK as u32;
+    let hash_3_value: u32 = (temp ^ (*cur.offset(2 as isize) as u32) << 8) & HASH_3_MASK as u32;
     let hash_value: u32 = (temp
-        ^ (*cur.offset(2 as isize) as u32) << 8 as c_int
-        ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5 as c_int)
+        ^ (*cur.offset(2 as isize) as u32) << 8
+        ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5)
         & (*mf).hash_mask;
     let mut delta2: u32 = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
     let delta3: u32 = pos.wrapping_sub(
@@ -816,10 +808,10 @@ pub unsafe extern "C" fn lzma_mf_bt4_skip(mut mf: *mut lzma_mf, mut amount: u32)
                     ^ *cur.offset(1 as isize) as u32;
                 let hash_2_value: u32 = temp & HASH_2_MASK as u32;
                 let hash_3_value: u32 =
-                    (temp ^ (*cur.offset(2 as isize) as u32) << 8 as c_int) & HASH_3_MASK as u32;
+                    (temp ^ (*cur.offset(2 as isize) as u32) << 8) & HASH_3_MASK as u32;
                 let hash_value: u32 = (temp
-                    ^ (*cur.offset(2 as isize) as u32) << 8 as c_int
-                    ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5 as c_int)
+                    ^ (*cur.offset(2 as isize) as u32) << 8
+                    ^ lzma_crc32_table[0 as usize][*cur.offset(3 as isize) as usize] << 5)
                     & (*mf).hash_mask;
                 let cur_match: u32 = *(*mf)
                     .hash

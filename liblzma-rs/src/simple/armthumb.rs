@@ -127,13 +127,11 @@ unsafe extern "C" fn armthumb_code(
             && *buffer.offset(i.wrapping_add(3 as size_t) as isize) as c_int & 0xf8 as c_int
                 == 0xf8 as c_int
         {
-            let mut src: u32 = (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32
-                & 7 as u32)
-                << 19 as c_int
-                | (*buffer.offset(i.wrapping_add(0 as size_t) as isize) as u32) << 11 as c_int
-                | (*buffer.offset(i.wrapping_add(3 as size_t) as isize) as u32 & 7 as u32)
-                    << 8 as c_int
-                | *buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32;
+            let mut src: u32 =
+                (*buffer.offset(i.wrapping_add(1 as size_t) as isize) as u32 & 7 as u32) << 19
+                    | (*buffer.offset(i.wrapping_add(0 as size_t) as isize) as u32) << 11
+                    | (*buffer.offset(i.wrapping_add(3 as size_t) as isize) as u32 & 7 as u32) << 8
+                    | *buffer.offset(i.wrapping_add(2 as size_t) as isize) as u32;
             src <<= 1 as c_int;
             let mut dest: u32 = 0;
             if is_encoder {
@@ -146,10 +144,10 @@ unsafe extern "C" fn armthumb_code(
             }
             dest >>= 1 as c_int;
             *buffer.offset(i.wrapping_add(1 as size_t) as isize) =
-                (0xf0 as u32 | dest >> 19 as c_int & 0x7 as u32) as u8;
-            *buffer.offset(i.wrapping_add(0 as size_t) as isize) = (dest >> 11 as c_int) as u8;
+                (0xf0 as u32 | dest >> 19 & 0x7 as u32) as u8;
+            *buffer.offset(i.wrapping_add(0 as size_t) as isize) = (dest >> 11) as u8;
             *buffer.offset(i.wrapping_add(3 as size_t) as isize) =
-                (0xf8 as u32 | dest >> 8 as c_int & 0x7 as u32) as u8;
+                (0xf8 as u32 | dest >> 8 & 0x7 as u32) as u8;
             *buffer.offset(i.wrapping_add(2 as size_t) as isize) = dest as u8;
             i = i.wrapping_add(2 as size_t);
         }

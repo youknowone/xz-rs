@@ -261,7 +261,7 @@ unsafe extern "C" fn microlzma_decode(
         };
         if (*coder).uncomp_size_is_exact {
             options.ext_size_low = (*coder).uncomp_size as u32;
-            options.ext_size_high = ((*coder).uncomp_size >> 32 as c_int) as u32;
+            options.ext_size_high = ((*coder).uncomp_size >> 32) as u32;
         }
         if lzma_lzma_lclppb_decode(
             &raw mut options,

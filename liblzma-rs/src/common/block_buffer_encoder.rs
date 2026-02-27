@@ -213,7 +213,7 @@ pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as c_ulonglong)
     .wrapping_sub(LZMA_CHECK_SIZE_MAX as c_ulonglong)
     & !(3 as c_ulonglong);
-pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16 as c_int;
+pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3 as c_int;
 pub const HEADERS_BOUND: c_int = 1 as c_int
     + 1 as c_int

@@ -193,18 +193,12 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     }
     let mut buf: *const u8 = mf_ptr(mf).offset(-(1 as isize));
     let buf_avail: u32 = if mf_avail(mf).wrapping_add(1 as u32)
-        < (2 as c_int
-            + (((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 8 as c_int))
+        < (2 as c_int + (((1 as c_int) << 3) + ((1 as c_int) << 3) + ((1 as c_int) << 8))
             - 1 as c_int) as u32
     {
         (mf_avail(mf) as u32).wrapping_add(1 as u32)
     } else {
-        (2 as c_int
-            + (((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 3 as c_int)
-                + ((1 as c_int) << 8 as c_int))
+        (2 as c_int + (((1 as c_int) << 3) + ((1 as c_int) << 3) + ((1 as c_int) << 8))
             - 1 as c_int) as u32
     };
     if buf_avail < 2 as u32 {
@@ -253,7 +247,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
                     .len
                     .wrapping_add(1 as u32)
         {
-            if !(back_main >> 7 as c_int
+            if !(back_main >> 7
                 > (*coder).matches[matches_count.wrapping_sub(2 as u32) as usize].dist)
             {
                 break;
@@ -268,8 +262,8 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     }
     if rep_len >= 2 as u32 {
         if rep_len.wrapping_add(1 as u32) >= len_main
-            || rep_len.wrapping_add(2 as u32) >= len_main && back_main > (1 as u32) << 9 as c_int
-            || rep_len.wrapping_add(3 as u32) >= len_main && back_main > (1 as u32) << 15 as c_int
+            || rep_len.wrapping_add(2 as u32) >= len_main && back_main > (1 as u32) << 9
+            || rep_len.wrapping_add(3 as u32) >= len_main && back_main > (1 as u32) << 15
         {
             *back_res = rep_index;
             *len_res = rep_len;
@@ -292,11 +286,11 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
             (*coder).matches[(*coder).matches_count.wrapping_sub(1 as u32) as usize].dist;
         if (*coder).longest_match_length >= len_main && new_dist < back_main
             || (*coder).longest_match_length == len_main.wrapping_add(1 as u32)
-                && !(new_dist >> 7 as c_int > back_main)
+                && !(new_dist >> 7 > back_main)
             || (*coder).longest_match_length > len_main.wrapping_add(1 as u32)
             || (*coder).longest_match_length.wrapping_add(1 as u32) >= len_main
                 && len_main >= 3 as u32
-                && back_main >> 7 as c_int > new_dist
+                && back_main >> 7 > new_dist
         {
             *back_res = UINT32_MAX as u32;
             *len_res = 1 as u32;

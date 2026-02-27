@@ -215,7 +215,7 @@ pub const true_0: c_int = 1 as c_int;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002 as c_ulonglong;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
-pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15 as c_int;
+pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15;
 unsafe extern "C" fn alone_decode(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,
@@ -253,11 +253,11 @@ unsafe extern "C" fn alone_decode(
                         && (*coder).options.dict_size != UINT32_MAX as u32
                     {
                         let mut d: u32 = (*coder).options.dict_size.wrapping_sub(1 as u32);
-                        d |= d >> 2 as c_int;
-                        d |= d >> 3 as c_int;
-                        d |= d >> 4 as c_int;
-                        d |= d >> 8 as c_int;
-                        d |= d >> 16 as c_int;
+                        d |= d >> 2;
+                        d |= d >> 3;
+                        d |= d >> 4;
+                        d |= d >> 8;
+                        d |= d >> 16;
                         d = d.wrapping_add(1);
                         if d != (*coder).options.dict_size {
                             return LZMA_FORMAT_ERROR;
@@ -279,14 +279,13 @@ unsafe extern "C" fn alone_decode(
                 } else {
                     if (*coder).picky as c_int != 0
                         && (*coder).uncompressed_size != LZMA_VLI_UNKNOWN as lzma_vli
-                        && (*coder).uncompressed_size >= (1 as lzma_vli) << 38 as c_int
+                        && (*coder).uncompressed_size >= (1 as lzma_vli) << 38
                     {
                         return LZMA_FORMAT_ERROR;
                     }
                     (*coder).options.ext_flags = LZMA_LZMA1EXT_ALLOW_EOPM as u32;
                     (*coder).options.ext_size_low = (*coder).uncompressed_size as u32;
-                    (*coder).options.ext_size_high =
-                        ((*coder).uncompressed_size >> 32 as c_int) as u32;
+                    (*coder).options.ext_size_high = ((*coder).uncompressed_size >> 32) as u32;
                     (*coder).memusage = lzma_lzma_decoder_memusage_nocheck(
                         &raw mut (*coder).options as *const c_void,
                     )

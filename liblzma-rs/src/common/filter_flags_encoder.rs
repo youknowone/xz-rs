@@ -39,7 +39,7 @@ pub struct lzma_filter {
     pub id: lzma_vli,
     pub options: *mut c_void,
 }
-pub const LZMA_FILTER_RESERVED_START: c_ulonglong = (1 as c_ulonglong) << 62 as c_int;
+pub const LZMA_FILTER_RESERVED_START: c_ulonglong = (1 as c_ulonglong) << 62;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filter_flags_size(
     mut size: *mut u32,

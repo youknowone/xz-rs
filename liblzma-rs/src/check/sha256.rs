@@ -51,10 +51,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
         state as *const c_void,
         ::core::mem::size_of::<[u32; 8]>() as size_t,
     );
-    W[0 as usize] = (*data.offset(0 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(0 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(0 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(0 as isize) & 0xff000000) >> 24 as c_int;
+    W[0 as usize] = (*data.offset(0 as isize) & 0xff) << 24
+        | (*data.offset(0 as isize) & 0xff00) << 8
+        | (*data.offset(0 as isize) & 0xff0000) >> 8
+        | (*data.offset(0 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 0 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 0 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -99,10 +99,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[1 as usize] = (*data.offset(1 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(1 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(1 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(1 as isize) & 0xff000000) >> 24 as c_int;
+    W[1 as usize] = (*data.offset(1 as isize) & 0xff) << 24
+        | (*data.offset(1 as isize) & 0xff00) << 8
+        | (*data.offset(1 as isize) & 0xff0000) >> 8
+        | (*data.offset(1 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 1 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 1 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -147,10 +147,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[2 as usize] = (*data.offset(2 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(2 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(2 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(2 as isize) & 0xff000000) >> 24 as c_int;
+    W[2 as usize] = (*data.offset(2 as isize) & 0xff) << 24
+        | (*data.offset(2 as isize) & 0xff00) << 8
+        | (*data.offset(2 as isize) & 0xff0000) >> 8
+        | (*data.offset(2 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 2 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 2 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -195,10 +195,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[3 as usize] = (*data.offset(3 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(3 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(3 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(3 as isize) & 0xff000000) >> 24 as c_int;
+    W[3 as usize] = (*data.offset(3 as isize) & 0xff) << 24
+        | (*data.offset(3 as isize) & 0xff00) << 8
+        | (*data.offset(3 as isize) & 0xff0000) >> 8
+        | (*data.offset(3 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 3 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 3 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -243,10 +243,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[4 as usize] = (*data.offset(4 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(4 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(4 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(4 as isize) & 0xff000000) >> 24 as c_int;
+    W[4 as usize] = (*data.offset(4 as isize) & 0xff) << 24
+        | (*data.offset(4 as isize) & 0xff00) << 8
+        | (*data.offset(4 as isize) & 0xff0000) >> 8
+        | (*data.offset(4 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 4 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 4 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -291,10 +291,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[5 as usize] = (*data.offset(5 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(5 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(5 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(5 as isize) & 0xff000000) >> 24 as c_int;
+    W[5 as usize] = (*data.offset(5 as isize) & 0xff) << 24
+        | (*data.offset(5 as isize) & 0xff00) << 8
+        | (*data.offset(5 as isize) & 0xff0000) >> 8
+        | (*data.offset(5 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 5 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 5 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -339,10 +339,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[6 as usize] = (*data.offset(6 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(6 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(6 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(6 as isize) & 0xff000000) >> 24 as c_int;
+    W[6 as usize] = (*data.offset(6 as isize) & 0xff) << 24
+        | (*data.offset(6 as isize) & 0xff00) << 8
+        | (*data.offset(6 as isize) & 0xff0000) >> 8
+        | (*data.offset(6 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 6 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 6 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -387,10 +387,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[7 as usize] = (*data.offset(7 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(7 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(7 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(7 as isize) & 0xff000000) >> 24 as c_int;
+    W[7 as usize] = (*data.offset(7 as isize) & 0xff) << 24
+        | (*data.offset(7 as isize) & 0xff00) << 8
+        | (*data.offset(7 as isize) & 0xff0000) >> 8
+        | (*data.offset(7 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 7 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 7 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -435,10 +435,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[8 as usize] = (*data.offset(8 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(8 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(8 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(8 as isize) & 0xff000000) >> 24 as c_int;
+    W[8 as usize] = (*data.offset(8 as isize) & 0xff) << 24
+        | (*data.offset(8 as isize) & 0xff00) << 8
+        | (*data.offset(8 as isize) & 0xff0000) >> 8
+        | (*data.offset(8 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 8 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 8 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -483,10 +483,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[9 as usize] = (*data.offset(9 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(9 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(9 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(9 as isize) & 0xff000000) >> 24 as c_int;
+    W[9 as usize] = (*data.offset(9 as isize) & 0xff) << 24
+        | (*data.offset(9 as isize) & 0xff00) << 8
+        | (*data.offset(9 as isize) & 0xff0000) >> 8
+        | (*data.offset(9 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 9 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 9 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -531,10 +531,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[10 as usize] = (*data.offset(10 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(10 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(10 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(10 as isize) & 0xff000000) >> 24 as c_int;
+    W[10 as usize] = (*data.offset(10 as isize) & 0xff) << 24
+        | (*data.offset(10 as isize) & 0xff00) << 8
+        | (*data.offset(10 as isize) & 0xff0000) >> 8
+        | (*data.offset(10 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 10 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 10 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -579,10 +579,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[11 as usize] = (*data.offset(11 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(11 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(11 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(11 as isize) & 0xff000000) >> 24 as c_int;
+    W[11 as usize] = (*data.offset(11 as isize) & 0xff) << 24
+        | (*data.offset(11 as isize) & 0xff00) << 8
+        | (*data.offset(11 as isize) & 0xff0000) >> 8
+        | (*data.offset(11 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 11 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 11 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -627,10 +627,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[12 as usize] = (*data.offset(12 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(12 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(12 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(12 as isize) & 0xff000000) >> 24 as c_int;
+    W[12 as usize] = (*data.offset(12 as isize) & 0xff) << 24
+        | (*data.offset(12 as isize) & 0xff00) << 8
+        | (*data.offset(12 as isize) & 0xff0000) >> 8
+        | (*data.offset(12 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 12 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 12 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -675,10 +675,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[13 as usize] = (*data.offset(13 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(13 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(13 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(13 as isize) & 0xff000000) >> 24 as c_int;
+    W[13 as usize] = (*data.offset(13 as isize) & 0xff) << 24
+        | (*data.offset(13 as isize) & 0xff00) << 8
+        | (*data.offset(13 as isize) & 0xff0000) >> 8
+        | (*data.offset(13 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 13 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 13 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -723,10 +723,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[14 as usize] = (*data.offset(14 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(14 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(14 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(14 as isize) & 0xff000000) >> 24 as c_int;
+    W[14 as usize] = (*data.offset(14 as isize) & 0xff) << 24
+        | (*data.offset(14 as isize) & 0xff00) << 8
+        | (*data.offset(14 as isize) & 0xff0000) >> 8
+        | (*data.offset(14 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 14 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 14 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -771,10 +771,10 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     ),
             ),
         );
-    W[15 as usize] = (*data.offset(15 as isize) & 0xff) << 24 as c_int
-        | (*data.offset(15 as isize) & 0xff00) << 8 as c_int
-        | (*data.offset(15 as isize) & 0xff0000) >> 8 as c_int
-        | (*data.offset(15 as isize) & 0xff000000) >> 24 as c_int;
+    W[15 as usize] = (*data.offset(15 as isize) & 0xff) << 24
+        | (*data.offset(15 as isize) & 0xff00) << 8
+        | (*data.offset(15 as isize) & 0xff0000) >> 8
+        | (*data.offset(15 as isize) & 0xff000000) >> 24;
     T[(7 as c_int - 15 as c_int & 7 as c_int) as usize] =
         T[(7 as c_int - 15 as c_int & 7 as c_int) as usize].wrapping_add(
             rotr_32(
@@ -827,14 +827,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(0 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(0 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(0 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(0 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(0 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(0 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(0 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(0 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(0 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 0 as c_int & 7 as c_int) as usize] =
@@ -887,14 +887,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(1 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(1 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(1 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(1 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(1 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(1 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(1 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(1 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(1 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 1 as c_int & 7 as c_int) as usize] =
@@ -947,14 +947,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(2 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(2 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(2 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(2 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(2 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(2 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(2 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(2 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(2 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 2 as c_int & 7 as c_int) as usize] =
@@ -1007,14 +1007,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(3 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(3 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(3 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(3 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(3 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(3 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(3 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(3 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(3 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 3 as c_int & 7 as c_int) as usize] =
@@ -1067,14 +1067,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(4 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(4 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(4 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(4 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(4 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(4 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(4 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(4 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(4 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 4 as c_int & 7 as c_int) as usize] =
@@ -1127,14 +1127,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(5 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(5 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(5 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(5 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(5 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(5 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(5 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(5 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(5 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 5 as c_int & 7 as c_int) as usize] =
@@ -1187,14 +1187,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(6 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(6 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(6 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(6 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(6 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(6 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(6 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(6 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(6 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 6 as c_int & 7 as c_int) as usize] =
@@ -1247,14 +1247,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(7 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(7 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(7 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(7 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(7 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(7 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(7 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(7 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(7 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 7 as c_int & 7 as c_int) as usize] =
@@ -1307,14 +1307,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(8 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(8 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(8 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(8 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(8 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(8 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(8 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(8 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(8 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 8 as c_int & 7 as c_int) as usize] =
@@ -1367,14 +1367,14 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(9 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(9 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(9 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(9 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(9 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
                             W[(9 as c_int - 15 as c_int & 15 as c_int) as usize]
                                 ^ rotr_32(W[(9 as c_int - 15 as c_int & 15 as c_int) as usize], 11),
                             7,
-                        ) ^ W[(9 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(9 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 9 as c_int & 7 as c_int) as usize] =
@@ -1427,7 +1427,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(10 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(10 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(10 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(10 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(10 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
@@ -1437,7 +1437,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                                     11,
                                 ),
                             7,
-                        ) ^ W[(10 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(10 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 10 as c_int & 7 as c_int) as usize] =
@@ -1490,7 +1490,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(11 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(11 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(11 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(11 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(11 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
@@ -1500,7 +1500,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                                     11,
                                 ),
                             7,
-                        ) ^ W[(11 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(11 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 11 as c_int & 7 as c_int) as usize] =
@@ -1553,7 +1553,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(12 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(12 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(12 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(12 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(12 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
@@ -1563,7 +1563,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                                     11,
                                 ),
                             7,
-                        ) ^ W[(12 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(12 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 12 as c_int & 7 as c_int) as usize] =
@@ -1616,7 +1616,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(13 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(13 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(13 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(13 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(13 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
@@ -1626,7 +1626,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                                     11,
                                 ),
                             7,
-                        ) ^ W[(13 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(13 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 13 as c_int & 7 as c_int) as usize] =
@@ -1679,7 +1679,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(14 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(14 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(14 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(14 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(14 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
@@ -1689,7 +1689,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                                     11,
                                 ),
                             7,
-                        ) ^ W[(14 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(14 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 14 as c_int & 7 as c_int) as usize] =
@@ -1742,7 +1742,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                     W[(15 as c_int - 2 as c_int & 15 as c_int) as usize]
                         ^ rotr_32(W[(15 as c_int - 2 as c_int & 15 as c_int) as usize], 2),
                     17,
-                ) ^ W[(15 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10 as c_int)
+                ) ^ W[(15 as c_int - 2 as c_int & 15 as c_int) as usize] >> 10)
                     .wrapping_add(W[(15 as c_int - 7 as c_int & 15 as c_int) as usize])
                     .wrapping_add(
                         rotr_32(
@@ -1752,7 +1752,7 @@ unsafe extern "C" fn transform(mut state: *mut u32, mut data: *const u32) {
                                     11,
                                 ),
                             7,
-                        ) ^ W[(15 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3 as c_int,
+                        ) ^ W[(15 as c_int - 15 as c_int & 15 as c_int) as usize] >> 3,
                     ),
             );
         T[(7 as c_int - 15 as c_int & 7 as c_int) as usize] =
@@ -1879,22 +1879,21 @@ pub unsafe extern "C" fn lzma_sha256_finish(mut check: *mut lzma_check_state) {
     }
     (*check).state.sha256.size = (*check).state.sha256.size.wrapping_mul(8 as u64);
     (*check).buffer.u64_0[((64 as c_int - 8 as c_int) / 8 as c_int) as usize] =
-        ((*check).state.sha256.size & 0xff as u64) << 56 as c_int
-            | ((*check).state.sha256.size & 0xff00 as u64) << 40 as c_int
-            | ((*check).state.sha256.size & 0xff0000 as u64) << 24 as c_int
-            | ((*check).state.sha256.size & 0xff000000 as u64) << 8 as c_int
-            | ((*check).state.sha256.size & 0xff00000000 as u64) >> 8 as c_int
-            | ((*check).state.sha256.size & 0xff0000000000 as u64) >> 24 as c_int
-            | ((*check).state.sha256.size & 0xff000000000000 as u64) >> 40 as c_int
-            | ((*check).state.sha256.size & 0xff00000000000000 as u64) >> 56 as c_int;
+        ((*check).state.sha256.size & 0xff as u64) << 56
+            | ((*check).state.sha256.size & 0xff00 as u64) << 40
+            | ((*check).state.sha256.size & 0xff0000 as u64) << 24
+            | ((*check).state.sha256.size & 0xff000000 as u64) << 8
+            | ((*check).state.sha256.size & 0xff00000000 as u64) >> 8
+            | ((*check).state.sha256.size & 0xff0000000000 as u64) >> 24
+            | ((*check).state.sha256.size & 0xff000000000000 as u64) >> 40
+            | ((*check).state.sha256.size & 0xff00000000000000 as u64) >> 56;
     process(check);
     let mut i: size_t = 0 as size_t;
     while i < 8 as size_t {
-        (*check).buffer.u32_0[i as usize] = ((*check).state.sha256.state[i as usize] & 0xff)
-            << 24 as c_int
-            | ((*check).state.sha256.state[i as usize] & 0xff00) << 8 as c_int
-            | ((*check).state.sha256.state[i as usize] & 0xff0000) >> 8 as c_int
-            | ((*check).state.sha256.state[i as usize] & 0xff000000) >> 24 as c_int;
+        (*check).buffer.u32_0[i as usize] = ((*check).state.sha256.state[i as usize] & 0xff) << 24
+            | ((*check).state.sha256.state[i as usize] & 0xff00) << 8
+            | ((*check).state.sha256.state[i as usize] & 0xff0000) >> 8
+            | ((*check).state.sha256.state[i as usize] & 0xff000000) >> 24;
         i = i.wrapping_add(1);
     }
 }
