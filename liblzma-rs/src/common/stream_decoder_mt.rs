@@ -379,8 +379,9 @@ pub struct lzma_stream_coder {
     pub first_stream: bool,
     pub out_was_filled: bool,
     pub pos: size_t,
-    pub buffer: [u8; 1024],
+    pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
+pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_outq {
@@ -508,8 +509,8 @@ pub const SEQ_BLOCK_HEADER: C2RustUnnamed_0 = 1;
 pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
-pub const UINTPTR_MAX: c_ulong = 18446744073709551615 as c_ulong;
+pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
+pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const SIG_SETMASK: c_int = 3 as c_int;
 pub const true_0: c_int = 1 as c_int;

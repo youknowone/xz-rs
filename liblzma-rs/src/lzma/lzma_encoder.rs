@@ -291,7 +291,7 @@ pub struct lzma_lzma1_encoder_s {
     pub align_price_count: u32,
     pub opts_end_index: u32,
     pub opts_current_index: u32,
-    pub opts: [lzma_optimal; 4096],
+    pub opts: [lzma_optimal; OPTS as usize],
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -322,7 +322,7 @@ pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
+pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
 #[inline]

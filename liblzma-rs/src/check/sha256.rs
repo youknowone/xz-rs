@@ -628,15 +628,14 @@ pub unsafe extern "C" fn lzma_sha256_finish(mut check: *mut lzma_check_state) {
         (*check).buffer.u8_0[fresh9 as usize] = 0 as u8;
     }
     (*check).state.sha256.size = (*check).state.sha256.size.wrapping_mul(8 as u64);
-    (*check).buffer.u64_0[7] =
-        ((*check).state.sha256.size & 0xff as u64) << 56
-            | ((*check).state.sha256.size & 0xff00 as u64) << 40
-            | ((*check).state.sha256.size & 0xff0000 as u64) << 24
-            | ((*check).state.sha256.size & 0xff000000 as u64) << 8
-            | ((*check).state.sha256.size & 0xff00000000 as u64) >> 8
-            | ((*check).state.sha256.size & 0xff0000000000 as u64) >> 24
-            | ((*check).state.sha256.size & 0xff000000000000 as u64) >> 40
-            | ((*check).state.sha256.size & 0xff00000000000000 as u64) >> 56;
+    (*check).buffer.u64_0[7] = ((*check).state.sha256.size & 0xff as u64) << 56
+        | ((*check).state.sha256.size & 0xff00 as u64) << 40
+        | ((*check).state.sha256.size & 0xff0000 as u64) << 24
+        | ((*check).state.sha256.size & 0xff000000 as u64) << 8
+        | ((*check).state.sha256.size & 0xff00000000 as u64) >> 8
+        | ((*check).state.sha256.size & 0xff0000000000 as u64) >> 24
+        | ((*check).state.sha256.size & 0xff000000000000 as u64) >> 40
+        | ((*check).state.sha256.size & 0xff00000000000000 as u64) >> 56;
     process(check);
     let mut i: size_t = 0 as size_t;
     while i < 8 as size_t {

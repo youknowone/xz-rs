@@ -124,11 +124,11 @@ pub struct lzma_delta_coder {
     pub next: lzma_next_coder,
     pub distance: size_t,
     pub pos: u8,
-    pub history: [u8; 256],
+    pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
+pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_DELTA_DIST_MIN: c_int = 1 as c_int;
 pub const LZMA_DELTA_DIST_MAX: c_int = 256 as c_int;

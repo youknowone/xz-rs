@@ -47,7 +47,7 @@ pub struct lzma_stream_flags {
     pub reserved_int1: u32,
     pub reserved_int2: u32,
 }
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
+pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_BACKWARD_SIZE_MIN: c_int = 4 as c_int;

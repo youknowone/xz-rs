@@ -121,8 +121,9 @@ pub struct lzma_delta_coder {
     pub next: lzma_next_coder,
     pub distance: size_t,
     pub pos: u8,
-    pub history: [u8; 256],
+    pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
 }
+pub const LZMA_DELTA_DIST_MAX: c_int = 256 as c_int;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 unsafe extern "C" fn decode_buffer(

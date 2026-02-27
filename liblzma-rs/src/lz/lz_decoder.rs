@@ -155,12 +155,12 @@ pub struct lzma_coder {
 pub struct C2RustUnnamed {
     pub pos: size_t,
     pub size: size_t,
-    pub buffer: [u8; 4096],
+    pub buffer: [u8; LZMA_BUFFER_SIZE as usize],
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
-pub const UINTPTR_MAX: c_ulong = 18446744073709551615 as c_ulong;
+pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
+pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;

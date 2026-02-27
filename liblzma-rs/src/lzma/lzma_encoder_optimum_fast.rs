@@ -113,8 +113,9 @@ pub struct lzma_lzma1_encoder_s {
     pub align_price_count: u32,
     pub opts_end_index: u32,
     pub opts_current_index: u32,
-    pub opts: [lzma_optimal; 4096],
+    pub opts: [lzma_optimal; OPTS as usize],
 }
+pub const OPTS: c_int = (1 as c_int) << 12;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_optimal {

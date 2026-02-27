@@ -225,7 +225,7 @@ pub type lzma_init_function = Option<
 >;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
+pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
 #[inline]

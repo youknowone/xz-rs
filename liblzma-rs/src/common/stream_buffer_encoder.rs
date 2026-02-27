@@ -133,6 +133,8 @@ pub struct lzma_block {
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const LZMA_VLI_BYTES_MAX: c_int = 9 as c_int;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
 pub const INDEX_BOUND: c_int =
@@ -145,14 +147,10 @@ pub unsafe extern "C" fn lzma_stream_buffer_bound(mut uncompressed_size: size_t)
     if block_bound == 0 as size_t {
         return 0 as size_t;
     }
-    if (if 18446744073709551615_u64 < 18446744073709551615_u64.wrapping_div(2) {
-        18446744073709551615_u64
-    } else {
-        18446744073709551615_u64.wrapping_div(2)
-    })
-    .wrapping_sub(block_bound as u64)
-        < HEADERS_BOUND as u64
-    {
+
+    // Match C: my_min(SIZE_MAX, LZMA_VLI_MAX) - block_bound < HEADERS_BOUND.
+    let stream_bound_max: size_t = core::cmp::min(size_t::MAX, LZMA_VLI_MAX as size_t);
+    if stream_bound_max.wrapping_sub(block_bound) < HEADERS_BOUND as size_t {
         return 0 as size_t;
     }
     return block_bound.wrapping_add(HEADERS_BOUND as size_t);
