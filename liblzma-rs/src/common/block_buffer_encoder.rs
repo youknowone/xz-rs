@@ -204,7 +204,7 @@ pub const false_0: c_int = 0 as c_int;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_VLI_BYTES_MAX: c_int = 9 as c_int;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_CHECK_SIZE_MAX: c_int = 64 as c_int;
 pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21 as c_ulonglong;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
@@ -319,14 +319,14 @@ unsafe extern "C" fn block_encode_uncompressed(
         *out.offset(fresh1 as isize) = control;
         control = 0x2 as u8;
         let copy_size: size_t =
-            if in_size.wrapping_sub(in_pos) < (1u32 << 16 as c_int) as size_t {
+            if in_size.wrapping_sub(in_pos) < (1u32 << 16) as size_t {
                 in_size.wrapping_sub(in_pos)
             } else {
-                (1u32 << 16 as c_int) as size_t
+                (1u32 << 16) as size_t
             };
         let fresh2 = *out_pos;
         *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh2 as isize) = (copy_size.wrapping_sub(1 as size_t) >> 8 as c_int) as u8;
+        *out.offset(fresh2 as isize) = (copy_size.wrapping_sub(1 as size_t) >> 8) as u8;
         let fresh3 = *out_pos;
         *out_pos = (*out_pos).wrapping_add(1);
         *out.offset(fresh3 as isize) = (copy_size.wrapping_sub(1 as size_t) & 0xff as size_t) as u8;
@@ -430,7 +430,7 @@ unsafe extern "C" fn block_buffer_encode(
     if (*block).version > 1 as u32 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*block).check > LZMA_CHECK_ID_MAX as c_uint
+    if (*block).check > LZMA_CHECK_ID_MAX
         || try_to_compress as c_int != 0 && (*block).filters.is_null()
     {
         return LZMA_PROG_ERROR;

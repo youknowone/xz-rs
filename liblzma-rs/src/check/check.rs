@@ -40,10 +40,10 @@ pub union C2RustUnnamed_0 {
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_check_is_supported(mut type_0: lzma_check) -> lzma_bool {
-    if type_0 > LZMA_CHECK_ID_MAX as c_uint {
+    if type_0 > LZMA_CHECK_ID_MAX {
         return false_0 as lzma_bool;
     }
     static mut available_checks: [lzma_bool; 16] = [
@@ -68,7 +68,7 @@ pub unsafe extern "C" fn lzma_check_is_supported(mut type_0: lzma_check) -> lzma
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_check_size(mut type_0: lzma_check) -> u32 {
-    if type_0 > LZMA_CHECK_ID_MAX as c_uint {
+    if type_0 > LZMA_CHECK_ID_MAX {
         return UINT32_MAX as u32;
     }
     static mut check_sizes: [u8; 16] = [

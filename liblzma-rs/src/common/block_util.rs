@@ -74,7 +74,7 @@ pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: c_int = 8 as c_int;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !(3 as c_ulonglong);
@@ -115,7 +115,7 @@ pub unsafe extern "C" fn lzma_block_unpadded_size(mut block: *const lzma_block) 
         || !((*block).compressed_size <= LZMA_VLI_MAX as lzma_vli
             || (*block).compressed_size == LZMA_VLI_UNKNOWN as lzma_vli)
         || (*block).compressed_size == 0 as lzma_vli
-        || (*block).check > LZMA_CHECK_ID_MAX as c_uint
+        || (*block).check > LZMA_CHECK_ID_MAX
     {
         return 0 as lzma_vli;
     }

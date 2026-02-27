@@ -640,7 +640,7 @@ unsafe extern "C" fn mythread_condtime_set(
     }
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
 pub const LZMA_THREADS_MAX: c_int = 16384 as c_int;
 pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15 as c_int;
@@ -1707,7 +1707,7 @@ unsafe extern "C" fn stream_encoder_mt_init(
     if lzma_raw_encoder_memusage(filters) == UINT64_MAX as u64 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*options).check > LZMA_CHECK_ID_MAX as c_uint {
+    if (*options).check > LZMA_CHECK_ID_MAX {
         return LZMA_PROG_ERROR;
     }
     if lzma_check_is_supported((*options).check) == 0 {

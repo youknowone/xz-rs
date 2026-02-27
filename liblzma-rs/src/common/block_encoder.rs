@@ -237,7 +237,7 @@ pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
 pub const true_0: c_int = 1 as c_int;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_CHECK_SIZE_MAX: c_int = 64 as c_int;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
 pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
@@ -423,7 +423,7 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
     if (*block).version > 1 as u32 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*block).check > LZMA_CHECK_ID_MAX as c_uint {
+    if (*block).check > LZMA_CHECK_ID_MAX {
         return LZMA_PROG_ERROR;
     }
     if lzma_check_is_supported((*block).check) == 0 {

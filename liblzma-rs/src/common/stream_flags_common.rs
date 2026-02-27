@@ -49,7 +49,7 @@ pub struct lzma_stream_flags {
 }
 pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_BACKWARD_SIZE_MIN: c_int = 4 as c_int;
 pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = (1 as c_ulonglong) << 34 as c_int;
 #[inline]
@@ -72,7 +72,7 @@ pub unsafe extern "C" fn lzma_stream_flags_compare(
     if (*a).version != 0 as u32 || (*b).version != 0 as u32 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*a).check > LZMA_CHECK_ID_MAX as c_uint || (*b).check > LZMA_CHECK_ID_MAX as c_uint {
+    if (*a).check > LZMA_CHECK_ID_MAX || (*b).check > LZMA_CHECK_ID_MAX {
         return LZMA_PROG_ERROR;
     }
     if (*a).check != (*b).check {

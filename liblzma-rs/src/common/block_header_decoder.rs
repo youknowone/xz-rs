@@ -105,7 +105,7 @@ unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
     return num;
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_FILTERS_MAX: c_int = 4 as c_int;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_header_decode(
@@ -131,7 +131,7 @@ pub unsafe extern "C" fn lzma_block_header_decode(
         .wrapping_add(1 as u32)
         .wrapping_mul(4 as u32)
         != (*block).header_size
-        || (*block).check > LZMA_CHECK_ID_MAX as c_uint
+        || (*block).check > LZMA_CHECK_ID_MAX
     {
         return LZMA_PROG_ERROR;
     }

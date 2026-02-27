@@ -133,7 +133,7 @@ pub struct lzma_block {
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const LZMA_VLI_BYTES_MAX: c_int = 9 as c_int;
-pub const LZMA_CHECK_ID_MAX: c_int = 15 as c_int;
+pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
 pub const INDEX_BOUND: c_int =
     1 as c_int + 1 as c_int + 2 as c_int * LZMA_VLI_BYTES_MAX + 4 as c_int + 3 as c_int
@@ -171,7 +171,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
     mut out_size: size_t,
 ) -> lzma_ret {
     if filters.is_null()
-        || check > LZMA_CHECK_ID_MAX as c_uint
+        || check > LZMA_CHECK_ID_MAX
         || in_0.is_null() && in_size != 0 as size_t
         || out.is_null()
         || out_pos_ptr.is_null()
