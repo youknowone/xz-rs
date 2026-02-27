@@ -151,8 +151,6 @@ pub struct lzma_str {
 }
 pub type C2RustUnnamed_2 = c_uint;
 pub const OPTMAP_TYPE_UINT32: C2RustUnnamed_2 = 0;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const INT_MAX: c_int = c_int::MAX;
@@ -947,7 +945,7 @@ unsafe extern "C" fn str_to_filters(
         *fresh0 = opts as *mut c_void;
         (*filters.offset(1)).id = LZMA_VLI_UNKNOWN as lzma_vli;
         let ref mut fresh1 = (*filters.offset(1)).options;
-        *fresh1 = NULL;
+        *fresh1 = core::ptr::null_mut();
         return ::core::ptr::null::<c_char>();
     }
     let only_xz: bool = flags & LZMA_STR_ALL_FILTERS as u32 == 0 as u32;
@@ -1007,7 +1005,7 @@ unsafe extern "C" fn str_to_filters(
     match current_block {
         15090052786889560393 => {
             temp_filters[i_0 as usize].id = LZMA_VLI_UNKNOWN as lzma_vli;
-            temp_filters[i_0 as usize].options = NULL;
+            temp_filters[i_0 as usize].options = core::ptr::null_mut();
             if flags & LZMA_STR_NO_VALIDATION as u32 == 0 as u32 {
                 let mut dummy: size_t = 0;
                 let ret: lzma_ret =
@@ -1060,8 +1058,8 @@ pub unsafe extern "C" fn lzma_str_to_filters(
         *error_pos = 0 as c_int;
     }
     if str.is_null() || filters.is_null() {
-        return b"Unexpected NULL pointer argument(s) to lzma_str_to_filters()\0" as *const u8
-            as *const c_char;
+        return b"Unexpected core::ptr::null_mut() pointer argument(s) to lzma_str_to_filters()\0"
+            as *const u8 as *const c_char;
     }
     let supported_flags: u32 = LZMA_STR_ALL_FILTERS as u32 | LZMA_STR_NO_VALIDATION as u32;
     if flags & !supported_flags != 0 {

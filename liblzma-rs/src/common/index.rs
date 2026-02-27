@@ -199,8 +199,6 @@ pub struct index_cat_info {
 }
 pub type C2RustUnnamed_2 = c_uint;
 pub type C2RustUnnamed_3 = c_uint;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;

@@ -520,11 +520,9 @@ pub struct lzma_options_easy {
     pub filters: [lzma_filter; 5],
     pub opt_lzma: lzma_options_lzma,
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const SIG_SETMASK: c_int = 3 as c_int;
-pub const MYTHREAD_RET_VALUE: *mut c_void = NULL;
+pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 #[inline]
 unsafe extern "C" fn mythread_sigmask(
     mut how: c_int,
@@ -1039,7 +1037,7 @@ unsafe extern "C" fn initialize_new_thread(
             (*thr).progress_in = 0 as u64;
             (*thr).progress_out = 0 as u64;
             (*thr).block_encoder = lzma_next_coder_s {
-                coder: NULL,
+                coder: core::ptr::null_mut(),
                 id: LZMA_VLI_UNKNOWN as lzma_vli,
                 init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
                 code: None,
@@ -1135,7 +1133,8 @@ unsafe extern "C" fn get_thread(
         while mythread_j_578 == 0 {
             (*(*coder).thr).state = THR_RUN;
             (*(*coder).thr).in_size = 0 as size_t;
-            (*(*coder).thr).outbuf = lzma_outq_get_buf(&raw mut (*coder).outq, NULL);
+            (*(*coder).thr).outbuf =
+                lzma_outq_get_buf(&raw mut (*coder).outq, core::ptr::null_mut());
             lzma_filters_free(
                 &raw mut (*(*coder).thr).filters as *mut lzma_filter,
                 allocator,
@@ -1723,13 +1722,13 @@ unsafe extern "C" fn stream_encoder_mt_init(
         (*next).coder = coder as *mut c_void;
         if mythread_mutex_init(&raw mut (*coder).mutex) != 0 {
             lzma_free(coder as *mut c_void, allocator);
-            (*next).coder = NULL;
+            (*next).coder = core::ptr::null_mut();
             return LZMA_MEM_ERROR;
         }
         if mythread_cond_init(&raw mut (*coder).cond) != 0 {
             mythread_mutex_destroy(&raw mut (*coder).mutex);
             lzma_free(coder as *mut c_void, allocator);
-            (*next).coder = NULL;
+            (*next).coder = core::ptr::null_mut();
             return LZMA_MEM_ERROR;
         }
         (*next).code = Some(
@@ -1772,7 +1771,7 @@ unsafe extern "C" fn stream_encoder_mt_init(
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN as lzma_vli;
         (*coder).filters_cache[0].id = LZMA_VLI_UNKNOWN as lzma_vli;
         (*coder).index_encoder = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,

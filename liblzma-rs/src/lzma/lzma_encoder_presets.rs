@@ -36,8 +36,6 @@ pub struct lzma_options_lzma {
     pub reserved_ptr1: *mut c_void,
     pub reserved_ptr2: *mut c_void,
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const LZMA_LC_DEFAULT: c_int = 3 as c_int;
 pub const LZMA_LP_DEFAULT: c_int = 0 as c_int;
 pub const LZMA_PB_DEFAULT: c_int = 2 as c_int;

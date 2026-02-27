@@ -230,8 +230,6 @@ pub struct lzma_filter_coder {
     pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
 }
 pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
@@ -499,7 +497,7 @@ unsafe extern "C" fn coder_find(mut id: lzma_vli) -> *const lzma_filter_coder {
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filter_encoder_is_supported(mut id: lzma_vli) -> lzma_bool {
-    return (encoder_find(id) != NULL as *const lzma_filter_encoder) as c_int as lzma_bool;
+    return !encoder_find(id).is_null() as lzma_bool;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filters_update(

@@ -176,8 +176,6 @@ pub struct lzma_filter_coder {
     pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
 }
 pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTERS_MAX: c_int = 4 as c_int;
@@ -316,7 +314,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
         } else {
             dest[i as usize].id = (*src.offset(i as isize)).id;
             if (*src.offset(i as isize)).options.is_null() {
-                dest[i as usize].options = NULL;
+                dest[i as usize].options = core::ptr::null_mut();
             } else {
                 let mut j: size_t = 0;
                 j = 0 as size_t;
@@ -355,7 +353,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
         }
         _ => {
             dest[i as usize].id = LZMA_VLI_UNKNOWN as lzma_vli;
-            dest[i as usize].options = NULL;
+            dest[i as usize].options = core::ptr::null_mut();
             memcpy(
                 real_dest as *mut c_void,
                 &raw mut dest as *mut lzma_filter as *const c_void,
@@ -381,7 +379,7 @@ pub unsafe extern "C" fn lzma_filters_free(
         }
         lzma_free((*filters.offset(i as isize)).options, allocator);
         let ref mut fresh0 = (*filters.offset(i as isize)).options;
-        *fresh0 = NULL;
+        *fresh0 = core::ptr::null_mut();
         (*filters.offset(i as isize)).id = LZMA_VLI_UNKNOWN as lzma_vli;
         i = i.wrapping_add(1);
     }

@@ -126,8 +126,6 @@ pub struct lzma_delta_coder {
     pub pos: u8,
     pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_DELTA_DIST_MIN: c_int = 1 as c_int;
@@ -160,7 +158,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
             Some(delta_coder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ())
                 as lzma_end_function;
         (*coder).next = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,

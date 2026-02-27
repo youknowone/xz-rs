@@ -87,8 +87,6 @@ pub type lzma_code_function = Option<
         lzma_action,
     ) -> lzma_ret,
 >;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 #[no_mangle]
@@ -112,7 +110,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
         return LZMA_PROG_ERROR;
     }
     let mut next: lzma_next_coder = lzma_next_coder_s {
-        coder: NULL,
+        coder: core::ptr::null_mut(),
         id: LZMA_VLI_UNKNOWN as lzma_vli,
         init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
         code: None,

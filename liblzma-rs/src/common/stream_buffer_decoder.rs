@@ -88,8 +88,6 @@ pub type lzma_code_function = Option<
         lzma_action,
     ) -> lzma_ret,
 >;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_TELL_ANY_CHECK: c_uint = 0x4;
@@ -118,7 +116,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_decode(
         return LZMA_PROG_ERROR;
     }
     let mut stream_decoder: lzma_next_coder = lzma_next_coder_s {
-        coder: NULL,
+        coder: core::ptr::null_mut(),
         id: LZMA_VLI_UNKNOWN as lzma_vli,
         init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
         code: None,

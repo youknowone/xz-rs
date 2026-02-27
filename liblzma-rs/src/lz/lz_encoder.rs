@@ -201,8 +201,6 @@ pub struct lzma_coder {
     pub mf: lzma_mf,
     pub next: lzma_next_coder,
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
@@ -688,7 +686,7 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
                 as unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret,
         )
             as Option<unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret>;
-        (*coder).lz.coder = NULL;
+        (*coder).lz.coder = core::ptr::null_mut();
         (*coder).lz.code = None;
         (*coder).lz.end = None;
         (*coder).lz.options_update = None;
@@ -700,7 +698,7 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         (*coder).mf.hash_count = 0 as u32;
         (*coder).mf.sons_count = 0 as u32;
         (*coder).next = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,

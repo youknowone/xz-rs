@@ -196,8 +196,6 @@ pub struct lzma_sha256_state {
     pub state: [u32; 8],
     pub size: u64,
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
@@ -362,7 +360,7 @@ unsafe extern "C" fn block_encode_normal(
         out_size = (*out_pos as lzma_vli).wrapping_add((*block).compressed_size) as size_t;
     }
     let mut raw_encoder: lzma_next_coder = lzma_next_coder_s {
-        coder: NULL,
+        coder: core::ptr::null_mut(),
         id: LZMA_VLI_UNKNOWN as lzma_vli,
         init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
         code: None,

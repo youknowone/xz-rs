@@ -142,8 +142,6 @@ pub type lzma_init_function = Option<
     ) -> lzma_ret,
 >;
 pub type lzma_filter_info = lzma_filter_info_s;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VERSION_MAJOR: c_int = 5 as c_int;
 pub const LZMA_VERSION_MINOR: c_int = 8 as c_int;
@@ -296,7 +294,7 @@ pub unsafe extern "C" fn lzma_next_end(
             lzma_free((*next).coder, allocator);
         }
         *next = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,
@@ -323,7 +321,7 @@ pub unsafe extern "C" fn lzma_strm_init(mut strm: *mut lzma_stream) -> lzma_ret 
             return LZMA_MEM_ERROR;
         }
         (*(*strm).internal).next = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,

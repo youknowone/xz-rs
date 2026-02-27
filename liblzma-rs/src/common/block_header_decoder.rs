@@ -92,8 +92,6 @@ pub struct lzma_block {
     pub reserved_bool7: lzma_bool,
     pub reserved_bool8: lzma_bool,
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
 unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
@@ -119,7 +117,7 @@ pub unsafe extern "C" fn lzma_block_header_decode(
     while i <= LZMA_FILTERS_MAX as size_t {
         (*(*block).filters.offset(i as isize)).id = LZMA_VLI_UNKNOWN as lzma_vli;
         let ref mut fresh0 = (*(*block).filters.offset(i as isize)).options;
-        *fresh0 = NULL;
+        *fresh0 = core::ptr::null_mut();
         i = i.wrapping_add(1);
     }
     if (*block).version > 1 as u32 {

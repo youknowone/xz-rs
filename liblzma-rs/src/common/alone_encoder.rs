@@ -208,8 +208,6 @@ pub struct lzma_alone_coder {
 pub type C2RustUnnamed_0 = c_uint;
 pub const SEQ_CODE: C2RustUnnamed_0 = 1;
 pub const SEQ_HEADER: C2RustUnnamed_0 = 0;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
@@ -347,7 +345,7 @@ unsafe extern "C" fn alone_encoder_init(
             alone_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
         ) as lzma_end_function;
         (*coder).next = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,

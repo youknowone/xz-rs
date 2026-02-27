@@ -106,8 +106,6 @@ pub type lzma_init_function = Option<
     ) -> lzma_ret,
 >;
 pub type lzma_filter_info = lzma_filter_info_s;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 #[inline]
 unsafe extern "C" fn read32be(mut buf: *const u8) -> u32 {
     let mut num: u32 = (*buf.offset(0) as u32) << 24;
@@ -243,7 +241,7 @@ pub unsafe extern "C" fn lzma_bcj_riscv_encode(
     mut size: size_t,
 ) -> size_t {
     start_offset = (start_offset & !1u32) as u32;
-    return riscv_encode(NULL, start_offset, true, buf, size);
+    return riscv_encode(core::ptr::null_mut(), start_offset, true, buf, size);
 }
 unsafe extern "C" fn riscv_decode(
     mut simple: *mut c_void,
@@ -349,5 +347,5 @@ pub unsafe extern "C" fn lzma_bcj_riscv_decode(
     mut size: size_t,
 ) -> size_t {
     start_offset = (start_offset & !1u32) as u32;
-    return riscv_decode(NULL, start_offset, false, buf, size);
+    return riscv_decode(core::ptr::null_mut(), start_offset, false, buf, size);
 }

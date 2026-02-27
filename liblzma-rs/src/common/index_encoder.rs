@@ -242,8 +242,6 @@ pub const SEQ_UNCOMPRESSED: C2RustUnnamed_3 = 3;
 pub const SEQ_UNPADDED: C2RustUnnamed_3 = 2;
 pub const SEQ_COUNT: C2RustUnnamed_3 = 1;
 pub const SEQ_INDICATOR: C2RustUnnamed_3 = 0;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const INDEX_INDICATOR: c_int = 0 as c_int;
 unsafe extern "C" fn index_encode(
     mut coder_ptr: *mut c_void,

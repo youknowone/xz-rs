@@ -262,8 +262,6 @@ pub const SEQ_UNCOMPRESSED_HEADER: C2RustUnnamed = 3;
 pub const SEQ_LZMA_COPY: C2RustUnnamed = 2;
 pub const SEQ_LZMA_ENCODE: C2RustUnnamed = 1;
 pub const SEQ_INIT: C2RustUnnamed = 0;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
@@ -613,7 +611,7 @@ unsafe extern "C" fn lzma2_encoder_init(
                 as unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret,
         )
             as Option<unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret>;
-        (*coder).lzma = NULL;
+        (*coder).lzma = core::ptr::null_mut();
     }
     (*coder).opt_cur = *(options as *const lzma_options_lzma);
     (*coder).sequence = SEQ_INIT;

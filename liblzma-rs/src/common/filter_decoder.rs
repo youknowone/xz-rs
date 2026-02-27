@@ -252,8 +252,6 @@ pub struct lzma_filter_coder {
     pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
 }
 pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const LZMA_FILTER_X86: c_ulonglong = 0x4;
 pub const LZMA_FILTER_POWERPC: c_ulonglong = 0x5;
 pub const LZMA_FILTER_IA64: c_ulonglong = 0x6;
@@ -538,7 +536,7 @@ unsafe extern "C" fn coder_find(mut id: lzma_vli) -> *const lzma_filter_coder {
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filter_decoder_is_supported(mut id: lzma_vli) -> lzma_bool {
-    return (decoder_find(id) != NULL as *const lzma_filter_decoder) as c_int as lzma_bool;
+    return !decoder_find(id).is_null() as lzma_bool;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_raw_decoder_init(
@@ -590,7 +588,7 @@ pub unsafe extern "C" fn lzma_properties_decode(
     mut props: *const u8,
     mut props_size: size_t,
 ) -> lzma_ret {
-    (*filter).options = NULL;
+    (*filter).options = core::ptr::null_mut();
     let fd: *const lzma_filter_decoder = decoder_find((*filter).id) as *const lzma_filter_decoder;
     if fd.is_null() {
         return LZMA_OPTIONS_ERROR;

@@ -218,8 +218,6 @@ pub const SEQ_FOOTER: C2RustUnnamed_0 = 3;
 pub const SEQ_PADDING_DECODE: C2RustUnnamed_0 = 2;
 pub const SEQ_PADDING_SEEK: C2RustUnnamed_0 = 1;
 pub const SEQ_MAGIC_BYTES: C2RustUnnamed_0 = 0;
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
@@ -831,7 +829,7 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
         )
             as Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret>;
         (*coder).index_decoder = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,

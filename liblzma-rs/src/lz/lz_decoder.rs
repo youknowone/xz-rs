@@ -157,8 +157,6 @@ pub struct C2RustUnnamed {
     pub size: size_t,
     pub buffer: [u8; LZMA_BUFFER_SIZE as usize],
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
@@ -168,7 +166,7 @@ pub const LZ_DICT_EXTRA: c_int = 0 as c_int;
 pub const LZ_DICT_REPEAT_MAX: c_int = 288 as c_int;
 pub const LZ_DICT_INIT_POS: c_int = 2 as c_int * LZ_DICT_REPEAT_MAX;
 pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
-    coder: NULL,
+    coder: core::ptr::null_mut(),
     code: None,
     reset: None,
     set_uncompressed: None,
@@ -364,7 +362,7 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
         (*coder).dict.size = 0 as size_t;
         (*coder).lz = LZMA_LZ_DECODER_INIT;
         (*coder).next = lzma_next_coder_s {
-            coder: NULL,
+            coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN as lzma_vli,
             init: ::core::ptr::null_mut::<c_void>() as uintptr_t,
             code: None,

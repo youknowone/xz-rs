@@ -68,8 +68,6 @@ pub struct lzma_outq {
     pub bufs_allocated: u32,
     pub bufs_limit: u32,
 }
-pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
-pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
@@ -276,6 +274,6 @@ pub unsafe extern "C" fn lzma_outq_enable_partial_output(
 ) {
     if !(*outq).head.is_null() && !(*(*outq).head).finished && !(*(*outq).head).worker.is_null() {
         enable_partial_output.expect("non-null function pointer")((*(*outq).head).worker);
-        (*(*outq).head).worker = NULL;
+        (*(*outq).head).worker = core::ptr::null_mut();
     }
 }
