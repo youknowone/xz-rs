@@ -273,7 +273,7 @@ pub struct lzma_length_decoder {
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
 #[inline]
@@ -285,7 +285,7 @@ unsafe extern "C" fn read32le(mut buf: *const u8) -> u32 {
     return num;
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002 as c_ulonglong;
+pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002;
 pub const LZMA_LCLP_MAX: c_int = 4 as c_int;
 pub const LZMA_PB_MAX: c_int = 4 as c_int;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
@@ -464,7 +464,7 @@ unsafe extern "C" fn lzma_decode(
         if rc_in_end.offset_from(rc_in_ptr) as c_long <= 20 as c_long {
             rc_in_ptr
         } else {
-            rc_in_end.offset(-(20 as isize))
+            rc_in_end.offset(-20)
         };
     let mut rc_bound: u32 = 0;
     let mut state: u32 = (*coder).state as u32;
@@ -1003,7 +1003,7 @@ unsafe extern "C" fn lzma_decode(
                         probs = (&raw mut (*coder).pos_special as *mut probability)
                             .offset(rep0 as isize)
                             .offset(-(symbol as isize))
-                            .offset(-(1 as isize));
+                            .offset(-1);
                         symbol = 1 as u32;
                         offset = 0 as u32;
                         current_block = 617447976488552541;
@@ -2751,7 +2751,7 @@ unsafe extern "C" fn lzma_decode(
                                 probs = (&raw mut (*coder).pos_special as *mut probability)
                                     .offset(rep0 as isize)
                                     .offset(-(symbol as isize))
-                                    .offset(-(1 as isize));
+                                    .offset(-1);
                                 symbol = 1 as u32;
                                 offset = 1 as u32;
                                 loop {

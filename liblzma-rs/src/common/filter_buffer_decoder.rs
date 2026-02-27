@@ -89,7 +89,7 @@ pub type lzma_code_function = Option<
 >;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_raw_buffer_decode(

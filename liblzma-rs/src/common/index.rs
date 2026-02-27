@@ -202,7 +202,7 @@ pub type C2RustUnnamed_3 = c_uint;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const UINTPTR_MAX: c_ulong = 18446744073709551615 as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const true_0: c_int = 1 as c_int;
@@ -215,12 +215,12 @@ unsafe extern "C" fn bsr32(mut n: u32) -> u32 {
 unsafe extern "C" fn ctz32(mut n: u32) -> u32 {
     return n.trailing_zeros() as i32 as u32;
 }
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
-pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = (1 as c_ulonglong) << 34;
-pub const UNPADDED_SIZE_MIN: c_ulonglong = 5 as c_ulonglong;
-pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !(3 as c_ulonglong);
+pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
+pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
+pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
 unsafe extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);

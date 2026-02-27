@@ -196,10 +196,10 @@ pub struct lzma_microlzma_coder {
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001 as c_ulonglong;
+pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
 unsafe extern "C" fn microlzma_encode(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,

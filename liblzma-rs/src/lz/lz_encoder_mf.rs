@@ -87,10 +87,10 @@ pub unsafe extern "C" fn lzma_mf_find(
             if limit > (*mf).match_len_max {
                 limit = (*mf).match_len_max;
             }
-            let mut p1: *const u8 = mf_ptr(mf).offset(-(1 as isize));
+            let mut p1: *const u8 = mf_ptr(mf).offset(-1);
             let mut p2: *const u8 = p1
                 .offset(-((*matches.offset(count.wrapping_sub(1 as u32) as isize)).dist as isize))
-                .offset(-(1 as isize));
+                .offset(-1);
             len_best = lzma_memcmplen(p1, p2, len_best, limit);
         }
     }

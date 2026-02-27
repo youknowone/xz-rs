@@ -51,7 +51,7 @@ pub struct lzma_filter {
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const LZMA_FILTER_RESERVED_START: c_ulonglong = (1 as c_ulonglong) << 62;
+pub const LZMA_FILTER_RESERVED_START: c_ulonglong = 1 << 62;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_filter_flags_decode(
     mut filter: *mut lzma_filter,

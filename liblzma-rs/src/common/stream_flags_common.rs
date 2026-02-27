@@ -47,11 +47,11 @@ pub struct lzma_stream_flags {
     pub reserved_int1: u32,
     pub reserved_int2: u32,
 }
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_BACKWARD_SIZE_MIN: c_int = 4 as c_int;
-pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = (1 as c_ulonglong) << 34;
+pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
 #[inline]
 unsafe extern "C" fn is_backward_size_valid(mut options: *const lzma_stream_flags) -> bool {
     return (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli

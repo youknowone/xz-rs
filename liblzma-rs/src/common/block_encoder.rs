@@ -233,17 +233,17 @@ pub const SEQ_PADDING: C2RustUnnamed_2 = 1;
 pub const SEQ_CODE: C2RustUnnamed_2 = 0;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_CHECK_SIZE_MAX: c_int = 64 as c_int;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
 pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
-    .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as c_ulonglong)
-    .wrapping_sub(LZMA_CHECK_SIZE_MAX as c_ulonglong)
-    & !(3 as c_ulonglong);
+    .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as u64)
+    .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64)
+    & !3;
 unsafe extern "C" fn block_encode(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,

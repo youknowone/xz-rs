@@ -220,10 +220,10 @@ pub const SEQ_PADDING_SEEK: C2RustUnnamed_0 = 1;
 pub const SEQ_MAGIC_BYTES: C2RustUnnamed_0 = 0;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
 unsafe extern "C" fn fill_temp(

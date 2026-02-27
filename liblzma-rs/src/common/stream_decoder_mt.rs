@@ -508,7 +508,7 @@ pub const SEQ_BLOCK_HEADER: C2RustUnnamed_0 = 1;
 pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const UINTPTR_MAX: c_ulong = 18446744073709551615 as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const SIG_SETMASK: c_int = 3 as c_int;
@@ -636,7 +636,7 @@ pub const LZMA_CONCATENATED: c_uint = 0x8;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
 pub const LZMA_THREADS_MAX: c_int = 16384 as c_int;
-pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15;
+pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
 pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_TELL_UNSUPPORTED_CHECK
     | LZMA_TELL_ANY_CHECK

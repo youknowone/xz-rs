@@ -71,13 +71,13 @@ pub struct lzma_block {
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: c_int = 8 as c_int;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024 as c_int;
-pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !(3 as c_ulonglong);
+pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
 unsafe extern "C" fn vli_ceil4(mut vli: lzma_vli) -> lzma_vli {
     return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);

@@ -145,15 +145,13 @@ pub unsafe extern "C" fn lzma_stream_buffer_bound(mut uncompressed_size: size_t)
     if block_bound == 0 as size_t {
         return 0 as size_t;
     }
-    if (if (18446744073709551615 as c_ulonglong)
-        < (18446744073709551615 as c_ulonglong).wrapping_div(2 as c_ulonglong)
-    {
-        18446744073709551615 as c_ulonglong
+    if (if 18446744073709551615_u64 < 18446744073709551615_u64.wrapping_div(2) {
+        18446744073709551615_u64
     } else {
-        (18446744073709551615 as c_ulonglong).wrapping_div(2 as c_ulonglong)
+        18446744073709551615_u64.wrapping_div(2)
     })
-    .wrapping_sub(block_bound as c_ulonglong)
-        < HEADERS_BOUND as c_ulonglong
+    .wrapping_sub(block_bound as u64)
+        < HEADERS_BOUND as u64
     {
         return 0 as size_t;
     }

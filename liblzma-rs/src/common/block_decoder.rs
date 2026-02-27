@@ -232,10 +232,10 @@ pub const SEQ_PADDING: C2RustUnnamed_2 = 1;
 pub const SEQ_CODE: C2RustUnnamed_2 = 0;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 #[inline]
 unsafe extern "C" fn is_size_valid(mut size: lzma_vli, mut reference: lzma_vli) -> bool {

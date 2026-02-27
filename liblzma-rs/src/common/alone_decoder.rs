@@ -210,12 +210,12 @@ pub type lzma_init_function = Option<
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002 as c_ulonglong;
+pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
-pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15;
+pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
 unsafe extern "C" fn alone_decode(
     mut coder_ptr: *mut c_void,
     mut allocator: *const lzma_allocator,

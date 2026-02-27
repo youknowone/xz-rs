@@ -322,7 +322,7 @@ pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
 pub const UINT32_MAX: c_uint = 4294967295;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
 #[inline]
@@ -332,8 +332,8 @@ unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
     *buf.offset(2) = (num >> 16) as u8;
     *buf.offset(3) = (num >> 24) as u8;
 }
-pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001 as c_ulonglong;
-pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002 as c_ulonglong;
+pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
+pub const LZMA_FILTER_LZMA1EXT: c_ulonglong = 0x4000000000000002;
 pub const LZMA_LCLP_MAX: c_int = 4 as c_int;
 pub const LZMA_PB_MAX: c_int = 4 as c_int;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
@@ -934,7 +934,7 @@ unsafe extern "C" fn match_0(
                 (&raw mut (*coder).dist_special as *mut probability)
                     .offset(base as isize)
                     .offset(-(dist_slot as isize))
-                    .offset(-(1 as isize)),
+                    .offset(-1),
                 footer_bits,
                 dist_reduced,
             );

@@ -467,7 +467,7 @@ unsafe extern "C" fn fill_dist_prices(mut coder: *mut lzma_lzma1_encoder) {
             (&raw mut (*coder).dist_special as *mut probability)
                 .offset(base as isize)
                 .offset(-(dist_slot_1 as isize))
-                .offset(-(1 as isize)),
+                .offset(-1),
             footer_bits,
             i_0.wrapping_sub(base),
         ) as u32;
@@ -579,14 +579,12 @@ unsafe extern "C" fn helper1(
         *len_res = 1 as u32;
         return UINT32_MAX as u32;
     }
-    let buf: *const u8 = mf_ptr(mf).offset(-(1 as isize));
+    let buf: *const u8 = mf_ptr(mf).offset(-1);
     let mut rep_lens: [u32; 4] = [0; 4];
     let mut rep_max_index: u32 = 0 as u32;
     let mut i: u32 = 0 as u32;
     while i < REPS as u32 {
-        let buf_back: *const u8 = buf
-            .offset(-((*coder).reps[i as usize] as isize))
-            .offset(-(1 as isize));
+        let buf_back: *const u8 = buf.offset(-((*coder).reps[i as usize] as isize)).offset(-1);
         if *buf.offset(0) as c_int != *buf_back.offset(0) as c_int
             || *buf.offset(1) as c_int != *buf_back.offset(1) as c_int
         {
@@ -614,9 +612,7 @@ unsafe extern "C" fn helper1(
         return UINT32_MAX as u32;
     }
     let current_byte: u8 = *buf;
-    let match_byte: u8 = *buf
-        .offset(-((*coder).reps[0] as isize))
-        .offset(-(1 as isize));
+    let match_byte: u8 = *buf.offset(-((*coder).reps[0] as isize)).offset(-1);
     if len_main < 2 as u32
         && current_byte as c_int != match_byte as c_int
         && rep_lens[rep_max_index as usize] < 2 as u32
@@ -860,9 +856,7 @@ unsafe extern "C" fn helper2(
     }
     let cur_price: u32 = (*coder).opts[cur as usize].price;
     let current_byte: u8 = *buf;
-    let match_byte: u8 = *buf
-        .offset(-(*reps.offset(0) as isize))
-        .offset(-(1 as isize));
+    let match_byte: u8 = *buf.offset(-(*reps.offset(0) as isize)).offset(-1);
     let pos_state: u32 = position & (*coder).pos_mask;
     let cur_and_1_price: u32 = cur_price
         .wrapping_add(rc_bit_0_price((*coder).is_match[state as usize][pos_state as usize]) as u32)
@@ -914,9 +908,7 @@ unsafe extern "C" fn helper2(
         nice_len
     };
     if !next_is_literal && match_byte as c_int != current_byte as c_int {
-        let buf_back: *const u8 = buf
-            .offset(-(*reps.offset(0) as isize))
-            .offset(-(1 as isize));
+        let buf_back: *const u8 = buf.offset(-(*reps.offset(0) as isize)).offset(-1);
         let limit: u32 = if buf_avail_full < nice_len.wrapping_add(1 as u32) {
             buf_avail_full
         } else {
@@ -965,7 +957,7 @@ unsafe extern "C" fn helper2(
     while rep_index < REPS as u32 {
         let buf_back_0: *const u8 = buf
             .offset(-(*reps.offset(rep_index as isize) as isize))
-            .offset(-(1 as isize));
+            .offset(-1);
         if !(*buf.offset(0) as c_int != *buf_back_0.offset(0) as c_int
             || *buf.offset(1) as c_int != *buf_back_0.offset(1) as c_int)
         {
@@ -1116,7 +1108,7 @@ unsafe extern "C" fn helper2(
                     false_0 != 0;
             }
             if len_test_1 == (*coder).matches[i_2 as usize].len {
-                let buf_back_1: *const u8 = buf.offset(-(cur_back as isize)).offset(-(1 as isize));
+                let buf_back_1: *const u8 = buf.offset(-(cur_back as isize)).offset(-1);
                 let mut len_test_2_0: u32 = len_test_1.wrapping_add(1 as u32);
                 let limit_1: u32 = if buf_avail_full < len_test_2_0.wrapping_add(nice_len) {
                     buf_avail_full
@@ -1246,7 +1238,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
         len_end = helper2(
             coder,
             &raw mut reps as *mut u32,
-            mf_ptr(mf).offset(-(1 as isize)),
+            mf_ptr(mf).offset(-1),
             len_end,
             position.wrapping_add(cur),
             cur,

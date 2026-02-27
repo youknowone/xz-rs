@@ -51,11 +51,11 @@ pub struct lzma_options_easy {
     pub filters: [lzma_filter; 5],
     pub opt_lzma: lzma_options_lzma,
 }
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21 as c_ulonglong;
+pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_easy_preset(
     mut opt_easy: *mut lzma_options_easy,

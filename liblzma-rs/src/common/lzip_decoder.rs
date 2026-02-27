@@ -225,7 +225,7 @@ pub type lzma_init_function = Option<
 >;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
 #[inline]
@@ -249,14 +249,14 @@ unsafe extern "C" fn read64le(mut buf: *const u8) -> u64 {
     return num;
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001 as c_ulonglong;
+pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
 pub const LZMA_TELL_NO_CHECK: c_uint = 0x1;
 pub const LZMA_TELL_UNSUPPORTED_CHECK: c_uint = 0x2;
 pub const LZMA_TELL_ANY_CHECK: c_uint = 0x4;
 pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
 pub const LZMA_CONCATENATED: c_uint = 0x8;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
-pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15;
+pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
 pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_TELL_UNSUPPORTED_CHECK
     | LZMA_TELL_ANY_CHECK

@@ -175,11 +175,11 @@ pub const SEQ_COUNT: C2RustUnnamed_0 = 1;
 pub const SEQ_INDICATOR: C2RustUnnamed_0 = 0;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const true_0: c_int = 1 as c_int;
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
-pub const UNPADDED_SIZE_MIN: c_ulonglong = 5 as c_ulonglong;
-pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !(3 as c_ulonglong);
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
+pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
+pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 pub const INDEX_INDICATOR: c_int = 0 as c_int;
 unsafe extern "C" fn index_decode(
     mut coder_ptr: *mut c_void,

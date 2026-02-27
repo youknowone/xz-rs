@@ -23,8 +23,8 @@ pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_BYTES_MAX: c_int = 9 as c_int;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_vli_encode(

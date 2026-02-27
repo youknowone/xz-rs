@@ -522,7 +522,7 @@ pub struct lzma_options_easy {
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const SIG_SETMASK: c_int = 3 as c_int;
 pub const true_0: c_int = 1 as c_int;
 pub const false_0: c_int = 0 as c_int;
@@ -643,7 +643,7 @@ pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 pub const LZMA_STREAM_HEADER_SIZE: c_int = 12 as c_int;
 pub const LZMA_THREADS_MAX: c_int = 16384 as c_int;
-pub const LZMA_MEMUSAGE_BASE: c_ulonglong = (1 as c_ulonglong) << 15;
+pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
 #[inline]
 unsafe extern "C" fn lzma_outq_has_buf(mut outq: *const lzma_outq) -> bool {
     return (*outq).bufs_in_use < (*outq).bufs_limit;
@@ -652,7 +652,7 @@ unsafe extern "C" fn lzma_outq_has_buf(mut outq: *const lzma_outq) -> bool {
 unsafe extern "C" fn lzma_outq_is_empty(mut outq: *const lzma_outq) -> bool {
     return (*outq).bufs_in_use == 0 as u32;
 }
-pub const BLOCK_SIZE_MAX: c_ulonglong = UINT64_MAX.wrapping_div(LZMA_THREADS_MAX as c_ulonglong);
+pub const BLOCK_SIZE_MAX: c_ulonglong = UINT64_MAX.wrapping_div(LZMA_THREADS_MAX as u64);
 unsafe extern "C" fn worker_error(mut thr: *mut worker_thread, mut ret: lzma_ret) {
     let mut mythread_i_207: c_uint = 0;
     while if mythread_i_207 != 0 {

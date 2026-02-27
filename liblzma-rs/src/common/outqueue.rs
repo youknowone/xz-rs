@@ -70,7 +70,7 @@ pub struct lzma_outq {
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 pub const UINTPTR_MAX: c_ulong = 18446744073709551615 as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const false_0: c_int = 0 as c_int;

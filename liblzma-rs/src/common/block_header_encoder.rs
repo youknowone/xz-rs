@@ -88,7 +88,7 @@ pub struct lzma_block {
 }
 pub const __DARWIN_NULL: *mut c_void = ::core::ptr::null_mut::<c_void>();
 pub const NULL: *mut c_void = __DARWIN_NULL;
-pub const UINT64_MAX: c_ulonglong = 18446744073709551615 as c_ulonglong;
+pub const UINT64_MAX: c_ulonglong = 18446744073709551615;
 #[inline]
 unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
     *buf.offset(0) = num as u8;
@@ -96,7 +96,7 @@ unsafe extern "C" fn write32le(mut buf: *mut u8, mut num: u32) {
     *buf.offset(2) = (num >> 16) as u8;
     *buf.offset(3) = (num >> 24) as u8;
 }
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2 as c_ulonglong);
+pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTERS_MAX: c_int = 4 as c_int;
 #[no_mangle]
