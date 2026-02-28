@@ -285,19 +285,21 @@ static mut bcj_optmap: [option_map; 1] = unsafe {
         },
     }]
 };
-unsafe extern "C" fn parse_bcj(
+extern "C" fn parse_bcj(
     str: *mut *const c_char,
     str_end: *const c_char,
     filter_options: *mut c_void,
 ) -> *const c_char {
-    return parse_options(
-        str,
-        str_end,
-        filter_options,
-        &raw const bcj_optmap as *const option_map,
-        (core::mem::size_of::<[option_map; 1]>() as size_t)
-            .wrapping_div(core::mem::size_of::<option_map>() as size_t),
-    );
+    return unsafe {
+        parse_options(
+            str,
+            str_end,
+            filter_options,
+            &raw const bcj_optmap as *const option_map,
+            (core::mem::size_of::<[option_map; 1]>() as size_t)
+                .wrapping_div(core::mem::size_of::<option_map>() as size_t),
+        )
+    };
 }
 static mut delta_optmap: [option_map; 1] = unsafe {
     [option_map {
@@ -313,22 +315,24 @@ static mut delta_optmap: [option_map; 1] = unsafe {
         },
     }]
 };
-unsafe extern "C" fn parse_delta(
+extern "C" fn parse_delta(
     str: *mut *const c_char,
     str_end: *const c_char,
     filter_options: *mut c_void,
 ) -> *const c_char {
-    let opts: *mut lzma_options_delta = filter_options as *mut lzma_options_delta;
-    (*opts).type_0 = LZMA_DELTA_TYPE_BYTE;
-    (*opts).dist = LZMA_DELTA_DIST_MIN as u32;
-    return parse_options(
-        str,
-        str_end,
-        filter_options,
-        &raw const delta_optmap as *const option_map,
-        (core::mem::size_of::<[option_map; 1]>() as size_t)
-            .wrapping_div(core::mem::size_of::<option_map>() as size_t),
-    );
+    return unsafe {
+        let opts: *mut lzma_options_delta = filter_options as *mut lzma_options_delta;
+        (*opts).type_0 = LZMA_DELTA_TYPE_BYTE;
+        (*opts).dist = LZMA_DELTA_DIST_MIN as u32;
+        parse_options(
+            str,
+            str_end,
+            filter_options,
+            &raw const delta_optmap as *const option_map,
+            (core::mem::size_of::<[option_map; 1]>() as size_t)
+                .wrapping_div(core::mem::size_of::<option_map>() as size_t),
+        )
+    };
 }
 pub const LZMA12_PRESET_STR: [c_char; 7] =
     unsafe { ::core::mem::transmute::<[u8; 7], [c_char; 7]>(*b"0-9[e]\0") };
@@ -373,7 +377,7 @@ unsafe extern "C" fn set_lzma12_preset(
     }
     return ::core::ptr::null::<c_char>();
 }
-static mut lzma12_mode_map: [name_value_map; 3] = unsafe {
+static lzma12_mode_map: [name_value_map; 3] = unsafe {
     [
         name_value_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"fast\0\0\0\0\0\0\0\0"),
@@ -389,7 +393,7 @@ static mut lzma12_mode_map: [name_value_map; 3] = unsafe {
         },
     ]
 };
-static mut lzma12_mf_map: [name_value_map; 6] = unsafe {
+static lzma12_mf_map: [name_value_map; 6] = unsafe {
     [
         name_value_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"hc3\0\0\0\0\0\0\0\0\0"),
