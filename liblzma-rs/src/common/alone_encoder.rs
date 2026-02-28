@@ -211,11 +211,13 @@ pub const SEQ_HEADER: C2RustUnnamed_0 = 0;
 pub const UINT32_MAX: c_uint = 4294967295;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
-unsafe extern "C" fn write32le(buf: *mut u8, num: u32) {
-    *buf.offset(0) = num as u8;
-    *buf.offset(1) = (num >> 8) as u8;
-    *buf.offset(2) = (num >> 16) as u8;
-    *buf.offset(3) = (num >> 24) as u8;
+extern "C" fn write32le(buf: *mut u8, num: u32) {
+    unsafe {
+        *buf.offset(0) = num as u8;
+        *buf.offset(1) = (num >> 8) as u8;
+        *buf.offset(2) = (num >> 16) as u8;
+        *buf.offset(3) = (num >> 24) as u8;
+    }
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;

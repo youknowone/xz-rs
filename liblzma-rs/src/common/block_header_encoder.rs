@@ -88,11 +88,13 @@ pub struct lzma_block {
 }
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
-unsafe extern "C" fn write32le(buf: *mut u8, num: u32) {
-    *buf.offset(0) = num as u8;
-    *buf.offset(1) = (num >> 8) as u8;
-    *buf.offset(2) = (num >> 16) as u8;
-    *buf.offset(3) = (num >> 24) as u8;
+extern "C" fn write32le(buf: *mut u8, num: u32) {
+    unsafe {
+        *buf.offset(0) = num as u8;
+        *buf.offset(1) = (num >> 8) as u8;
+        *buf.offset(2) = (num >> 16) as u8;
+        *buf.offset(3) = (num >> 24) as u8;
+    }
 }
 pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;

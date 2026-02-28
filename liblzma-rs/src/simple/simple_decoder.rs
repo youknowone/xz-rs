@@ -38,12 +38,14 @@ pub struct lzma_options_bcj {
     pub start_offset: u32,
 }
 #[inline]
-unsafe extern "C" fn read32le(buf: *const u8) -> u32 {
-    let mut num: u32 = *buf.offset(0) as u32;
-    num |= (*buf.offset(1) as u32) << 8;
-    num |= (*buf.offset(2) as u32) << 16;
-    num |= (*buf.offset(3) as u32) << 24;
-    return num;
+extern "C" fn read32le(buf: *const u8) -> u32 {
+    return unsafe {
+        let mut num: u32 = *buf.offset(0) as u32;
+        num |= (*buf.offset(1) as u32) << 8;
+        num |= (*buf.offset(2) as u32) << 16;
+        num |= (*buf.offset(3) as u32) << 24;
+        num
+    };
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_simple_props_decode(

@@ -225,24 +225,28 @@ pub type lzma_init_function = Option<
 >;
 pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 #[inline]
-unsafe extern "C" fn read32le(buf: *const u8) -> u32 {
-    let mut num: u32 = *buf.offset(0) as u32;
-    num |= (*buf.offset(1) as u32) << 8;
-    num |= (*buf.offset(2) as u32) << 16;
-    num |= (*buf.offset(3) as u32) << 24;
-    return num;
+extern "C" fn read32le(buf: *const u8) -> u32 {
+    return unsafe {
+        let mut num: u32 = *buf.offset(0) as u32;
+        num |= (*buf.offset(1) as u32) << 8;
+        num |= (*buf.offset(2) as u32) << 16;
+        num |= (*buf.offset(3) as u32) << 24;
+        num
+    };
 }
 #[inline]
-unsafe extern "C" fn read64le(buf: *const u8) -> u64 {
-    let mut num: u64 = *buf.offset(0) as u64;
-    num |= (*buf.offset(1) as u64) << 8;
-    num |= (*buf.offset(2) as u64) << 16;
-    num |= (*buf.offset(3) as u64) << 24;
-    num |= (*buf.offset(4) as u64) << 32;
-    num |= (*buf.offset(5) as u64) << 40;
-    num |= (*buf.offset(6) as u64) << 48;
-    num |= (*buf.offset(7) as u64) << 56;
-    return num;
+extern "C" fn read64le(buf: *const u8) -> u64 {
+    return unsafe {
+        let mut num: u64 = *buf.offset(0) as u64;
+        num |= (*buf.offset(1) as u64) << 8;
+        num |= (*buf.offset(2) as u64) << 16;
+        num |= (*buf.offset(3) as u64) << 24;
+        num |= (*buf.offset(4) as u64) << 32;
+        num |= (*buf.offset(5) as u64) << 40;
+        num |= (*buf.offset(6) as u64) << 48;
+        num |= (*buf.offset(7) as u64) << 56;
+        num
+    };
 }
 pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
