@@ -267,10 +267,9 @@ unsafe extern "C" fn rc_bittree_reverse(
 unsafe extern "C" fn rc_direct(rc: *mut lzma_range_encoder, value: u32, mut bit_count: u32) {
     loop {
         bit_count -= 1;
-        let fresh0 = (*rc).count;
-        (*rc).count = (*rc).count.wrapping_add(1);
-        (*rc).symbols[fresh0 as usize] =
+        (*rc).symbols[(*rc).count as usize] =
             (RC_DIRECT_0 as u32).wrapping_add(value >> bit_count & 1) as C2RustUnnamed;
+        (*rc).count += 1;
         if !(bit_count != 0) {
             break;
         }
@@ -280,9 +279,8 @@ unsafe extern "C" fn rc_direct(rc: *mut lzma_range_encoder, value: u32, mut bit_
 unsafe extern "C" fn rc_flush(rc: *mut lzma_range_encoder) {
     let mut i: size_t = 0;
     while i < 5 {
-        let fresh1 = (*rc).count;
-        (*rc).count = (*rc).count.wrapping_add(1);
-        (*rc).symbols[fresh1 as usize] = RC_FLUSH;
+        (*rc).symbols[(*rc).count as usize] = RC_FLUSH;
+        (*rc).count += 1;
         i += 1;
     }
 }

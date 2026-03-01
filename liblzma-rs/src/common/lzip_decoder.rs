@@ -144,9 +144,8 @@ unsafe extern "C" fn lzip_decode(
                 if *in_pos >= in_size {
                     return LZMA_OK;
                 }
-                let fresh0 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
-                (*coder).version = *in_0.offset(fresh0 as isize) as u32;
+                (*coder).version = *in_0.offset(*in_pos as isize) as u32;
+                *in_pos += 1;
                 if (*coder).version > 1 {
                     return LZMA_OPTIONS_ERROR;
                 }
@@ -164,9 +163,8 @@ unsafe extern "C" fn lzip_decode(
                 if *in_pos >= in_size {
                     return LZMA_OK;
                 }
-                let fresh1 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
-                let ds: u32 = *in_0.offset(fresh1 as isize) as u32;
+                let ds: u32 = *in_0.offset(*in_pos as isize) as u32;
+                *in_pos += 1;
                 (*coder).member_size = (*coder).member_size.wrapping_add(1);
                 let b2log: u32 = ds & 0x1f;
                 let fracnum: u32 = ds >> 5;

@@ -1042,9 +1042,8 @@ unsafe extern "C" fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mu
     crc = !crc;
     if size > 4 {
         while buf as uintptr_t & 3 as uintptr_t != 0 {
-            let fresh0 = buf;
+            crc = lzma_crc64_table[0][(*buf as u64 ^ crc & 0xff as u64) as usize] ^ crc >> 8;
             buf = buf.offset(1);
-            crc = lzma_crc64_table[0][(*fresh0 as u64 ^ crc & 0xff as u64) as usize] ^ crc >> 8;
             size -= 1;
         }
         let limit: *const u8 = buf.offset((size & !(3)) as isize);
@@ -1060,14 +1059,13 @@ unsafe extern "C" fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mu
         }
     }
     loop {
-        let fresh1 = size;
+        let old_size = size;
         size = size.wrapping_sub(1);
-        if !(fresh1 != 0) {
+        if old_size == 0 {
             break;
         }
-        let fresh2 = buf;
+        crc = lzma_crc64_table[0][(*buf as u64 ^ crc & 0xff as u64) as usize] ^ crc >> 8;
         buf = buf.offset(1);
-        crc = lzma_crc64_table[0][(*fresh2 as u64 ^ crc & 0xff as u64) as usize] ^ crc >> 8;
     }
     !crc
 }

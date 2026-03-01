@@ -110,9 +110,9 @@ unsafe extern "C" fn hc_find_func(
     *son.offset(cyclic_pos as isize) = cur_match;
     loop {
         let delta: u32 = pos.wrapping_sub(cur_match);
-        let fresh2 = depth;
+        let old_depth = depth;
         depth = depth.wrapping_sub(1);
-        if fresh2 == 0 || delta >= cyclic_size {
+        if old_depth == 0 || delta >= cyclic_size {
             return matches;
         }
         let pb: *const u8 = cur.offset(-(delta as isize));
@@ -259,9 +259,8 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(mf: *mut lzma_mf, matches: *mut lzma_m
     }
     if delta2 != delta3 && delta3 < (*mf).cyclic_size && *cur.offset(-(delta3 as isize)) == *cur {
         len_best = 3;
-        let fresh3 = matches_count;
+        (*matches.offset(matches_count as isize)).dist = delta3.wrapping_sub(1);
         matches_count += 1;
-        (*matches.offset(fresh3 as isize)).dist = delta3.wrapping_sub(1);
         delta2 = delta3;
     }
     if matches_count != 0 {
@@ -344,9 +343,9 @@ unsafe extern "C" fn bt_find_func(
     let mut len1: u32 = 0;
     loop {
         let delta: u32 = pos.wrapping_sub(cur_match);
-        let fresh4 = depth;
+        let old_depth = depth;
         depth = depth.wrapping_sub(1);
-        if fresh4 == 0 || delta >= cyclic_size {
+        if old_depth == 0 || delta >= cyclic_size {
             *ptr0 = EMPTY_HASH_VALUE;
             *ptr1 = EMPTY_HASH_VALUE;
             return matches;
@@ -402,9 +401,9 @@ unsafe extern "C" fn bt_skip_func(
     let mut len1: u32 = 0;
     loop {
         let delta: u32 = pos.wrapping_sub(cur_match);
-        let fresh5 = depth;
+        let old_depth = depth;
         depth = depth.wrapping_sub(1);
-        if fresh5 == 0 || delta >= cyclic_size {
+        if old_depth == 0 || delta >= cyclic_size {
             *ptr0 = EMPTY_HASH_VALUE;
             *ptr1 = EMPTY_HASH_VALUE;
             return;
@@ -662,9 +661,8 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(mf: *mut lzma_mf, matches: *mut lzma_m
     }
     if delta2 != delta3 && delta3 < (*mf).cyclic_size && *cur.offset(-(delta3 as isize)) == *cur {
         len_best = 3;
-        let fresh6 = matches_count;
+        (*matches.offset(matches_count as isize)).dist = delta3.wrapping_sub(1);
         matches_count += 1;
-        (*matches.offset(fresh6 as isize)).dist = delta3.wrapping_sub(1);
         delta2 = delta3;
     }
     if matches_count != 0 {

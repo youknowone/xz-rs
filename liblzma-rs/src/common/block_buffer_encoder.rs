@@ -120,21 +120,18 @@ unsafe extern "C" fn block_encode_uncompressed(
     let mut in_pos: size_t = 0;
     let mut control: u8 = 0x1 as u8;
     while in_pos < in_size {
-        let fresh1 = *out_pos;
-        *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh1 as isize) = control;
+                *out.offset(*out_pos as isize) = control;
+        *out_pos += 1;
         control = 0x2 as u8;
         let copy_size: size_t = if in_size.wrapping_sub(in_pos) < (1u32 << 16) as size_t {
             in_size.wrapping_sub(in_pos)
         } else {
             (1u32 << 16) as size_t
         };
-        let fresh2 = *out_pos;
-        *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh2 as isize) = (copy_size.wrapping_sub(1) >> 8) as u8;
-        let fresh3 = *out_pos;
-        *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh3 as isize) = (copy_size.wrapping_sub(1) & 0xff) as u8;
+                *out.offset(*out_pos as isize) = (copy_size.wrapping_sub(1) >> 8) as u8;
+        *out_pos += 1;
+                *out.offset(*out_pos as isize) = (copy_size.wrapping_sub(1) & 0xff) as u8;
+        *out_pos += 1;
         memcpy(
             out.offset(*out_pos as isize) as *mut c_void,
             in_0.offset(in_pos as isize) as *const c_void,
@@ -143,9 +140,8 @@ unsafe extern "C" fn block_encode_uncompressed(
         in_pos = in_pos.wrapping_add(copy_size);
         *out_pos = (*out_pos).wrapping_add(copy_size);
     }
-    let fresh4 = *out_pos;
-    *out_pos = (*out_pos).wrapping_add(1);
-    *out.offset(fresh4 as isize) = 0;
+        *out.offset(*out_pos as isize) = 0;
+    *out_pos += 1;
     LZMA_OK
 }
 unsafe extern "C" fn block_encode_normal(
@@ -268,9 +264,8 @@ unsafe extern "C" fn block_buffer_encode(
     }
     let mut i: size_t = (*block).compressed_size as size_t;
     while i & 3 != 0 {
-        let fresh0 = *out_pos;
-        *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh0 as isize) = 0;
+                *out.offset(*out_pos as isize) = 0;
+        *out_pos += 1;
         i += 1;
     }
     if check_size > 0 {

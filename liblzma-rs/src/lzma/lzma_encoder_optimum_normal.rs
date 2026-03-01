@@ -985,9 +985,8 @@ unsafe extern "C" fn helper2(
         while new_len > (*coder).matches[matches_count as usize].len {
             matches_count += 1;
         }
-        let fresh0 = matches_count;
+        (*coder).matches[matches_count as usize].len = new_len;
         matches_count += 1;
-        (*coder).matches[fresh0 as usize].len = new_len;
     }
     if new_len >= start_len {
         let normal_match_price: u32 =

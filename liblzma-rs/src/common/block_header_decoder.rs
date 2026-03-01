@@ -108,12 +108,11 @@ pub unsafe extern "C" fn lzma_block_header_decode(
         i_0 += 1;
     }
     while in_pos < in_size {
-        let fresh1 = in_pos;
-        in_pos += 1;
-        if *in_0.offset(fresh1 as isize) != 0 {
+        if *in_0.offset(in_pos as isize) != 0 {
             lzma_filters_free((*block).filters, allocator);
             return LZMA_OPTIONS_ERROR;
         }
+        in_pos += 1;
     }
     LZMA_OK
 }

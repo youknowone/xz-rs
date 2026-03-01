@@ -148,23 +148,18 @@ unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
     }
     (*coder).buf_pos = pos;
     let mut size: size_t = (*coder).uncompressed_size.wrapping_sub(1);
-    let fresh1 = pos;
+    (*coder).buf[pos as usize] =
+        ((*coder).buf[pos as usize] as size_t).wrapping_add(size >> 16) as u8;
     pos += 1;
-    (*coder).buf[fresh1 as usize] =
-        ((*coder).buf[fresh1 as usize] as size_t).wrapping_add(size >> 16) as u8;
-    let fresh2 = pos;
+    (*coder).buf[pos as usize] = (size >> 8 & 0xff) as u8;
     pos += 1;
-    (*coder).buf[fresh2 as usize] = (size >> 8 & 0xff) as u8;
-    let fresh3 = pos;
+    (*coder).buf[pos as usize] = (size & 0xff) as u8;
     pos += 1;
-    (*coder).buf[fresh3 as usize] = (size & 0xff) as u8;
     size = (*coder).compressed_size.wrapping_sub(1);
-    let fresh4 = pos;
+    (*coder).buf[pos as usize] = (size >> 8) as u8;
     pos += 1;
-    (*coder).buf[fresh4 as usize] = (size >> 8) as u8;
-    let fresh5 = pos;
+    (*coder).buf[pos as usize] = (size & 0xff) as u8;
     pos += 1;
-    (*coder).buf[fresh5 as usize] = (size & 0xff) as u8;
     if (*coder).need_properties {
         lzma_lzma_lclppb_encode(
             &raw mut (*coder).opt_cur,
@@ -203,9 +198,8 @@ unsafe extern "C" fn lzma2_encode(
             0 => {
                 if mf_unencoded(mf) == 0 {
                     if (*mf).action == LZMA_FINISH {
-                        let fresh0 = *out_pos;
-                        *out_pos = (*out_pos).wrapping_add(1);
-                        *out.offset(fresh0 as isize) = 0;
+                                                *out.offset(*out_pos as isize) = 0;
+                        *out_pos += 1;
                     }
                     return if (*mf).action == LZMA_RUN {
                         LZMA_OK

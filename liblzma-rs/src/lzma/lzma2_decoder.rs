@@ -149,19 +149,17 @@ unsafe extern "C" fn lzma2_decode(
                 }
             }
             1 => {
-                let fresh0 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
                 (*coder).uncompressed_size = (*coder)
                     .uncompressed_size
-                    .wrapping_add(((*in_0.offset(fresh0 as isize) as u32) << 8) as size_t);
+                    .wrapping_add(((*in_0.offset(*in_pos as isize) as u32) << 8) as size_t);
+                *in_pos += 1;
                 (*coder).sequence = SEQ_UNCOMPRESSED_2;
             }
             2 => {
-                let fresh1 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
                 (*coder).uncompressed_size = (*coder).uncompressed_size.wrapping_add(
-                    u32::from(*in_0.offset(fresh1 as isize)).wrapping_add(1) as size_t,
+                    u32::from(*in_0.offset(*in_pos as isize)).wrapping_add(1) as size_t,
                 );
+                *in_pos += 1;
                 (*coder).sequence = SEQ_COMPRESSED_0;
                 (*coder)
                     .lzma
@@ -173,23 +171,21 @@ unsafe extern "C" fn lzma2_decode(
                 );
             }
             3 => {
-                let fresh2 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
-                (*coder).compressed_size = ((*in_0.offset(fresh2 as isize) as u32) << 8) as size_t;
+                (*coder).compressed_size = ((*in_0.offset(*in_pos as isize) as u32) << 8) as size_t;
+                *in_pos += 1;
                 (*coder).sequence = SEQ_COMPRESSED_1;
             }
             4 => {
-                let fresh3 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
                 (*coder).compressed_size = (*coder).compressed_size.wrapping_add(
-                    u32::from(*in_0.offset(fresh3 as isize)).wrapping_add(1) as size_t,
+                    u32::from(*in_0.offset(*in_pos as isize)).wrapping_add(1) as size_t,
                 );
+                *in_pos += 1;
                 (*coder).sequence = (*coder).next_sequence as sequence;
             }
             5 => {
-                let fresh4 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
-                if lzma_lzma_lclppb_decode(&raw mut (*coder).options, *in_0.offset(fresh4 as isize))
+                let prop_byte = *in_0.offset(*in_pos as isize);
+                *in_pos += 1;
+                if lzma_lzma_lclppb_decode(&raw mut (*coder).options, prop_byte)
                 {
                     return LZMA_DATA_ERROR;
                 }

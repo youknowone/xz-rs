@@ -573,17 +573,15 @@ pub unsafe extern "C" fn lzma_sha256_update(
 #[no_mangle]
 pub unsafe extern "C" fn lzma_sha256_finish(check: *mut lzma_check_state) {
     let mut pos: size_t = ((*check).state.sha256.size & 0x3f as u64) as size_t;
-    let fresh8 = pos;
+    (*check).buffer.u8_0[pos as usize] = 0x80 as u8;
     pos += 1;
-    (*check).buffer.u8_0[fresh8 as usize] = 0x80 as u8;
     while pos != (64 - 8) as size_t {
         if pos == 64 {
             process(check);
             pos = 0;
         }
-        let fresh9 = pos;
+        (*check).buffer.u8_0[pos as usize] = 0;
         pos += 1;
-        (*check).buffer.u8_0[fresh9 as usize] = 0;
     }
     (*check).state.sha256.size = (*check).state.sha256.size.wrapping_mul(8);
     (*check).buffer.u64_0[7] = ((*check).state.sha256.size & 0xff as u64) << 56

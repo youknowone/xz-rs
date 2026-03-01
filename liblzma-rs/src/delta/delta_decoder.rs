@@ -14,9 +14,8 @@ unsafe extern "C" fn decode_buffer(coder: *mut lzma_delta_coder, buffer: *mut u8
         *buffer.offset(i as isize) = (*buffer.offset(i as isize)).wrapping_add(
             (*coder).history[(distance.wrapping_add((*coder).pos as size_t) & 0xff) as usize],
         );
-        let fresh1 = (*coder).pos;
+        (*coder).history[((*coder).pos & 0xff) as usize] = *buffer.offset(i as isize);
         (*coder).pos = (*coder).pos.wrapping_sub(1);
-        (*coder).history[(fresh1 & 0xff) as usize] = *buffer.offset(i as isize);
         i += 1;
     }
 }

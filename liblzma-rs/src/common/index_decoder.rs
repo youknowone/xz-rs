@@ -72,9 +72,9 @@ unsafe extern "C" fn index_decode(
     while *in_pos < in_size {
         match (*coder).sequence {
             0 => {
-                let fresh0 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
-                if *in_0.offset(fresh0 as isize) != INDEX_INDICATOR {
+                let byte = *in_0.offset(*in_pos as isize);
+                *in_pos += 1;
+                if byte != INDEX_INDICATOR {
                     return LZMA_DATA_ERROR;
                 }
                 (*coder).sequence = SEQ_COUNT;
@@ -153,9 +153,9 @@ unsafe extern "C" fn index_decode(
             8340016495055110192 => {
                 if (*coder).pos > 0 {
                     (*coder).pos = (*coder).pos.wrapping_sub(1);
-                    let fresh1 = *in_pos;
-                    *in_pos = (*in_pos).wrapping_add(1);
-                    if *in_0.offset(fresh1 as isize) != 0 {
+                    let byte = *in_0.offset(*in_pos as isize);
+                    *in_pos += 1;
+                    if byte != 0 {
                         return LZMA_DATA_ERROR;
                     }
                     continue;
@@ -189,10 +189,10 @@ unsafe extern "C" fn index_decode(
             if *in_pos == in_size {
                 return LZMA_OK;
             }
-            let fresh2 = *in_pos;
-            *in_pos = (*in_pos).wrapping_add(1);
+            let val = *in_0.offset(*in_pos as isize);
+            *in_pos += 1;
             if (*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff
-                != *in_0.offset(fresh2 as isize) as u32
+                != val as u32
             {
                 return LZMA_DATA_ERROR;
             }

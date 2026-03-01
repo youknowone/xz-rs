@@ -193,9 +193,9 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
     while *in_pos < in_size {
         match (*index_hash).sequence {
             0 => {
-                let fresh0 = *in_pos;
-                *in_pos = (*in_pos).wrapping_add(1);
-                if *in_0.offset(fresh0 as isize) != INDEX_INDICATOR {
+                let byte = *in_0.offset(*in_pos as isize);
+                *in_pos += 1;
+                if byte != INDEX_INDICATOR {
                     return LZMA_DATA_ERROR;
                 }
                 (*index_hash).sequence = SEQ_COUNT;
@@ -286,9 +286,9 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
             12753679906265593574 => {
                 if (*index_hash).pos > 0 {
                     (*index_hash).pos = (*index_hash).pos.wrapping_sub(1);
-                    let fresh1 = *in_pos;
-                    *in_pos = (*in_pos).wrapping_add(1);
-                    if *in_0.offset(fresh1 as isize) != 0 {
+                    let byte = *in_0.offset(*in_pos as isize);
+                    *in_pos += 1;
+                    if byte != 0 {
                         return LZMA_DATA_ERROR;
                     }
                     continue;
@@ -326,10 +326,10 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
             if *in_pos == in_size {
                 return LZMA_OK;
             }
-            let fresh2 = *in_pos;
-            *in_pos = (*in_pos).wrapping_add(1);
+            let val = *in_0.offset(*in_pos as isize);
+            *in_pos += 1;
             if (*index_hash).crc32 >> (*index_hash).pos.wrapping_mul(8) & 0xff
-                != *in_0.offset(fresh2 as isize) as u32
+                != val as u32
             {
                 return LZMA_DATA_ERROR;
             }

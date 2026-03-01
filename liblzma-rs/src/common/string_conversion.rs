@@ -905,9 +905,9 @@ unsafe extern "C" fn str_to_filters(
         _ => {}
     }
     loop {
-        let fresh2 = i_0;
+        let old_i = i_0;
         i_0 = i_0.wrapping_sub(1);
-        if !(fresh2 > 0) {
+        if old_i == 0 {
             break;
         }
         lzma_free(temp_filters[i_0 as usize].options, allocator);

@@ -169,9 +169,9 @@ unsafe extern "C" fn block_decode(
                         return LZMA_OK;
                     }
                     (*coder).compressed_size = (*coder).compressed_size.wrapping_add(1);
-                    let fresh0 = *in_pos;
-                    *in_pos = (*in_pos).wrapping_add(1);
-                    if *in_0.offset(fresh0 as isize) != 0 {
+                    let byte = *in_0.offset(*in_pos as isize);
+                    *in_pos += 1;
+                    if byte != 0 {
                         return LZMA_DATA_ERROR;
                     }
                 }

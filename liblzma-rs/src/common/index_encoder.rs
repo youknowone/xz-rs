@@ -150,9 +150,8 @@ unsafe extern "C" fn index_encode(
             5 => {
                 if (*coder).pos > 0 {
                     (*coder).pos = (*coder).pos.wrapping_sub(1);
-                    let fresh0 = *out_pos;
-                    *out_pos = (*out_pos).wrapping_add(1);
-                    *out.offset(fresh0 as isize) = 0;
+                                        *out.offset(*out_pos as isize) = 0;
+                    *out_pos += 1;
                     continue;
                 } else {
                     (*coder).crc32 = lzma_crc32(
