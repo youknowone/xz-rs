@@ -87,7 +87,7 @@ unsafe extern "C" fn auto_decode(
     }
     match current_block_28 {
         13935781298497728377 => {
-            let ret: lzma_ret = (*coder).next.code.expect("non-null function pointer")(
+            let ret: lzma_ret = (*coder).next.code.unwrap()(
                 (*coder).next.coder,
                 allocator,
                 in_0,
@@ -125,7 +125,7 @@ extern "C" fn auto_decoder_get_check(coder_ptr: *const c_void) -> lzma_check {
         (if (*coder).next.get_check.is_none() {
             LZMA_CHECK_NONE
         } else {
-            (*coder).next.get_check.expect("non-null function pointer")((*coder).next.coder)
+            (*coder).next.get_check.unwrap()((*coder).next.coder)
         }) as lzma_check
     };
 }
@@ -138,7 +138,7 @@ unsafe extern "C" fn auto_decoder_memconfig(
     let coder: *mut lzma_auto_coder = coder_ptr as *mut lzma_auto_coder;
     let mut ret: lzma_ret = LZMA_OK;
     if (*coder).next.memconfig.is_some() {
-        ret = (*coder).next.memconfig.expect("non-null function pointer")(
+        ret = (*coder).next.memconfig.unwrap()(
             (*coder).next.coder,
             memusage,
             old_memlimit,

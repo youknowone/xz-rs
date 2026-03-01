@@ -115,7 +115,7 @@ unsafe extern "C" fn microlzma_decode(
         }
         let dummy_in: u8 = 0;
         let mut dummy_in_pos: size_t = 0;
-        if (*coder).lzma.code.expect("non-null function pointer")(
+        if (*coder).lzma.code.unwrap()(
             (*coder).lzma.coder,
             allocator,
             &raw const dummy_in,
@@ -131,7 +131,7 @@ unsafe extern "C" fn microlzma_decode(
         }
         (*coder).props_decoded = true;
     }
-    let mut ret: lzma_ret = (*coder).lzma.code.expect("non-null function pointer")(
+    let mut ret: lzma_ret = (*coder).lzma.code.unwrap()(
         (*coder).lzma.coder,
         allocator,
         in_0,

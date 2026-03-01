@@ -38,7 +38,7 @@ unsafe extern "C" fn copy_or_code(
             (*coder).end_was_reached = true;
         }
     } else {
-        let ret: lzma_ret = (*coder).next.code.expect("non-null function pointer")(
+        let ret: lzma_ret = (*coder).next.code.unwrap()(
             (*coder).next.coder,
             allocator,
             in_0,
@@ -62,7 +62,7 @@ unsafe extern "C" fn call_filter(
     buffer: *mut u8,
     size: size_t,
 ) -> size_t {
-    let filtered: size_t = (*coder).filter.expect("non-null function pointer")(
+    let filtered: size_t = (*coder).filter.unwrap()(
         (*coder).simple,
         (*coder).now_pos,
         (*coder).is_encoder,

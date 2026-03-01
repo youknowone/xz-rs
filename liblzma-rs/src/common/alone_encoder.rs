@@ -74,7 +74,7 @@ unsafe extern "C" fn alone_encode(
                 (*coder).sequence = SEQ_CODE;
             }
             1 => {
-                return (*coder).next.code.expect("non-null function pointer")(
+                return (*coder).next.code.unwrap()(
                     (*coder).next.coder,
                     allocator,
                     in_0,

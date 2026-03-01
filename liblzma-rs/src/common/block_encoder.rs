@@ -76,7 +76,7 @@ unsafe extern "C" fn block_encode(
             0 => {
                 let in_start: size_t = *in_pos;
                 let out_start: size_t = *out_pos;
-                let ret: lzma_ret = (*coder).next.code.expect("non-null function pointer")(
+                let ret: lzma_ret = (*coder).next.code.unwrap()(
                     (*coder).next.coder,
                     allocator,
                     in_0,

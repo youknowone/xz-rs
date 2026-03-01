@@ -40,7 +40,7 @@ unsafe extern "C" fn microlzma_encode(
     if (*coder)
         .lzma
         .set_out_limit
-        .expect("non-null function pointer")(
+        .unwrap()(
         (*coder).lzma.coder,
         &raw mut uncomp_size,
         out_size.wrapping_sub(*out_pos) as u64,
@@ -48,7 +48,7 @@ unsafe extern "C" fn microlzma_encode(
     {
         return LZMA_PROG_ERROR;
     }
-    let ret: lzma_ret = (*coder).lzma.code.expect("non-null function pointer")(
+    let ret: lzma_ret = (*coder).lzma.code.unwrap()(
         (*coder).lzma.coder,
         allocator,
         in_0,

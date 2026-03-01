@@ -370,7 +370,7 @@ pub unsafe extern "C" fn lzma_filters_update(
     (*(*strm).internal)
         .next
         .update
-        .expect("non-null function pointer")(
+        .unwrap()(
         (*(*strm).internal).next.coder,
         (*strm).allocator,
         filters,
@@ -437,7 +437,7 @@ pub unsafe extern "C" fn lzma_mt_block_size(filters: *const lzma_filter) -> u64 
             return UINT64_MAX;
         }
         if (*fe).block_size.is_some() {
-            let size: u64 = (*fe).block_size.expect("non-null function pointer")(
+            let size: u64 = (*fe).block_size.unwrap()(
                 (*filters.offset(i as isize)).options,
             ) as u64;
             if size > max {
@@ -465,7 +465,7 @@ pub unsafe extern "C" fn lzma_properties_size(
         *size = (*fe).props_size_fixed;
         return LZMA_OK;
     }
-    (*fe).props_size_get.expect("non-null function pointer")(size, (*filter).options)
+    (*fe).props_size_get.unwrap()(size, (*filter).options)
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_properties_encode(
@@ -479,5 +479,5 @@ pub unsafe extern "C" fn lzma_properties_encode(
     if (*fe).props_encode.is_none() {
         return LZMA_OK;
     }
-    (*fe).props_encode.expect("non-null function pointer")((*filter).options, props)
+    (*fe).props_encode.unwrap()((*filter).options, props)
 }

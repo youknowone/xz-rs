@@ -43,7 +43,7 @@ pub unsafe extern "C" fn lzma_block_buffer_decode(
     if ret == LZMA_OK {
         let in_start: size_t = *in_pos;
         let out_start: size_t = *out_pos;
-        ret = block_decoder.code.expect("non-null function pointer")(
+        ret = block_decoder.code.unwrap()(
             block_decoder.coder,
             allocator,
             in_0,

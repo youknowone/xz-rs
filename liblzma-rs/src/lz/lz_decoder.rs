@@ -84,7 +84,7 @@ unsafe extern "C" fn decode_buffer(
                 (*coder).dict.size.wrapping_sub((*coder).dict.pos)
             },
         );
-        let ret: lzma_ret = (*coder).lz.code.expect("non-null function pointer")(
+        let ret: lzma_ret = (*coder).lz.code.unwrap()(
             (*coder).lz.coder,
             &raw mut (*coder).dict,
             in_0,
@@ -129,7 +129,7 @@ unsafe extern "C" fn lz_decode(
         if !(*coder).next_finished && (*coder).temp.pos == (*coder).temp.size {
             (*coder).temp.pos = 0;
             (*coder).temp.size = 0;
-            let ret: lzma_ret = (*coder).next.code.expect("non-null function pointer")(
+            let ret: lzma_ret = (*coder).next.code.unwrap()(
                 (*coder).next.coder,
                 allocator,
                 in_0,
@@ -179,7 +179,7 @@ unsafe extern "C" fn lz_decoder_end(coder_ptr: *mut c_void, allocator: *const lz
     lzma_next_end(&raw mut (*coder).next, allocator);
     lzma_free((*coder).dict.buf as *mut c_void, allocator);
     if (*coder).lz.end.is_some() {
-        (*coder).lz.end.expect("non-null function pointer")((*coder).lz.coder, allocator);
+        (*coder).lz.end.unwrap()((*coder).lz.coder, allocator);
     } else {
         lzma_free((*coder).lz.coder, allocator);
     }
@@ -245,7 +245,7 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
         preset_dict: ::core::ptr::null::<u8>(),
         preset_dict_size: 0,
     };
-    let ret_: lzma_ret = lz_init.expect("non-null function pointer")(
+    let ret_: lzma_ret = lz_init.unwrap()(
         &raw mut (*coder).lz,
         allocator,
         (*filters.offset(0)).id,

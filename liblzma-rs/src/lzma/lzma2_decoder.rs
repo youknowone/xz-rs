@@ -129,7 +129,7 @@ unsafe extern "C" fn lzma2_decode(
                     } else {
                         (*coder).next_sequence = SEQ_LZMA;
                         if control >= 0xa0 {
-                            (*coder).lzma.reset.expect("non-null function pointer")(
+                            (*coder).lzma.reset.unwrap()(
                                 (*coder).lzma.coder,
                                 &raw mut (*coder).options as *const c_void,
                             );
@@ -164,7 +164,7 @@ unsafe extern "C" fn lzma2_decode(
                 (*coder)
                     .lzma
                     .set_uncompressed
-                    .expect("non-null function pointer")(
+                    .unwrap()(
                     (*coder).lzma.coder,
                     (*coder).uncompressed_size as lzma_vli,
                     false,
@@ -189,7 +189,7 @@ unsafe extern "C" fn lzma2_decode(
                 {
                     return LZMA_DATA_ERROR;
                 }
-                (*coder).lzma.reset.expect("non-null function pointer")(
+                (*coder).lzma.reset.unwrap()(
                     (*coder).lzma.coder,
                     &raw mut (*coder).options as *const c_void,
                 );
@@ -197,7 +197,7 @@ unsafe extern "C" fn lzma2_decode(
             }
             6 => {
                 let in_start: size_t = *in_pos;
-                let ret: lzma_ret = (*coder).lzma.code.expect("non-null function pointer")(
+                let ret: lzma_ret = (*coder).lzma.code.unwrap()(
                     (*coder).lzma.coder,
                     dict,
                     in_0,

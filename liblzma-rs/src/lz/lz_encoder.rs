@@ -99,7 +99,7 @@ unsafe extern "C" fn fill_window(
             LZMA_OK
         };
     } else {
-        ret = (*coder).next.code.expect("non-null function pointer")(
+        ret = (*coder).next.code.unwrap()(
             (*coder).next.coder,
             allocator,
             in_0,
@@ -131,7 +131,7 @@ unsafe extern "C" fn fill_window(
         let pending: u32 = (*coder).mf.pending;
         (*coder).mf.pending = 0;
         (*coder).mf.read_pos = (*coder).mf.read_pos.wrapping_sub(pending);
-        (*coder).mf.skip.expect("non-null function pointer")(&raw mut (*coder).mf, pending);
+        (*coder).mf.skip.unwrap()(&raw mut (*coder).mf, pending);
     }
     ret
 }
@@ -154,7 +154,7 @@ unsafe extern "C" fn lz_encode(
                 return ret_;
             }
         }
-        let ret: lzma_ret = (*coder).lz.code.expect("non-null function pointer")(
+        let ret: lzma_ret = (*coder).lz.code.unwrap()(
             (*coder).lz.coder,
             &raw mut (*coder).mf,
             out,
@@ -368,7 +368,7 @@ unsafe extern "C" fn lz_encoder_init(
             (*mf).write_pos as size_t,
         );
         (*mf).action = LZMA_SYNC_FLUSH;
-        (*mf).skip.expect("non-null function pointer")(mf, (*mf).write_pos);
+        (*mf).skip.unwrap()(mf, (*mf).write_pos);
     }
     (*mf).action = LZMA_RUN;
     false
@@ -422,7 +422,7 @@ unsafe extern "C" fn lz_encoder_end(coder_ptr: *mut c_void, allocator: *const lz
     lzma_free((*coder).mf.hash as *mut c_void, allocator);
     lzma_free((*coder).mf.buffer as *mut c_void, allocator);
     if (*coder).lz.end.is_some() {
-        (*coder).lz.end.expect("non-null function pointer")((*coder).lz.coder, allocator);
+        (*coder).lz.end.unwrap()((*coder).lz.coder, allocator);
     } else {
         lzma_free((*coder).lz.coder, allocator);
     }
@@ -442,7 +442,7 @@ unsafe extern "C" fn lz_encoder_update(
         (*coder)
             .lz
             .options_update
-            .expect("non-null function pointer")((*coder).lz.coder, reversed_filters);
+            .unwrap()((*coder).lz.coder, reversed_filters);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -462,7 +462,7 @@ unsafe extern "C" fn lz_encoder_set_out_limit(
         return (*coder)
             .lz
             .set_out_limit
-            .expect("non-null function pointer")(
+            .unwrap()(
             (*coder).lz.coder, uncomp_size, out_limit
         );
     }
@@ -564,7 +564,7 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         preset_dict: ::core::ptr::null::<u8>(),
         preset_dict_size: 0,
     };
-    let ret_: lzma_ret = lz_init.expect("non-null function pointer")(
+    let ret_: lzma_ret = lz_init.unwrap()(
         &raw mut (*coder).lz,
         allocator,
         (*filters.offset(0)).id,

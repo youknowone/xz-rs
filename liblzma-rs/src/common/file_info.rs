@@ -178,7 +178,7 @@ unsafe extern "C" fn decode_index(
     let ret: lzma_ret = (*coder)
         .index_decoder
         .code
-        .expect("non-null function pointer")(
+        .unwrap()(
         (*coder).index_decoder.coder,
         allocator,
         in_0,
@@ -536,7 +536,7 @@ unsafe extern "C" fn file_info_decoder_memconfig(
         if (*coder)
             .index_decoder
             .memconfig
-            .expect("non-null function pointer")(
+            .unwrap()(
             (*coder).index_decoder.coder,
             &raw mut this_index_memusage,
             &raw mut dummy,
@@ -562,7 +562,7 @@ unsafe extern "C" fn file_info_decoder_memconfig(
             if (*coder)
                 .index_decoder
                 .memconfig
-                .expect("non-null function pointer")(
+                .unwrap()(
                 (*coder).index_decoder.coder,
                 &raw mut dummy1,
                 &raw mut dummy2,

@@ -270,7 +270,7 @@ pub unsafe extern "C" fn lzma_raw_coder_init(
         while i < count {
             let j: size_t = count.wrapping_sub(i).wrapping_sub(1);
             let fc: *const lzma_filter_coder =
-                coder_find.expect("non-null function pointer")((*options.offset(i as isize)).id)
+                coder_find.unwrap()((*options.offset(i as isize)).id)
                     as *const lzma_filter_coder;
             if fc.is_null() || (*fc).init.is_none() {
                 return LZMA_OPTIONS_ERROR;
@@ -284,7 +284,7 @@ pub unsafe extern "C" fn lzma_raw_coder_init(
         let mut i_0: size_t = 0;
         while i_0 < count {
             let fc_0: *const lzma_filter_coder =
-                coder_find.expect("non-null function pointer")((*options.offset(i_0 as isize)).id)
+                coder_find.unwrap()((*options.offset(i_0 as isize)).id)
                     as *const lzma_filter_coder;
             if fc_0.is_null() || (*fc_0).init.is_none() {
                 return LZMA_OPTIONS_ERROR;
@@ -317,7 +317,7 @@ pub unsafe extern "C" fn lzma_raw_coder_memusage(
     let mut i: size_t = 0;
     loop {
         let fc: *const lzma_filter_coder =
-            coder_find.expect("non-null function pointer")((*filters.offset(i as isize)).id)
+            coder_find.unwrap()((*filters.offset(i as isize)).id)
                 as *const lzma_filter_coder;
         if fc.is_null() {
             return UINT64_MAX;
@@ -325,7 +325,7 @@ pub unsafe extern "C" fn lzma_raw_coder_memusage(
         if (*fc).memusage.is_none() {
             total = total.wrapping_add(1024);
         } else {
-            let usage: u64 = (*fc).memusage.expect("non-null function pointer")(
+            let usage: u64 = (*fc).memusage.unwrap()(
                 (*filters.offset(i as isize)).options,
             ) as u64;
             if usage == UINT64_MAX {

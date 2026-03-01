@@ -95,7 +95,7 @@ unsafe extern "C" fn block_decode(
                             .wrapping_sub((*coder).uncompressed_size)
                     }) as size_t,
                 );
-                let ret: lzma_ret = (*coder).next.code.expect("non-null function pointer")(
+                let ret: lzma_ret = (*coder).next.code.unwrap()(
                     (*coder).next.coder,
                     allocator,
                     in_0,

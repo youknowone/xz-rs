@@ -181,7 +181,7 @@ unsafe extern "C" fn block_encode_normal(
         lzma_raw_encoder_init(&raw mut raw_encoder, allocator, (*block).filters);
     if ret == LZMA_OK {
         let mut in_pos: size_t = 0;
-        ret = raw_encoder.code.expect("non-null function pointer")(
+        ret = raw_encoder.code.unwrap()(
             raw_encoder.coder,
             allocator,
             in_0,

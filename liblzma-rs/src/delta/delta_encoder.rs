@@ -81,7 +81,7 @@ unsafe extern "C" fn delta_encode(
         };
     } else {
         let out_start: size_t = *out_pos;
-        ret = (*coder).next.code.expect("non-null function pointer")(
+        ret = (*coder).next.code.unwrap()(
             (*coder).next.coder,
             allocator,
             in_0,

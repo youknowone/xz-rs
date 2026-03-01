@@ -749,7 +749,7 @@ unsafe extern "C" fn parse_filter(
             let errmsg: *const c_char =
                 filter_name_map[i as usize]
                     .parse
-                    .expect("non-null function pointer")(str, str_end, options);
+                    .unwrap()(str, str_end, options);
             if !errmsg.is_null() {
                 lzma_free(options, allocator);
                 return errmsg;

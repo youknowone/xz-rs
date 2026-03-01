@@ -38,7 +38,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_encode(
     }
     let out_start: size_t = *out_pos;
     let mut in_pos: size_t = 0;
-    let mut ret: lzma_ret = next.code.expect("non-null function pointer")(
+    let mut ret: lzma_ret = next.code.unwrap()(
         next.coder,
         allocator,
         in_0,

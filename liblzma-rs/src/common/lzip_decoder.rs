@@ -231,7 +231,7 @@ unsafe extern "C" fn lzip_decode(
                 let ret: lzma_ret = (*coder)
                     .lzma_decoder
                     .code
-                    .expect("non-null function pointer")(
+                    .unwrap()(
                     (*coder).lzma_decoder.coder,
                     allocator,
                     in_0,

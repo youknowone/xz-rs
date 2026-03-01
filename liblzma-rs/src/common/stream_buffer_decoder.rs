@@ -51,7 +51,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_decode(
     if ret == LZMA_OK {
         let in_start: size_t = *in_pos;
         let out_start: size_t = *out_pos;
-        ret = stream_decoder.code.expect("non-null function pointer")(
+        ret = stream_decoder.code.unwrap()(
             stream_decoder.coder,
             allocator,
             in_0,
@@ -75,7 +75,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_decode(
                 }
             } else if ret == LZMA_MEMLIMIT_ERROR {
                 let mut memusage: u64 = 0;
-                stream_decoder.memconfig.expect("non-null function pointer")(
+                stream_decoder.memconfig.unwrap()(
                     stream_decoder.coder,
                     memlimit,
                     &raw mut memusage,

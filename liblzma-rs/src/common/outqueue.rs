@@ -208,7 +208,7 @@ pub unsafe extern "C" fn lzma_outq_enable_partial_output(
     enable_partial_output: Option<unsafe extern "C" fn(*mut c_void) -> ()>,
 ) {
     if !(*outq).head.is_null() && !(*(*outq).head).finished && !(*(*outq).head).worker.is_null() {
-        enable_partial_output.expect("non-null function pointer")((*(*outq).head).worker);
+        enable_partial_output.unwrap()((*(*outq).head).worker);
         (*(*outq).head).worker = core::ptr::null_mut();
     }
 }

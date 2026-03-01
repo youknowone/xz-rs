@@ -445,7 +445,7 @@ pub unsafe extern "C" fn lzma_properties_decode(
             LZMA_OPTIONS_ERROR
         };
     }
-    (*fd).props_decode.expect("non-null function pointer")(
+    (*fd).props_decode.unwrap()(
         &raw mut (*filter).options,
         allocator,
         props,

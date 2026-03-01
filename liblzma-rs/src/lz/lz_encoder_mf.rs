@@ -35,7 +35,7 @@ pub unsafe extern "C" fn lzma_mf_find(
     count_ptr: *mut u32,
     matches: *mut lzma_match,
 ) -> u32 {
-    let count: u32 = (*mf).find.expect("non-null function pointer")(mf, matches) as u32;
+    let count: u32 = (*mf).find.unwrap()(mf, matches) as u32;
     let mut len_best: u32 = 0;
     if count > 0 {
         len_best = (*matches.offset(count.wrapping_sub(1) as isize)).len;

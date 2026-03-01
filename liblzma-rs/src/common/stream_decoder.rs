@@ -356,7 +356,7 @@ unsafe extern "C" fn stream_decode(
                 let ret_1: lzma_ret = (*coder)
                     .block_decoder
                     .code
-                    .expect("non-null function pointer")(
+                    .unwrap()(
                     (*coder).block_decoder.coder,
                     allocator,
                     in_0,

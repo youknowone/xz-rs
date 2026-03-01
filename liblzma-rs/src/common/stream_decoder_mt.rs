@@ -481,7 +481,7 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
         ret = (*thr)
             .block_decoder
             .code
-            .expect("non-null function pointer")(
+            .unwrap()(
             (*thr).block_decoder.coder,
             (*thr).allocator,
             (*thr).in_0,
@@ -1104,7 +1104,7 @@ unsafe extern "C" fn stream_decode_mt(
                 let ret_4: lzma_ret = (*coder)
                     .block_decoder
                     .code
-                    .expect("non-null function pointer")(
+                    .unwrap()(
                     (*coder).block_decoder.coder,
                     allocator,
                     in_0,

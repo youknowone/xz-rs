@@ -500,7 +500,7 @@ unsafe extern "C" fn worker_encode(
         ret = (*thr)
             .block_encoder
             .code
-            .expect("non-null function pointer")(
+            .unwrap()(
             (*thr).block_encoder.coder,
             (*thr).allocator,
             (*thr).in_0,
@@ -1164,7 +1164,7 @@ unsafe extern "C" fn stream_encode_mt(
                 let ret_0: lzma_ret = (*coder)
                     .index_encoder
                     .code
-                    .expect("non-null function pointer")(
+                    .unwrap()(
                     (*coder).index_encoder.coder,
                     allocator,
                     ::core::ptr::null::<u8>(),

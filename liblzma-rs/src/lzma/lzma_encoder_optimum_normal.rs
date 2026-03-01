@@ -103,7 +103,7 @@ unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
 #[inline]
 unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
     if amount != 0 {
-        (*mf).skip.expect("non-null function pointer")(mf, amount);
+        (*mf).skip.unwrap()(mf, amount);
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
 }

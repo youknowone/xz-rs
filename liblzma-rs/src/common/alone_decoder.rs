@@ -116,7 +116,7 @@ unsafe extern "C" fn alone_decode(
                 current_block_42 = 14763689060501151050;
             }
             4 => {
-                return (*coder).next.code.expect("non-null function pointer")(
+                return (*coder).next.code.unwrap()(
                     (*coder).next.coder,
                     allocator,
                     in_0,

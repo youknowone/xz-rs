@@ -189,7 +189,7 @@ unsafe extern "C" fn index_tree_node_end(
     if !(*node).right.is_null() {
         index_tree_node_end((*node).right, allocator, free_func);
     }
-    free_func.expect("non-null function pointer")(node as *mut c_void, allocator);
+    free_func.unwrap()(node as *mut c_void, allocator);
 }
 unsafe extern "C" fn index_tree_end(
     tree: *mut index_tree,

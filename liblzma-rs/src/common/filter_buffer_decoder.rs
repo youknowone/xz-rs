@@ -45,7 +45,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
     }
     let in_start: size_t = *in_pos;
     let out_start: size_t = *out_pos;
-    let mut ret: lzma_ret = next.code.expect("non-null function pointer")(
+    let mut ret: lzma_ret = next.code.unwrap()(
         next.coder,
         allocator,
         in_0,
@@ -67,7 +67,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
             } else {
                 let mut tmp: [u8; 1] = [0; 1];
                 let mut tmp_pos: size_t = 0;
-                next.code.expect("non-null function pointer")(
+                next.code.unwrap()(
                     next.coder,
                     allocator,
                     in_0,

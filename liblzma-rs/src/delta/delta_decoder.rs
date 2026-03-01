@@ -32,7 +32,7 @@ unsafe extern "C" fn delta_decode(
 ) -> lzma_ret {
     let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
     let out_start: size_t = *out_pos;
-    let ret: lzma_ret = (*coder).next.code.expect("non-null function pointer")(
+    let ret: lzma_ret = (*coder).next.code.unwrap()(
         (*coder).next.coder,
         allocator,
         in_0,

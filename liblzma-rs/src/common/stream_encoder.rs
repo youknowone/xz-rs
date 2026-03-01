@@ -165,7 +165,7 @@ unsafe extern "C" fn stream_encode(
                 let ret: lzma_ret = (*coder)
                     .block_encoder
                     .code
-                    .expect("non-null function pointer")(
+                    .unwrap()(
                     (*coder).block_encoder.coder,
                     allocator,
                     in_0,
@@ -196,7 +196,7 @@ unsafe extern "C" fn stream_encode(
                 let ret_0: lzma_ret = (*coder)
                     .index_encoder
                     .code
-                    .expect("non-null function pointer")(
+                    .unwrap()(
                     (*coder).index_encoder.coder,
                     allocator,
                     ::core::ptr::null::<u8>(),
@@ -284,7 +284,7 @@ unsafe extern "C" fn stream_encoder_update(
         ret = (*coder)
             .block_encoder
             .update
-            .expect("non-null function pointer")(
+            .unwrap()(
             (*coder).block_encoder.coder,
             allocator,
             filters,

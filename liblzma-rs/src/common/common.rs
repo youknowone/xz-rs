@@ -34,7 +34,7 @@ pub unsafe extern "C" fn lzma_alloc(
     }
     let mut ptr: *mut c_void = core::ptr::null_mut();
     if !allocator.is_null() && (*allocator).alloc.is_some() {
-        ptr = (*allocator).alloc.expect("non-null function pointer")((*allocator).opaque, 1, size);
+        ptr = (*allocator).alloc.unwrap()((*allocator).opaque, 1, size);
     } else {
         ptr = malloc(size);
     }
@@ -50,7 +50,7 @@ pub unsafe extern "C" fn lzma_alloc_zero(
     }
     let mut ptr: *mut c_void = core::ptr::null_mut();
     if !allocator.is_null() && (*allocator).alloc.is_some() {
-        ptr = (*allocator).alloc.expect("non-null function pointer")((*allocator).opaque, 1, size);
+        ptr = (*allocator).alloc.unwrap()((*allocator).opaque, 1, size);
         if !ptr.is_null() {
             memset(ptr, 0, size);
         }
@@ -62,7 +62,7 @@ pub unsafe extern "C" fn lzma_alloc_zero(
 #[no_mangle]
 pub unsafe extern "C" fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator) {
     if !allocator.is_null() && (*allocator).free.is_some() {
-        (*allocator).free.expect("non-null function pointer")((*allocator).opaque, ptr);
+        (*allocator).free.unwrap()((*allocator).opaque, ptr);
     } else {
         free(ptr);
     };
@@ -113,7 +113,7 @@ pub unsafe extern "C" fn lzma_next_filter_init(
     } else {
         (*filters.offset(0))
             .init
-            .expect("non-null function pointer")(next, allocator, filters)
+            .unwrap()(next, allocator, filters)
     }
 }
 #[no_mangle]
@@ -128,7 +128,7 @@ pub unsafe extern "C" fn lzma_next_filter_update(
     if (*reversed_filters.offset(0)).id == LZMA_VLI_UNKNOWN {
         return LZMA_OK;
     }
-    (*next).update.expect("non-null function pointer")(
+    (*next).update.unwrap()(
         (*next).coder,
         allocator,
         ::core::ptr::null::<lzma_filter>(),
@@ -142,7 +142,7 @@ pub unsafe extern "C" fn lzma_next_end(
 ) {
     if (*next).init != 0 {
         if (*next).end.is_some() {
-            (*next).end.expect("non-null function pointer")((*next).coder, allocator);
+            (*next).end.unwrap()((*next).coder, allocator);
         } else {
             lzma_free((*next).coder, allocator);
         }
@@ -262,7 +262,7 @@ pub unsafe extern "C" fn lzma_code(strm: *mut lzma_stream, action: lzma_action) 
     let mut ret: lzma_ret = (*(*strm).internal)
         .next
         .code
-        .expect("non-null function pointer")(
+        .unwrap()(
         (*(*strm).internal).next.coder,
         (*strm).allocator,
         (*strm).next_in,
@@ -355,7 +355,7 @@ pub unsafe extern "C" fn lzma_get_progress(
         (*(*strm).internal)
             .next
             .get_progress
-            .expect("non-null function pointer")(
+            .unwrap()(
             (*(*strm).internal).next.coder,
             progress_in,
             progress_out,
@@ -374,7 +374,7 @@ pub extern "C" fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
         (*(*strm).internal)
             .next
             .get_check
-            .expect("non-null function pointer")((*(*strm).internal).next.coder)
+            .unwrap()((*(*strm).internal).next.coder)
     };
 }
 #[no_mangle]
@@ -388,7 +388,7 @@ pub extern "C" fn lzma_memusage(strm: *const lzma_stream) -> u64 {
             || (*(*strm).internal)
                 .next
                 .memconfig
-                .expect("non-null function pointer")(
+                .unwrap()(
                 (*(*strm).internal).next.coder,
                 &raw mut memusage,
                 &raw mut old_memlimit,
@@ -411,7 +411,7 @@ pub extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
             || (*(*strm).internal)
                 .next
                 .memconfig
-                .expect("non-null function pointer")(
+                .unwrap()(
                 (*(*strm).internal).next.coder,
                 &raw mut memusage,
                 &raw mut old_memlimit,
@@ -440,7 +440,7 @@ pub unsafe extern "C" fn lzma_memlimit_set(
     (*(*strm).internal)
         .next
         .memconfig
-        .expect("non-null function pointer")(
+        .unwrap()(
         (*(*strm).internal).next.coder,
         &raw mut memusage,
         &raw mut old_memlimit,
