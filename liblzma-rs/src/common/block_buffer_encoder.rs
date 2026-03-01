@@ -68,7 +68,7 @@ unsafe extern "C" fn block_encode_uncompressed(
 ) -> lzma_ret {
     let mut lzma2: lzma_options_lzma = lzma_options_lzma {
         dict_size: LZMA_DICT_SIZE_MIN as u32,
-        preset_dict: ::core::ptr::null::<u8>(),
+        preset_dict: core::ptr::null::<u8>(),
         preset_dict_size: 0,
         lc: 0,
         lp: 0,
@@ -315,7 +315,7 @@ pub unsafe extern "C" fn lzma_block_uncomp_encode(
 ) -> lzma_ret {
     block_buffer_encode(
         block,
-        ::core::ptr::null::<lzma_allocator>(),
+        core::ptr::null::<lzma_allocator>(),
         in_0,
         in_size,
         out,

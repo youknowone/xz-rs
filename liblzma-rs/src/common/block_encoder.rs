@@ -186,7 +186,7 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
     allocator: *const lzma_allocator,
     block: *mut lzma_block,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -206,7 +206,7 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,

@@ -259,7 +259,7 @@ pub unsafe extern "C" fn lzma_index_decoder_init(
     i: *mut *mut lzma_index,
     memlimit: u64,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -281,7 +281,7 @@ pub unsafe extern "C" fn lzma_index_decoder_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,

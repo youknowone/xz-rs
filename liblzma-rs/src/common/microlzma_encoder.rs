@@ -82,7 +82,7 @@ unsafe extern "C" fn microlzma_encoder_init(
     allocator: *const lzma_allocator,
     options: *const lzma_options_lzma,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -102,7 +102,7 @@ unsafe extern "C" fn microlzma_encoder_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,

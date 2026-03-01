@@ -54,7 +54,7 @@ unsafe extern "C" fn microlzma_decode(
         }
         let mut options: lzma_options_lzma = lzma_options_lzma {
             dict_size: (*coder).dict_size,
-            preset_dict: ::core::ptr::null::<u8>(),
+            preset_dict: core::ptr::null::<u8>(),
             preset_dict_size: 0,
             lc: 0,
             lp: 0,
@@ -177,7 +177,7 @@ unsafe extern "C" fn microlzma_decoder_init(
     uncomp_size_is_exact: bool,
     dict_size: u32,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -203,7 +203,7 @@ unsafe extern "C" fn microlzma_decoder_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,

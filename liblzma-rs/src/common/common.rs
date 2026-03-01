@@ -100,13 +100,13 @@ pub unsafe extern "C" fn lzma_next_filter_init(
     allocator: *const lzma_allocator,
     filters: *const lzma_filter_info,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<lzma_init_function, uintptr_t>((*filters.offset(0)).init)
+    if core::mem::transmute::<lzma_init_function, uintptr_t>((*filters.offset(0)).init)
         != (*next).init
     {
         lzma_next_end(next, allocator);
     }
     (*next).init =
-        ::core::mem::transmute::<lzma_init_function, uintptr_t>((*filters.offset(0)).init);
+        core::mem::transmute::<lzma_init_function, uintptr_t>((*filters.offset(0)).init);
     (*next).id = (*filters.offset(0)).id;
     if (*filters.offset(0)).init.is_none() {
         LZMA_OK
@@ -131,7 +131,7 @@ pub unsafe extern "C" fn lzma_next_filter_update(
     (*next).update.unwrap()(
         (*next).coder,
         allocator,
-        ::core::ptr::null::<lzma_filter>(),
+        core::ptr::null::<lzma_filter>(),
         reversed_filters,
     )
 }

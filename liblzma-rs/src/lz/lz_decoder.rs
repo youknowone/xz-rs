@@ -242,7 +242,7 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
     }
     let mut lz_options: lzma_lz_options = lzma_lz_options {
         dict_size: 0,
-        preset_dict: ::core::ptr::null::<u8>(),
+        preset_dict: core::ptr::null::<u8>(),
         preset_dict_size: 0,
     };
     let ret_: lzma_ret = lz_init.unwrap()(

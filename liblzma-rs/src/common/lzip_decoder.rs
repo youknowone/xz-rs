@@ -173,7 +173,7 @@ unsafe extern "C" fn lzip_decode(
                 }
                 (*coder).options.dict_size =
                     (1u32 << b2log).wrapping_sub(fracnum << b2log.wrapping_sub(4));
-                (*coder).options.preset_dict = ::core::ptr::null::<u8>();
+                (*coder).options.preset_dict = core::ptr::null::<u8>();
                 (*coder).options.lc = LZIP_LC;
                 (*coder).options.lp = LZIP_LP;
                 (*coder).options.pb = LZIP_PB;
@@ -334,7 +334,7 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
     memlimit: u64,
     flags: u32,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(*mut lzma_next_coder, *const lzma_allocator, u64, u32) -> lzma_ret,
         >,
@@ -351,7 +351,7 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(*mut lzma_next_coder, *const lzma_allocator, u64, u32) -> lzma_ret,
         >,

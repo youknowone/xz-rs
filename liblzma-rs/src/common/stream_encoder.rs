@@ -199,7 +199,7 @@ unsafe extern "C" fn stream_encode(
                     .unwrap()(
                     (*coder).index_encoder.coder,
                     allocator,
-                    ::core::ptr::null::<u8>(),
+                    core::ptr::null::<u8>(),
                     core::ptr::null_mut(),
                     0,
                     out,
@@ -321,7 +321,7 @@ unsafe extern "C" fn stream_encoder_init(
     filters: *const lzma_filter,
     check: lzma_check,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -343,7 +343,7 @@ unsafe extern "C" fn stream_encoder_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -472,7 +472,7 @@ unsafe extern "C" fn stream_encoder_init(
         coder as *mut c_void,
         allocator,
         filters,
-        ::core::ptr::null::<lzma_filter>(),
+        core::ptr::null::<lzma_filter>(),
     )
 }
 #[no_mangle]

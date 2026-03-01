@@ -1271,7 +1271,7 @@ pub extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
         nice_len: 0,
         match_finder: 0 as lzma_match_finder,
         depth: 0,
-        preset_dict: ::core::ptr::null::<u8>(),
+        preset_dict: core::ptr::null::<u8>(),
         preset_dict_size: 0,
     };
     set_lz_options(&raw mut lz_options, options as *const lzma_options_lzma);

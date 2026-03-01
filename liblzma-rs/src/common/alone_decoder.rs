@@ -199,7 +199,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     memlimit: u64,
     picky: bool,
 ) -> lzma_ret {
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -221,7 +221,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -287,7 +287,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     (*coder).picky = picky;
     (*coder).pos = 0;
     (*coder).options.dict_size = 0;
-    (*coder).options.preset_dict = ::core::ptr::null::<u8>();
+    (*coder).options.preset_dict = core::ptr::null::<u8>();
     (*coder).options.preset_dict_size = 0;
     (*coder).uncompressed_size = 0;
     (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };

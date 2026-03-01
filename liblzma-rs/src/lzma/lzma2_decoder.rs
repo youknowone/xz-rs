@@ -341,7 +341,7 @@ pub unsafe extern "C" fn lzma_lzma2_props_decode(
         (*opt).dict_size = 2u32 | (u32::from(*props.offset(0)) & 1);
         (*opt).dict_size <<= u32::from(*props.offset(0)).wrapping_div(2).wrapping_add(11);
     }
-    (*opt).preset_dict = ::core::ptr::null::<u8>();
+    (*opt).preset_dict = core::ptr::null::<u8>();
     (*opt).preset_dict_size = 0;
     *options = opt as *mut c_void;
     LZMA_OK

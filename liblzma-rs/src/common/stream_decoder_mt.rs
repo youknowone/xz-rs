@@ -311,7 +311,7 @@ extern "C" fn mythread_create(
     let ret: c_int = unsafe {
         pthread_create(
             thread as *mut pthread_t,
-            ::core::ptr::null::<pthread_attr_t>(),
+            core::ptr::null::<pthread_attr_t>(),
             func as Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
             arg as *mut c_void,
         )
@@ -328,7 +328,7 @@ extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
     unsafe {
         pthread_mutex_init(
             mutex as *mut pthread_mutex_t,
-            ::core::ptr::null::<pthread_mutexattr_t>(),
+            core::ptr::null::<pthread_mutexattr_t>(),
         )
     }
 }
@@ -350,7 +350,7 @@ extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
         (*mycond).clk_id = _CLOCK_REALTIME;
         pthread_cond_init(
             &raw mut (*mycond).cond,
-            ::core::ptr::null::<pthread_condattr_t>(),
+            core::ptr::null::<pthread_condattr_t>(),
         )
     };
 }
@@ -1723,7 +1723,7 @@ unsafe extern "C" fn stream_decoder_mt_init(
     if (*options).flags & !(LZMA_SUPPORTED_FLAGS as u32) != 0 {
         return LZMA_OPTIONS_ERROR;
     }
-    if ::core::mem::transmute::<
+    if core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,
@@ -1743,7 +1743,7 @@ unsafe extern "C" fn stream_decoder_mt_init(
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = ::core::mem::transmute::<
+    (*next).init = core::mem::transmute::<
         Option<
             unsafe extern "C" fn(
                 *mut lzma_next_coder,

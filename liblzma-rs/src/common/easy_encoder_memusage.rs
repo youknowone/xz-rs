@@ -12,7 +12,7 @@ pub extern "C" fn lzma_easy_encoder_memusage(preset: u32) -> u64 {
         }; 5],
         opt_lzma: lzma_options_lzma {
             dict_size: 0,
-            preset_dict: ::core::ptr::null::<u8>(),
+            preset_dict: core::ptr::null::<u8>(),
             preset_dict_size: 0,
             lc: 0,
             lp: 0,

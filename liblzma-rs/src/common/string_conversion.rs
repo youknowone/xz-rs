@@ -115,10 +115,10 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
     } else {
         static mut suffixes: [[c_char; 4]; 4] = unsafe {
             [
-                ::core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"\0\0\0\0"),
-                ::core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"KiB\0"),
-                ::core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"MiB\0"),
-                ::core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"GiB\0"),
+                core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"\0\0\0\0"),
+                core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"KiB\0"),
+                core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"MiB\0"),
+                core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"GiB\0"),
             ]
         };
         let mut suf: size_t = 0;
@@ -134,7 +134,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
             }
         }
         let mut buf: [c_char; 16] =
-            ::core::mem::transmute::<[u8; 16], [c_char; 16]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
+            core::mem::transmute::<[u8; 16], [c_char; 16]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
         let mut pos: size_t = (core::mem::size_of::<[c_char; 16]>()).wrapping_sub(1);
         loop {
             pos -= 1;
@@ -158,7 +158,7 @@ pub const OPTMAP_USE_BYTE_SUFFIX: u8 = 0x2;
 pub const OPTMAP_NO_STRFY_ZERO: u8 = 0x4;
 static mut bcj_optmap: [option_map; 1] = unsafe {
     [option_map {
-        name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"start\0\0\0\0\0\0\0"),
+        name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"start\0\0\0\0\0\0\0"),
         type_0: 0,
         flags: (OPTMAP_NO_STRFY_ZERO | OPTMAP_USE_BYTE_SUFFIX) as u8,
         offset: 0,
@@ -188,7 +188,7 @@ extern "C" fn parse_bcj(
 }
 static mut delta_optmap: [option_map; 1] = unsafe {
     [option_map {
-        name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"dist\0\0\0\0\0\0\0\0"),
+        name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"dist\0\0\0\0\0\0\0\0"),
         type_0: 0,
         flags: 0,
         offset: 4,
@@ -220,7 +220,7 @@ extern "C" fn parse_delta(
     };
 }
 pub const LZMA12_PRESET_STR: [c_char; 7] =
-    unsafe { ::core::mem::transmute::<[u8; 7], [c_char; 7]>(*b"0-9[e]\0") };
+    unsafe { core::mem::transmute::<[u8; 7], [c_char; 7]>(*b"0-9[e]\0") };
 unsafe extern "C" fn parse_lzma12_preset(
     str: *mut *const c_char,
     str_end: *const c_char,
@@ -244,7 +244,7 @@ unsafe extern "C" fn parse_lzma12_preset(
             }
         }
     }
-    ::core::ptr::null::<c_char>()
+    core::ptr::null::<c_char>()
 }
 unsafe extern "C" fn set_lzma12_preset(
     str: *mut *const c_char,
@@ -260,20 +260,20 @@ unsafe extern "C" fn set_lzma12_preset(
     if lzma_lzma_preset(opts, preset) != 0 {
         return b"Unsupported preset\0" as *const u8 as *const c_char;
     }
-    ::core::ptr::null::<c_char>()
+    core::ptr::null::<c_char>()
 }
 static lzma12_mode_map: [name_value_map; 3] = unsafe {
     [
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"fast\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"fast\0\0\0\0\0\0\0\0"),
             value: LZMA_MODE_FAST as u32,
         },
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"normal\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"normal\0\0\0\0\0\0"),
             value: LZMA_MODE_NORMAL as u32,
         },
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
             value: 0,
         },
     ]
@@ -281,27 +281,27 @@ static lzma12_mode_map: [name_value_map; 3] = unsafe {
 static lzma12_mf_map: [name_value_map; 6] = unsafe {
     [
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"hc3\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"hc3\0\0\0\0\0\0\0\0\0"),
             value: LZMA_MF_HC3 as u32,
         },
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"hc4\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"hc4\0\0\0\0\0\0\0\0\0"),
             value: LZMA_MF_HC4 as u32,
         },
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"bt2\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"bt2\0\0\0\0\0\0\0\0\0"),
             value: LZMA_MF_BT2 as u32,
         },
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"bt3\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"bt3\0\0\0\0\0\0\0\0\0"),
             value: LZMA_MF_BT3 as u32,
         },
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"bt4\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"bt4\0\0\0\0\0\0\0\0\0"),
             value: LZMA_MF_BT4 as u32,
         },
         name_value_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0"),
             value: 0,
         },
     ]
@@ -312,7 +312,7 @@ static mut lzma12_optmap: [option_map; 9] = [option_map {
     flags: 0,
     offset: 0,
     u: C2RustUnnamed_0 {
-        map: ::core::ptr::null::<name_value_map>(),
+        map: core::ptr::null::<name_value_map>(),
     },
 }; 9];
 unsafe extern "C" fn parse_lzma12(
@@ -335,12 +335,12 @@ unsafe extern "C" fn parse_lzma12(
     if (*opts).lc.wrapping_add((*opts).lp) > LZMA_LCLP_MAX {
         return b"The sum of lc and lp must not exceed 4\0" as *const u8 as *const c_char;
     }
-    ::core::ptr::null::<c_char>()
+    core::ptr::null::<c_char>()
 }
 static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
     [
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lzma1\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lzma1\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_lzma>() as u32,
             id: LZMA_FILTER_LZMA1,
             parse: Some(
@@ -357,7 +357,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: false,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lzma2\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lzma2\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_lzma>() as u32,
             id: LZMA_FILTER_LZMA2,
             parse: Some(
@@ -374,7 +374,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: false,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"x86\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"x86\0\0\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_X86,
             parse: Some(
@@ -391,7 +391,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"arm\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"arm\0\0\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_ARM,
             parse: Some(
@@ -408,7 +408,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"armthumb\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"armthumb\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_ARMTHUMB,
             parse: Some(
@@ -425,7 +425,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"arm64\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"arm64\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_ARM64,
             parse: Some(
@@ -442,7 +442,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"riscv\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"riscv\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_RISCV,
             parse: Some(
@@ -459,7 +459,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"powerpc\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"powerpc\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_POWERPC,
             parse: Some(
@@ -476,7 +476,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"ia64\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"ia64\0\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_IA64,
             parse: Some(
@@ -493,7 +493,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"sparc\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"sparc\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_bcj>() as u32,
             id: LZMA_FILTER_SPARC,
             parse: Some(
@@ -510,7 +510,7 @@ static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
             allow_null: true,
         },
         C2RustUnnamed {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"delta\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"delta\0\0\0\0\0\0\0"),
             opts_size: core::mem::size_of::<lzma_options_delta>() as u32,
             id: LZMA_FILTER_DELTA,
             parse: Some(
@@ -698,7 +698,7 @@ unsafe extern "C" fn parse_options(
             }
         }
     }
-    ::core::ptr::null::<c_char>()
+    core::ptr::null::<c_char>()
 }
 unsafe extern "C" fn parse_filter(
     str: *mut *const c_char,
@@ -756,7 +756,7 @@ unsafe extern "C" fn parse_filter(
             }
             (*filter).id = filter_name_map[i as usize].id;
             (*filter).options = options;
-            return ::core::ptr::null::<c_char>();
+            return core::ptr::null::<c_char>();
         }
         i += 1;
     }
@@ -769,7 +769,7 @@ unsafe extern "C" fn str_to_filters(
     allocator: *const lzma_allocator,
 ) -> *const c_char {
     let mut current_block: u64;
-    let mut errmsg: *const c_char = ::core::ptr::null::<c_char>();
+    let mut errmsg: *const c_char = core::ptr::null::<c_char>();
     while **str as u8 == b' ' {
         *str = (*str).offset(1);
     }
@@ -817,7 +817,7 @@ unsafe extern "C" fn str_to_filters(
         (*filters.offset(0)).options = opts as *mut c_void;
         (*filters.offset(1)).id = LZMA_VLI_UNKNOWN;
         (*filters.offset(1)).options = core::ptr::null_mut();
-        return ::core::ptr::null::<c_char>();
+        return core::ptr::null::<c_char>();
     }
     let only_xz: bool = flags & LZMA_STR_ALL_FILTERS as u32 == 0;
     let mut temp_filters: [lzma_filter; 5] = [lzma_filter {
@@ -898,7 +898,7 @@ unsafe extern "C" fn str_to_filters(
                         i_0.wrapping_add(1)
                             .wrapping_mul(core::mem::size_of::<lzma_filter>()),
                     );
-                    return ::core::ptr::null::<c_char>();
+                    return core::ptr::null::<c_char>();
                 }
             }
         }
@@ -1236,16 +1236,16 @@ pub unsafe extern "C" fn lzma_str_list_filters(
 unsafe extern "C" fn run_static_initializers() {
     lzma12_optmap = [
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"preset\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"preset\0\0\0\0\0\0"),
             type_0: OPTMAP_TYPE_LZMA_PRESET,
             flags: 0,
             offset: 0,
             u: C2RustUnnamed_0 {
-                map: ::core::ptr::null::<name_value_map>(),
+                map: core::ptr::null::<name_value_map>(),
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"dict\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"dict\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: OPTMAP_USE_BYTE_SUFFIX,
             offset: 0,
@@ -1257,7 +1257,7 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lc\0\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lc\0\0\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
             offset: 20,
@@ -1269,7 +1269,7 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lp\0\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"lp\0\0\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
             offset: 24,
@@ -1281,7 +1281,7 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"pb\0\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"pb\0\0\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
             offset: 28,
@@ -1293,7 +1293,7 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mode\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mode\0\0\0\0\0\0\0\0"),
             type_0: OPTMAP_TYPE_LZMA_MODE,
             flags: OPTMAP_USE_NAME_VALUE_MAP,
             offset: 32,
@@ -1302,7 +1302,7 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"nice\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"nice\0\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
             offset: 36,
@@ -1311,7 +1311,7 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mf\0\0\0\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mf\0\0\0\0\0\0\0\0\0\0"),
             type_0: OPTMAP_TYPE_LZMA_MATCH_FINDER,
             flags: OPTMAP_USE_NAME_VALUE_MAP,
             offset: 40,
@@ -1320,7 +1320,7 @@ unsafe extern "C" fn run_static_initializers() {
             },
         },
         option_map {
-            name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"depth\0\0\0\0\0\0\0"),
+            name: core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"depth\0\0\0\0\0\0\0"),
             type_0: 0,
             flags: 0,
             offset: 44,

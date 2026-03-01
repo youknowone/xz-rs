@@ -374,7 +374,7 @@ extern "C" fn decoder_find(id: lzma_vli) -> *const lzma_filter_decoder {
         }
         i += 1;
     }
-    ::core::ptr::null::<lzma_filter_decoder>()
+    core::ptr::null::<lzma_filter_decoder>()
 }
 extern "C" fn coder_find(id: lzma_vli) -> *const lzma_filter_coder {
     decoder_find(id) as *const lzma_filter_coder
