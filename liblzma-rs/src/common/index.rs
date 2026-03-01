@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_ulong, c_ulonglong, c_void};
+use core::ffi::{c_uint, c_ulong, c_ulonglong, c_void};
 extern "C" {
     fn lzma_vli_size(vli: lzma_vli) -> u32;
     fn lzma_stream_flags_compare(
@@ -168,7 +168,7 @@ extern "C" fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) ->
 extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     return vli_ceil4(index_size_unpadded(count, index_list_size));
 }
-pub const INDEX_GROUP_SIZE: c_int = 512;
+pub const INDEX_GROUP_SIZE: u32 = 512;
 pub const PREALLOC_MAX: usize = (SIZE_MAX as usize)
     .wrapping_sub(core::mem::size_of::<index_group>() as usize)
     .wrapping_div(core::mem::size_of::<index_record>() as usize);

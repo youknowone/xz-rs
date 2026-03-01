@@ -357,10 +357,10 @@ unsafe extern "C" fn lzma2_encoder_options_update(
         || (*coder).opt_cur.lp != (*opt).lp
         || (*coder).opt_cur.pb != (*opt).pb
     {
-        if (*opt).lc > LZMA_LCLP_MAX as u32
-            || (*opt).lp > LZMA_LCLP_MAX as u32
-            || (*opt).lc.wrapping_add((*opt).lp) > LZMA_LCLP_MAX as u32
-            || (*opt).pb > LZMA_PB_MAX as u32
+        if (*opt).lc > LZMA_LCLP_MAX
+            || (*opt).lp > LZMA_LCLP_MAX
+            || (*opt).lc.wrapping_add((*opt).lp) > LZMA_LCLP_MAX
+            || (*opt).pb > LZMA_PB_MAX
         {
             return LZMA_OPTIONS_ERROR;
         }

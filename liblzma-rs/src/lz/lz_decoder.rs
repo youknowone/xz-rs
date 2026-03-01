@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_ulong, c_void};
+use core::ffi::{c_ulong, c_void};
 extern "C" {
     fn lzma_next_filter_init(
         next: *mut lzma_next_coder,
@@ -34,10 +34,10 @@ pub struct C2RustUnnamed {
 }
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
-pub const LZMA_BUFFER_SIZE: c_int = 4096;
-pub const LZ_DICT_EXTRA: c_int = 0;
-pub const LZ_DICT_REPEAT_MAX: c_int = 288;
-pub const LZ_DICT_INIT_POS: c_int = 2 * LZ_DICT_REPEAT_MAX;
+pub const LZMA_BUFFER_SIZE: u32 = 4096;
+pub const LZ_DICT_EXTRA: u32 = 0;
+pub const LZ_DICT_REPEAT_MAX: u32 = 288;
+pub const LZ_DICT_INIT_POS: u32 = 2 * LZ_DICT_REPEAT_MAX;
 pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
     coder: core::ptr::null_mut(),
     code: None,

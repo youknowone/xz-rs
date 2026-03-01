@@ -195,10 +195,10 @@ pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_BITS: u32 = 5;
 #[inline]
 unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
-    return (*options).lc <= LZMA_LCLP_MAX as u32
-        && (*options).lp <= LZMA_LCLP_MAX as u32
-        && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX as u32
-        && (*options).pb <= LZMA_PB_MAX as u32;
+    return (*options).lc <= LZMA_LCLP_MAX
+        && (*options).lp <= LZMA_LCLP_MAX
+        && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX
+        && (*options).pb <= LZMA_PB_MAX;
 }
 pub const STATES: u32 = 12;
 pub const LIT_STATES: u32 = 7;
@@ -3595,7 +3595,7 @@ pub unsafe extern "C" fn lzma_lzma_lclppb_decode(
     byte = (byte as u32).wrapping_sub((*options).pb.wrapping_mul(9u32).wrapping_mul(5)) as u8;
     (*options).lp = (byte / 9) as u32;
     (*options).lc = (byte as u32).wrapping_sub((*options).lp.wrapping_mul(9));
-    return (*options).lc.wrapping_add((*options).lp) > LZMA_LCLP_MAX as u32;
+    return (*options).lc.wrapping_add((*options).lp) > LZMA_LCLP_MAX;
 }
 #[no_mangle]
 pub extern "C" fn lzma_lzma_decoder_memusage_nocheck(options: *const c_void) -> u64 {

@@ -1,20 +1,20 @@
 use crate::types::*;
-use core::ffi::{c_char, c_int, c_uint, c_void};
+use core::ffi::{c_char, c_uint, c_void};
 extern "C" {
     fn malloc(__size: size_t) -> *mut c_void;
     fn calloc(__count: size_t, __size: size_t) -> *mut c_void;
     fn free(_: *mut c_void);
 }
-pub const LZMA_VERSION_MAJOR: c_int = 5;
-pub const LZMA_VERSION_MINOR: c_int = 8;
-pub const LZMA_VERSION_PATCH: c_int = 2;
-pub const LZMA_VERSION_STABILITY: c_int = LZMA_VERSION_STABILITY_STABLE;
-pub const LZMA_VERSION_STABILITY_STABLE: c_int = 2;
-pub const LZMA_VERSION: c_uint = (LZMA_VERSION_MAJOR as u32)
+pub const LZMA_VERSION_MAJOR: u32 = 5;
+pub const LZMA_VERSION_MINOR: u32 = 8;
+pub const LZMA_VERSION_PATCH: u32 = 2;
+pub const LZMA_VERSION_STABILITY: u32 = LZMA_VERSION_STABILITY_STABLE;
+pub const LZMA_VERSION_STABILITY_STABLE: u32 = 2;
+pub const LZMA_VERSION: c_uint = (LZMA_VERSION_MAJOR)
     .wrapping_mul(10000000)
-    .wrapping_add((LZMA_VERSION_MINOR as u32).wrapping_mul(10000))
-    .wrapping_add((LZMA_VERSION_PATCH as u32).wrapping_mul(10))
-    .wrapping_add(LZMA_VERSION_STABILITY as u32);
+    .wrapping_add((LZMA_VERSION_MINOR).wrapping_mul(10000))
+    .wrapping_add((LZMA_VERSION_PATCH).wrapping_mul(10))
+    .wrapping_add(LZMA_VERSION_STABILITY);
 pub const LZMA_TIMED_OUT: c_uint = 101;
 #[no_mangle]
 pub extern "C" fn lzma_version_number() -> u32 {

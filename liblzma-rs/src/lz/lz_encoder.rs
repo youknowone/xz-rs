@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_next_filter_init(
         next: *mut lzma_next_coder,
@@ -57,7 +57,7 @@ extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
 }
 pub const HASH_2_SIZE: c_uint = 1u32 << 10;
 pub const HASH_3_SIZE: c_uint = 1u32 << 16;
-pub const LZMA_MEMCMPLEN_EXTRA: c_int = 0;
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 0;
 unsafe extern "C" fn move_window(mf: *mut lzma_mf) {
     let move_offset: u32 = (*mf).read_pos.wrapping_sub((*mf).keep_size_before) & !(15);
     let move_size: size_t = (*mf).write_pos.wrapping_sub(move_offset) as size_t;
@@ -311,7 +311,7 @@ unsafe extern "C" fn lz_encoder_init(
 ) -> bool {
     if (*mf).buffer.is_null() {
         (*mf).buffer = lzma_alloc(
-            (*mf).size.wrapping_add(LZMA_MEMCMPLEN_EXTRA as u32) as size_t,
+            (*mf).size.wrapping_add(LZMA_MEMCMPLEN_EXTRA) as size_t,
             allocator,
         ) as *mut u8;
         if (*mf).buffer.is_null() {

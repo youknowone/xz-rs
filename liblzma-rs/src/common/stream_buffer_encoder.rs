@@ -1,5 +1,4 @@
 use crate::types::*;
-use core::ffi::c_int;
 #[repr(C)]
 pub struct lzma_index_s {
     _opaque: [u8; 0],
@@ -36,8 +35,8 @@ extern "C" {
     ) -> lzma_ret;
 }
 pub type lzma_index = lzma_index_s;
-pub const INDEX_BOUND: c_int = 1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 4 + 3 & !(3);
-pub const HEADERS_BOUND: c_int = 2 * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
+pub const INDEX_BOUND: u32 = 1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 4 + 3 & !(3);
+pub const HEADERS_BOUND: u32 = 2 * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
 #[no_mangle]
 pub extern "C" fn lzma_stream_buffer_bound(uncompressed_size: size_t) -> size_t {
     let block_bound: size_t = unsafe { lzma_block_buffer_bound(uncompressed_size) } as size_t;

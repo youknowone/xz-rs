@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
@@ -44,7 +44,7 @@ extern "C" fn write32le(buf: *mut u8, num: u32) {
         *buf.offset(3) = (num >> 24) as u8;
     }
 }
-pub const ALONE_HEADER_SIZE: c_int = 1 + 4 + 8;
+pub const ALONE_HEADER_SIZE: u32 = 1 + 4 + 8;
 unsafe extern "C" fn alone_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,

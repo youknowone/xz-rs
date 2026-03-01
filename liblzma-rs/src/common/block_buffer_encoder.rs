@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_uint, c_ulonglong, c_void};
 extern "C" {
     fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
     fn lzma_check_size(check: lzma_check) -> u32;
@@ -20,14 +20,14 @@ extern "C" {
     );
     fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check);
 }
-pub const LZMA_CHECK_SIZE_MAX: c_int = 64;
+pub const LZMA_CHECK_SIZE_MAX: u32 = 64;
 pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as u64)
     .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64)
     & !3;
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
-pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3;
-pub const HEADERS_BOUND: c_int =
+pub const LZMA2_HEADER_UNCOMPRESSED: u32 = 3;
+pub const HEADERS_BOUND: u32 =
     1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 3 + 4 + LZMA_CHECK_SIZE_MAX + 3 & !(3);
 extern "C" fn lzma2_bound(uncompressed_size: u64) -> u64 {
     if uncompressed_size > COMPRESSED_SIZE_MAX as u64 {

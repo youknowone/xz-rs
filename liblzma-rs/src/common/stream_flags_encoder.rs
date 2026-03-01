@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     static lzma_header_magic: [u8; 6];
@@ -14,7 +14,7 @@ extern "C" fn write32le(buf: *mut u8, num: u32) {
         *buf.offset(3) = (num >> 24) as u8;
     }
 }
-pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2;
+pub const LZMA_STREAM_FLAGS_SIZE: u32 = 2;
 #[inline]
 extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
     return unsafe {

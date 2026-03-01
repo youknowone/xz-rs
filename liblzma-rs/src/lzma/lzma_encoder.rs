@@ -467,10 +467,10 @@ unsafe extern "C" fn rc_pending(rc: *const lzma_range_encoder) -> u64 {
 }
 #[inline]
 unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
-    return (*options).lc <= LZMA_LCLP_MAX as u32
-        && (*options).lp <= LZMA_LCLP_MAX as u32
-        && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX as u32
-        && (*options).pb <= LZMA_PB_MAX as u32;
+    return (*options).lc <= LZMA_LCLP_MAX
+        && (*options).lp <= LZMA_LCLP_MAX
+        && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX
+        && (*options).pb <= LZMA_PB_MAX;
 }
 pub const STATES: u32 = 12;
 pub const LIT_STATES: u32 = 7;
@@ -1175,12 +1175,10 @@ pub unsafe extern "C" fn lzma_lzma_encoder_create(
             } else {
                 (*options).nice_len
             };
-            (*coder).match_len_encoder.table_size = nice_len
-                .wrapping_add(1u32)
-                .wrapping_sub(MATCH_LEN_MIN);
-            (*coder).rep_len_encoder.table_size = nice_len
-                .wrapping_add(1u32)
-                .wrapping_sub(MATCH_LEN_MIN);
+            (*coder).match_len_encoder.table_size =
+                nice_len.wrapping_add(1u32).wrapping_sub(MATCH_LEN_MIN);
+            (*coder).rep_len_encoder.table_size =
+                nice_len.wrapping_add(1u32).wrapping_sub(MATCH_LEN_MIN);
         }
         _ => return LZMA_OPTIONS_ERROR,
     }

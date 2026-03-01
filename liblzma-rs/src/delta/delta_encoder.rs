@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_next_filter_update(
         next: *mut lzma_next_coder,
@@ -13,7 +13,7 @@ extern "C" {
         filters: *const lzma_filter_info,
     ) -> lzma_ret;
 }
-pub const LZMA_DELTA_DIST_MIN: c_int = 1;
+pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 unsafe extern "C" fn copy_and_encode(
     coder: *mut lzma_delta_coder,
     in_0: *const u8,
@@ -159,6 +159,6 @@ pub unsafe extern "C" fn lzma_delta_props_encode(options: *const c_void, out: *m
         return LZMA_PROG_ERROR;
     }
     let opt: *const lzma_options_delta = options as *const lzma_options_delta;
-    *out.offset(0) = (*opt).dist.wrapping_sub(LZMA_DELTA_DIST_MIN as u32) as u8;
+    *out.offset(0) = (*opt).dist.wrapping_sub(LZMA_DELTA_DIST_MIN) as u8;
     return LZMA_OK;
 }

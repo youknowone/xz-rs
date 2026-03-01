@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
@@ -75,11 +75,11 @@ extern "C" fn read64le(buf: *const u8) -> u64 {
         num
     };
 }
-pub const LZIP_V0_FOOTER_SIZE: c_int = 12;
-pub const LZIP_V1_FOOTER_SIZE: c_int = 20;
-pub const LZIP_LC: c_int = 3;
-pub const LZIP_LP: c_int = 0;
-pub const LZIP_PB: c_int = 2;
+pub const LZIP_V0_FOOTER_SIZE: u32 = 12;
+pub const LZIP_V1_FOOTER_SIZE: u32 = 20;
+pub const LZIP_LC: u32 = 3;
+pub const LZIP_LP: u32 = 0;
+pub const LZIP_PB: u32 = 2;
 unsafe extern "C" fn lzip_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
@@ -176,9 +176,9 @@ unsafe extern "C" fn lzip_decode(
                 (*coder).options.dict_size =
                     (1u32 << b2log).wrapping_sub(fracnum << b2log.wrapping_sub(4));
                 (*coder).options.preset_dict = ::core::ptr::null::<u8>();
-                (*coder).options.lc = LZIP_LC as u32;
-                (*coder).options.lp = LZIP_LP as u32;
-                (*coder).options.pb = LZIP_PB as u32;
+                (*coder).options.lc = LZIP_LC;
+                (*coder).options.lp = LZIP_LP;
+                (*coder).options.pb = LZIP_PB;
                 (*coder).memusage =
                     lzma_lzma_decoder_memusage_nocheck(&raw mut (*coder).options as *const c_void)
                         .wrapping_add(LZMA_MEMUSAGE_BASE);

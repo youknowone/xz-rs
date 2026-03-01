@@ -247,8 +247,8 @@ pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
 
 // Stream/block size constants
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
-pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024;
+pub const LZMA_STREAM_HEADER_SIZE: u32 = 12;
+pub const LZMA_BLOCK_HEADER_SIZE_MAX: u32 = 1024;
 pub const LZMA_MEMUSAGE_BASE: u64 = 1 << 15;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
 
@@ -267,20 +267,20 @@ pub const STATE_NONLIT_MATCH: lzma_lzma_state = 10;
 pub const STATE_NONLIT_REP: lzma_lzma_state = 11;
 
 // VLI encoding constants
-pub const LZMA_VLI_BYTES_MAX: c_int = 9;
+pub const LZMA_VLI_BYTES_MAX: u32 = 9;
 
 // Filter chain limit
-pub const LZMA_FILTERS_MAX: c_int = 4;
+pub const LZMA_FILTERS_MAX: u32 = 4;
 
 // LZMA option limits
-pub const LZMA_LCLP_MAX: c_int = 4;
-pub const LZMA_PB_MAX: c_int = 4;
+pub const LZMA_LCLP_MAX: u32 = 4;
+pub const LZMA_PB_MAX: u32 = 4;
 
 // Delta filter
-pub const LZMA_DELTA_DIST_MAX: c_int = 256;
+pub const LZMA_DELTA_DIST_MAX: u32 = 256;
 
 // Stream flags
-pub const LZMA_BACKWARD_SIZE_MIN: c_int = 4;
+pub const LZMA_BACKWARD_SIZE_MIN: u32 = 4;
 pub const LZMA_BACKWARD_SIZE_MAX: u64 = 1 << 34;
 
 // Decoder supported flags

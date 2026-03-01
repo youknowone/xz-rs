@@ -1,9 +1,9 @@
 use crate::types::*;
-use core::ffi::{c_int, c_ulonglong};
+use core::ffi::c_ulonglong;
 extern "C" {
     fn lzma_check_size(check: lzma_check) -> u32;
 }
-pub const LZMA_BLOCK_HEADER_SIZE_MIN: c_int = 8;
+pub const LZMA_BLOCK_HEADER_SIZE_MIN: u32 = 8;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
@@ -34,8 +34,8 @@ pub unsafe extern "C" fn lzma_block_compressed_size(
 pub unsafe extern "C" fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli {
     if block.is_null()
         || (*block).version > 1
-        || (*block).header_size < LZMA_BLOCK_HEADER_SIZE_MIN as u32
-        || (*block).header_size > LZMA_BLOCK_HEADER_SIZE_MAX as u32
+        || (*block).header_size < LZMA_BLOCK_HEADER_SIZE_MIN
+        || (*block).header_size > LZMA_BLOCK_HEADER_SIZE_MAX
         || (*block).header_size & 3 != 0
         || !((*block).compressed_size <= LZMA_VLI_MAX
             || (*block).compressed_size == LZMA_VLI_UNKNOWN)

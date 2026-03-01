@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_ulong, c_void};
+use core::ffi::{c_ulong, c_void};
 extern "C" {
     fn lzma_bufcpy(
         in_0: *const u8,
@@ -12,7 +12,7 @@ extern "C" {
 }
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
-pub const LZMA_THREADS_MAX: c_int = 16384;
+pub const LZMA_THREADS_MAX: u32 = 16384;
 #[inline]
 extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
     return (core::mem::size_of::<lzma_outbuf>() as usize).wrapping_add(buf_size as usize) as u64;
@@ -22,7 +22,7 @@ pub extern "C" fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64 {
     let limit: u64 = (UINT64_MAX)
         .wrapping_div((2 * 16384) as u64)
         .wrapping_div(2);
-    if threads > LZMA_THREADS_MAX as u32 || buf_size_max > limit {
+    if threads > LZMA_THREADS_MAX || buf_size_max > limit {
         return UINT64_MAX;
     }
     return ((2u32).wrapping_mul(threads) as u64)
@@ -87,7 +87,7 @@ pub unsafe extern "C" fn lzma_outq_init(
     allocator: *const lzma_allocator,
     threads: u32,
 ) -> lzma_ret {
-    if threads > LZMA_THREADS_MAX as u32 {
+    if threads > LZMA_THREADS_MAX {
         return LZMA_OPTIONS_ERROR;
     }
     let bufs_limit: u32 = (2u32).wrapping_mul(threads);

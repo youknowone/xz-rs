@@ -374,7 +374,7 @@ extern "C" fn mythread_condtime_set(
         }
     }
 }
-pub const LZMA_THREADS_MAX: c_int = 16384;
+pub const LZMA_THREADS_MAX: u32 = 16384;
 #[inline]
 extern "C" fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
     return unsafe { (*outq).bufs_in_use < (*outq).bufs_limit };
@@ -1270,10 +1270,7 @@ unsafe extern "C" fn get_options(
     if options.is_null() {
         return LZMA_PROG_ERROR;
     }
-    if (*options).flags != 0
-        || (*options).threads == 0
-        || (*options).threads > LZMA_THREADS_MAX as u32
-    {
+    if (*options).flags != 0 || (*options).threads == 0 || (*options).threads > LZMA_THREADS_MAX {
         return LZMA_OPTIONS_ERROR;
     }
     if !(*options).filters.is_null() {

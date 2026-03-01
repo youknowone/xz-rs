@@ -404,7 +404,7 @@ extern "C" fn mythread_condtime_set(
         }
     }
 }
-pub const LZMA_THREADS_MAX: c_int = 16384;
+pub const LZMA_THREADS_MAX: u32 = 16384;
 pub const INDEX_INDICATOR: u8 = 0;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
@@ -1717,7 +1717,7 @@ unsafe extern "C" fn stream_decoder_mt_init(
     options: *const lzma_mt,
 ) -> lzma_ret {
     let mut coder: *mut lzma_stream_coder = core::ptr::null_mut();
-    if (*options).threads == 0 || (*options).threads > LZMA_THREADS_MAX as u32 {
+    if (*options).threads == 0 || (*options).threads > LZMA_THREADS_MAX {
         return LZMA_OPTIONS_ERROR;
     }
     if (*options).flags & !(LZMA_SUPPORTED_FLAGS as u32) != 0 {

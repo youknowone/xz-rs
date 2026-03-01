@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_next_filter_init(
         next: *mut lzma_next_coder,
@@ -8,7 +8,7 @@ extern "C" {
     ) -> lzma_ret;
     fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
 }
-pub const LZMA_DELTA_DIST_MIN: c_int = 1;
+pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 unsafe extern "C" fn delta_coder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
     lzma_next_end(&raw mut (*coder).next, allocator);
@@ -58,8 +58,8 @@ pub unsafe extern "C" fn lzma_delta_coder_memusage(options: *const c_void) -> u6
     let opt: *const lzma_options_delta = options as *const lzma_options_delta;
     if opt.is_null()
         || (*opt).type_0 != LZMA_DELTA_TYPE_BYTE
-        || (*opt).dist < LZMA_DELTA_DIST_MIN as u32
-        || (*opt).dist > LZMA_DELTA_DIST_MAX as u32
+        || (*opt).dist < LZMA_DELTA_DIST_MIN
+        || (*opt).dist > LZMA_DELTA_DIST_MAX
     {
         return UINT64_MAX;
     }

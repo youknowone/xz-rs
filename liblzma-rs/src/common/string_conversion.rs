@@ -63,13 +63,13 @@ pub const LZMA_STR_ENCODER: c_uint = 0x10;
 pub const LZMA_STR_DECODER: c_uint = 0x20;
 pub const LZMA_STR_GETOPT_LONG: c_uint = 0x40;
 pub const LZMA_STR_NO_SPACES: c_uint = 0x80;
-pub const LZMA_DELTA_DIST_MIN: c_int = 1;
+pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 pub const LZMA_DICT_SIZE_DEFAULT: c_uint = 1u32 << 23;
-pub const LZMA_LCLP_MIN: c_int = 0;
-pub const LZMA_PB_MIN: c_int = 0;
+pub const LZMA_LCLP_MIN: u32 = 0;
+pub const LZMA_PB_MIN: u32 = 0;
 pub const LZMA_PRESET_DEFAULT: c_uint = 6;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
-pub const STR_ALLOC_SIZE: c_int = 800;
+pub const STR_ALLOC_SIZE: u32 = 800;
 unsafe extern "C" fn str_init(str: *mut lzma_str, allocator: *const lzma_allocator) -> lzma_ret {
     (*str).buf = lzma_alloc(STR_ALLOC_SIZE as size_t, allocator) as *mut c_char;
     if (*str).buf.is_null() {
@@ -152,7 +152,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
         );
     };
 }
-pub const NAME_LEN_MAX: c_int = 11;
+pub const NAME_LEN_MAX: u32 = 11;
 pub const OPTMAP_USE_NAME_VALUE_MAP: u8 = 0x1;
 pub const OPTMAP_USE_BYTE_SUFFIX: u8 = 0x2;
 pub const OPTMAP_NO_STRFY_ZERO: u8 = 0x4;
@@ -194,8 +194,8 @@ static mut delta_optmap: [option_map; 1] = unsafe {
         offset: 4,
         u: C2RustUnnamed_0 {
             range: C2RustUnnamed_1 {
-                min: LZMA_DELTA_DIST_MIN as u32,
-                max: LZMA_DELTA_DIST_MAX as u32,
+                min: LZMA_DELTA_DIST_MIN,
+                max: LZMA_DELTA_DIST_MAX,
             },
         },
     }]
@@ -208,7 +208,7 @@ extern "C" fn parse_delta(
     return unsafe {
         let opts: *mut lzma_options_delta = filter_options as *mut lzma_options_delta;
         (*opts).type_0 = LZMA_DELTA_TYPE_BYTE;
-        (*opts).dist = LZMA_DELTA_DIST_MIN as u32;
+        (*opts).dist = LZMA_DELTA_DIST_MIN;
         parse_options(
             str,
             str_end,
@@ -332,7 +332,7 @@ unsafe extern "C" fn parse_lzma12(
     if !errmsg.is_null() {
         return errmsg;
     }
-    if (*opts).lc.wrapping_add((*opts).lp) > LZMA_LCLP_MAX as u32 {
+    if (*opts).lc.wrapping_add((*opts).lp) > LZMA_LCLP_MAX {
         return b"The sum of lc and lp must not exceed 4\0" as *const u8 as *const c_char;
     }
     return ::core::ptr::null::<c_char>();
@@ -1263,8 +1263,8 @@ unsafe extern "C" fn run_static_initializers() {
             offset: 20,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
-                    min: LZMA_LCLP_MIN as u32,
-                    max: LZMA_LCLP_MAX as u32,
+                    min: LZMA_LCLP_MIN,
+                    max: LZMA_LCLP_MAX,
                 },
             },
         },
@@ -1275,8 +1275,8 @@ unsafe extern "C" fn run_static_initializers() {
             offset: 24,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
-                    min: LZMA_LCLP_MIN as u32,
-                    max: LZMA_LCLP_MAX as u32,
+                    min: LZMA_LCLP_MIN,
+                    max: LZMA_LCLP_MAX,
                 },
             },
         },
@@ -1287,8 +1287,8 @@ unsafe extern "C" fn run_static_initializers() {
             offset: 28,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
-                    min: LZMA_PB_MIN as u32,
-                    max: LZMA_PB_MAX as u32,
+                    min: LZMA_PB_MIN,
+                    max: LZMA_PB_MAX,
                 },
             },
         },
