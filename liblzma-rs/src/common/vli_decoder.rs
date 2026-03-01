@@ -30,9 +30,9 @@ pub unsafe extern "C" fn lzma_vli_decode(
         let byte: u8 = *in_0.offset(*in_pos as isize);
         *in_pos = (*in_pos).wrapping_add(1);
         *vli =
-            (*vli).wrapping_add(((byte as c_int & 0x7f) as lzma_vli) << (*vli_pos).wrapping_mul(7));
+            (*vli).wrapping_add(((byte & 0x7f) as lzma_vli) << (*vli_pos).wrapping_mul(7));
         *vli_pos = (*vli_pos).wrapping_add(1);
-        if byte as c_int & 0x80 == 0 {
+        if byte & 0x80 == 0 {
             if byte as c_int == 0 && *vli_pos > 1 {
                 return LZMA_DATA_ERROR;
             }

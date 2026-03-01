@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_simple_coder_init(
         next: *mut lzma_next_coder,
@@ -39,7 +39,7 @@ unsafe extern "C" fn x86_code(
     let mut buffer_pos: size_t = 0;
     while buffer_pos <= limit {
         let mut b: u8 = *buffer.offset(buffer_pos as isize);
-        if b as c_int != 0xe8 && b as c_int != 0xe9 {
+        if b != 0xe8 && b != 0xe9 {
             buffer_pos = buffer_pos.wrapping_add(1);
         } else {
             let offset: u32 = now_pos
@@ -57,7 +57,7 @@ unsafe extern "C" fn x86_code(
                 }
             }
             b = *buffer.offset(buffer_pos.wrapping_add(4) as isize);
-            if (b as c_int == 0 || b as c_int == 0xff) && prev_mask >> 1 <= 4 && prev_mask >> 1 != 3
+            if (b == 0 || b == 0xff) && prev_mask >> 1 <= 4 && prev_mask >> 1 != 3
             {
                 let mut src: u32 = (b as u32) << 24
                     | (*buffer.offset(buffer_pos.wrapping_add(3) as isize) as u32) << 16
@@ -77,7 +77,7 @@ unsafe extern "C" fn x86_code(
                     }
                     let i_0: u32 = MASK_TO_BIT_NUMBER[(prev_mask >> 1) as usize];
                     b = (dest >> (24u32).wrapping_sub(i_0.wrapping_mul(8))) as u8;
-                    if !(b as c_int == 0 || b as c_int == 0xff) {
+                    if !(b == 0 || b == 0xff) {
                         break;
                     }
                     src =
@@ -93,7 +93,7 @@ unsafe extern "C" fn x86_code(
             } else {
                 buffer_pos = buffer_pos.wrapping_add(1);
                 prev_mask |= 1;
-                if b as c_int == 0 || b as c_int == 0xff {
+                if b == 0 || b == 0xff {
                     prev_mask |= 0x10 as u32;
                 }
             }

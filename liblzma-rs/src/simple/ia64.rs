@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_simple_coder_init(
         next: *mut lzma_next_coder,
@@ -27,7 +27,7 @@ unsafe extern "C" fn ia64_code(
     let mut i: size_t = 0;
     i = 0;
     while i < size {
-        let instr_template: u32 = (*buffer.offset(i as isize) as c_int & 0x1f) as u32;
+        let instr_template: u32 = (*buffer.offset(i as isize) & 0x1f) as u32;
         let mask: u32 = BRANCH_TABLE[instr_template as usize];
         let mut bit_pos: u32 = 5;
         let mut slot: size_t = 0;

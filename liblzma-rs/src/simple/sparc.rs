@@ -23,9 +23,9 @@ unsafe extern "C" fn sparc_code(
     let mut i: size_t = 0;
     i = 0;
     while i < size {
-        if *buffer.offset(i as isize) as c_int == 0x40
+        if *buffer.offset(i as isize) == 0x40
             && *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xc0 == 0
-            || *buffer.offset(i as isize) as c_int == 0x7f
+            || *buffer.offset(i as isize) == 0x7f
                 && *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xc0 == 0xc0
         {
             let mut src: u32 = (*buffer.offset(i.wrapping_add(0) as isize) as u32) << 24
