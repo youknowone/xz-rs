@@ -35,28 +35,6 @@ extern "C" {
     ) -> lzma_ret;
     fn lzma_block_buffer_bound64(uncompressed_size: u64) -> u64;
     fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64;
-    fn lzma_outq_init(
-        outq: *mut lzma_outq,
-        allocator: *const lzma_allocator,
-        threads: u32,
-    ) -> lzma_ret;
-    fn lzma_outq_end(outq: *mut lzma_outq, allocator: *const lzma_allocator);
-    fn lzma_outq_prealloc_buf(
-        outq: *mut lzma_outq,
-        allocator: *const lzma_allocator,
-        size: size_t,
-    ) -> lzma_ret;
-    fn lzma_outq_get_buf(outq: *mut lzma_outq, worker: *mut c_void) -> *mut lzma_outbuf;
-    fn lzma_outq_is_readable(outq: *const lzma_outq) -> bool;
-    fn lzma_outq_read(
-        outq: *mut lzma_outq,
-        allocator: *const lzma_allocator,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-        unpadded_size: *mut lzma_vli,
-        uncompressed_size: *mut lzma_vli,
-    ) -> lzma_ret;
 }
 pub type __uint32_t = u32;
 pub type __darwin_time_t = c_long;

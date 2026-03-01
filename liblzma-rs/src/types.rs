@@ -853,10 +853,7 @@ extern "C" {
         index_hash: *mut lzma_index_hash,
         allocator: *const lzma_allocator,
     ) -> *mut lzma_index_hash;
-    pub fn lzma_index_hash_end(
-        index_hash: *mut lzma_index_hash,
-        allocator: *const lzma_allocator,
-    );
+    pub fn lzma_index_hash_end(index_hash: *mut lzma_index_hash, allocator: *const lzma_allocator);
     pub fn lzma_index_hash_append(
         index_hash: *mut lzma_index_hash,
         unpadded_size: lzma_vli,
@@ -869,6 +866,28 @@ extern "C" {
         in_size: size_t,
     ) -> lzma_ret;
     pub fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli;
+    pub fn lzma_outq_init(
+        outq: *mut lzma_outq,
+        allocator: *const lzma_allocator,
+        threads: u32,
+    ) -> lzma_ret;
+    pub fn lzma_outq_end(outq: *mut lzma_outq, allocator: *const lzma_allocator);
+    pub fn lzma_outq_prealloc_buf(
+        outq: *mut lzma_outq,
+        allocator: *const lzma_allocator,
+        size: size_t,
+    ) -> lzma_ret;
+    pub fn lzma_outq_get_buf(outq: *mut lzma_outq, worker: *mut c_void) -> *mut lzma_outbuf;
+    pub fn lzma_outq_is_readable(outq: *const lzma_outq) -> bool;
+    pub fn lzma_outq_read(
+        outq: *mut lzma_outq,
+        allocator: *const lzma_allocator,
+        out: *mut u8,
+        out_pos: *mut size_t,
+        out_size: size_t,
+        unpadded_size: *mut lzma_vli,
+        uncompressed_size: *mut lzma_vli,
+    ) -> lzma_ret;
     pub fn memcmp(s1: *const c_void, s2: *const c_void, n: size_t) -> c_int;
     pub fn memchr(s: *const c_void, c: c_int, n: size_t) -> *mut c_void;
     pub fn strlen(s: *const c_char) -> size_t;

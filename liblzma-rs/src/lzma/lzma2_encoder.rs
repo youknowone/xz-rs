@@ -33,7 +33,8 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
         read_limit: u32,
-    ) -> lzma_ret;}
+    ) -> lzma_ret;
+}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_options {

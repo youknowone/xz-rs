@@ -15,7 +15,8 @@ extern "C" {
             ) -> lzma_ret,
         >,
     ) -> lzma_ret;
-    fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64;    fn lzma_lzma_optimum_fast(
+    fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64;
+    fn lzma_lzma_optimum_fast(
         coder: *mut lzma_lzma1_encoder,
         mf: *mut lzma_mf,
         back_res: *mut u32,
@@ -27,7 +28,8 @@ extern "C" {
         back_res: *mut u32,
         len_res: *mut u32,
         position: u32,
-    );}
+    );
+}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_options {

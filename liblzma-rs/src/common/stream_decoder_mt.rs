@@ -24,34 +24,12 @@ extern "C" {
     fn pthread_mutex_lock(_: *mut pthread_mutex_t) -> c_int;
     fn pthread_mutex_unlock(_: *mut pthread_mutex_t) -> c_int;
     fn pthread_sigmask(_: c_int, _: *const sigset_t, _: *mut sigset_t) -> c_int;
-    fn lzma_outq_init(
-        outq: *mut lzma_outq,
-        allocator: *const lzma_allocator,
-        threads: u32,
-    ) -> lzma_ret;
-    fn lzma_outq_end(outq: *mut lzma_outq, allocator: *const lzma_allocator);
     fn lzma_outq_clear_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator);
     fn lzma_outq_clear_cache2(
         outq: *mut lzma_outq,
         allocator: *const lzma_allocator,
         keep_size: size_t,
     );
-    fn lzma_outq_prealloc_buf(
-        outq: *mut lzma_outq,
-        allocator: *const lzma_allocator,
-        size: size_t,
-    ) -> lzma_ret;
-    fn lzma_outq_get_buf(outq: *mut lzma_outq, worker: *mut c_void) -> *mut lzma_outbuf;
-    fn lzma_outq_is_readable(outq: *const lzma_outq) -> bool;
-    fn lzma_outq_read(
-        outq: *mut lzma_outq,
-        allocator: *const lzma_allocator,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-        unpadded_size: *mut lzma_vli,
-        uncompressed_size: *mut lzma_vli,
-    ) -> lzma_ret;
     fn lzma_outq_enable_partial_output(
         outq: *mut lzma_outq,
         enable_partial_output: Option<unsafe extern "C" fn(*mut c_void) -> ()>,
