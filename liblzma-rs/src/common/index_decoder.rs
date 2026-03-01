@@ -128,7 +128,7 @@ unsafe extern "C" fn index_decode(
                         return ret_;
                     }
                     (*coder).count = (*coder).count.wrapping_sub(1);
-                    (*coder).sequence = (if (*coder).count == 0 as lzma_vli {
+                    (*coder).sequence = (if (*coder).count == 0 {
                         SEQ_PADDING_INIT as c_int
                     } else {
                         SEQ_UNPADDED as c_int
@@ -169,13 +169,13 @@ unsafe extern "C" fn index_decode(
                 }
             }
             7642845755631126846 => {
-                if lzma_index_memusage(1 as lzma_vli, (*coder).count) > (*coder).memlimit {
+                if lzma_index_memusage(1, (*coder).count) > (*coder).memlimit {
                     ret = LZMA_MEMLIMIT_ERROR;
                     break;
                 } else {
                     lzma_index_prealloc((*coder).index, (*coder).count);
                     ret = LZMA_OK;
-                    (*coder).sequence = (if (*coder).count == 0 as lzma_vli {
+                    (*coder).sequence = (if (*coder).count == 0 {
                         SEQ_PADDING_INIT as c_int
                     } else {
                         SEQ_UNPADDED as c_int
@@ -223,7 +223,7 @@ unsafe extern "C" fn index_decoder_memconfig(
     new_memlimit: u64,
 ) -> lzma_ret {
     let coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
-    *memusage = lzma_index_memusage(1 as lzma_vli, (*coder).count);
+    *memusage = lzma_index_memusage(1, (*coder).count);
     *old_memlimit = (*coder).memlimit;
     if new_memlimit != 0 {
         if new_memlimit < *memusage {
@@ -247,7 +247,7 @@ unsafe extern "C" fn index_decoder_reset(
     }
     (*coder).sequence = SEQ_INDICATOR;
     (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
-    (*coder).count = 0 as lzma_vli;
+    (*coder).count = 0;
     (*coder).pos = 0;
     (*coder).crc32 = 0;
     return LZMA_OK;
@@ -417,7 +417,7 @@ pub unsafe extern "C" fn lzma_index_buffer_decode(
         if ret == LZMA_OK {
             ret = LZMA_DATA_ERROR;
         } else if ret == LZMA_MEMLIMIT_ERROR {
-            *memlimit = lzma_index_memusage(1 as lzma_vli, coder.count);
+            *memlimit = lzma_index_memusage(1, coder.count);
         }
     }
     return ret;

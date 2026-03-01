@@ -96,7 +96,7 @@ unsafe extern "C" fn alone_decode(
                 } else {
                     if (*coder).picky
                         && (*coder).uncompressed_size != LZMA_VLI_UNKNOWN
-                        && (*coder).uncompressed_size >= (1 as lzma_vli) << 38
+                        && (*coder).uncompressed_size >= (1) << 38
                     {
                         return LZMA_FORMAT_ERROR;
                     }
@@ -289,7 +289,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     (*coder).options.dict_size = 0;
     (*coder).options.preset_dict = ::core::ptr::null::<u8>();
     (*coder).options.preset_dict_size = 0;
-    (*coder).uncompressed_size = 0 as lzma_vli;
+    (*coder).uncompressed_size = 0;
     (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
     (*coder).memusage = LZMA_MEMUSAGE_BASE;
     return LZMA_OK;

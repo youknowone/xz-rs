@@ -28,13 +28,13 @@ pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3;
 pub const HEADERS_BOUND: c_int = 1
-    + 1 as c_int
-    + 2 as c_int * LZMA_VLI_BYTES_MAX
-    + 3 as c_int
-    + 4 as c_int
+    + 1
+    + 2 * LZMA_VLI_BYTES_MAX
+    + 3
+    + 4
     + LZMA_CHECK_SIZE_MAX
-    + 3 as c_int
-    & !(3 as c_int);
+    + 3
+    & !(3);
 extern "C" fn lzma2_bound(uncompressed_size: u64) -> u64 {
     if uncompressed_size > COMPRESSED_SIZE_MAX as u64 {
         return 0;
@@ -255,7 +255,7 @@ unsafe extern "C" fn block_buffer_encode(
     out_size = out_size.wrapping_sub(check_size);
     (*block).uncompressed_size = in_size as lzma_vli;
     (*block).compressed_size = lzma2_bound(in_size as u64) as lzma_vli;
-    if (*block).compressed_size == 0 as lzma_vli {
+    if (*block).compressed_size == 0 {
         return LZMA_DATA_ERROR;
     }
     let mut ret: lzma_ret = LZMA_BUF_ERROR;

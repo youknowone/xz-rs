@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 #[inline]
 extern "C" fn write32le(buf: *mut u8, num: u32) {
     unsafe {
@@ -16,9 +16,9 @@ pub unsafe extern "C" fn lzma_simple_props_size(
 ) -> lzma_ret {
     let opt: *const lzma_options_bcj = options as *const lzma_options_bcj;
     *size = (if opt.is_null() || (*opt).start_offset == 0 {
-        0 as c_int
+        0
     } else {
-        4 as c_int
+        4
     }) as u32;
     return LZMA_OK;
 }

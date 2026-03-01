@@ -408,7 +408,7 @@ pub const LZMA_THREADS_MAX: c_int = 16384;
 pub const INDEX_INDICATOR: c_int = 0;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
-    return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
+    return vli.wrapping_add(3) & !(3);
 }
 #[inline]
 extern "C" fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
@@ -427,10 +427,10 @@ unsafe extern "C" fn worker_enable_partial_update(thr_ptr: *mut c_void) {
     let mut mythread_i_325: c_uint = 0;
     while if mythread_i_325 != 0 {
         mythread_mutex_unlock(&raw mut (*thr).mutex);
-        0 as c_int
+        0
     } else {
         mythread_mutex_lock(&raw mut (*thr).mutex);
-        1 as c_int
+        1
     } != 0
     {
         let mut mythread_j_325: c_uint = 0;
@@ -498,10 +498,10 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
                 let mut mythread_i_415: c_uint = 0;
                 while if mythread_i_415 != 0 {
                     mythread_mutex_unlock(&raw mut (*(*thr).coder).mutex);
-                    0 as c_int
+                    0
                 } else {
                     mythread_mutex_lock(&raw mut (*(*thr).coder).mutex);
-                    1 as c_int
+                    1
                 } != 0
                 {
                     let mut mythread_j_415: c_uint = 0;
@@ -518,10 +518,10 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
             let mut mythread_i_434: c_uint = 0;
             while if mythread_i_434 != 0 {
                 mythread_mutex_unlock(&raw mut (*thr).mutex);
-                0 as c_int
+                0
             } else {
                 mythread_mutex_lock(&raw mut (*thr).mutex);
-                1 as c_int
+                1
             } != 0
             {
                 let mut mythread_j_434: c_uint = 0;
@@ -543,10 +543,10 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
             let mut mythread_i_458: c_uint = 0;
             while if mythread_i_458 != 0 {
                 mythread_mutex_unlock(&raw mut (*(*thr).coder).mutex);
-                0 as c_int
+                0
             } else {
                 mythread_mutex_lock(&raw mut (*(*thr).coder).mutex);
-                1 as c_int
+                1
             } != 0
             {
                 let mut mythread_j_458: c_uint = 0;
@@ -592,10 +592,10 @@ unsafe extern "C" fn threads_end(coder: *mut lzma_stream_coder, allocator: *cons
         let mut mythread_i_502: c_uint = 0;
         while if mythread_i_502 != 0 {
             mythread_mutex_unlock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
-            0 as c_int
+            0
         } else {
             mythread_mutex_lock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
-            1 as c_int
+            1
         } != 0
         {
             let mut mythread_j_502: c_uint = 0;
@@ -626,10 +626,10 @@ unsafe extern "C" fn threads_stop(coder: *mut lzma_stream_coder) {
         let mut mythread_i_538: c_uint = 0;
         while if mythread_i_538 != 0 {
             mythread_mutex_unlock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
-            0 as c_int
+            0
         } else {
             mythread_mutex_lock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
-            1 as c_int
+            1
         } != 0
         {
             let mut mythread_j_538: c_uint = 0;
@@ -704,10 +704,10 @@ unsafe extern "C" fn get_thread(
     let mut mythread_i_608: c_uint = 0;
     while if mythread_i_608 != 0 {
         mythread_mutex_unlock(&raw mut (*coder).mutex);
-        0 as c_int
+        0
     } else {
         mythread_mutex_lock(&raw mut (*coder).mutex);
-        1 as c_int
+        1
     } != 0
     {
         let mut mythread_j_608: c_uint = 0;
@@ -753,10 +753,10 @@ unsafe extern "C" fn read_output_and_wait(
     let mut mythread_i_654: c_uint = 0;
     while if mythread_i_654 != 0 {
         mythread_mutex_unlock(&raw mut (*coder).mutex);
-        0 as c_int
+        0
     } else {
         mythread_mutex_lock(&raw mut (*coder).mutex);
-        1 as c_int
+        1
     } != 0
     {
         let mut mythread_j_654: c_uint = 0;
@@ -1391,10 +1391,10 @@ unsafe extern "C" fn stream_decode_mt(
                     let mut mythread_i_1347: c_uint = 0;
                     while if mythread_i_1347 != 0 {
                         mythread_mutex_unlock(&raw mut (*coder).mutex);
-                        0 as c_int
+                        0
                     } else {
                         mythread_mutex_lock(&raw mut (*coder).mutex);
-                        1 as c_int
+                        1
                     } != 0
                     {
                         let mut mythread_j_1347: c_uint = 0;
@@ -1440,10 +1440,10 @@ unsafe extern "C" fn stream_decode_mt(
                     let mut mythread_i_1410: c_uint = 0;
                     while if mythread_i_1410 != 0 {
                         mythread_mutex_unlock(&raw mut (*coder).mutex);
-                        0 as c_int
+                        0
                     } else {
                         mythread_mutex_lock(&raw mut (*coder).mutex);
-                        1 as c_int
+                        1
                     } != 0
                     {
                         let mut mythread_j_1410: c_uint = 0;
@@ -1496,10 +1496,10 @@ unsafe extern "C" fn stream_decode_mt(
                         let mut mythread_i_1478: c_uint = 0;
                         while if mythread_i_1478 != 0 {
                             mythread_mutex_unlock(&raw mut (*(*coder).thr).mutex);
-                            0 as c_int
+                            0
                         } else {
                             mythread_mutex_lock(&raw mut (*(*coder).thr).mutex);
-                            1 as c_int
+                            1
                         } != 0
                         {
                             let mut mythread_j_1478: c_uint = 0;
@@ -1513,10 +1513,10 @@ unsafe extern "C" fn stream_decode_mt(
                         let mut mythread_i_1486: c_uint = 0;
                         while if mythread_i_1486 != 0 {
                             mythread_mutex_unlock(&raw mut (*coder).mutex);
-                            0 as c_int
+                            0
                         } else {
                             mythread_mutex_lock(&raw mut (*coder).mutex);
-                            1 as c_int
+                            1
                         } != 0
                         {
                             let mut mythread_j_1486: c_uint = 0;
@@ -1563,10 +1563,10 @@ unsafe extern "C" fn stream_decode_mt(
                 let mut mythread_i_1517: c_uint = 0;
                 while if mythread_i_1517 != 0 {
                     mythread_mutex_unlock(&raw mut (*(*coder).thr).mutex);
-                    0 as c_int
+                    0
                 } else {
                     mythread_mutex_lock(&raw mut (*(*coder).thr).mutex);
-                    1 as c_int
+                    1
                 } != 0
                 {
                     let mut mythread_j_1517: c_uint = 0;
@@ -1633,10 +1633,10 @@ unsafe extern "C" fn stream_decoder_mt_memconfig(
     let mut mythread_i_1829: c_uint = 0;
     while if mythread_i_1829 != 0 {
         mythread_mutex_unlock(&raw mut (*coder).mutex);
-        0 as c_int
+        0
     } else {
         mythread_mutex_lock(&raw mut (*coder).mutex);
-        1 as c_int
+        1
     } != 0
     {
         let mut mythread_j_1829: c_uint = 0;
@@ -1671,10 +1671,10 @@ unsafe extern "C" fn stream_decoder_mt_get_progress(
     let mut mythread_i_1862: c_uint = 0;
     while if mythread_i_1862 != 0 {
         mythread_mutex_unlock(&raw mut (*coder).mutex);
-        0 as c_int
+        0
     } else {
         mythread_mutex_lock(&raw mut (*coder).mutex);
-        1 as c_int
+        1
     } != 0
     {
         let mut mythread_j_1862: c_uint = 0;
@@ -1686,10 +1686,10 @@ unsafe extern "C" fn stream_decoder_mt_get_progress(
                 let mut mythread_i_1867: c_uint = 0;
                 while if mythread_i_1867 != 0 {
                     mythread_mutex_unlock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
-                    0 as c_int
+                    0
                 } else {
                     mythread_mutex_lock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
-                    1 as c_int
+                    1
                 } != 0
                 {
                     let mut mythread_j_1867: c_uint = 0;
@@ -1810,7 +1810,7 @@ unsafe extern "C" fn stream_decoder_mt_init(
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
         memset(
             &raw mut (*coder).outq as *mut c_void,
-            0 as c_int,
+            0,
             core::mem::size_of::<lzma_outq>(),
         );
         (*coder).block_decoder = lzma_next_coder_s {

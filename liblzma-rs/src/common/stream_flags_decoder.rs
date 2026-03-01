@@ -22,7 +22,7 @@ extern "C" fn stream_flags_decode(options: *mut lzma_stream_flags, in_0: *const 
             return true;
         }
         (*options).version = 0;
-        (*options).check = (*in_0.offset(1) as c_int & 0xf as c_int) as lzma_check;
+        (*options).check = (*in_0.offset(1) as c_int & 0xf) as lzma_check;
         false
     };
 }
@@ -93,7 +93,7 @@ pub unsafe extern "C" fn lzma_stream_footer_decode(
         read32le(in_0.offset(core::mem::size_of::<u32>() as usize as isize)) as lzma_vli;
     (*options).backward_size = (*options)
         .backward_size
-        .wrapping_add(1 as lzma_vli)
-        .wrapping_mul(4 as lzma_vli);
+        .wrapping_add(1)
+        .wrapping_mul(4);
     return LZMA_OK;
 }

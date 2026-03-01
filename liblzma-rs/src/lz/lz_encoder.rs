@@ -114,7 +114,7 @@ unsafe extern "C" fn fill_window(
     (*coder).mf.write_pos = write_pos as u32;
     memset(
         (*coder).mf.buffer.offset(write_pos as isize) as *mut c_void,
-        0 as c_int,
+        0,
         0,
     );
     if ret == LZMA_STREAM_END {
@@ -263,13 +263,13 @@ unsafe extern "C" fn lz_encoder_prepare(
         hs |= hs >> 2;
         hs |= hs >> 4;
         hs |= hs >> 8;
-        hs >>= 1 as c_int;
+        hs >>= 1;
         hs |= 0xffff as u32;
         if hs > (1) << 24 {
             if hash_bytes == 3 {
                 hs = (1u32 << 24).wrapping_sub(1) as u32;
             } else {
-                hs >>= 1 as c_int;
+                hs >>= 1;
             }
         }
     }
@@ -319,7 +319,7 @@ unsafe extern "C" fn lz_encoder_init(
         }
         memset(
             (*mf).buffer.offset((*mf).size as isize) as *mut c_void,
-            0 as c_int,
+            0,
             0,
         );
     }
@@ -348,7 +348,7 @@ unsafe extern "C" fn lz_encoder_init(
     } else {
         memset(
             (*mf).hash as *mut c_void,
-            0 as c_int,
+            0,
             ((*mf).hash_count as size_t).wrapping_mul(core::mem::size_of::<u32>()),
         );
     }

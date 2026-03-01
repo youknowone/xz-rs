@@ -164,7 +164,7 @@ unsafe extern "C" fn block_decode(
         }
         match current_block_40 {
             17473121293339793080 => {
-                while (*coder).compressed_size & 3 as lzma_vli != 0 {
+                while (*coder).compressed_size & 3 != 0 {
                     if *in_pos >= in_size {
                         return LZMA_OK;
                     }
@@ -259,7 +259,7 @@ pub unsafe extern "C" fn lzma_block_decoder_init(
                 *mut lzma_block,
             ) -> lzma_ret,
     ));
-    if lzma_block_unpadded_size(block) == 0 as lzma_vli
+    if lzma_block_unpadded_size(block) == 0
         || !((*block).uncompressed_size <= LZMA_VLI_MAX
             || (*block).uncompressed_size == LZMA_VLI_UNKNOWN)
     {
@@ -305,10 +305,10 @@ pub unsafe extern "C" fn lzma_block_decoder_init(
     }
     (*coder).sequence = SEQ_CODE;
     (*coder).block = block;
-    (*coder).compressed_size = 0 as lzma_vli;
-    (*coder).uncompressed_size = 0 as lzma_vli;
+    (*coder).compressed_size = 0;
+    (*coder).uncompressed_size = 0;
     (*coder).compressed_limit = if (*block).compressed_size == LZMA_VLI_UNKNOWN {
-        (LZMA_VLI_MAX & !(3 as lzma_vli))
+        (LZMA_VLI_MAX & !(3))
             .wrapping_sub((*block).header_size as lzma_vli)
             .wrapping_sub(lzma_check_size((*block).check) as lzma_vli)
     } else {

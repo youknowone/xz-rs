@@ -158,7 +158,7 @@ unsafe extern "C" fn microlzma_decode(
             .wrapping_sub((*out_pos).wrapping_sub(out_start) as lzma_vli);
         if ret == LZMA_STREAM_END {
             ret = LZMA_DATA_ERROR;
-        } else if (*coder).uncomp_size == 0 as lzma_vli {
+        } else if (*coder).uncomp_size == 0 {
             ret = LZMA_STREAM_END;
         }
     }

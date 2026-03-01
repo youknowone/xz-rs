@@ -52,7 +52,7 @@ pub unsafe extern "C" fn lzma_alloc_zero(
     if !allocator.is_null() && (*allocator).alloc.is_some() {
         ptr = (*allocator).alloc.expect("non-null function pointer")((*allocator).opaque, 1, size);
         if !ptr.is_null() {
-            memset(ptr, 0 as c_int, size);
+            memset(ptr, 0, size);
         }
     } else {
         ptr = calloc(1, size);
@@ -186,7 +186,7 @@ pub unsafe extern "C" fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
     }
     memset(
         &raw mut (*(*strm).internal).supported_actions as *mut bool as *mut c_void,
-        0 as c_int,
+        0,
         core::mem::size_of::<[bool; 5]>(),
     );
     (*(*strm).internal).sequence = ISEQ_RUN;

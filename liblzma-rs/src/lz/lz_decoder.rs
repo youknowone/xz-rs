@@ -51,7 +51,7 @@ unsafe extern "C" fn lz_decoder_reset(coder: *mut lzma_coder) {
     *(*coder)
         .dict
         .buf
-        .offset((LZ_DICT_INIT_POS - 1 as c_int) as isize) = '\0' as i32 as u8;
+        .offset((LZ_DICT_INIT_POS - 1) as isize) = '\0' as i32 as u8;
     (*coder).dict.has_wrapped = false;
     (*coder).dict.need_reset = false;
 }
@@ -264,7 +264,7 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
     if lz_options.dict_size
         > (SIZE_MAX as size_t)
             .wrapping_sub(15)
-            .wrapping_sub((2 as c_int * LZ_DICT_REPEAT_MAX) as size_t)
+            .wrapping_sub((2 * LZ_DICT_REPEAT_MAX) as size_t)
             .wrapping_sub(LZ_DICT_EXTRA as size_t)
     {
         return LZMA_MEM_ERROR;
@@ -272,7 +272,7 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
     lz_options.dict_size = lz_options.dict_size.wrapping_add(15) & !(15);
     let alloc_size: size_t = lz_options
         .dict_size
-        .wrapping_add((2 as c_int * LZ_DICT_REPEAT_MAX) as size_t);
+        .wrapping_add((2 * LZ_DICT_REPEAT_MAX) as size_t);
     if (*coder).dict.size != alloc_size {
         lzma_free((*coder).dict.buf as *mut c_void, allocator);
         (*coder).dict.buf =
@@ -308,6 +308,6 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
 pub extern "C" fn lzma_lz_decoder_memusage(dictionary_size: size_t) -> u64 {
     return (core::mem::size_of::<lzma_coder>() as u64)
         .wrapping_add(dictionary_size as u64)
-        .wrapping_add((2 as c_int * LZ_DICT_REPEAT_MAX) as u64)
+        .wrapping_add((2 * LZ_DICT_REPEAT_MAX) as u64)
         .wrapping_add(LZ_DICT_EXTRA as u64);
 }

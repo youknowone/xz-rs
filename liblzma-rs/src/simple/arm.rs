@@ -23,11 +23,11 @@ unsafe extern "C" fn arm_code(
     let mut i: size_t = 0;
     i = 0;
     while i < size {
-        if *buffer.offset(i.wrapping_add(3) as isize) as c_int == 0xeb as c_int {
+        if *buffer.offset(i.wrapping_add(3) as isize) as c_int == 0xeb {
             let mut src: u32 = (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(0) as isize) as u32;
-            src <<= 2 as c_int;
+            src <<= 2;
             let mut dest: u32 = 0;
             if is_encoder {
                 dest = now_pos
@@ -37,7 +37,7 @@ unsafe extern "C" fn arm_code(
             } else {
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32).wrapping_add(8));
             }
-            dest >>= 2 as c_int;
+            dest >>= 2;
             *buffer.offset(i.wrapping_add(2) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(1) as isize) = (dest >> 8) as u8;
             *buffer.offset(i.wrapping_add(0) as isize) = dest as u8;

@@ -156,13 +156,13 @@ pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
-    return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
+    return vli.wrapping_add(3) & !(3);
 }
 #[inline]
 extern "C" fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     return (1u32.wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
         .wrapping_add(index_list_size)
-        .wrapping_add(4 as lzma_vli);
+        .wrapping_add(4);
 }
 #[inline]
 extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
@@ -284,10 +284,10 @@ unsafe extern "C" fn index_stream_init(
     (*s).number = stream_number;
     (*s).block_number_base = block_number_base;
     index_tree_init(&raw mut (*s).groups);
-    (*s).record_count = 0 as lzma_vli;
-    (*s).index_list_size = 0 as lzma_vli;
+    (*s).record_count = 0;
+    (*s).index_list_size = 0;
     (*s).stream_flags.version = UINT32_MAX as u32;
-    (*s).stream_padding = 0 as lzma_vli;
+    (*s).stream_padding = 0;
     return s;
 }
 unsafe extern "C" fn index_stream_end(node: *mut c_void, allocator: *const lzma_allocator) {
@@ -304,10 +304,10 @@ unsafe extern "C" fn index_init_plain(allocator: *const lzma_allocator) -> *mut 
         lzma_alloc(core::mem::size_of::<lzma_index>(), allocator) as *mut lzma_index;
     if !i.is_null() {
         index_tree_init(&raw mut (*i).streams);
-        (*i).uncompressed_size = 0 as lzma_vli;
-        (*i).total_size = 0 as lzma_vli;
-        (*i).record_count = 0 as lzma_vli;
-        (*i).index_list_size = 0 as lzma_vli;
+        (*i).uncompressed_size = 0;
+        (*i).total_size = 0;
+        (*i).record_count = 0;
+        (*i).index_list_size = 0;
         (*i).prealloc = INDEX_GROUP_SIZE as size_t;
         (*i).checks = 0;
     }
@@ -320,7 +320,7 @@ pub unsafe extern "C" fn lzma_index_init(allocator: *const lzma_allocator) -> *m
         return core::ptr::null_mut();
     }
     let s: *mut index_stream =
-        index_stream_init(0 as lzma_vli, 0 as lzma_vli, 1, 0 as lzma_vli, allocator);
+        index_stream_init(0, 0, 1, 0, allocator);
     if s.is_null() {
         lzma_free(i as *mut c_void, allocator);
         return core::ptr::null_mut();
@@ -350,10 +350,10 @@ pub unsafe extern "C" fn lzma_index_prealloc(i: *mut lzma_index, mut records: lz
 }
 #[no_mangle]
 pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u64 {
-    let alloc_overhead: size_t = (4 as size_t).wrapping_mul(core::mem::size_of::<*mut c_void>());
+    let alloc_overhead: size_t = (4_usize).wrapping_mul(core::mem::size_of::<*mut c_void>());
     let stream_base: size_t = (core::mem::size_of::<index_stream>())
         .wrapping_add(core::mem::size_of::<index_group>())
-        .wrapping_add((2 as size_t).wrapping_mul(alloc_overhead));
+        .wrapping_add((2_usize).wrapping_mul(alloc_overhead));
     let group_base: size_t = (core::mem::size_of::<index_group>())
         .wrapping_add(
             (INDEX_GROUP_SIZE as size_t).wrapping_mul(core::mem::size_of::<index_record>()),
@@ -361,14 +361,14 @@ pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u6
         .wrapping_add(alloc_overhead);
     let groups: lzma_vli = blocks
         .wrapping_add(INDEX_GROUP_SIZE as lzma_vli)
-        .wrapping_sub(1 as lzma_vli)
+        .wrapping_sub(1)
         .wrapping_div(INDEX_GROUP_SIZE as lzma_vli);
     let streams_mem: u64 = (streams as u64).wrapping_mul(stream_base as u64);
     let groups_mem: u64 = (groups as u64).wrapping_mul(group_base as u64);
     let index_base: u64 =
         (core::mem::size_of::<lzma_index>() as usize).wrapping_add(alloc_overhead as usize) as u64;
     let limit: u64 = (UINT64_MAX).wrapping_sub(index_base);
-    if streams == 0 as lzma_vli
+    if streams == 0
         || streams > UINT32_MAX as lzma_vli
         || blocks > LZMA_VLI_MAX
         || streams > limit.wrapping_div(stream_base as u64)
@@ -418,7 +418,7 @@ unsafe extern "C" fn index_file_size(
     stream_padding: lzma_vli,
 ) -> lzma_vli {
     let mut file_size: lzma_vli = compressed_base
-        .wrapping_add((2 as c_int * LZMA_STREAM_HEADER_SIZE) as lzma_vli)
+        .wrapping_add((2 * LZMA_STREAM_HEADER_SIZE) as lzma_vli)
         .wrapping_add(stream_padding)
         .wrapping_add(vli_ceil4(unpadded_sum));
     if file_size > LZMA_VLI_MAX {
@@ -437,7 +437,7 @@ pub unsafe extern "C" fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli 
     return index_file_size(
         (*s).node.compressed_base,
         if g.is_null() {
-            0 as lzma_vli
+            0
         } else {
             (*(&raw const (*g).records as *const index_record).offset((*g).last as isize))
                 .unpadded_sum
@@ -462,9 +462,9 @@ pub unsafe extern "C" fn lzma_index_checks(i: *const lzma_index) -> u32 {
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_padding_size(i: *const lzma_index) -> u32 {
-    return ((4 as lzma_vli)
+    return ((4_u64)
         .wrapping_sub(index_size_unpadded((*i).record_count, (*i).index_list_size))
-        & 3 as lzma_vli) as u32;
+        & 3) as u32;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_stream_flags(
@@ -489,13 +489,13 @@ pub unsafe extern "C" fn lzma_index_stream_padding(
 ) -> lzma_ret {
     if i.is_null()
         || stream_padding > LZMA_VLI_MAX
-        || stream_padding & 3 as lzma_vli != 0 as lzma_vli
+        || stream_padding & 3 != 0
     {
         return LZMA_PROG_ERROR;
     }
     let s: *mut index_stream = (*i).streams.rightmost as *mut index_stream;
     let old_stream_padding: lzma_vli = (*s).stream_padding;
-    (*s).stream_padding = 0 as lzma_vli;
+    (*s).stream_padding = 0;
     if lzma_index_file_size(i).wrapping_add(stream_padding) > LZMA_VLI_MAX {
         (*s).stream_padding = old_stream_padding;
         return LZMA_DATA_ERROR;
@@ -520,14 +520,14 @@ pub unsafe extern "C" fn lzma_index_append(
     let s: *mut index_stream = (*i).streams.rightmost as *mut index_stream;
     let mut g: *mut index_group = (*s).groups.rightmost as *mut index_group;
     let compressed_base: lzma_vli = if g.is_null() {
-        0 as lzma_vli
+        0
     } else {
         vli_ceil4(
             (*(&raw mut (*g).records as *mut index_record).offset((*g).last as isize)).unpadded_sum,
         ) as lzma_vli
     };
     let uncompressed_base: lzma_vli = if g.is_null() {
-        0 as lzma_vli
+        0
     } else {
         (*(&raw mut (*g).records as *mut index_record).offset((*g).last as isize)).uncompressed_sum
     };
@@ -542,7 +542,7 @@ pub unsafe extern "C" fn lzma_index_append(
     if index_file_size(
         (*s).node.compressed_base,
         compressed_base.wrapping_add(unpadded_size),
-        (*s).record_count.wrapping_add(1 as lzma_vli),
+        (*s).record_count.wrapping_add(1),
         (*s).index_list_size
             .wrapping_add(index_list_size_add as lzma_vli),
         (*s).stream_padding,
@@ -551,7 +551,7 @@ pub unsafe extern "C" fn lzma_index_append(
         return LZMA_DATA_ERROR;
     }
     if index_size(
-        (*i).record_count.wrapping_add(1 as lzma_vli),
+        (*i).record_count.wrapping_add(1),
         (*i).index_list_size
             .wrapping_add(index_list_size_add as lzma_vli),
     ) > LZMA_BACKWARD_SIZE_MAX as lzma_vli
@@ -576,7 +576,7 @@ pub unsafe extern "C" fn lzma_index_append(
         (*i).prealloc = INDEX_GROUP_SIZE as size_t;
         (*g).node.uncompressed_base = uncompressed_base;
         (*g).node.compressed_base = compressed_base;
-        (*g).number_base = (*s).record_count.wrapping_add(1 as lzma_vli);
+        (*g).number_base = (*s).record_count.wrapping_add(1);
         index_tree_append(&raw mut (*s).groups, &raw mut (*g).node);
     }
     (*(&raw mut (*g).records as *mut index_record).offset((*g).last as isize)).uncompressed_sum =
@@ -730,11 +730,11 @@ unsafe extern "C" fn index_dup_stream(
         index_stream_end(dest as *mut c_void, allocator);
         return core::ptr::null_mut();
     }
-    (*destg).node.uncompressed_base = 0 as lzma_vli;
-    (*destg).node.compressed_base = 0 as lzma_vli;
-    (*destg).number_base = 1 as lzma_vli;
+    (*destg).node.uncompressed_base = 0;
+    (*destg).node.compressed_base = 0;
+    (*destg).number_base = 1;
     (*destg).allocated = (*src).record_count as size_t;
-    (*destg).last = (*src).record_count.wrapping_sub(1 as lzma_vli) as size_t;
+    (*destg).last = (*src).record_count.wrapping_sub(1) as size_t;
     let mut srcg: *const index_group = (*src).groups.leftmost as *const index_group;
     let mut i: size_t = 0;
     loop {
@@ -813,12 +813,12 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
     };
     (*iter).stream.padding = (*stream).stream_padding;
     if (*stream).groups.rightmost.is_null() {
-        (*iter).stream.compressed_size = index_size(0 as lzma_vli, 0 as lzma_vli)
-            .wrapping_add((2 as c_int * LZMA_STREAM_HEADER_SIZE) as lzma_vli);
-        (*iter).stream.uncompressed_size = 0 as lzma_vli;
+        (*iter).stream.compressed_size = index_size(0, 0)
+            .wrapping_add((2 * LZMA_STREAM_HEADER_SIZE) as lzma_vli);
+        (*iter).stream.uncompressed_size = 0;
     } else {
         let g: *const index_group = (*stream).groups.rightmost as *const index_group;
-        (*iter).stream.compressed_size = ((2 as c_int * LZMA_STREAM_HEADER_SIZE) as lzma_vli)
+        (*iter).stream.compressed_size = ((2 * LZMA_STREAM_HEADER_SIZE) as lzma_vli)
             .wrapping_add(index_size(
                 (*stream).record_count,
                 (*stream).index_list_size,

@@ -20,7 +20,7 @@ extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool 
     return unsafe {
         (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
             && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX as lzma_vli
-            && (*options).backward_size & 3 as lzma_vli == 0 as lzma_vli
+            && (*options).backward_size & 3 == 0
     };
 }
 extern "C" fn stream_flags_encode(options: *const lzma_stream_flags, out: *mut u8) -> bool {
@@ -79,20 +79,20 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
         out.offset(4),
         (*options)
             .backward_size
-            .wrapping_div(4 as lzma_vli)
-            .wrapping_sub(1 as lzma_vli) as u32,
+            .wrapping_div(4)
+            .wrapping_sub(1) as u32,
     );
-    if stream_flags_encode(options, out.offset((2 as c_int * 4) as isize)) {
+    if stream_flags_encode(options, out.offset((2 * 4) as isize)) {
         return LZMA_PROG_ERROR;
     }
     let crc: u32 = lzma_crc32(
         out.offset(4),
-        (4 as c_int + LZMA_STREAM_FLAGS_SIZE) as size_t,
+        (4 + LZMA_STREAM_FLAGS_SIZE) as size_t,
         0,
     ) as u32;
     write32le(out, crc);
     memcpy(
-        out.offset((2 as c_int * 4) as isize)
+        out.offset((2 * 4) as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *mut c_void,
         &raw const lzma_footer_magic as *const u8 as *const c_void,
         core::mem::size_of::<[u8; 2]>(),

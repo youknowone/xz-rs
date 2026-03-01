@@ -20,7 +20,7 @@ extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
 #[no_mangle]
 pub extern "C" fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64 {
     let limit: u64 = (UINT64_MAX)
-        .wrapping_div((2 as c_int * 16384 as c_int) as u64)
+        .wrapping_div((2 * 16384) as u64)
         .wrapping_div(2);
     if threads > LZMA_THREADS_MAX as u32 || buf_size_max > limit {
         return UINT64_MAX;
@@ -151,8 +151,8 @@ pub unsafe extern "C" fn lzma_outq_get_buf(
     (*buf).finish_ret = LZMA_STREAM_END;
     (*buf).pos = 0;
     (*buf).decoder_in_pos = 0;
-    (*buf).unpadded_size = 0 as lzma_vli;
-    (*buf).uncompressed_size = 0 as lzma_vli;
+    (*buf).unpadded_size = 0;
+    (*buf).uncompressed_size = 0;
     (*outq).bufs_in_use = (*outq).bufs_in_use.wrapping_add(1);
     (*outq).mem_in_use = (*outq)
         .mem_in_use

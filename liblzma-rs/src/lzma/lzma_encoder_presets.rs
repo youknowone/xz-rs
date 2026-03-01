@@ -31,9 +31,9 @@ pub unsafe extern "C" fn lzma_lzma_preset(
             LZMA_MF_HC4 as c_int
         }) as lzma_match_finder;
         (*options).nice_len = (if level <= 1 {
-            128 as c_int
+            128
         } else {
-            273 as c_int
+            273
         }) as u32;
         static mut depths: [u8; 4] = [4, 8, 24, 48];
         (*options).depth = depths[level as usize] as u32;
@@ -41,11 +41,11 @@ pub unsafe extern "C" fn lzma_lzma_preset(
         (*options).mode = LZMA_MODE_NORMAL;
         (*options).mf = LZMA_MF_BT4;
         (*options).nice_len = (if level == 4 {
-            16 as c_int
+            16
         } else if level == 5 {
-            32 as c_int
+            32
         } else {
-            64 as c_int
+            64
         }) as u32;
         (*options).depth = 0;
     }

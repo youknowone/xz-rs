@@ -82,7 +82,7 @@ unsafe extern "C" fn str_free(str: *mut lzma_str, allocator: *const lzma_allocat
     lzma_free((*str).buf as *mut c_void, allocator);
 }
 unsafe extern "C" fn str_is_full(str: *const lzma_str) -> bool {
-    return (*str).pos == (STR_ALLOC_SIZE - 1 as c_int) as size_t;
+    return (*str).pos == (STR_ALLOC_SIZE - 1) as size_t;
 }
 unsafe extern "C" fn str_finish(
     dest: *mut *mut c_char,
@@ -100,7 +100,7 @@ unsafe extern "C" fn str_finish(
 }
 unsafe extern "C" fn str_append_str(str: *mut lzma_str, s: *const c_char) {
     let len: size_t = strlen(s) as size_t;
-    let limit: size_t = ((STR_ALLOC_SIZE - 1 as c_int) as size_t).wrapping_sub((*str).pos);
+    let limit: size_t = ((STR_ALLOC_SIZE - 1) as size_t).wrapping_sub((*str).pos);
     let copy_size: size_t = if len < limit { len } else { limit };
     memcpy(
         (*str).buf.offset((*str).pos as isize) as *mut c_void,
@@ -129,7 +129,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
                         .wrapping_div(core::mem::size_of::<[c_char; 4]>() as usize)
                         .wrapping_sub(1 as usize)
             {
-                v >>= 10 as c_int;
+                v >>= 10;
                 suf = suf.wrapping_add(1);
             }
         }
@@ -153,9 +153,9 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
     };
 }
 pub const NAME_LEN_MAX: c_int = 11;
-pub const OPTMAP_USE_NAME_VALUE_MAP: c_int = 0x1 as c_int;
-pub const OPTMAP_USE_BYTE_SUFFIX: c_int = 0x2 as c_int;
-pub const OPTMAP_NO_STRFY_ZERO: c_int = 0x4 as c_int;
+pub const OPTMAP_USE_NAME_VALUE_MAP: c_int = 0x1;
+pub const OPTMAP_USE_BYTE_SUFFIX: c_int = 0x2;
+pub const OPTMAP_NO_STRFY_ZERO: c_int = 0x4;
 static mut bcj_optmap: [option_map; 1] = unsafe {
     [option_map {
         name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"start\0\0\0\0\0\0\0"),
@@ -567,7 +567,7 @@ unsafe extern "C" fn parse_options(
                     *str as *const c_void,
                     &raw const (*optmap.offset(i as isize)).name as *const c_char as *const c_void,
                     name_len,
-                ) == 0 as c_int
+                ) == 0
                     && (*optmap.offset(i as isize)).name[name_len as usize] as c_int == '\0' as i32
                 {
                     break;
@@ -602,7 +602,7 @@ unsafe extern "C" fn parse_options(
                             &raw const (*map.offset(j as isize)).name as *const c_char
                                 as *const c_void,
                             value_len,
-                        ) == 0 as c_int
+                        ) == 0
                             && (*map.offset(j as isize)).name[value_len as usize] as c_int
                                 == '\0' as i32
                         {
@@ -639,7 +639,7 @@ unsafe extern "C" fn parse_options(
                     if p < name_eq_value_end {
                         let multiplier_start: *const c_char = p;
                         if (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_BYTE_SUFFIX
-                            == 0 as c_int
+                            == 0
                         {
                             *str = multiplier_start;
                             return b"This option does not support any multiplier suffixes\0"
@@ -739,7 +739,7 @@ unsafe extern "C" fn parse_filter(
             &raw const (*(&raw const filter_name_map as *const C2RustUnnamed).offset(i as isize))
                 .name as *const c_char as *const c_void,
             name_len,
-        ) == 0 as c_int
+        ) == 0
             && filter_name_map[i as usize].name[name_len as usize] as c_int == '\0' as i32
         {
             if only_xz && filter_name_map[i as usize].id >= LZMA_FILTER_RESERVED_START {
@@ -934,7 +934,7 @@ pub unsafe extern "C" fn lzma_str_to_filters(
     allocator: *const lzma_allocator,
 ) -> *const c_char {
     if !error_pos.is_null() {
-        *error_pos = 0 as c_int;
+        *error_pos = 0;
     }
     if str.is_null() || filters.is_null() {
         return b"Unexpected core::ptr::null_mut() pointer argument(s) to lzma_str_to_filters()\0"

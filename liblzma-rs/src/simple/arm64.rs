@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_simple_coder_init(
         next: *mut lzma_next_coder,
@@ -47,7 +47,7 @@ unsafe extern "C" fn arm64_code(
         if instr >> 26 == 0x25 as u32 {
             let src: u32 = instr;
             instr = 0x94000000 as u32;
-            pc >>= 2 as c_int;
+            pc >>= 2;
             if !is_encoder {
                 pc = 0u32.wrapping_sub(pc);
             }
@@ -57,7 +57,7 @@ unsafe extern "C" fn arm64_code(
             let src_0: u32 = instr >> 29 & 3 | instr >> 3 & 0x1ffffc as u32;
             if !(src_0.wrapping_add(0x20000 as u32) & 0x1c0000 as u32 != 0) {
                 instr = (instr & 0x9000001f) as u32;
-                pc >>= 12 as c_int;
+                pc >>= 12;
                 if !is_encoder {
                     pc = 0u32.wrapping_sub(pc);
                 }

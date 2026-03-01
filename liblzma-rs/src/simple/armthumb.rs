@@ -26,14 +26,14 @@ unsafe extern "C" fn armthumb_code(
     let mut i: size_t = 0;
     i = 0;
     while i <= size {
-        if *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xf8 as c_int == 0xf0 as c_int
-            && *buffer.offset(i.wrapping_add(3) as isize) as c_int & 0xf8 as c_int == 0xf8 as c_int
+        if *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xf8 == 0xf0
+            && *buffer.offset(i.wrapping_add(3) as isize) as c_int & 0xf8 == 0xf8
         {
             let mut src: u32 = (*buffer.offset(i.wrapping_add(1) as isize) as u32 & 7) << 19
                 | (*buffer.offset(i.wrapping_add(0) as isize) as u32) << 11
                 | (*buffer.offset(i.wrapping_add(3) as isize) as u32 & 7) << 8
                 | *buffer.offset(i.wrapping_add(2) as isize) as u32;
-            src <<= 1 as c_int;
+            src <<= 1;
             let mut dest: u32 = 0;
             if is_encoder {
                 dest = now_pos
@@ -43,7 +43,7 @@ unsafe extern "C" fn armthumb_code(
             } else {
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32).wrapping_add(4));
             }
-            dest >>= 1 as c_int;
+            dest >>= 1;
             *buffer.offset(i.wrapping_add(1) as isize) =
                 (0xf0 as u32 | dest >> 19 & 0x7 as u32) as u8;
             *buffer.offset(i.wrapping_add(0) as isize) = (dest >> 11) as u8;

@@ -218,7 +218,7 @@ pub unsafe extern "C" fn lzma_simple_coder_init(
     if coder.is_null() {
         coder = lzma_alloc(
             (core::mem::size_of::<lzma_simple_coder>())
-                .wrapping_add((2 as size_t).wrapping_mul(unfiltered_max)),
+                .wrapping_add((2_usize).wrapping_mul(unfiltered_max)),
             allocator,
         ) as *mut lzma_simple_coder;
         if coder.is_null() {
@@ -272,7 +272,7 @@ pub unsafe extern "C" fn lzma_simple_coder_init(
             set_out_limit: None,
         };
         (*coder).filter = filter;
-        (*coder).allocated = (2 as size_t).wrapping_mul(unfiltered_max);
+        (*coder).allocated = (2_usize).wrapping_mul(unfiltered_max);
         if simple_size > 0 {
             (*coder).simple = lzma_alloc(simple_size, allocator);
             if (*coder).simple.is_null() {

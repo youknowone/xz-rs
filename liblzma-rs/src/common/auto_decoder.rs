@@ -48,7 +48,7 @@ unsafe extern "C" fn auto_decode(
                 return LZMA_OK;
             }
             (*coder).sequence = SEQ_CODE;
-            if *in_0.offset(*in_pos as isize) as c_int == 0xfd as c_int {
+            if *in_0.offset(*in_pos as isize) as c_int == 0xfd {
                 let ret_: lzma_ret = lzma_stream_decoder_init(
                     &raw mut (*coder).next,
                     allocator,

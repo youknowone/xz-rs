@@ -73,7 +73,7 @@ pub unsafe extern "C" fn lzma_block_header_decode(
         if ret_ != LZMA_OK {
             return ret_;
         }
-        if lzma_block_unpadded_size(block) == 0 as lzma_vli {
+        if lzma_block_unpadded_size(block) == 0 {
             return LZMA_DATA_ERROR;
         }
     } else {

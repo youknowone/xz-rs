@@ -23,8 +23,8 @@ pub unsafe extern "C" fn lzma_vli_encode(
     vli >>= (*vli_pos).wrapping_mul(7);
     while vli >= 0x80 as lzma_vli {
         *vli_pos = (*vli_pos).wrapping_add(1);
-        *out.offset(*out_pos as isize) = (vli as u8 as c_int | 0x80 as c_int) as u8;
-        vli >>= 7 as c_int;
+        *out.offset(*out_pos as isize) = (vli as u8 as c_int | 0x80) as u8;
+        vli >>= 7;
         *out_pos = (*out_pos).wrapping_add(1);
         if *out_pos == out_size {
             return if vli_pos == &raw mut vli_pos_internal {

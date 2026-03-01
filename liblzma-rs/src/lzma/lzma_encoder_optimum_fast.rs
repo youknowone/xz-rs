@@ -141,13 +141,13 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     }
     let mut buf: *const u8 = mf_ptr(mf).offset(-1);
     let buf_avail: u32 = if mf_avail(mf).wrapping_add(1)
-        < (2 as c_int + (((1 as c_int) << 3) + ((1 as c_int) << 3) + ((1 as c_int) << 8))
-            - 1 as c_int) as u32
+        < (2 + (((1) << 3) + ((1) << 3) + ((1) << 8))
+            - 1) as u32
     {
         (mf_avail(mf) as u32).wrapping_add(1)
     } else {
-        (2 as c_int + (((1 as c_int) << 3) + ((1 as c_int) << 3) + ((1 as c_int) << 8))
-            - 1 as c_int) as u32
+        (2 + (((1) << 3) + ((1) << 3) + ((1) << 8))
+            - 1) as u32
     };
     if buf_avail < 2 {
         *back_res = UINT32_MAX as u32;
@@ -253,7 +253,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
             buf.offset(-((*coder).reps[i_0 as usize] as isize))
                 .offset(-1) as *const c_void,
             limit as size_t,
-        ) == 0 as c_int
+        ) == 0
         {
             *back_res = UINT32_MAX as u32;
             *len_res = 1;

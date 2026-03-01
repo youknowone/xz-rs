@@ -55,13 +55,13 @@ pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 pub const INDEX_INDICATOR: c_int = 0;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
-    return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
+    return vli.wrapping_add(3) & !(3);
 }
 #[inline]
 extern "C" fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     return (1u32.wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
         .wrapping_add(index_list_size)
-        .wrapping_add(4 as lzma_vli);
+        .wrapping_add(4);
 }
 #[inline]
 extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
@@ -91,16 +91,16 @@ pub unsafe extern "C" fn lzma_index_hash_init(
         }
     }
     (*index_hash).sequence = SEQ_BLOCK;
-    (*index_hash).blocks.blocks_size = 0 as lzma_vli;
-    (*index_hash).blocks.uncompressed_size = 0 as lzma_vli;
-    (*index_hash).blocks.count = 0 as lzma_vli;
-    (*index_hash).blocks.index_list_size = 0 as lzma_vli;
-    (*index_hash).records.blocks_size = 0 as lzma_vli;
-    (*index_hash).records.uncompressed_size = 0 as lzma_vli;
-    (*index_hash).records.count = 0 as lzma_vli;
-    (*index_hash).records.index_list_size = 0 as lzma_vli;
-    (*index_hash).unpadded_size = 0 as lzma_vli;
-    (*index_hash).uncompressed_size = 0 as lzma_vli;
+    (*index_hash).blocks.blocks_size = 0;
+    (*index_hash).blocks.uncompressed_size = 0;
+    (*index_hash).blocks.count = 0;
+    (*index_hash).blocks.index_list_size = 0;
+    (*index_hash).records.blocks_size = 0;
+    (*index_hash).records.uncompressed_size = 0;
+    (*index_hash).records.count = 0;
+    (*index_hash).records.index_list_size = 0;
+    (*index_hash).unpadded_size = 0;
+    (*index_hash).uncompressed_size = 0;
     (*index_hash).pos = 0;
     (*index_hash).crc32 = 0;
     lzma_check_init(&raw mut (*index_hash).blocks.check, LZMA_CHECK_SHA256);
@@ -217,7 +217,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                 }
                 ret = LZMA_OK;
                 (*index_hash).pos = 0;
-                (*index_hash).sequence = (if (*index_hash).remaining == 0 as lzma_vli {
+                (*index_hash).sequence = (if (*index_hash).remaining == 0 {
                     SEQ_PADDING_INIT as c_int
                 } else {
                     SEQ_UNPADDED as c_int
@@ -258,7 +258,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                         return LZMA_DATA_ERROR;
                     }
                     (*index_hash).remaining = (*index_hash).remaining.wrapping_sub(1);
-                    (*index_hash).sequence = (if (*index_hash).remaining == 0 as lzma_vli {
+                    (*index_hash).sequence = (if (*index_hash).remaining == 0 {
                         SEQ_PADDING_INIT as c_int
                     } else {
                         SEQ_UNPADDED as c_int
@@ -267,10 +267,10 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                 continue;
             }
             4 => {
-                (*index_hash).pos = ((4 as lzma_vli).wrapping_sub(index_size_unpadded(
+                (*index_hash).pos = ((4_u64).wrapping_sub(index_size_unpadded(
                     (*index_hash).records.count,
                     (*index_hash).records.index_list_size,
-                )) & 3 as lzma_vli) as size_t;
+                )) & 3) as size_t;
                 (*index_hash).sequence = SEQ_PADDING;
                 current_block = 12753679906265593574;
             }

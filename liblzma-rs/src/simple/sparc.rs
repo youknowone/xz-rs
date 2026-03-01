@@ -23,24 +23,24 @@ unsafe extern "C" fn sparc_code(
     let mut i: size_t = 0;
     i = 0;
     while i < size {
-        if *buffer.offset(i as isize) as c_int == 0x40 as c_int
-            && *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xc0 as c_int == 0 as c_int
-            || *buffer.offset(i as isize) as c_int == 0x7f as c_int
-                && *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xc0 as c_int
-                    == 0xc0 as c_int
+        if *buffer.offset(i as isize) as c_int == 0x40
+            && *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xc0 == 0
+            || *buffer.offset(i as isize) as c_int == 0x7f
+                && *buffer.offset(i.wrapping_add(1) as isize) as c_int & 0xc0
+                    == 0xc0
         {
             let mut src: u32 = (*buffer.offset(i.wrapping_add(0) as isize) as u32) << 24
                 | (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(3) as isize) as u32;
-            src <<= 2 as c_int;
+            src <<= 2;
             let mut dest: u32 = 0;
             if is_encoder {
                 dest = now_pos.wrapping_add(i as u32).wrapping_add(src);
             } else {
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
-            dest >>= 2 as c_int;
+            dest >>= 2;
             dest = 0u32.wrapping_sub(dest >> 22 & 1) << 22 & 0x3fffffff as u32
                 | dest & 0x3fffff as u32
                 | 0x40000000 as u32;

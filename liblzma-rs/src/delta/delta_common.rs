@@ -52,7 +52,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
     (*coder).pos = 0;
     memset(
         &raw mut (*coder).history as *mut u8 as *mut c_void,
-        0 as c_int,
+        0,
         256,
     );
     return lzma_next_filter_init(&raw mut (*coder).next, allocator, filters.offset(1));
