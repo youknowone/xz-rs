@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_simple_coder_init(
         next: *mut lzma_next_coder,
@@ -27,20 +27,20 @@ unsafe extern "C" fn ia64_code(
     let mut i: size_t = 0;
     i = 0;
     while i < size {
-        let instr_template: u32 = (*buffer.offset(i as isize) as c_int & 0x1f as c_int) as u32;
+        let instr_template: u32 = (*buffer.offset(i as isize) & 0x1f) as u32;
         let mask: u32 = BRANCH_TABLE[instr_template as usize];
         let mut bit_pos: u32 = 5;
         let mut slot: size_t = 0;
         while slot < 3 {
             if !(mask >> slot & 1 == 0) {
                 let byte_pos: size_t = (bit_pos >> 3) as size_t;
-                let bit_res: u32 = bit_pos & 0x7 as u32;
+                let bit_res: u32 = bit_pos & 0x7;
                 let mut instruction: u64 = 0;
                 let mut j: size_t = 0;
                 while j < 6 {
                     instruction = instruction.wrapping_add(
                         (*buffer.offset(i.wrapping_add(j).wrapping_add(byte_pos) as isize) as u64)
-                            << (8 as size_t).wrapping_mul(j),
+                            << (8_usize).wrapping_mul(j),
                     );
                     j = j.wrapping_add(1);
                 }
@@ -48,23 +48,23 @@ unsafe extern "C" fn ia64_code(
                 if inst_norm >> 37 & 0xf as u64 == 0x5 as u64 && inst_norm >> 9 & 0x7 as u64 == 0 {
                     let mut src: u32 = (inst_norm >> 13 & 0xfffff as u64) as u32;
                     src = (src as u64 | (inst_norm >> 36 & 1) << 20) as u32;
-                    src <<= 4 as c_int;
+                    src <<= 4;
                     let mut dest: u32 = 0;
                     if is_encoder {
                         dest = now_pos.wrapping_add(i as u32).wrapping_add(src);
                     } else {
                         dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
                     }
-                    dest >>= 4 as c_int;
+                    dest >>= 4;
                     inst_norm &= !((0x8fffff as u64) << 13);
-                    inst_norm |= ((dest & 0xfffff as u32) as u64) << 13;
-                    inst_norm |= ((dest & 0x100000 as u32) as u64) << 36 - 20 as c_int;
+                    inst_norm |= ((dest & 0xfffff) as u64) << 13;
+                    inst_norm |= ((dest & 0x100000) as u64) << 36 - 20;
                     instruction &= (1u32 << bit_res).wrapping_sub(1) as u64;
                     instruction |= inst_norm << bit_res;
                     let mut j_0: size_t = 0;
                     while j_0 < 6 {
                         *buffer.offset(i.wrapping_add(j_0).wrapping_add(byte_pos) as isize) =
-                            (instruction >> (8 as size_t).wrapping_mul(j_0)) as u8;
+                            (instruction >> (8_usize).wrapping_mul(j_0)) as u8;
                         j_0 = j_0.wrapping_add(1);
                     }
                 }

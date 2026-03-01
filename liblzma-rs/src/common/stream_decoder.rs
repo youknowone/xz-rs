@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 #[repr(C)]
 pub struct lzma_index_hash_s {
     _opaque: [u8; 0],
@@ -82,7 +82,7 @@ pub const SEQ_BLOCK_RUN: C2RustUnnamed_0 = 3;
 pub const SEQ_BLOCK_INIT: C2RustUnnamed_0 = 2;
 pub const SEQ_BLOCK_HEADER: C2RustUnnamed_0 = 1;
 pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
-pub const INDEX_INDICATOR: c_int = 0;
+pub const INDEX_INDICATOR: u8 = 0;
 unsafe extern "C" fn stream_decoder_reset(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
@@ -185,7 +185,7 @@ unsafe extern "C" fn stream_decode(
                     return LZMA_OK;
                 }
                 if (*coder).pos == 0 {
-                    if *in_0.offset(*in_pos as isize) as c_int == INDEX_INDICATOR {
+                    if *in_0.offset(*in_pos as isize) == INDEX_INDICATOR {
                         (*coder).sequence = SEQ_INDEX;
                         current_block_100 = 16789764818708874114;
                     } else {

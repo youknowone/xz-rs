@@ -126,7 +126,7 @@ unsafe extern "C" fn block_encode(
         }
         match current_block_34 {
             6470892831169497455 => {
-                while (*coder).compressed_size & 3 as lzma_vli != 0 {
+                while (*coder).compressed_size & 3 != 0 {
                     if *out_pos >= out_size {
                         return LZMA_OK;
                     }
@@ -292,8 +292,8 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
     }
     (*coder).sequence = SEQ_CODE;
     (*coder).block = block;
-    (*coder).compressed_size = 0 as lzma_vli;
-    (*coder).uncompressed_size = 0 as lzma_vli;
+    (*coder).compressed_size = 0;
+    (*coder).uncompressed_size = 0;
     (*coder).pos = 0;
     lzma_check_init(&raw mut (*coder).check, (*block).check);
     return lzma_raw_encoder_init(&raw mut (*coder).next, allocator, (*block).filters);

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 #[inline]
 extern "C" fn rotr_32(num: u32, amount: c_uint) -> u32 {
     return num >> amount | num << 32u32.wrapping_sub(amount);
@@ -566,7 +566,7 @@ pub unsafe extern "C" fn lzma_sha256_update(
 ) {
     while size > 0 {
         let copy_start: size_t = ((*check).state.sha256.size & 0x3f as u64) as size_t;
-        let mut copy_size: size_t = (64 as size_t).wrapping_sub(copy_start);
+        let mut copy_size: size_t = (64_usize).wrapping_sub(copy_start);
         if copy_size > size {
             copy_size = size;
         }
@@ -589,7 +589,7 @@ pub unsafe extern "C" fn lzma_sha256_finish(check: *mut lzma_check_state) {
     let fresh8 = pos;
     pos = pos.wrapping_add(1);
     (*check).buffer.u8_0[fresh8 as usize] = 0x80 as u8;
-    while pos != (64 as c_int - 8 as c_int) as size_t {
+    while pos != (64 - 8) as size_t {
         if pos == 64 {
             process(check);
             pos = 0;

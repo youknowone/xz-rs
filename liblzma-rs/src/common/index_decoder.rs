@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_uint, c_ulonglong, c_void};
 #[repr(C)]
 pub struct lzma_index_s {
     _opaque: [u8; 0],
@@ -53,7 +53,7 @@ pub const SEQ_COUNT: C2RustUnnamed_0 = 1;
 pub const SEQ_INDICATOR: C2RustUnnamed_0 = 0;
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
-pub const INDEX_INDICATOR: c_int = 0;
+pub const INDEX_INDICATOR: u8 = 0;
 unsafe extern "C" fn index_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
@@ -74,7 +74,7 @@ unsafe extern "C" fn index_decode(
             0 => {
                 let fresh0 = *in_pos;
                 *in_pos = (*in_pos).wrapping_add(1);
-                if *in_0.offset(fresh0 as isize) as c_int != INDEX_INDICATOR {
+                if *in_0.offset(fresh0 as isize) != INDEX_INDICATOR {
                     return LZMA_DATA_ERROR;
                 }
                 (*coder).sequence = SEQ_COUNT;
@@ -128,10 +128,10 @@ unsafe extern "C" fn index_decode(
                         return ret_;
                     }
                     (*coder).count = (*coder).count.wrapping_sub(1);
-                    (*coder).sequence = (if (*coder).count == 0 as lzma_vli {
-                        SEQ_PADDING_INIT as c_int
+                    (*coder).sequence = (if (*coder).count == 0 {
+                        SEQ_PADDING_INIT
                     } else {
-                        SEQ_UNPADDED as c_int
+                        SEQ_UNPADDED
                     }) as C2RustUnnamed_0;
                 }
                 continue;
@@ -169,16 +169,16 @@ unsafe extern "C" fn index_decode(
                 }
             }
             7642845755631126846 => {
-                if lzma_index_memusage(1 as lzma_vli, (*coder).count) > (*coder).memlimit {
+                if lzma_index_memusage(1, (*coder).count) > (*coder).memlimit {
                     ret = LZMA_MEMLIMIT_ERROR;
                     break;
                 } else {
                     lzma_index_prealloc((*coder).index, (*coder).count);
                     ret = LZMA_OK;
-                    (*coder).sequence = (if (*coder).count == 0 as lzma_vli {
-                        SEQ_PADDING_INIT as c_int
+                    (*coder).sequence = (if (*coder).count == 0 {
+                        SEQ_PADDING_INIT
                     } else {
-                        SEQ_UNPADDED as c_int
+                        SEQ_UNPADDED
                     }) as C2RustUnnamed_0;
                     continue;
                 }
@@ -191,7 +191,7 @@ unsafe extern "C" fn index_decode(
             }
             let fresh2 = *in_pos;
             *in_pos = (*in_pos).wrapping_add(1);
-            if (*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff as u32
+            if (*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff
                 != *in_0.offset(fresh2 as isize) as u32
             {
                 return LZMA_DATA_ERROR;
@@ -223,7 +223,7 @@ unsafe extern "C" fn index_decoder_memconfig(
     new_memlimit: u64,
 ) -> lzma_ret {
     let coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
-    *memusage = lzma_index_memusage(1 as lzma_vli, (*coder).count);
+    *memusage = lzma_index_memusage(1, (*coder).count);
     *old_memlimit = (*coder).memlimit;
     if new_memlimit != 0 {
         if new_memlimit < *memusage {
@@ -247,7 +247,7 @@ unsafe extern "C" fn index_decoder_reset(
     }
     (*coder).sequence = SEQ_INDICATOR;
     (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
-    (*coder).count = 0 as lzma_vli;
+    (*coder).count = 0;
     (*coder).pos = 0;
     (*coder).crc32 = 0;
     return LZMA_OK;
@@ -417,7 +417,7 @@ pub unsafe extern "C" fn lzma_index_buffer_decode(
         if ret == LZMA_OK {
             ret = LZMA_DATA_ERROR;
         } else if ret == LZMA_MEMLIMIT_ERROR {
-            *memlimit = lzma_index_memusage(1 as lzma_vli, coder.count);
+            *memlimit = lzma_index_memusage(1, coder.count);
         }
     }
     return ret;

@@ -7,14 +7,14 @@ pub const LZMA_BLOCK_HEADER_SIZE_MIN: c_int = 8;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
-    return vli.wrapping_add(3 as lzma_vli) & !(3 as lzma_vli);
+    return vli.wrapping_add(3) & !(3);
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_compressed_size(
     block: *mut lzma_block,
     unpadded_size: lzma_vli,
 ) -> lzma_ret {
-    if lzma_block_unpadded_size(block) == 0 as lzma_vli {
+    if lzma_block_unpadded_size(block) == 0 {
         return LZMA_PROG_ERROR;
     }
     let container_size: u32 = (*block)
@@ -39,10 +39,10 @@ pub unsafe extern "C" fn lzma_block_unpadded_size(block: *const lzma_block) -> l
         || (*block).header_size & 3 != 0
         || !((*block).compressed_size <= LZMA_VLI_MAX
             || (*block).compressed_size == LZMA_VLI_UNKNOWN)
-        || (*block).compressed_size == 0 as lzma_vli
+        || (*block).compressed_size == 0
         || (*block).check > LZMA_CHECK_ID_MAX
     {
-        return 0 as lzma_vli;
+        return 0;
     }
     if (*block).compressed_size == LZMA_VLI_UNKNOWN {
         return LZMA_VLI_UNKNOWN;
@@ -52,7 +52,7 @@ pub unsafe extern "C" fn lzma_block_unpadded_size(block: *const lzma_block) -> l
         .wrapping_add((*block).header_size as lzma_vli)
         .wrapping_add(lzma_check_size((*block).check) as lzma_vli);
     if unpadded_size > UNPADDED_SIZE_MAX as lzma_vli {
-        return 0 as lzma_vli;
+        return 0;
     }
     return unpadded_size;
 }

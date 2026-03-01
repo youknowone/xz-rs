@@ -54,7 +54,7 @@ pub struct lzma_str {
     pub buf: *mut c_char,
     pub pos: size_t,
 }
-pub type C2RustUnnamed_2 = c_uint;
+pub type C2RustUnnamed_2 = u8;
 pub const OPTMAP_TYPE_UINT32: C2RustUnnamed_2 = 0;
 pub const INT_MAX: c_int = c_int::MAX;
 pub const LZMA_STR_ALL_FILTERS: c_uint = 0x1;
@@ -82,7 +82,7 @@ unsafe extern "C" fn str_free(str: *mut lzma_str, allocator: *const lzma_allocat
     lzma_free((*str).buf as *mut c_void, allocator);
 }
 unsafe extern "C" fn str_is_full(str: *const lzma_str) -> bool {
-    return (*str).pos == (STR_ALLOC_SIZE - 1 as c_int) as size_t;
+    return (*str).pos == (STR_ALLOC_SIZE - 1) as size_t;
 }
 unsafe extern "C" fn str_finish(
     dest: *mut *mut c_char,
@@ -100,7 +100,7 @@ unsafe extern "C" fn str_finish(
 }
 unsafe extern "C" fn str_append_str(str: *mut lzma_str, s: *const c_char) {
     let len: size_t = strlen(s) as size_t;
-    let limit: size_t = ((STR_ALLOC_SIZE - 1 as c_int) as size_t).wrapping_sub((*str).pos);
+    let limit: size_t = ((STR_ALLOC_SIZE - 1) as size_t).wrapping_sub((*str).pos);
     let copy_size: size_t = if len < limit { len } else { limit };
     memcpy(
         (*str).buf.offset((*str).pos as isize) as *mut c_void,
@@ -129,7 +129,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
                         .wrapping_div(core::mem::size_of::<[c_char; 4]>() as usize)
                         .wrapping_sub(1 as usize)
             {
-                v >>= 10 as c_int;
+                v >>= 10;
                 suf = suf.wrapping_add(1);
             }
         }
@@ -153,9 +153,9 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
     };
 }
 pub const NAME_LEN_MAX: c_int = 11;
-pub const OPTMAP_USE_NAME_VALUE_MAP: c_int = 0x1 as c_int;
-pub const OPTMAP_USE_BYTE_SUFFIX: c_int = 0x2 as c_int;
-pub const OPTMAP_NO_STRFY_ZERO: c_int = 0x4 as c_int;
+pub const OPTMAP_USE_NAME_VALUE_MAP: u8 = 0x1;
+pub const OPTMAP_USE_BYTE_SUFFIX: u8 = 0x2;
+pub const OPTMAP_NO_STRFY_ZERO: u8 = 0x4;
 static mut bcj_optmap: [option_map; 1] = unsafe {
     [option_map {
         name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"start\0\0\0\0\0\0\0"),
@@ -165,7 +165,7 @@ static mut bcj_optmap: [option_map; 1] = unsafe {
         u: C2RustUnnamed_0 {
             range: C2RustUnnamed_1 {
                 min: 0,
-                max: UINT32_MAX as u32,
+                max: UINT32_MAX,
             },
         },
     }]
@@ -226,16 +226,16 @@ unsafe extern "C" fn parse_lzma12_preset(
     str_end: *const c_char,
     preset: *mut u32,
 ) -> *const c_char {
-    if !(**str as c_int >= '0' as i32 && **str as c_int <= '9' as i32) {
+    if !(**str as u8 >= b'0' && **str as u8 <= b'9') {
         return b"Unsupported preset\0" as *const u8 as *const c_char;
     }
-    *preset = (**str as c_int - '0' as i32) as u32;
+    *preset = (**str as u8 - b'0') as u32;
     loop {
         *str = (*str).offset(1);
         if !(*str < str_end) {
             break;
         }
-        match **str as c_int {
+        match **str {
             101 => {
                 *preset = (*preset | LZMA_PRESET_EXTREME) as u32;
             }
@@ -535,8 +535,8 @@ unsafe extern "C" fn parse_options(
     optmap: *const option_map,
     optmap_size: size_t,
 ) -> *const c_char {
-    while *str < str_end && **str as c_int != '\0' as i32 {
-        if **str as c_int == ',' as i32 {
+    while *str < str_end && **str != 0 {
+        if **str as u8 == b',' {
             *str = (*str).offset(1);
         } else {
             let str_len: size_t = str_end.offset_from(*str) as size_t;
@@ -550,7 +550,7 @@ unsafe extern "C" fn parse_options(
                 '=' as i32,
                 name_eq_value_end.offset_from(*str) as size_t,
             ) as *const c_char;
-            if equals_sign.is_null() || **str as c_int == '=' as i32 {
+            if equals_sign.is_null() || **str as u8 == b'=' {
                 return b"Options must be 'name=value' pairs separated with commas\0" as *const u8
                     as *const c_char;
             }
@@ -567,8 +567,8 @@ unsafe extern "C" fn parse_options(
                     *str as *const c_void,
                     &raw const (*optmap.offset(i as isize)).name as *const c_char as *const c_void,
                     name_len,
-                ) == 0 as c_int
-                    && (*optmap.offset(i as isize)).name[name_len as usize] as c_int == '\0' as i32
+                ) == 0
+                    && (*optmap.offset(i as isize)).name[name_len as usize] == 0
                 {
                     break;
                 }
@@ -579,7 +579,7 @@ unsafe extern "C" fn parse_options(
             if value_len == 0 {
                 return b"Option value cannot be empty\0" as *const u8 as *const c_char;
             }
-            if (*optmap.offset(i as isize)).type_0 as c_int == OPTMAP_TYPE_LZMA_PRESET as c_int {
+            if (*optmap.offset(i as isize)).type_0 == OPTMAP_TYPE_LZMA_PRESET {
                 let errmsg: *const c_char =
                     set_lzma12_preset(str, name_eq_value_end, filter_options);
                 if !errmsg.is_null() {
@@ -587,14 +587,14 @@ unsafe extern "C" fn parse_options(
                 }
             } else {
                 let mut v: u32 = 0;
-                if (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_NAME_VALUE_MAP != 0 {
+                if (*optmap.offset(i as isize)).flags & OPTMAP_USE_NAME_VALUE_MAP != 0 {
                     if value_len > NAME_LEN_MAX as size_t {
                         return b"Invalid option value\0" as *const u8 as *const c_char;
                     }
                     let map: *const name_value_map = (*optmap.offset(i as isize)).u.map;
                     let mut j: size_t = 0;
                     loop {
-                        if (*map.offset(j as isize)).name[0] as c_int == '\0' as i32 {
+                        if (*map.offset(j as isize)).name[0] == 0 {
                             return b"Invalid option value\0" as *const u8 as *const c_char;
                         }
                         if memcmp(
@@ -602,9 +602,8 @@ unsafe extern "C" fn parse_options(
                             &raw const (*map.offset(j as isize)).name as *const c_char
                                 as *const c_void,
                             value_len,
-                        ) == 0 as c_int
-                            && (*map.offset(j as isize)).name[value_len as usize] as c_int
-                                == '\0' as i32
+                        ) == 0
+                            && (*map.offset(j as isize)).name[value_len as usize] == 0
                         {
                             v = (*map.offset(j as isize)).value;
                             break;
@@ -612,41 +611,36 @@ unsafe extern "C" fn parse_options(
                             j = j.wrapping_add(1);
                         }
                     }
-                } else if (**str as c_int) < '0' as i32 || **str as c_int > '9' as i32 {
+                } else if (**str as u8) < b'0' || **str as u8 > b'9' {
                     return b"Value is not a non-negative decimal integer\0" as *const u8
                         as *const c_char;
                 } else {
                     let mut p: *const c_char = *str;
                     v = 0;
                     loop {
-                        if v > (UINT32_MAX as u32).wrapping_div(10) {
+                        if v > (UINT32_MAX).wrapping_div(10) {
                             return b"Value out of range\0" as *const u8 as *const c_char;
                         }
                         v = v.wrapping_mul(10);
-                        let add: u32 = (*p as c_int - '0' as i32) as u32;
-                        if (UINT32_MAX as u32).wrapping_sub(add) < v {
+                        let add: u32 = (*p as u8 - b'0') as u32;
+                        if (UINT32_MAX).wrapping_sub(add) < v {
                             return b"Value out of range\0" as *const u8 as *const c_char;
                         }
                         v = v.wrapping_add(add);
                         p = p.offset(1);
-                        if !(p < name_eq_value_end
-                            && *p as c_int >= '0' as i32
-                            && *p as c_int <= '9' as i32)
-                        {
+                        if !(p < name_eq_value_end && *p as u8 >= b'0' && *p as u8 <= b'9') {
                             break;
                         }
                     }
                     if p < name_eq_value_end {
                         let multiplier_start: *const c_char = p;
-                        if (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_BYTE_SUFFIX
-                            == 0 as c_int
-                        {
+                        if (*optmap.offset(i as isize)).flags & OPTMAP_USE_BYTE_SUFFIX == 0 {
                             *str = multiplier_start;
                             return b"This option does not support any multiplier suffixes\0"
                                 as *const u8 as *const c_char;
                         }
                         let mut shift: u32 = 0;
-                        match *p as c_int {
+                        match *p {
                             107 | 75 => {
                                 shift = 10;
                             }
@@ -664,10 +658,10 @@ unsafe extern "C" fn parse_options(
                             }
                         }
                         p = p.offset(1);
-                        if p < name_eq_value_end && *p as c_int == 'i' as i32 {
+                        if p < name_eq_value_end && *p as u8 == b'i' {
                             p = p.offset(1);
                         }
-                        if p < name_eq_value_end && *p as c_int == 'B' as i32 {
+                        if p < name_eq_value_end && *p as u8 == b'B' {
                             p = p.offset(1);
                         }
                         if p < name_eq_value_end {
@@ -675,7 +669,7 @@ unsafe extern "C" fn parse_options(
                             return b"Invalid multiplier suffix (KiB, MiB, or GiB)\0" as *const u8
                                 as *const c_char;
                         }
-                        if v > UINT32_MAX as u32 >> shift {
+                        if v > UINT32_MAX >> shift {
                             return b"Value out of range\0" as *const u8 as *const c_char;
                         }
                         v <<= shift;
@@ -689,7 +683,7 @@ unsafe extern "C" fn parse_options(
                 let ptr: *mut c_void = (filter_options as *mut c_char)
                     .offset((*optmap.offset(i as isize)).offset as isize)
                     as *mut c_void;
-                match (*optmap.offset(i as isize)).type_0 as c_int {
+                match (*optmap.offset(i as isize)).type_0 {
                     1 => {
                         *(ptr as *mut lzma_mode) = v as lzma_mode;
                     }
@@ -717,7 +711,7 @@ unsafe extern "C" fn parse_filter(
     let mut opts_start: *const c_char = str_end;
     let mut p: *const c_char = *str;
     while p < str_end {
-        if *p as c_int == ':' as i32 || *p as c_int == '=' as i32 {
+        if *p as u8 == b':' || *p as u8 == b'=' {
             name_end = p;
             opts_start = p.offset(1);
             break;
@@ -739,8 +733,8 @@ unsafe extern "C" fn parse_filter(
             &raw const (*(&raw const filter_name_map as *const C2RustUnnamed).offset(i as isize))
                 .name as *const c_char as *const c_void,
             name_len,
-        ) == 0 as c_int
-            && filter_name_map[i as usize].name[name_len as usize] as c_int == '\0' as i32
+        ) == 0
+            && filter_name_map[i as usize].name[name_len as usize] == 0
         {
             if only_xz && filter_name_map[i as usize].id >= LZMA_FILTER_RESERVED_START {
                 return b"This filter cannot be used in the .xz format\0" as *const u8
@@ -776,19 +770,18 @@ unsafe extern "C" fn str_to_filters(
 ) -> *const c_char {
     let mut current_block: u64;
     let mut errmsg: *const c_char = ::core::ptr::null::<c_char>();
-    while **str as c_int == ' ' as i32 {
+    while **str as u8 == b' ' {
         *str = (*str).offset(1);
     }
-    if **str as c_int == '\0' as i32 {
+    if **str == 0 {
         return b"Empty string is not allowed, try '6' if a default value is needed\0" as *const u8
             as *const c_char;
     }
-    if **str as c_int >= '0' as i32 && **str as c_int <= '9' as i32
-        || **str as c_int == '-' as i32
-            && (*(*str).offset(1) as c_int >= '0' as i32
-                && *(*str).offset(1) as c_int <= '9' as i32)
+    if **str as u8 >= b'0' && **str as u8 <= b'9'
+        || **str as u8 == b'-'
+            && (*(*str).offset(1) as u8 >= b'0' && *(*str).offset(1) as u8 <= b'9')
     {
-        if **str as c_int == '-' as i32 {
+        if **str as u8 == b'-' {
             *str = (*str).offset(1);
         }
         let str_len: size_t = strlen(*str) as size_t;
@@ -796,8 +789,8 @@ unsafe extern "C" fn str_to_filters(
             memchr(*str as *const c_void, ' ' as i32, str_len) as *const c_char;
         if !str_end.is_null() {
             let mut i: size_t = 1;
-            while *str_end.offset(i as isize) as c_int != '\0' as i32 {
-                if *str_end.offset(i as isize) as c_int != ' ' as i32 {
+            while *str_end.offset(i as isize) != 0 {
+                if *str_end.offset(i as isize) as u8 != b' ' {
                     return b"Unsupported preset\0" as *const u8 as *const c_char;
                 }
                 i = i.wrapping_add(1);
@@ -840,15 +833,13 @@ unsafe extern "C" fn str_to_filters(
             current_block = 6100283484465977373;
             break;
         } else {
-            if *(*str).offset(0) as c_int == '-' as i32 && *(*str).offset(1) as c_int == '-' as i32
-            {
+            if *(*str).offset(0) as u8 == b'-' && *(*str).offset(1) as u8 == b'-' {
                 *str = (*str).offset(2);
             }
             let mut filter_end: *const c_char = *str;
-            while *filter_end.offset(0) as c_int != '\0' as i32 {
-                if *filter_end.offset(0) as c_int == '-' as i32
-                    && *filter_end.offset(1) as c_int == '-' as i32
-                    || *filter_end.offset(0) as c_int == ' ' as i32
+            while *filter_end.offset(0) != 0 {
+                if *filter_end.offset(0) as u8 == b'-' && *filter_end.offset(1) as u8 == b'-'
+                    || *filter_end.offset(0) as u8 == b' '
                 {
                     break;
                 }
@@ -871,11 +862,11 @@ unsafe extern "C" fn str_to_filters(
                     current_block = 6100283484465977373;
                     break;
                 }
-                while **str as c_int == ' ' as i32 {
+                while **str as u8 == b' ' {
                     *str = (*str).offset(1);
                 }
                 i_0 = i_0.wrapping_add(1);
-                if !(**str as c_int != '\0' as i32) {
+                if !(**str != 0) {
                     current_block = 15090052786889560393;
                     break;
                 }
@@ -934,7 +925,7 @@ pub unsafe extern "C" fn lzma_str_to_filters(
     allocator: *const lzma_allocator,
 ) -> *const c_char {
     if !error_pos.is_null() {
-        *error_pos = 0 as c_int;
+        *error_pos = 0;
     }
     if str.is_null() || filters.is_null() {
         return b"Unexpected core::ptr::null_mut() pointer argument(s) to lzma_str_to_filters()\0"
@@ -965,12 +956,12 @@ unsafe extern "C" fn strfy_filter(
 ) {
     let mut i: size_t = 0;
     while i < optmap_count {
-        if !((*optmap.offset(i as isize)).type_0 as c_int == OPTMAP_TYPE_LZMA_PRESET as c_int) {
+        if !((*optmap.offset(i as isize)).type_0 == OPTMAP_TYPE_LZMA_PRESET) {
             let mut v: u32 = 0;
             let ptr: *const c_void = (filter_options as *const c_char)
                 .offset((*optmap.offset(i as isize)).offset as isize)
                 as *const c_void;
-            match (*optmap.offset(i as isize)).type_0 as c_int {
+            match (*optmap.offset(i as isize)).type_0 {
                 1 => {
                     v = *(ptr as *const lzma_mode) as u32;
                 }
@@ -981,8 +972,7 @@ unsafe extern "C" fn strfy_filter(
                     v = *(ptr as *const u32);
                 }
             }
-            if !(v == 0 && (*optmap.offset(i as isize)).flags as c_int & OPTMAP_NO_STRFY_ZERO != 0)
-            {
+            if !(v == 0 && (*optmap.offset(i as isize)).flags & OPTMAP_NO_STRFY_ZERO != 0) {
                 str_append_str(dest, delimiter);
                 delimiter = b",\0" as *const u8 as *const c_char;
                 str_append_str(
@@ -990,11 +980,11 @@ unsafe extern "C" fn strfy_filter(
                     &raw const (*optmap.offset(i as isize)).name as *const c_char,
                 );
                 str_append_str(dest, b"=\0" as *const u8 as *const c_char);
-                if (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_NAME_VALUE_MAP != 0 {
+                if (*optmap.offset(i as isize)).flags & OPTMAP_USE_NAME_VALUE_MAP != 0 {
                     let map: *const name_value_map = (*optmap.offset(i as isize)).u.map;
                     let mut j: size_t = 0;
                     loop {
-                        if (*map.offset(j as isize)).name[0] as c_int == '\0' as i32 {
+                        if (*map.offset(j as isize)).name[0] == 0 {
                             str_append_str(dest, b"UNKNOWN\0" as *const u8 as *const c_char);
                             break;
                         } else if (*map.offset(j as isize)).value == v {
@@ -1011,7 +1001,7 @@ unsafe extern "C" fn strfy_filter(
                     str_append_u32(
                         dest,
                         v,
-                        (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_BYTE_SUFFIX != 0,
+                        (*optmap.offset(i as isize)).flags & OPTMAP_USE_BYTE_SUFFIX != 0,
                     );
                 }
             }
@@ -1097,9 +1087,9 @@ pub unsafe extern "C" fn lzma_str_from_filters(
                     break;
                 } else {
                     let optmap_count: size_t = (if flags & LZMA_STR_ENCODER as u32 != 0 {
-                        filter_name_map[j as usize].strfy_encoder as c_int
+                        filter_name_map[j as usize].strfy_encoder
                     } else {
-                        filter_name_map[j as usize].strfy_decoder as c_int
+                        filter_name_map[j as usize].strfy_decoder
                     }) as size_t;
                     strfy_filter(
                         &raw mut dest,
@@ -1183,9 +1173,9 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                     let optmap: *const option_map = filter_name_map[i as usize].optmap;
                     let mut d: *const c_char = opt_delim;
                     let end: size_t = (if flags & LZMA_STR_ENCODER as u32 != 0 {
-                        filter_name_map[i as usize].strfy_encoder as c_int
+                        filter_name_map[i as usize].strfy_encoder
                     } else {
-                        filter_name_map[i as usize].strfy_decoder as c_int
+                        filter_name_map[i as usize].strfy_decoder
                     }) as size_t;
                     let mut j: size_t = 0;
                     while j < end {
@@ -1196,17 +1186,14 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                             &raw const (*optmap.offset(j as isize)).name as *const c_char,
                         );
                         str_append_str(&raw mut dest, b"=<\0" as *const u8 as *const c_char);
-                        if (*optmap.offset(j as isize)).type_0 as c_int
-                            == OPTMAP_TYPE_LZMA_PRESET as c_int
-                        {
+                        if (*optmap.offset(j as isize)).type_0 == OPTMAP_TYPE_LZMA_PRESET {
                             str_append_str(&raw mut dest, LZMA12_PRESET_STR.as_ptr());
-                        } else if (*optmap.offset(j as isize)).flags as c_int
-                            & OPTMAP_USE_NAME_VALUE_MAP
+                        } else if (*optmap.offset(j as isize)).flags & OPTMAP_USE_NAME_VALUE_MAP
                             != 0
                         {
                             let m: *const name_value_map = (*optmap.offset(j as isize)).u.map;
                             let mut k: size_t = 0;
-                            while (*m.offset(k as isize)).name[0] as c_int != '\0' as i32 {
+                            while (*m.offset(k as isize)).name[0] != 0 {
                                 if k > 0 {
                                     str_append_str(
                                         &raw mut dest,
@@ -1220,9 +1207,8 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                                 k = k.wrapping_add(1);
                             }
                         } else {
-                            let use_byte_suffix: bool = (*optmap.offset(j as isize)).flags as c_int
-                                & OPTMAP_USE_BYTE_SUFFIX
-                                != 0;
+                            let use_byte_suffix: bool =
+                                (*optmap.offset(j as isize)).flags & OPTMAP_USE_BYTE_SUFFIX != 0;
                             str_append_u32(
                                 &raw mut dest,
                                 (*optmap.offset(j as isize)).u.range.min,
@@ -1253,7 +1239,7 @@ unsafe extern "C" fn run_static_initializers() {
     lzma12_optmap = [
         option_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"preset\0\0\0\0\0\0"),
-            type_0: OPTMAP_TYPE_LZMA_PRESET as u8,
+            type_0: OPTMAP_TYPE_LZMA_PRESET,
             flags: 0,
             offset: 0,
             u: C2RustUnnamed_0 {
@@ -1263,7 +1249,7 @@ unsafe extern "C" fn run_static_initializers() {
         option_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"dict\0\0\0\0\0\0\0\0"),
             type_0: 0,
-            flags: OPTMAP_USE_BYTE_SUFFIX as u8,
+            flags: OPTMAP_USE_BYTE_SUFFIX,
             offset: 0,
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
@@ -1310,8 +1296,8 @@ unsafe extern "C" fn run_static_initializers() {
         },
         option_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mode\0\0\0\0\0\0\0\0"),
-            type_0: OPTMAP_TYPE_LZMA_MODE as u8,
-            flags: OPTMAP_USE_NAME_VALUE_MAP as u8,
+            type_0: OPTMAP_TYPE_LZMA_MODE,
+            flags: OPTMAP_USE_NAME_VALUE_MAP,
             offset: 32,
             u: C2RustUnnamed_0 {
                 map: &raw const lzma12_mode_map as *const name_value_map,
@@ -1328,8 +1314,8 @@ unsafe extern "C" fn run_static_initializers() {
         },
         option_map {
             name: ::core::mem::transmute::<[u8; 12], [c_char; 12]>(*b"mf\0\0\0\0\0\0\0\0\0\0"),
-            type_0: OPTMAP_TYPE_LZMA_MATCH_FINDER as u8,
-            flags: OPTMAP_USE_NAME_VALUE_MAP as u8,
+            type_0: OPTMAP_TYPE_LZMA_MATCH_FINDER,
+            flags: OPTMAP_USE_NAME_VALUE_MAP,
             offset: 40,
             u: C2RustUnnamed_0 {
                 map: &raw const lzma12_mf_map as *const name_value_map,
@@ -1343,7 +1329,7 @@ unsafe extern "C" fn run_static_initializers() {
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: 0,
-                    max: UINT32_MAX as u32,
+                    max: UINT32_MAX,
                 },
             },
         },

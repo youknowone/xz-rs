@@ -105,9 +105,7 @@ unsafe extern "C" fn lzip_decode(
                             LZMA_OK
                         };
                     }
-                    if *in_0.offset(*in_pos as isize) as c_int
-                        != lzip_id_string[(*coder).pos as usize] as c_int
-                    {
+                    if *in_0.offset(*in_pos as isize) != lzip_id_string[(*coder).pos as usize] {
                         return if !(*coder).first_member {
                             LZMA_STREAM_END
                         } else {
@@ -170,7 +168,7 @@ unsafe extern "C" fn lzip_decode(
                 *in_pos = (*in_pos).wrapping_add(1);
                 let ds: u32 = *in_0.offset(fresh1 as isize) as u32;
                 (*coder).member_size = (*coder).member_size.wrapping_add(1);
-                let b2log: u32 = ds & 0x1f as u32;
+                let b2log: u32 = ds & 0x1f;
                 let fracnum: u32 = ds >> 5;
                 if b2log < 12 || b2log > 29 || b2log == 12 && fracnum > 0 {
                     return LZMA_DATA_ERROR;

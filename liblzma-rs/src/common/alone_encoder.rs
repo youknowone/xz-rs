@@ -44,7 +44,7 @@ extern "C" fn write32le(buf: *mut u8, num: u32) {
         *buf.offset(3) = (num >> 24) as u8;
     }
 }
-pub const ALONE_HEADER_SIZE: c_int = 1 + 4 as c_int + 8 as c_int;
+pub const ALONE_HEADER_SIZE: c_int = 1 + 4 + 8;
 unsafe extern "C" fn alone_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
@@ -190,13 +190,13 @@ unsafe extern "C" fn alone_encoder_init(
     d |= d >> 4;
     d |= d >> 8;
     d |= d >> 16;
-    if d != UINT32_MAX as u32 {
+    if d != UINT32_MAX {
         d = d.wrapping_add(1);
     }
     write32le((&raw mut (*coder).header as *mut u8).offset(1), d);
     memset(
         (&raw mut (*coder).header as *mut u8).offset(1).offset(4) as *mut c_void,
-        0xff as c_int,
+        0xff,
         8,
     );
     let filters: [lzma_filter_info; 2] = [

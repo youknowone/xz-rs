@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_delta_coder_init(
         next: *mut lzma_next_coder,
@@ -12,13 +12,13 @@ unsafe extern "C" fn decode_buffer(coder: *mut lzma_delta_coder, buffer: *mut u8
     let mut i: size_t = 0;
     while i < size {
         let ref mut fresh0 = *buffer.offset(i as isize);
-        *fresh0 = (*fresh0 as c_int
-            + (*coder).history
-                [(distance.wrapping_add((*coder).pos as size_t) & 0xff as size_t) as usize]
-                as c_int) as u8;
+        *fresh0 = (*fresh0).wrapping_add(
+            (*coder).history
+                [(distance.wrapping_add((*coder).pos as size_t) & 0xff) as usize],
+        );
         let fresh1 = (*coder).pos;
         (*coder).pos = (*coder).pos.wrapping_sub(1);
-        (*coder).history[(fresh1 as c_int & 0xff as c_int) as usize] = *buffer.offset(i as isize);
+        (*coder).history[(fresh1 & 0xff) as usize] = *buffer.offset(i as isize);
         i = i.wrapping_add(1);
     }
 }

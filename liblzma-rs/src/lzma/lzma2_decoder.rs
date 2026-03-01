@@ -112,23 +112,23 @@ unsafe extern "C" fn lzma2_decode(
                 if control == 0 {
                     return LZMA_STREAM_END;
                 }
-                if control >= 0xe0 as u32 || control == 1 {
+                if control >= 0xe0 || control == 1 {
                     (*coder).need_properties = true;
                     (*coder).need_dictionary_reset = true;
                 } else if (*coder).need_dictionary_reset {
                     return LZMA_DATA_ERROR;
                 }
-                if control >= 0x80 as u32 {
-                    (*coder).uncompressed_size = ((control & 0x1f as u32) << 16) as size_t;
+                if control >= 0x80 {
+                    (*coder).uncompressed_size = ((control & 0x1f) << 16) as size_t;
                     (*coder).sequence = SEQ_UNCOMPRESSED_1;
-                    if control >= 0xc0 as u32 {
+                    if control >= 0xc0 {
                         (*coder).need_properties = false;
                         (*coder).next_sequence = SEQ_PROPERTIES;
                     } else if (*coder).need_properties {
                         return LZMA_DATA_ERROR;
                     } else {
                         (*coder).next_sequence = SEQ_LZMA;
-                        if control >= 0xa0 as u32 {
+                        if control >= 0xa0 {
                             (*coder).lzma.reset.expect("non-null function pointer")(
                                 (*coder).lzma.coder,
                                 &raw mut (*coder).options as *const c_void,
@@ -328,10 +328,10 @@ pub unsafe extern "C" fn lzma_lzma2_props_decode(
     if props_size != 1 {
         return LZMA_OPTIONS_ERROR;
     }
-    if *props.offset(0) as c_int & 0xc0 != 0 {
+    if *props.offset(0) & 0xc0 != 0 {
         return LZMA_OPTIONS_ERROR;
     }
-    if *props.offset(0) as c_int > 40 as c_int {
+    if *props.offset(0) > 40 {
         return LZMA_OPTIONS_ERROR;
     }
     let opt: *mut lzma_options_lzma =
@@ -339,8 +339,8 @@ pub unsafe extern "C" fn lzma_lzma2_props_decode(
     if opt.is_null() {
         return LZMA_MEM_ERROR;
     }
-    if *props.offset(0) as c_int == 40 as c_int {
-        (*opt).dict_size = UINT32_MAX as u32;
+    if *props.offset(0) == 40 {
+        (*opt).dict_size = UINT32_MAX;
     } else {
         (*opt).dict_size = 2u32 | (u32::from(*props.offset(0)) & 1);
         (*opt).dict_size <<= u32::from(*props.offset(0)).wrapping_div(2).wrapping_add(11);

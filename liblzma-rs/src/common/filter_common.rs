@@ -324,7 +324,7 @@ pub unsafe extern "C" fn lzma_raw_coder_memusage(
             return UINT64_MAX;
         }
         if (*fc).memusage.is_none() {
-            total = total.wrapping_add(1024 as u64);
+            total = total.wrapping_add(1024);
         } else {
             let usage: u64 = (*fc).memusage.expect("non-null function pointer")(
                 (*filters.offset(i as isize)).options,

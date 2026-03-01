@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
@@ -48,7 +48,7 @@ unsafe extern "C" fn auto_decode(
                 return LZMA_OK;
             }
             (*coder).sequence = SEQ_CODE;
-            if *in_0.offset(*in_pos as isize) as c_int == 0xfd as c_int {
+            if *in_0.offset(*in_pos as isize) == 0xfd {
                 let ret_: lzma_ret = lzma_stream_decoder_init(
                     &raw mut (*coder).next,
                     allocator,

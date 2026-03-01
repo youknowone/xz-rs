@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_vli_encode(
         vli: lzma_vli,
@@ -33,10 +33,10 @@ pub unsafe extern "C" fn lzma_block_header_size(block: *mut lzma_block) -> lzma_
     if (*block).version > 1 {
         return LZMA_OPTIONS_ERROR;
     }
-    let mut size: u32 = (1 as c_int + 1 as c_int + 4 as c_int) as u32;
+    let mut size: u32 = (1 + 1 + 4) as u32;
     if (*block).compressed_size != LZMA_VLI_UNKNOWN {
         let add: u32 = lzma_vli_size((*block).compressed_size) as u32;
-        if add == 0 || (*block).compressed_size == 0 as lzma_vli {
+        if add == 0 || (*block).compressed_size == 0 {
             return LZMA_PROG_ERROR;
         }
         size = size.wrapping_add(add);
@@ -73,7 +73,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
     block: *const lzma_block,
     out: *mut u8,
 ) -> lzma_ret {
-    if lzma_block_unpadded_size(block) == 0 as lzma_vli
+    if lzma_block_unpadded_size(block) == 0
         || !((*block).uncompressed_size <= LZMA_VLI_MAX
             || (*block).uncompressed_size == LZMA_VLI_UNKNOWN)
     {
@@ -95,7 +95,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
             return ret_;
         }
         let ref mut fresh0 = *out.offset(1);
-        *fresh0 = (*fresh0 as c_int | 0x40 as c_int) as u8;
+        *fresh0 |= 0x40;
     }
     if (*block).uncompressed_size != LZMA_VLI_UNKNOWN {
         let ret__0: lzma_ret = lzma_vli_encode(
@@ -109,7 +109,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
             return ret__0;
         }
         let ref mut fresh1 = *out.offset(1);
-        *fresh1 = (*fresh1 as c_int | 0x80 as c_int) as u8;
+        *fresh1 |= 0x80;
     }
     if (*block).filters.is_null() || (*(*block).filters.offset(0)).id == LZMA_VLI_UNKNOWN {
         return LZMA_PROG_ERROR;
@@ -137,7 +137,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
     *fresh2 = (*fresh2 as size_t | filter_count.wrapping_sub(1)) as u8;
     memset(
         out.offset(out_pos as isize) as *mut c_void,
-        0 as c_int,
+        0,
         out_size.wrapping_sub(out_pos),
     );
     write32le(out.offset(out_size as isize), lzma_crc32(out, out_size, 0));

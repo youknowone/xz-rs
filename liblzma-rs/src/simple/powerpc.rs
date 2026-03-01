@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_simple_coder_init(
         next: *mut lzma_next_coder,
@@ -23,10 +23,10 @@ unsafe extern "C" fn powerpc_code(
     let mut i: size_t = 0;
     i = 0;
     while i < size {
-        if *buffer.offset(i as isize) as c_int >> 2 == 0x12 as c_int
-            && *buffer.offset(i.wrapping_add(3) as isize) as c_int & 3 as c_int == 1 as c_int
+        if *buffer.offset(i as isize) >> 2 == 0x12
+            && *buffer.offset(i.wrapping_add(3) as isize) & 3 == 1
         {
-            let src: u32 = (*buffer.offset(i.wrapping_add(0) as isize) as u32 & 3) << 24
+            let src: u32 = (*buffer.offset(i as isize) as u32 & 3) << 24
                 | (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(3) as isize) as u32 & !(3);
@@ -36,12 +36,12 @@ unsafe extern "C" fn powerpc_code(
             } else {
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
-            *buffer.offset(i.wrapping_add(0) as isize) =
-                (0x48 as u32 | dest >> 24 & 0x3 as u32) as u8;
+            *buffer.offset(i as isize) =
+                (0x48 | dest >> 24 & 0x3) as u8;
             *buffer.offset(i.wrapping_add(1) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(2) as isize) = (dest >> 8) as u8;
             let ref mut fresh0 = *buffer.offset(i.wrapping_add(3) as isize);
-            *fresh0 = (*fresh0 as c_int & 0x3 as c_int) as u8;
+            *fresh0 = (*fresh0 & 0x3) as u8;
             let ref mut fresh1 = *buffer.offset(i.wrapping_add(3) as isize);
             *fresh1 = (*fresh1 as u32 | dest) as u8;
         }

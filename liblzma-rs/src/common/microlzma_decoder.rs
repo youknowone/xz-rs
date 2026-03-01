@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
@@ -64,8 +64,8 @@ unsafe extern "C" fn microlzma_decode(
             mf: 0 as lzma_match_finder,
             depth: 0,
             ext_flags: 0,
-            ext_size_low: UINT32_MAX as u32,
-            ext_size_high: UINT32_MAX as u32,
+            ext_size_low: UINT32_MAX,
+            ext_size_high: UINT32_MAX,
             reserved_int4: 0,
             reserved_int5: 0,
             reserved_int6: 0,
@@ -82,10 +82,7 @@ unsafe extern "C" fn microlzma_decode(
             options.ext_size_low = (*coder).uncomp_size as u32;
             options.ext_size_high = ((*coder).uncomp_size >> 32) as u32;
         }
-        if lzma_lzma_lclppb_decode(
-            &raw mut options,
-            !(*in_0.offset(*in_pos as isize) as c_int) as u8,
-        ) {
+        if lzma_lzma_lclppb_decode(&raw mut options, !*in_0.offset(*in_pos as isize)) {
             return LZMA_OPTIONS_ERROR;
         }
         *in_pos = (*in_pos).wrapping_add(1);
@@ -158,7 +155,7 @@ unsafe extern "C" fn microlzma_decode(
             .wrapping_sub((*out_pos).wrapping_sub(out_start) as lzma_vli);
         if ret == LZMA_STREAM_END {
             ret = LZMA_DATA_ERROR;
-        } else if (*coder).uncomp_size == 0 as lzma_vli {
+        } else if (*coder).uncomp_size == 0 {
             ret = LZMA_STREAM_END;
         }
     }

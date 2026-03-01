@@ -27,14 +27,8 @@ pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     & !3;
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3;
-pub const HEADERS_BOUND: c_int = 1
-    + 1 as c_int
-    + 2 as c_int * LZMA_VLI_BYTES_MAX
-    + 3 as c_int
-    + 4 as c_int
-    + LZMA_CHECK_SIZE_MAX
-    + 3 as c_int
-    & !(3 as c_int);
+pub const HEADERS_BOUND: c_int =
+    1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 3 + 4 + LZMA_CHECK_SIZE_MAX + 3 & !(3);
 extern "C" fn lzma2_bound(uncompressed_size: u64) -> u64 {
     if uncompressed_size > COMPRESSED_SIZE_MAX as u64 {
         return 0;
@@ -140,7 +134,7 @@ unsafe extern "C" fn block_encode_uncompressed(
         *out.offset(fresh2 as isize) = (copy_size.wrapping_sub(1) >> 8) as u8;
         let fresh3 = *out_pos;
         *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh3 as isize) = (copy_size.wrapping_sub(1) & 0xff as size_t) as u8;
+        *out.offset(fresh3 as isize) = (copy_size.wrapping_sub(1) & 0xff) as u8;
         memcpy(
             out.offset(*out_pos as isize) as *mut c_void,
             in_0.offset(in_pos as isize) as *const c_void,
@@ -255,7 +249,7 @@ unsafe extern "C" fn block_buffer_encode(
     out_size = out_size.wrapping_sub(check_size);
     (*block).uncompressed_size = in_size as lzma_vli;
     (*block).compressed_size = lzma2_bound(in_size as u64) as lzma_vli;
-    if (*block).compressed_size == 0 as lzma_vli {
+    if (*block).compressed_size == 0 {
         return LZMA_DATA_ERROR;
     }
     let mut ret: lzma_ret = LZMA_BUF_ERROR;

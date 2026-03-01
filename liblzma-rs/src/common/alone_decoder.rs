@@ -68,7 +68,7 @@ unsafe extern "C" fn alone_decode(
                     as u32;
                 (*coder).pos = (*coder).pos.wrapping_add(1);
                 if (*coder).pos == 4 {
-                    if (*coder).picky && (*coder).options.dict_size != UINT32_MAX as u32 {
+                    if (*coder).picky && (*coder).options.dict_size != UINT32_MAX {
                         let mut d: u32 = (*coder).options.dict_size.wrapping_sub(1);
                         d |= d >> 2;
                         d |= d >> 3;
@@ -96,7 +96,7 @@ unsafe extern "C" fn alone_decode(
                 } else {
                     if (*coder).picky
                         && (*coder).uncompressed_size != LZMA_VLI_UNKNOWN
-                        && (*coder).uncompressed_size >= (1 as lzma_vli) << 38
+                        && (*coder).uncompressed_size >= (1) << 38
                     {
                         return LZMA_FORMAT_ERROR;
                     }
@@ -289,7 +289,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     (*coder).options.dict_size = 0;
     (*coder).options.preset_dict = ::core::ptr::null::<u8>();
     (*coder).options.preset_dict_size = 0;
-    (*coder).uncompressed_size = 0 as lzma_vli;
+    (*coder).uncompressed_size = 0;
     (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
     (*coder).memusage = LZMA_MEMUSAGE_BASE;
     return LZMA_OK;

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
@@ -65,7 +65,7 @@ unsafe extern "C" fn microlzma_encode(
         }
         return ret;
     }
-    *out.offset(out_start as isize) = !((*coder).props as c_int) as u8;
+    *out.offset(out_start as isize) = !(*coder).props;
     *in_pos = in_start.wrapping_add(uncomp_size as size_t);
     return ret;
 }

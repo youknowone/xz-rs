@@ -22,30 +22,22 @@ pub unsafe extern "C" fn lzma_lzma_preset(
     (*options).lp = LZMA_LP_DEFAULT as u32;
     (*options).pb = LZMA_PB_DEFAULT as u32;
     static mut dict_pow2: [u8; 10] = [18, 20, 21, 22, 22, 23, 23, 24, 25, 26];
-    (*options).dict_size = (1u32 << dict_pow2[level as usize] as c_int) as u32;
+    (*options).dict_size = 1u32 << dict_pow2[level as usize];
     if level <= 3 {
         (*options).mode = LZMA_MODE_FAST;
-        (*options).mf = (if level == 0 {
-            LZMA_MF_HC3 as c_int
-        } else {
-            LZMA_MF_HC4 as c_int
-        }) as lzma_match_finder;
-        (*options).nice_len = (if level <= 1 {
-            128 as c_int
-        } else {
-            273 as c_int
-        }) as u32;
+        (*options).mf = (if level == 0 { LZMA_MF_HC3 } else { LZMA_MF_HC4 }) as lzma_match_finder;
+        (*options).nice_len = (if level <= 1 { 128 } else { 273 }) as u32;
         static mut depths: [u8; 4] = [4, 8, 24, 48];
         (*options).depth = depths[level as usize] as u32;
     } else {
         (*options).mode = LZMA_MODE_NORMAL;
         (*options).mf = LZMA_MF_BT4;
         (*options).nice_len = (if level == 4 {
-            16 as c_int
+            16
         } else if level == 5 {
-            32 as c_int
+            32
         } else {
-            64 as c_int
+            64
         }) as u32;
         (*options).depth = 0;
     }

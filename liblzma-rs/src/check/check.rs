@@ -34,7 +34,7 @@ pub extern "C" fn lzma_check_is_supported(type_0: lzma_check) -> lzma_bool {
 #[no_mangle]
 pub extern "C" fn lzma_check_size(type_0: lzma_check) -> u32 {
     if type_0 > LZMA_CHECK_ID_MAX {
-        return UINT32_MAX as u32;
+        return UINT32_MAX;
     }
     static check_sizes: [u8; 16] = [
         0, 4 as u8, 4 as u8, 4 as u8, 8 as u8, 8 as u8, 8 as u8, 16 as u8, 16 as u8, 16 as u8,

@@ -36,9 +36,7 @@ extern "C" {
     ) -> lzma_ret;
 }
 pub type lzma_index = lzma_index_s;
-pub const INDEX_BOUND: c_int =
-    1 as c_int + 1 as c_int + 2 as c_int * LZMA_VLI_BYTES_MAX + 4 as c_int + 3 as c_int
-        & !(3 as c_int);
+pub const INDEX_BOUND: c_int = 1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 4 + 3 & !(3);
 pub const HEADERS_BOUND: c_int = 2 * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
 #[no_mangle]
 pub extern "C" fn lzma_stream_buffer_bound(uncompressed_size: size_t) -> size_t {
@@ -78,7 +76,7 @@ pub unsafe extern "C" fn lzma_stream_buffer_encode(
         return LZMA_UNSUPPORTED_CHECK;
     }
     let mut out_pos: size_t = *out_pos_ptr;
-    if out_size.wrapping_sub(out_pos) <= (2 as c_int * LZMA_STREAM_HEADER_SIZE) as size_t {
+    if out_size.wrapping_sub(out_pos) <= (2 * LZMA_STREAM_HEADER_SIZE) as size_t {
         return LZMA_BUF_ERROR;
     }
     out_size = out_size.wrapping_sub(LZMA_STREAM_HEADER_SIZE as size_t);

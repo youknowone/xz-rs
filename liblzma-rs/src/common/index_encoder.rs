@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 #[repr(C)]
 pub struct lzma_index_s {
     _opaque: [u8; 0],
@@ -99,7 +99,7 @@ pub const SEQ_UNCOMPRESSED: C2RustUnnamed_3 = 3;
 pub const SEQ_UNPADDED: C2RustUnnamed_3 = 2;
 pub const SEQ_COUNT: C2RustUnnamed_3 = 1;
 pub const SEQ_INDICATOR: C2RustUnnamed_3 = 0;
-pub const INDEX_INDICATOR: c_int = 0;
+pub const INDEX_INDICATOR: u8 = 0;
 unsafe extern "C" fn index_encode(
     coder_ptr: *mut c_void,
     _allocator: *const lzma_allocator,
@@ -118,7 +118,7 @@ unsafe extern "C" fn index_encode(
     while *out_pos < out_size {
         match (*coder).sequence {
             0 => {
-                *out.offset(*out_pos as isize) = INDEX_INDICATOR as u8;
+                *out.offset(*out_pos as isize) = INDEX_INDICATOR;
                 *out_pos = (*out_pos).wrapping_add(1);
                 (*coder).sequence = SEQ_COUNT;
                 continue;
@@ -190,7 +190,7 @@ unsafe extern "C" fn index_encode(
                         return LZMA_OK;
                     }
                     *out.offset(*out_pos as isize) =
-                        ((*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff as u32) as u8;
+                        ((*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff) as u8;
                     *out_pos = (*out_pos).wrapping_add(1);
                     (*coder).pos = (*coder).pos.wrapping_add(1);
                     if !((*coder).pos < 4) {
