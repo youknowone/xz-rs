@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_ulonglong, c_void};
+use core::ffi::{c_uint, c_void};
 #[repr(C)]
 pub struct lzma_index_s {
     _opaque: [u8; 0],
@@ -40,9 +40,6 @@ pub const SEQ_UNPADDED: C2RustUnnamed_0 = 3;
 pub const SEQ_MEMUSAGE: C2RustUnnamed_0 = 2;
 pub const SEQ_COUNT: C2RustUnnamed_0 = 1;
 pub const SEQ_INDICATOR: C2RustUnnamed_0 = 0;
-pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
-pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
-pub const INDEX_INDICATOR: u8 = 0;
 unsafe extern "C" fn index_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_ulong, c_void};
+use core::ffi::c_void;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_options {
@@ -24,12 +24,8 @@ pub struct C2RustUnnamed {
     pub size: size_t,
     pub buffer: [u8; LZMA_BUFFER_SIZE as usize],
 }
-pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
-pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const LZMA_BUFFER_SIZE: u32 = 4096;
 pub const LZ_DICT_EXTRA: u32 = 0;
-pub const LZ_DICT_REPEAT_MAX: u32 = 288;
-pub const LZ_DICT_INIT_POS: u32 = 2 * LZ_DICT_REPEAT_MAX;
 pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
     coder: core::ptr::null_mut(),
     code: None,

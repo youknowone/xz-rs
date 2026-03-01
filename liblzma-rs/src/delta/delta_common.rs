@@ -1,6 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 unsafe extern "C" fn delta_coder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
     lzma_next_end(&raw mut (*coder).next, allocator);

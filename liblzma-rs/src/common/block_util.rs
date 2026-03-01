@@ -1,7 +1,5 @@
 use crate::types::*;
-use core::ffi::c_ulonglong;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: u32 = 8;
-pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     vli.wrapping_add(3) & !(3)

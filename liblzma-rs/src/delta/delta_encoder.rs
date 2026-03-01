@@ -7,7 +7,6 @@ extern "C" {
         filters: *const lzma_filter_info,
     ) -> lzma_ret;
 }
-pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 unsafe extern "C" fn copy_and_encode(
     coder: *mut lzma_delta_coder,
     in_0: *const u8,

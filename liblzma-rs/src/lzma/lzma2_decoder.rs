@@ -50,8 +50,6 @@ pub const SEQ_COMPRESSED_0: sequence = 3;
 pub const SEQ_UNCOMPRESSED_2: sequence = 2;
 pub const SEQ_UNCOMPRESSED_1: sequence = 1;
 pub const SEQ_CONTROL: sequence = 0;
-pub const LZ_DICT_REPEAT_MAX: u32 = 288;
-pub const LZ_DICT_INIT_POS: u32 = 2 * LZ_DICT_REPEAT_MAX;
 pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
     coder: core::ptr::null_mut(),
     code: None,

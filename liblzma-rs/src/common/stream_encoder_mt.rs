@@ -347,7 +347,6 @@ extern "C" fn mythread_condtime_set(
         }
     }
 }
-pub const LZMA_THREADS_MAX: u32 = 16384;
 #[inline]
 extern "C" fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
     unsafe { (*outq).bufs_in_use < (*outq).bufs_limit }

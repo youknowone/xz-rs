@@ -18,7 +18,6 @@ pub const SEQ_CODER_INIT: C2RustUnnamed_0 = 3;
 pub const SEQ_UNCOMPRESSED_SIZE: C2RustUnnamed_0 = 2;
 pub const SEQ_DICTIONARY_SIZE: C2RustUnnamed_0 = 1;
 pub const SEQ_PROPERTIES: C2RustUnnamed_0 = 0;
-pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
 unsafe extern "C" fn alone_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,

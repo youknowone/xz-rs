@@ -107,9 +107,6 @@ extern "C" fn read32le(buf: *const u8) -> u32 {
         num
     };
 }
-pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
-pub const LZ_DICT_REPEAT_MAX: u32 = 288;
-pub const LZ_DICT_INIT_POS: u32 = 2 * LZ_DICT_REPEAT_MAX;
 #[inline]
 unsafe extern "C" fn dict_get(dict: *const lzma_dict, distance: u32) -> u8 {
     *(*dict).buf.offset(
@@ -187,8 +184,6 @@ unsafe extern "C" fn dict_put_safe(dict: *mut lzma_dict, byte: u8) -> bool {
 pub const RC_SHIFT_BITS: u32 = 8;
 pub const RC_TOP_BITS: u32 = 24;
 pub const RC_TOP_VALUE: c_uint = 1u32 << RC_TOP_BITS;
-pub const RC_BIT_MODEL_TOTAL_BITS: u32 = 11;
-pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_BITS: u32 = 5;
 #[inline]
 unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
@@ -198,7 +193,6 @@ unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool 
         && (*options).pb <= LZMA_PB_MAX
 }
 pub const STATES: u32 = 12;
-pub const LIT_STATES: u32 = 7;
 pub const LITERAL_CODER_SIZE: c_uint = 0x300;
 #[inline]
 unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
@@ -209,7 +203,6 @@ unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
         i += 1;
     }
 }
-pub const MATCH_LEN_MIN: u32 = 2;
 pub const LEN_LOW_BITS: u32 = 3;
 pub const LEN_LOW_SYMBOLS: u32 = 1 << LEN_LOW_BITS;
 pub const LEN_MID_BITS: u32 = 3;

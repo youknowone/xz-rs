@@ -1,8 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_ulong, c_void};
-pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
-pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
-pub const LZMA_THREADS_MAX: u32 = 16384;
+use core::ffi::c_void;
 #[inline]
 extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
     (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64

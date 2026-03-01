@@ -1,4 +1,4 @@
-use core::ffi::{c_char, c_int, c_uchar, c_uint, c_void};
+use core::ffi::{c_char, c_int, c_uchar, c_uint, c_ulong, c_ulonglong, c_void};
 
 // Platform-dependent type aliases
 pub type size_t = libc::size_t;
@@ -290,6 +290,27 @@ pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_IGNORE_CHECK
     | LZMA_CONCATENATED
     | LZMA_FAIL_FAST;
+
+// Common constants used across many modules
+pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
+pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
+pub const INDEX_INDICATOR: u8 = 0;
+pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
+pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
+pub const LZMA_THREADS_MAX: u32 = 16384;
+pub const LZMA_DELTA_DIST_MIN: u32 = 1;
+pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
+
+// LZMA range coder and match constants
+pub const RC_BIT_MODEL_TOTAL_BITS: u32 = 11;
+pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
+pub const MATCH_LEN_MIN: u32 = 2;
+pub const REPS: u32 = 4;
+pub const LIT_STATES: u32 = 7;
+pub const FASTPOS_BITS: u32 = 13;
+pub const OPTS: u32 = 1 << 12;
+pub const LZ_DICT_REPEAT_MAX: u32 = 288;
+pub const LZ_DICT_INIT_POS: u32 = 2 * LZ_DICT_REPEAT_MAX;
 
 // lzma_block struct (shared across 12 modules)
 #[derive(Copy, Clone)]

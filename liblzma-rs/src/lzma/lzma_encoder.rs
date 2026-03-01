@@ -140,7 +140,6 @@ extern "C" fn write32le(buf: *mut u8, num: u32) {
         *buf.offset(3) = (num >> 24) as u8;
     }
 }
-pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 #[inline]
 extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
@@ -156,8 +155,6 @@ unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
 pub const RC_SHIFT_BITS: u32 = 8;
 pub const RC_TOP_BITS: u32 = 24;
 pub const RC_TOP_VALUE: c_uint = 1u32 << RC_TOP_BITS;
-pub const RC_BIT_MODEL_TOTAL_BITS: u32 = 11;
-pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const RC_MOVE_BITS: u32 = 5;
 pub const RC_MOVE_REDUCING_BITS: u32 = 4;
 #[inline]
@@ -471,7 +468,6 @@ unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool 
         && (*options).pb <= LZMA_PB_MAX
 }
 pub const STATES: u32 = 12;
-pub const LIT_STATES: u32 = 7;
 pub const LITERAL_CODER_SIZE: c_uint = 0x300;
 #[inline]
 unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
@@ -482,7 +478,6 @@ unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
         i += 1;
     }
 }
-pub const MATCH_LEN_MIN: u32 = 2;
 pub const LEN_LOW_BITS: u32 = 3;
 pub const LEN_LOW_SYMBOLS: u32 = 1 << LEN_LOW_BITS;
 pub const LEN_MID_BITS: u32 = 3;
@@ -500,9 +495,6 @@ pub const FULL_DISTANCES: u32 = 1 << FULL_DISTANCES_BITS;
 pub const ALIGN_BITS: u32 = 4;
 pub const ALIGN_SIZE: u32 = 1 << ALIGN_BITS;
 pub const ALIGN_MASK: u32 = ALIGN_SIZE - 1;
-pub const REPS: u32 = 4;
-pub const OPTS: u32 = 1 << 12;
-pub const FASTPOS_BITS: u32 = 13;
 #[inline]
 unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
     if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {

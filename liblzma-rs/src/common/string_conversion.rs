@@ -63,7 +63,6 @@ pub const LZMA_STR_ENCODER: c_uint = 0x10;
 pub const LZMA_STR_DECODER: c_uint = 0x20;
 pub const LZMA_STR_GETOPT_LONG: c_uint = 0x40;
 pub const LZMA_STR_NO_SPACES: c_uint = 0x80;
-pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 pub const LZMA_DICT_SIZE_DEFAULT: c_uint = 1u32 << 23;
 pub const LZMA_LCLP_MIN: u32 = 0;
 pub const LZMA_PB_MIN: u32 = 0;

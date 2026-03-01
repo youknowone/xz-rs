@@ -262,8 +262,6 @@ pub const SEQ_BLOCK_THR_INIT: C2RustUnnamed_0 = 3;
 pub const SEQ_BLOCK_INIT: C2RustUnnamed_0 = 2;
 pub const SEQ_BLOCK_HEADER: C2RustUnnamed_0 = 1;
 pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
-pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
-pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const SIG_SETMASK: c_int = 3;
 pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 #[inline]
@@ -369,8 +367,6 @@ extern "C" fn mythread_condtime_set(
         }
     }
 }
-pub const LZMA_THREADS_MAX: u32 = 16384;
-pub const INDEX_INDICATOR: u8 = 0;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     vli.wrapping_add(3) & !(3)

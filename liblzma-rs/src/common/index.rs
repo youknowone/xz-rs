@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_ulong, c_ulonglong, c_void};
+use core::ffi::{c_uint, c_void};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_s {
@@ -135,8 +135,6 @@ pub struct index_cat_info {
 }
 pub type C2RustUnnamed_2 = c_uint;
 pub type C2RustUnnamed_3 = c_uint;
-pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
-pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 #[inline]
 extern "C" fn bsr32(n: u32) -> u32 {
     n.leading_zeros() as i32 as u32 ^ 31
@@ -145,8 +143,6 @@ extern "C" fn bsr32(n: u32) -> u32 {
 extern "C" fn ctz32(n: u32) -> u32 {
     n.trailing_zeros() as i32 as u32
 }
-pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
-pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     vli.wrapping_add(3) & !(3)

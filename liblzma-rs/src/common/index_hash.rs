@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_ulonglong, c_void};
+use core::ffi::{c_uint, c_void};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_hash_s {
@@ -30,9 +30,6 @@ pub const SEQ_UNPADDED: C2RustUnnamed_1 = 2;
 pub const SEQ_COUNT: C2RustUnnamed_1 = 1;
 pub const SEQ_BLOCK: C2RustUnnamed_1 = 0;
 pub type lzma_index_hash = lzma_index_hash_s;
-pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
-pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
-pub const INDEX_INDICATOR: u8 = 0;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     vli.wrapping_add(3) & !(3)

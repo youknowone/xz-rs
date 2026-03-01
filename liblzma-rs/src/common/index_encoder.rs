@@ -88,7 +88,6 @@ pub const SEQ_UNCOMPRESSED: C2RustUnnamed_3 = 3;
 pub const SEQ_UNPADDED: C2RustUnnamed_3 = 2;
 pub const SEQ_COUNT: C2RustUnnamed_3 = 1;
 pub const SEQ_INDICATOR: C2RustUnnamed_3 = 0;
-pub const INDEX_INDICATOR: u8 = 0;
 unsafe extern "C" fn index_encode(
     coder_ptr: *mut c_void,
     _allocator: *const lzma_allocator,

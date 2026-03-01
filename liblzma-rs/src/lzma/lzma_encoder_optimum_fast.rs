@@ -63,7 +63,6 @@ pub struct lzma_lzma1_encoder_s {
     pub opts_current_index: u32,
     pub opts: [lzma_optimal; OPTS as usize],
 }
-pub const OPTS: u32 = 1 << 12;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_optimal {
@@ -105,7 +104,6 @@ unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
 }
-pub const REPS: u32 = 4;
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
     buf1: *const u8,

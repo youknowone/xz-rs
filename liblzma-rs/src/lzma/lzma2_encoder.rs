@@ -103,7 +103,6 @@ unsafe extern "C" fn mf_read(
     *out_pos = (*out_pos).wrapping_add(copy_size);
     *left = (*left).wrapping_sub(copy_size);
 }
-pub const FASTPOS_BITS: u32 = 13;
 #[inline]
 unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
     if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
