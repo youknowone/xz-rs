@@ -1,12 +1,4 @@
 use crate::types::*;
-extern "C" {
-    fn lzma_next_filter_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        filters: *const lzma_filter_info,
-    ) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct C2RustUnnamed {
@@ -178,8 +170,12 @@ pub unsafe extern "C" fn lzma_filters_copy(
         _ => {
             dest[i as usize].id = LZMA_VLI_UNKNOWN;
             dest[i as usize].options = core::ptr::null_mut();
-            core::ptr::copy_nonoverlapping(&raw mut dest as *const u8, real_dest as *mut u8, i.wrapping_add(1)
-                .wrapping_mul(core::mem::size_of::<lzma_filter>()));
+            core::ptr::copy_nonoverlapping(
+                &raw mut dest as *const u8,
+                real_dest as *mut u8,
+                i.wrapping_add(1)
+                    .wrapping_mul(core::mem::size_of::<lzma_filter>()),
+            );
             return LZMA_OK;
         }
     };

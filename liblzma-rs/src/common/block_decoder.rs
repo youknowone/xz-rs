@@ -1,33 +1,11 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
-    fn lzma_check_size(check: lzma_check) -> u32;
-    fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
     fn lzma_raw_decoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
         options: *const lzma_filter,
     ) -> lzma_ret;
-    fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check);
-    fn lzma_check_update(
-        check: *mut lzma_check_state,
-        type_0: lzma_check,
-        buf: *const u8,
-        size: size_t,
-    );
-    fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check);
 }
 #[derive(Copy, Clone)]
 #[repr(C)]

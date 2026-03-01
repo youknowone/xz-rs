@@ -1,14 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_filter_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        filters: *const lzma_filter_info,
-    ) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_lzma_decoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -265,7 +257,10 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
         (*next).end = Some(
             alone_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
         );
-        (*next).memconfig = Some(alone_decoder_memconfig as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret);
+        (*next).memconfig = Some(
+            alone_decoder_memconfig
+                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
+        );
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

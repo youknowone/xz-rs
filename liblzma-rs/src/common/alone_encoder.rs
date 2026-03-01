@@ -1,22 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_filter_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        filters: *const lzma_filter_info,
-    ) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
     fn lzma_lzma_encoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -194,7 +178,11 @@ unsafe extern "C" fn alone_encoder_init(
         d += 1;
     }
     write32le((&raw mut (*coder).header as *mut u8).offset(1), d);
-    core::ptr::write_bytes((&raw mut (*coder).header as *mut u8).offset(1).offset(4) as *mut u8, 0xff as u8, 8);
+    core::ptr::write_bytes(
+        (&raw mut (*coder).header as *mut u8).offset(1).offset(4) as *mut u8,
+        0xff as u8,
+        8,
+    );
     let filters: [lzma_filter_info; 2] = [
         lzma_filter_info_s {
             id: LZMA_FILTER_LZMA1,

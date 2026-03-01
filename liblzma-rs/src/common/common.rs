@@ -84,7 +84,11 @@ pub unsafe extern "C" fn lzma_bufcpy(
         out_avail
     };
     if copy_size > 0 {
-        core::ptr::copy_nonoverlapping(in_0.offset(*in_pos as isize) as *const u8, out.offset(*out_pos as isize) as *mut u8, copy_size);
+        core::ptr::copy_nonoverlapping(
+            in_0.offset(*in_pos as isize) as *const u8,
+            out.offset(*out_pos as isize) as *mut u8,
+            copy_size,
+        );
     }
     *in_pos = (*in_pos).wrapping_add(copy_size);
     *out_pos = (*out_pos).wrapping_add(copy_size);
@@ -96,9 +100,7 @@ pub unsafe extern "C" fn lzma_next_filter_init(
     allocator: *const lzma_allocator,
     filters: *const lzma_filter_info,
 ) -> lzma_ret {
-    if core::mem::transmute::<lzma_init_function, uintptr_t>((*filters).init)
-        != (*next).init
-    {
+    if core::mem::transmute::<lzma_init_function, uintptr_t>((*filters).init) != (*next).init {
         lzma_next_end(next, allocator);
     }
     (*next).init = core::mem::transmute::<lzma_init_function, uintptr_t>((*filters).init);
@@ -177,7 +179,11 @@ pub unsafe extern "C" fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
             set_out_limit: None,
         };
     }
-    core::ptr::write_bytes(&raw mut (*(*strm).internal).supported_actions as *mut u8, 0 as u8, core::mem::size_of::<[bool; 5]>());
+    core::ptr::write_bytes(
+        &raw mut (*(*strm).internal).supported_actions as *mut u8,
+        0 as u8,
+        core::mem::size_of::<[bool; 5]>(),
+    );
     (*(*strm).internal).sequence = ISEQ_RUN;
     (*(*strm).internal).allow_buf_error = false;
     (*strm).total_in = 0;

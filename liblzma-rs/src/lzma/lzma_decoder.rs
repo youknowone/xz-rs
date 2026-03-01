@@ -156,7 +156,11 @@ unsafe extern "C" fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut 
             }
         }
     } else {
-        core::ptr::copy_nonoverlapping((*dict).buf.offset(back as isize) as *const u8, (*dict).buf.offset((*dict).pos as isize) as *mut u8, left as size_t);
+        core::ptr::copy_nonoverlapping(
+            (*dict).buf.offset(back as isize) as *const u8,
+            (*dict).buf.offset((*dict).pos as isize) as *mut u8,
+            left as size_t,
+        );
         (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
     }
     if !(*dict).has_wrapped {
@@ -1935,8 +1939,7 @@ unsafe extern "C" fn lzma_decode(
                                             >> RC_MOVE_BITS);
                                     symbol = (symbol << 1).wrapping_add(1);
                                 }
-                                symbol =
-                                    symbol.wrapping_add((-(1_i32 << 3) + 2 + (1 << 3)) as u32);
+                                symbol = symbol.wrapping_add((-(1_i32 << 3) + 2 + (1 << 3)) as u32);
                                 len = symbol;
                             } else {
                                 rc.range = rc.range.wrapping_sub(rc_bound);
@@ -2177,9 +2180,8 @@ unsafe extern "C" fn lzma_decode(
                                                 >> RC_MOVE_BITS);
                                     symbol = (symbol << 1).wrapping_add(1);
                                 }
-                                symbol = symbol.wrapping_add(
-                                    (-(1_i32 << 8) + 2 + (1 << 3) + (1 << 3)) as u32,
-                                );
+                                symbol = symbol
+                                    .wrapping_add((-(1_i32 << 8) + 2 + (1 << 3) + (1 << 3)) as u32);
                                 len = symbol;
                             }
                         }
@@ -2939,8 +2941,8 @@ unsafe extern "C" fn lzma_decode(
                                                 >> RC_MOVE_BITS);
                                         symbol = (symbol << 1).wrapping_add(1);
                                     }
-                                    symbol = symbol
-                                        .wrapping_add((-(1_i32 << 3) + 2 + (1 << 3)) as u32);
+                                    symbol =
+                                        symbol.wrapping_add((-(1_i32 << 3) + 2 + (1 << 3)) as u32);
                                     len = symbol;
                                 } else {
                                     rc.range = rc.range.wrapping_sub(rc_bound);
@@ -3401,16 +3403,21 @@ pub unsafe extern "C" fn lzma_lzma_decoder_create(
         if (*lz).coder.is_null() {
             return LZMA_MEM_ERROR;
         }
-        (*lz).code = Some(lzma_decode as unsafe extern "C" fn(
-            *mut c_void,
-            *mut lzma_dict,
-            *const u8,
-            *mut size_t,
-            size_t,
-        ) -> lzma_ret);
+        (*lz).code = Some(
+            lzma_decode
+                as unsafe extern "C" fn(
+                    *mut c_void,
+                    *mut lzma_dict,
+                    *const u8,
+                    *mut size_t,
+                    size_t,
+                ) -> lzma_ret,
+        );
         (*lz).reset =
             Some(lzma_decoder_reset as unsafe extern "C" fn(*mut c_void, *const c_void) -> ());
-        (*lz).set_uncompressed = Some(lzma_decoder_uncompressed as unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> ());
+        (*lz).set_uncompressed = Some(
+            lzma_decoder_uncompressed as unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> (),
+        );
     }
     (*lz_options).dict_size = (*options).dict_size as size_t;
     (*lz_options).preset_dict = (*options).preset_dict;

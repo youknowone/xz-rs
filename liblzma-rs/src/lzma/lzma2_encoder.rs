@@ -5,14 +5,6 @@ pub struct lzma_lzma1_encoder_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
     fn lzma_lz_encoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -101,10 +93,14 @@ unsafe extern "C" fn mf_read(
 ) {
     let out_avail: size_t = out_size.wrapping_sub(*out_pos);
     let copy_size: size_t = if out_avail < *left { out_avail } else { *left };
-    core::ptr::copy_nonoverlapping((*mf)
-        .buffer
-        .offset((*mf).read_pos as isize)
-        .offset(-(*left as isize)) as *const u8, out.offset(*out_pos as isize) as *mut u8, copy_size);
+    core::ptr::copy_nonoverlapping(
+        (*mf)
+            .buffer
+            .offset((*mf).read_pos as isize)
+            .offset(-(*left as isize)) as *const u8,
+        out.offset(*out_pos as isize) as *mut u8,
+        copy_size,
+    );
     *out_pos = (*out_pos).wrapping_add(copy_size);
     *left = (*left).wrapping_sub(copy_size);
 }
@@ -380,15 +376,23 @@ unsafe extern "C" fn lzma2_encoder_init(
             return LZMA_MEM_ERROR;
         }
         (*lz).coder = coder as *mut c_void;
-        (*lz).code = Some(lzma2_encode as unsafe extern "C" fn(
-            *mut c_void,
-            *mut lzma_mf,
-            *mut u8,
-            *mut size_t,
-            size_t,
-        ) -> lzma_ret);
-        (*lz).end = Some(lzma2_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ());
-        (*lz).options_update = Some(lzma2_encoder_options_update as unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret);
+        (*lz).code = Some(
+            lzma2_encode
+                as unsafe extern "C" fn(
+                    *mut c_void,
+                    *mut lzma_mf,
+                    *mut u8,
+                    *mut size_t,
+                    size_t,
+                ) -> lzma_ret,
+        );
+        (*lz).end = Some(
+            lzma2_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
+        );
+        (*lz).options_update = Some(
+            lzma2_encoder_options_update
+                as unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret,
+        );
         (*coder).lzma = core::ptr::null_mut();
     }
     (*coder).opt_cur = *(options as *const lzma_options_lzma);

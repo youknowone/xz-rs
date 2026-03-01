@@ -869,14 +869,13 @@ unsafe extern "C" fn encode_init(coder: *mut lzma_lzma1_encoder, mf: *mut lzma_m
         (*mf).read_ahead = 0;
         rc_bit(
             &raw mut (*coder).rc,
-            (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16])
-                as *mut probability)
-                 as *mut probability,
+            (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16]) as *mut probability)
+                as *mut probability,
             0,
         );
         rc_bittree(
             &raw mut (*coder).rc,
-            &raw mut (*coder).literal as *mut probability ,
+            &raw mut (*coder).literal as *mut probability,
             8,
             *(*mf).buffer as u32,
         );
@@ -1205,14 +1204,19 @@ unsafe extern "C" fn lzma_encoder_init(
     if options.is_null() {
         return LZMA_PROG_ERROR;
     }
-    (*lz).code = Some(lzma_encode as unsafe extern "C" fn(
-        *mut c_void,
-        *mut lzma_mf,
-        *mut u8,
-        *mut size_t,
-        size_t,
-    ) -> lzma_ret);
-    (*lz).set_out_limit = Some(lzma_lzma_set_out_limit as unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret);
+    (*lz).code = Some(
+        lzma_encode
+            as unsafe extern "C" fn(
+                *mut c_void,
+                *mut lzma_mf,
+                *mut u8,
+                *mut size_t,
+                size_t,
+            ) -> lzma_ret,
+    );
+    (*lz).set_out_limit = Some(
+        lzma_lzma_set_out_limit as unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret,
+    );
     lzma_lzma_encoder_create(
         &raw mut (*lz).coder,
         allocator,

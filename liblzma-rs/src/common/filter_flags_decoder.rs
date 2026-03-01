@@ -1,12 +1,5 @@
 use crate::types::*;
 extern "C" {
-    fn lzma_vli_decode(
-        vli: *mut lzma_vli,
-        vli_pos: *mut size_t,
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-    ) -> lzma_ret;
     fn lzma_properties_decode(
         filter: *mut lzma_filter,
         allocator: *const lzma_allocator,

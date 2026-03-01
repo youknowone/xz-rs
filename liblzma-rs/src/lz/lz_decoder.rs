@@ -1,13 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_ulong, c_void};
-extern "C" {
-    fn lzma_next_filter_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        filters: *const lzma_filter_info,
-    ) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_options {
@@ -65,11 +57,15 @@ unsafe extern "C" fn decode_buffer(
         if (*coder).dict.pos == (*coder).dict.size {
             (*coder).dict.pos = LZ_DICT_REPEAT_MAX as size_t;
             (*coder).dict.has_wrapped = true;
-            core::ptr::copy_nonoverlapping((*coder)
-                .dict
-                .buf
-                .offset((*coder).dict.size as isize)
-                .offset(-(LZ_DICT_REPEAT_MAX as isize)) as *const u8, (*coder).dict.buf as *mut u8, LZ_DICT_REPEAT_MAX as size_t);
+            core::ptr::copy_nonoverlapping(
+                (*coder)
+                    .dict
+                    .buf
+                    .offset((*coder).dict.size as isize)
+                    .offset(-(LZ_DICT_REPEAT_MAX as isize)) as *const u8,
+                (*coder).dict.buf as *mut u8,
+                LZ_DICT_REPEAT_MAX as size_t,
+            );
         }
         let dict_start: size_t = (*coder).dict.pos;
         (*coder).dict.limit = (*coder).dict.pos.wrapping_add(
@@ -89,7 +85,11 @@ unsafe extern "C" fn decode_buffer(
         );
         let copy_size: size_t = (*coder).dict.pos.wrapping_sub(dict_start);
         if copy_size > 0 {
-            core::ptr::copy_nonoverlapping((*coder).dict.buf.offset(dict_start as isize) as *const u8, out.offset(*out_pos as isize) as *mut u8, copy_size);
+            core::ptr::copy_nonoverlapping(
+                (*coder).dict.buf.offset(dict_start as isize) as *const u8,
+                out.offset(*out_pos as isize) as *mut u8,
+                copy_size,
+            );
         }
         *out_pos = (*out_pos).wrapping_add(copy_size);
         if (*coder).dict.need_reset {
@@ -214,8 +214,7 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
                 ) -> lzma_ret,
         );
         (*next).end =
-            Some(lz_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ())
-               ;
+            Some(lz_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ());
         (*coder).dict.buf = core::ptr::null_mut();
         (*coder).dict.size = 0;
         (*coder).lz = LZMA_LZ_DECODER_INIT;
@@ -279,7 +278,11 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
             lz_options.dict_size
         };
         let offset: size_t = lz_options.preset_dict_size.wrapping_sub(copy_size);
-        core::ptr::copy_nonoverlapping(lz_options.preset_dict.offset(offset as isize) as *const u8, (*coder).dict.buf.offset((*coder).dict.pos as isize) as *mut u8, copy_size);
+        core::ptr::copy_nonoverlapping(
+            lz_options.preset_dict.offset(offset as isize) as *const u8,
+            (*coder).dict.buf.offset((*coder).dict.pos as isize) as *mut u8,
+            copy_size,
+        );
         (*coder).dict.pos = (*coder).dict.pos.wrapping_add(copy_size);
         (*coder).dict.full = copy_size;
     }

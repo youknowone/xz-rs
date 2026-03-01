@@ -1,13 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-extern "C" {
-    fn lzma_next_filter_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        filters: *const lzma_filter_info,
-    ) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-}
 pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 unsafe extern "C" fn delta_coder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
@@ -29,8 +21,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
         }
         (*next).coder = coder as *mut c_void;
         (*next).end =
-            Some(delta_coder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ())
-               ;
+            Some(delta_coder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ());
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

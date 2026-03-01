@@ -1,8 +1,5 @@
 use crate::types::*;
 use core::ffi::c_ulonglong;
-extern "C" {
-    fn lzma_check_size(check: lzma_check) -> u32;
-}
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: u32 = 8;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 #[inline]

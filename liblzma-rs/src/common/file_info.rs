@@ -5,13 +5,8 @@ pub struct lzma_index_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
     fn lzma_stream_header_decode(options: *mut lzma_stream_flags, in_0: *const u8) -> lzma_ret;
     fn lzma_stream_footer_decode(options: *mut lzma_stream_flags, in_0: *const u8) -> lzma_ret;
-    fn lzma_stream_flags_compare(
-        a: *const lzma_stream_flags,
-        b: *const lzma_stream_flags,
-    ) -> lzma_ret;
     fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u64;
     fn lzma_index_memused(i: *const lzma_index) -> u64;
     fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
@@ -26,16 +21,6 @@ extern "C" {
         src: *mut lzma_index,
         allocator: *const lzma_allocator,
     ) -> lzma_ret;
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
     fn lzma_index_decoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -662,7 +647,10 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
         (*next).end = Some(
             file_info_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
         );
-        (*next).memconfig = Some(file_info_decoder_memconfig as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret);
+        (*next).memconfig = Some(
+            file_info_decoder_memconfig
+                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
+        );
         (*coder).index_decoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

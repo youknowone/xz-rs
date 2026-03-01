@@ -1,15 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_ulong, c_void};
-extern "C" {
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
-}
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const LZMA_THREADS_MAX: u32 = 16384;

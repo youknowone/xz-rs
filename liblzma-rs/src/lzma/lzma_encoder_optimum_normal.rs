@@ -1120,7 +1120,11 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
         return;
     }
     let mut reps: [u32; 4] = [0; 4];
-    core::ptr::copy_nonoverlapping(&raw mut (*coder).reps as *const u8, &raw mut reps as *mut u8, core::mem::size_of::<[u32; 4]>());
+    core::ptr::copy_nonoverlapping(
+        &raw mut (*coder).reps as *const u8,
+        &raw mut reps as *mut u8,
+        core::mem::size_of::<[u32; 4]>(),
+    );
     let mut cur: u32 = 0;
     cur = 1;
     while cur < len_end {

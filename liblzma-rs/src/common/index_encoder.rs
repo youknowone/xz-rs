@@ -5,7 +5,6 @@ pub struct lzma_index_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
     fn lzma_vli_encode(
         vli: lzma_vli,
         vli_pos: *mut size_t,
@@ -13,13 +12,10 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
     ) -> lzma_ret;
-    fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli;
     fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
     fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *const lzma_index);
     fn lzma_index_iter_next(iter: *mut lzma_index_iter, mode: lzma_index_iter_mode) -> lzma_bool;
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_index_padding_size(i: *const lzma_index) -> u32;
 }
 pub type lzma_index = lzma_index_s;

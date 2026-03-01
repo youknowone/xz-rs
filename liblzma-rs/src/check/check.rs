@@ -1,6 +1,5 @@
 use crate::types::*;
 extern "C" {
-    fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64;
     fn lzma_sha256_init(check: *mut lzma_check_state);
     fn lzma_sha256_update(buf: *const u8, size: size_t, check: *mut lzma_check_state);

@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::c_uint;
 extern "C" {
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_stream_decoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,

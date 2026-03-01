@@ -5,18 +5,15 @@ pub struct lzma_index_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
     fn lzma_filters_copy(
         src: *const lzma_filter,
         dest: *mut lzma_filter,
         allocator: *const lzma_allocator,
     ) -> lzma_ret;
-    fn lzma_filters_free(filters: *mut lzma_filter, allocator: *const lzma_allocator);
     fn lzma_stream_header_encode(options: *const lzma_stream_flags, out: *mut u8) -> lzma_ret;
     fn lzma_stream_footer_encode(options: *const lzma_stream_flags, out: *mut u8) -> lzma_ret;
     fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret;
     fn lzma_block_header_encode(block: *const lzma_block, out: *mut u8) -> lzma_ret;
-    fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
     fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index;
     fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
     fn lzma_index_append(
@@ -26,16 +23,6 @@ extern "C" {
         uncompressed_size: lzma_vli,
     ) -> lzma_ret;
     fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
     fn lzma_block_encoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -297,7 +284,11 @@ unsafe extern "C" fn stream_encoder_update(
         }
         _ => {
             lzma_filters_free(&raw mut (*coder).filters as *mut lzma_filter, allocator);
-            core::ptr::copy_nonoverlapping(&raw mut temp as *const u8, &raw mut (*coder).filters as *mut u8, core::mem::size_of::<[lzma_filter; 5]>());
+            core::ptr::copy_nonoverlapping(
+                &raw mut temp as *const u8,
+                &raw mut (*coder).filters as *mut u8,
+                core::mem::size_of::<[lzma_filter; 5]>(),
+            );
             return LZMA_OK;
         }
     };
@@ -377,12 +368,15 @@ unsafe extern "C" fn stream_encoder_init(
         (*next).end = Some(
             stream_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
         );
-        (*next).update = Some(stream_encoder_update as unsafe extern "C" fn(
-            *mut c_void,
-            *const lzma_allocator,
-            *const lzma_filter,
-            *const lzma_filter,
-        ) -> lzma_ret);
+        (*next).update = Some(
+            stream_encoder_update
+                as unsafe extern "C" fn(
+                    *mut c_void,
+                    *const lzma_allocator,
+                    *const lzma_filter,
+                    *const lzma_filter,
+                ) -> lzma_ret,
+        );
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
         (*coder).block_encoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
@@ -444,12 +438,7 @@ unsafe extern "C" fn stream_encoder_init(
     }
     (*coder).buffer_pos = 0;
     (*coder).buffer_size = LZMA_STREAM_HEADER_SIZE as size_t;
-    stream_encoder_update(
-        coder as *mut c_void,
-        allocator,
-        filters,
-        core::ptr::null(),
-    )
+    stream_encoder_update(coder as *mut c_void, allocator, filters, core::ptr::null())
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_stream_encoder(

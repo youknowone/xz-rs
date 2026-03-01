@@ -1,26 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-extern "C" {
-    fn lzma_next_filter_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        filters: *const lzma_filter_info,
-    ) -> lzma_ret;
-    fn lzma_next_filter_update(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        reversed_filters: *const lzma_filter,
-    ) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
-}
 unsafe extern "C" fn copy_or_code(
     coder: *mut lzma_simple_coder,
     allocator: *const lzma_allocator,
@@ -109,7 +88,11 @@ unsafe extern "C" fn simple_code(
     if out_avail > buf_avail || buf_avail == 0 {
         let out_start: size_t = *out_pos;
         if buf_avail > 0 {
-            core::ptr::copy_nonoverlapping((&raw mut (*coder).buffer as *mut u8).offset((*coder).pos as isize) as *const u8, out.offset(*out_pos as isize) as *mut u8, buf_avail);
+            core::ptr::copy_nonoverlapping(
+                (&raw mut (*coder).buffer as *mut u8).offset((*coder).pos as isize) as *const u8,
+                out.offset(*out_pos as isize) as *mut u8,
+                buf_avail,
+            );
         }
         *out_pos = (*out_pos).wrapping_add(buf_avail);
         let ret: lzma_ret = copy_or_code(
@@ -131,10 +114,18 @@ unsafe extern "C" fn simple_code(
             (*coder).size = 0;
         } else if unfiltered > 0 {
             *out_pos = (*out_pos).wrapping_sub(unfiltered);
-            core::ptr::copy_nonoverlapping(out.offset(*out_pos as isize) as *const u8, &raw mut (*coder).buffer as *mut u8, unfiltered);
+            core::ptr::copy_nonoverlapping(
+                out.offset(*out_pos as isize) as *const u8,
+                &raw mut (*coder).buffer as *mut u8,
+                unfiltered,
+            );
         }
     } else if (*coder).pos > 0 {
-        core::ptr::copy((&raw mut (*coder).buffer as *mut u8).offset((*coder).pos as isize) as *const u8, &raw mut (*coder).buffer as *mut u8, buf_avail);
+        core::ptr::copy(
+            (&raw mut (*coder).buffer as *mut u8).offset((*coder).pos as isize) as *const u8,
+            &raw mut (*coder).buffer as *mut u8,
+            buf_avail,
+        );
         (*coder).size = (*coder).size.wrapping_sub((*coder).pos);
         (*coder).pos = 0;
     }
@@ -229,12 +220,15 @@ pub unsafe extern "C" fn lzma_simple_coder_init(
         (*next).end = Some(
             simple_coder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
         );
-        (*next).update = Some(simple_coder_update as unsafe extern "C" fn(
-            *mut c_void,
-            *const lzma_allocator,
-            *const lzma_filter,
-            *const lzma_filter,
-        ) -> lzma_ret);
+        (*next).update = Some(
+            simple_coder_update
+                as unsafe extern "C" fn(
+                    *mut c_void,
+                    *const lzma_allocator,
+                    *const lzma_filter,
+                    *const lzma_filter,
+                ) -> lzma_ret,
+        );
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,
@@ -259,8 +253,7 @@ pub unsafe extern "C" fn lzma_simple_coder_init(
         }
     }
     if !(*filters).options.is_null() {
-        let simple: *const lzma_options_bcj =
-            (*filters).options as *const lzma_options_bcj;
+        let simple: *const lzma_options_bcj = (*filters).options as *const lzma_options_bcj;
         (*coder).now_pos = (*simple).start_offset;
         if (*coder).now_pos & alignment.wrapping_sub(1) != 0 {
             return LZMA_OPTIONS_ERROR;

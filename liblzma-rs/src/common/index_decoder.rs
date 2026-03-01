@@ -5,15 +5,6 @@ pub struct lzma_index_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_vli_decode(
-        vli: *mut lzma_vli,
-        vli_pos: *mut size_t,
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-    ) -> lzma_ret;
-    fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u64;
     fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index;
     fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
@@ -23,8 +14,6 @@ extern "C" {
         unpadded_size: lzma_vli,
         uncompressed_size: lzma_vli,
     ) -> lzma_ret;
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_index_padding_size(i: *const lzma_index) -> u32;
     fn lzma_index_prealloc(i: *mut lzma_index, records: lzma_vli);
 }
@@ -326,7 +315,10 @@ pub unsafe extern "C" fn lzma_index_decoder_init(
         (*next).end = Some(
             index_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
         );
-        (*next).memconfig = Some(index_decoder_memconfig as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret);
+        (*next).memconfig = Some(
+            index_decoder_memconfig
+                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
+        );
         (*coder).index = core::ptr::null_mut();
     } else {
         lzma_index_end((*coder).index, allocator);

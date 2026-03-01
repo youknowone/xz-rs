@@ -10,7 +10,6 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
     ) -> lzma_ret;
-    fn lzma_easy_preset(easy: *mut lzma_options_easy, preset: u32) -> bool;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_easy_buffer_encode(

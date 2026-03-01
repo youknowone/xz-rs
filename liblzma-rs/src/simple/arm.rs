@@ -1,17 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-extern "C" {
-    fn lzma_simple_coder_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        filters: *const lzma_filter_info,
-        filter: Option<unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t>,
-        simple_size: size_t,
-        unfiltered_max: size_t,
-        alignment: u32,
-        is_encoder: bool,
-    ) -> lzma_ret;
-}
 unsafe extern "C" fn arm_code(
     _simple: *mut c_void,
     now_pos: u32,

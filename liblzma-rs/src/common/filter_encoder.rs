@@ -1,8 +1,6 @@
 use crate::types::*;
 use core::ffi::c_void;
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
     fn lzma_raw_coder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,

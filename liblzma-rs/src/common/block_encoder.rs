@@ -1,37 +1,11 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_ulonglong, c_void};
 extern "C" {
-    fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
-    fn lzma_check_size(check: lzma_check) -> u32;
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_filter_update(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        reversed_filters: *const lzma_filter,
-    ) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
     fn lzma_raw_encoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
         filters: *const lzma_filter,
     ) -> lzma_ret;
-    fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check);
-    fn lzma_check_update(
-        check: *mut lzma_check_state,
-        type_0: lzma_check,
-        buf: *const u8,
-        size: size_t,
-    );
-    fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check);
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -154,7 +128,11 @@ unsafe extern "C" fn block_encode(
         if (*coder).pos < check_size {
             return LZMA_OK;
         }
-        core::ptr::copy_nonoverlapping(&raw mut (*coder).check.buffer.u8_0 as *const u8, &raw mut (*(*coder).block).raw_check as *mut u8, check_size);
+        core::ptr::copy_nonoverlapping(
+            &raw mut (*coder).check.buffer.u8_0 as *const u8,
+            &raw mut (*(*coder).block).raw_check as *mut u8,
+            check_size,
+        );
         return LZMA_STREAM_END;
     }
     LZMA_PROG_ERROR
@@ -256,12 +234,15 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
         (*next).end = Some(
             block_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
         );
-        (*next).update = Some(block_encoder_update as unsafe extern "C" fn(
-            *mut c_void,
-            *const lzma_allocator,
-            *const lzma_filter,
-            *const lzma_filter,
-        ) -> lzma_ret);
+        (*next).update = Some(
+            block_encoder_update
+                as unsafe extern "C" fn(
+                    *mut c_void,
+                    *const lzma_allocator,
+                    *const lzma_filter,
+                    *const lzma_filter,
+                ) -> lzma_ret,
+        );
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

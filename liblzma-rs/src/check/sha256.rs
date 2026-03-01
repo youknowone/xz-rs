@@ -17,7 +17,11 @@ static mut SHA256_K: [u32; 64] = [
 unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
     let mut W: [u32; 16] = [0; 16];
     let mut T: [u32; 8] = [0; 8];
-    core::ptr::copy_nonoverlapping(state as *const u8, &raw mut T as *mut u8, core::mem::size_of::<[u32; 8]>());
+    core::ptr::copy_nonoverlapping(
+        state as *const u8,
+        &raw mut T as *mut u8,
+        core::mem::size_of::<[u32; 8]>(),
+    );
     W[0] = (*data & 0xff) << 24
         | (*data & 0xff00) << 8
         | (*data & 0xff0000) >> 8
@@ -534,7 +538,11 @@ pub unsafe extern "C" fn lzma_sha256_init(check: *mut lzma_check_state) {
         0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a, 0x510e527f, 0x9b05688c, 0x1f83d9ab,
         0x5be0cd19,
     ];
-    core::ptr::copy_nonoverlapping(&raw const s as *const u8, &raw mut (*check).state.sha256.state as *mut u8, core::mem::size_of::<[u32; 8]>());
+    core::ptr::copy_nonoverlapping(
+        &raw const s as *const u8,
+        &raw mut (*check).state.sha256.state as *mut u8,
+        core::mem::size_of::<[u32; 8]>(),
+    );
     (*check).state.sha256.size = 0;
 }
 #[no_mangle]
@@ -549,7 +557,11 @@ pub unsafe extern "C" fn lzma_sha256_update(
         if copy_size > size {
             copy_size = size;
         }
-        core::ptr::copy_nonoverlapping(buf as *const u8, (&raw mut (*check).buffer.u8_0 as *mut u8).offset(copy_start as isize) as *mut u8, copy_size);
+        core::ptr::copy_nonoverlapping(
+            buf as *const u8,
+            (&raw mut (*check).buffer.u8_0 as *mut u8).offset(copy_start as isize) as *mut u8,
+            copy_size,
+        );
         buf = buf.offset(copy_size as isize);
         size = size.wrapping_sub(copy_size);
         (*check).state.sha256.size = (*check).state.sha256.size.wrapping_add(copy_size as u64);

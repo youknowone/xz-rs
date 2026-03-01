@@ -7,8 +7,6 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
     ) -> lzma_ret;
-    fn lzma_vli_size(vli: lzma_vli) -> u32;
-    fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     fn lzma_filter_flags_size(size: *mut u32, filter: *const lzma_filter) -> lzma_ret;
     fn lzma_filter_flags_encode(
         filter: *const lzma_filter,
@@ -16,7 +14,6 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
     ) -> lzma_ret;
-    fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
 }
 #[inline]
 extern "C" fn write32le(buf: *mut u8, num: u32) {
@@ -131,7 +128,11 @@ pub unsafe extern "C" fn lzma_block_header_encode(
         }
     }
     *out.offset(1) |= filter_count.wrapping_sub(1) as u8;
-    core::ptr::write_bytes(out.offset(out_pos as isize) as *mut u8, 0 as u8, out_size.wrapping_sub(out_pos));
+    core::ptr::write_bytes(
+        out.offset(out_pos as isize) as *mut u8,
+        0 as u8,
+        out_size.wrapping_sub(out_pos),
+    );
     write32le(out.offset(out_size as isize), lzma_crc32(out, out_size, 0));
     LZMA_OK
 }

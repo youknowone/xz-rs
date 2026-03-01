@@ -4,10 +4,8 @@ pub struct lzma_index_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
     fn lzma_stream_header_encode(options: *const lzma_stream_flags, out: *mut u8) -> lzma_ret;
     fn lzma_stream_footer_encode(options: *const lzma_stream_flags, out: *mut u8) -> lzma_ret;
-    fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
     fn lzma_block_buffer_bound(uncompressed_size: size_t) -> size_t;
     fn lzma_block_buffer_encode(
         block: *mut lzma_block,

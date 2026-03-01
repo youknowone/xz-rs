@@ -1,6 +1,5 @@
 use crate::types::*;
 extern "C" {
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_raw_encoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,

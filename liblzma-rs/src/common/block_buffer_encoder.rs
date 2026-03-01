@@ -1,24 +1,13 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_ulonglong, c_void};
 extern "C" {
-    fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
-    fn lzma_check_size(check: lzma_check) -> u32;
     fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret;
     fn lzma_block_header_encode(block: *const lzma_block, out: *mut u8) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_raw_encoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
         filters: *const lzma_filter,
     ) -> lzma_ret;
-    fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check);
-    fn lzma_check_update(
-        check: *mut lzma_check_state,
-        type_0: lzma_check,
-        buf: *const u8,
-        size: size_t,
-    );
-    fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check);
 }
 pub const LZMA_CHECK_SIZE_MAX: u32 = 64;
 pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
@@ -132,7 +121,11 @@ unsafe extern "C" fn block_encode_uncompressed(
         *out_pos += 1;
         *out.offset(*out_pos as isize) = (copy_size.wrapping_sub(1) & 0xff) as u8;
         *out_pos += 1;
-        core::ptr::copy_nonoverlapping(in_0.offset(in_pos as isize) as *const u8, out.offset(*out_pos as isize) as *mut u8, copy_size);
+        core::ptr::copy_nonoverlapping(
+            in_0.offset(in_pos as isize) as *const u8,
+            out.offset(*out_pos as isize) as *mut u8,
+            copy_size,
+        );
         in_pos = in_pos.wrapping_add(copy_size);
         *out_pos = (*out_pos).wrapping_add(copy_size);
     }
@@ -272,8 +265,16 @@ unsafe extern "C" fn block_buffer_encode(
         lzma_check_init(&raw mut check, (*block).check);
         lzma_check_update(&raw mut check, (*block).check, in_0, in_size);
         lzma_check_finish(&raw mut check, (*block).check);
-        core::ptr::copy_nonoverlapping(&raw mut check.buffer.u8_0 as *const u8, &raw mut (*block).raw_check as *mut u8, check_size);
-        core::ptr::copy_nonoverlapping(&raw mut check.buffer.u8_0 as *const u8, out.offset(*out_pos as isize) as *mut u8, check_size);
+        core::ptr::copy_nonoverlapping(
+            &raw mut check.buffer.u8_0 as *const u8,
+            &raw mut (*block).raw_check as *mut u8,
+            check_size,
+        );
+        core::ptr::copy_nonoverlapping(
+            &raw mut check.buffer.u8_0 as *const u8,
+            out.offset(*out_pos as isize) as *mut u8,
+            check_size,
+        );
         *out_pos = (*out_pos).wrapping_add(check_size);
     }
     LZMA_OK

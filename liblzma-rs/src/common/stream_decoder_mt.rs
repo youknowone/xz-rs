@@ -24,23 +24,14 @@ extern "C" {
     fn pthread_mutex_lock(_: *mut pthread_mutex_t) -> c_int;
     fn pthread_mutex_unlock(_: *mut pthread_mutex_t) -> c_int;
     fn pthread_sigmask(_: c_int, _: *const sigset_t, _: *mut sigset_t) -> c_int;
-    fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
-    fn lzma_check_size(check: lzma_check) -> u32;
-    fn lzma_filters_free(filters: *mut lzma_filter, allocator: *const lzma_allocator);
     fn lzma_raw_decoder_memusage(filters: *const lzma_filter) -> u64;
     fn lzma_stream_header_decode(options: *mut lzma_stream_flags, in_0: *const u8) -> lzma_ret;
     fn lzma_stream_footer_decode(options: *mut lzma_stream_flags, in_0: *const u8) -> lzma_ret;
-    fn lzma_stream_flags_compare(
-        a: *const lzma_stream_flags,
-        b: *const lzma_stream_flags,
-    ) -> lzma_ret;
     fn lzma_block_header_decode(
         block: *mut lzma_block,
         allocator: *const lzma_allocator,
         in_0: *const u8,
     ) -> lzma_ret;
-    fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
     fn lzma_index_hash_init(
         index_hash: *mut lzma_index_hash,
         allocator: *const lzma_allocator,
@@ -58,16 +49,6 @@ extern "C" {
         in_size: size_t,
     ) -> lzma_ret;
     fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli;
-    fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
-    fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
-    fn lzma_bufcpy(
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-        out: *mut u8,
-        out_pos: *mut size_t,
-        out_size: size_t,
-    ) -> size_t;
     fn lzma_block_decoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -325,12 +306,7 @@ extern "C" fn mythread_join(thread: mythread) -> c_int {
 }
 #[inline]
 extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
-    unsafe {
-        pthread_mutex_init(
-            mutex as *mut pthread_mutex_t,
-            core::ptr::null(),
-        )
-    }
+    unsafe { pthread_mutex_init(mutex as *mut pthread_mutex_t, core::ptr::null()) }
 }
 #[inline]
 extern "C" fn mythread_mutex_destroy(mutex: *mut mythread_mutex) {
@@ -348,10 +324,7 @@ extern "C" fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
 extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
     return unsafe {
         (*mycond).clk_id = _CLOCK_REALTIME;
-        pthread_cond_init(
-            &raw mut (*mycond).cond,
-            core::ptr::null(),
-        )
+        pthread_cond_init(&raw mut (*mycond).cond, core::ptr::null())
     };
 }
 #[inline]
@@ -1790,10 +1763,20 @@ unsafe extern "C" fn stream_decoder_mt_init(
         );
         (*next).get_check =
             Some(stream_decoder_mt_get_check as unsafe extern "C" fn(*const c_void) -> lzma_check);
-        (*next).memconfig = Some(stream_decoder_mt_memconfig as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret);
-        (*next).get_progress = Some(stream_decoder_mt_get_progress as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> ());
+        (*next).memconfig = Some(
+            stream_decoder_mt_memconfig
+                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
+        );
+        (*next).get_progress = Some(
+            stream_decoder_mt_get_progress
+                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> (),
+        );
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
-        core::ptr::write_bytes(&raw mut (*coder).outq as *mut u8, 0 as u8, core::mem::size_of::<lzma_outq>());
+        core::ptr::write_bytes(
+            &raw mut (*coder).outq as *mut u8,
+            0 as u8,
+            core::mem::size_of::<lzma_outq>(),
+        );
         (*coder).block_decoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

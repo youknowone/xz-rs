@@ -596,6 +596,63 @@ extern "C" {
     pub fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
     pub fn lzma_alloc_zero(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
     pub fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
+    pub fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
+    pub fn lzma_next_filter_init(
+        next: *mut lzma_next_coder,
+        allocator: *const lzma_allocator,
+        filters: *const lzma_filter_info,
+    ) -> lzma_ret;
+    pub fn lzma_next_filter_update(
+        next: *mut lzma_next_coder,
+        allocator: *const lzma_allocator,
+        reversed_filters: *const lzma_filter,
+    ) -> lzma_ret;
+    pub fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
+    pub fn lzma_end(strm: *mut lzma_stream);
+    pub fn lzma_bufcpy(
+        in_0: *const u8,
+        in_pos: *mut size_t,
+        in_size: size_t,
+        out: *mut u8,
+        out_pos: *mut size_t,
+        out_size: size_t,
+    ) -> size_t;
+    pub fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
+    pub fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
+    pub fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
+    pub fn lzma_check_size(check: lzma_check) -> u32;
+    pub fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check);
+    pub fn lzma_check_update(
+        check: *mut lzma_check_state,
+        type_0: lzma_check,
+        buf: *const u8,
+        size: size_t,
+    );
+    pub fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check);
+    pub fn lzma_vli_size(vli: lzma_vli) -> u32;
+    pub fn lzma_vli_decode(
+        vli: *mut lzma_vli,
+        vli_pos: *mut size_t,
+        in_0: *const u8,
+        in_pos: *mut size_t,
+        in_size: size_t,
+    ) -> lzma_ret;
+    pub fn lzma_stream_flags_compare(
+        a: *const lzma_stream_flags,
+        b: *const lzma_stream_flags,
+    ) -> lzma_ret;
+    pub fn lzma_easy_preset(easy: *mut lzma_options_easy, preset: u32) -> bool;
+    pub fn lzma_filters_free(filters: *mut lzma_filter, allocator: *const lzma_allocator);
+    pub fn lzma_simple_coder_init(
+        next: *mut lzma_next_coder,
+        allocator: *const lzma_allocator,
+        filters: *const lzma_filter_info,
+        filter: Option<unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t>,
+        simple_size: size_t,
+        unfiltered_max: size_t,
+        alignment: u32,
+        is_encoder: bool,
+    ) -> lzma_ret;
     pub fn memcmp(s1: *const c_void, s2: *const c_void, n: size_t) -> c_int;
     pub fn memchr(s: *const c_void, c: c_int, n: size_t) -> *mut c_void;
     pub fn strlen(s: *const c_char) -> size_t;

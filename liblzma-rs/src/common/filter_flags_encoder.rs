@@ -7,7 +7,6 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
     ) -> lzma_ret;
-    fn lzma_vli_size(vli: lzma_vli) -> u32;
     fn lzma_properties_size(size: *mut u32, filter: *const lzma_filter) -> lzma_ret;
     fn lzma_properties_encode(filter: *const lzma_filter, props: *mut u8) -> lzma_ret;
 }

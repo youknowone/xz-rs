@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::c_void;
 extern "C" {
-    fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     static lzma_header_magic: [u8; 6];
     static lzma_footer_magic: [u8; 2];
 }

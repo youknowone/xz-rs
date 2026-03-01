@@ -1,14 +1,5 @@
 use crate::types::*;
 extern "C" {
-    fn lzma_vli_decode(
-        vli: *mut lzma_vli,
-        vli_pos: *mut size_t,
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-    ) -> lzma_ret;
-    fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
-    fn lzma_filters_free(filters: *mut lzma_filter, allocator: *const lzma_allocator);
     fn lzma_filter_flags_decode(
         filter: *mut lzma_filter,
         allocator: *const lzma_allocator,
@@ -16,7 +7,6 @@ extern "C" {
         in_pos: *mut size_t,
         in_size: size_t,
     ) -> lzma_ret;
-    fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli;
 }
 #[inline]
 extern "C" fn read32le(buf: *const u8) -> u32 {

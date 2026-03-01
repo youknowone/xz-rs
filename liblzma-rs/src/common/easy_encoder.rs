@@ -5,7 +5,6 @@ extern "C" {
         filters: *const lzma_filter,
         check: lzma_check,
     ) -> lzma_ret;
-    fn lzma_easy_preset(easy: *mut lzma_options_easy, preset: u32) -> bool;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_easy_encoder(

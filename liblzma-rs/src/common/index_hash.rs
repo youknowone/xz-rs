@@ -1,25 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_ulonglong, c_void};
-extern "C" {
-    fn lzma_vli_decode(
-        vli: *mut lzma_vli,
-        vli_pos: *mut size_t,
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-    ) -> lzma_ret;
-    fn lzma_vli_size(vli: lzma_vli) -> u32;
-    fn lzma_check_size(check: lzma_check) -> u32;
-    fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
-    fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check);
-    fn lzma_check_update(
-        check: *mut lzma_check_state,
-        type_0: lzma_check,
-        buf: *const u8,
-        size: size_t,
-    );
-    fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check);
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_hash_s {
