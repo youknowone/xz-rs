@@ -3543,7 +3543,7 @@ pub unsafe extern "C" fn lzma_lzma_props_decode(
         return LZMA_OPTIONS_ERROR;
     } else {
         (*opt).dict_size = read32le(props.offset(1));
-        (*opt).preset_dict = core::ptr::null::<u8>();
+        (*opt).preset_dict = core::ptr::null();
         (*opt).preset_dict_size = 0;
         *options = opt as *mut c_void;
         return LZMA_OK;

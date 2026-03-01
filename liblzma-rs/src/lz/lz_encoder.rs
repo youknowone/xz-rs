@@ -400,7 +400,7 @@ pub extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -
         hash_count: 0,
         sons_count: 0,
     };
-    if unsafe { lz_encoder_prepare(&raw mut mf, core::ptr::null::<lzma_allocator>(), lz_options) } {
+    if unsafe { lz_encoder_prepare(&raw mut mf, core::ptr::null(), lz_options) } {
         return UINT64_MAX;
     }
     (mf.hash_count as u64)
@@ -546,7 +546,7 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         nice_len: 0,
         match_finder: 0,
         depth: 0,
-        preset_dict: core::ptr::null::<u8>(),
+        preset_dict: core::ptr::null(),
         preset_dict_size: 0,
     };
     let ret_: lzma_ret = lz_init.unwrap()(

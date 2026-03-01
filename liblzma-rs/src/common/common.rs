@@ -128,7 +128,7 @@ pub unsafe extern "C" fn lzma_next_filter_update(
     (*next).update.unwrap()(
         (*next).coder,
         allocator,
-        core::ptr::null::<lzma_filter>(),
+        core::ptr::null(),
         reversed_filters,
     )
 }

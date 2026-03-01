@@ -252,7 +252,7 @@ unsafe extern "C" fn index_tree_next(mut node: *const index_tree_node) -> *mut c
     (*node).parent as *mut c_void
 }
 unsafe extern "C" fn index_tree_locate(tree: *const index_tree, target: lzma_vli) -> *mut c_void {
-    let mut result: *const index_tree_node = core::ptr::null::<index_tree_node>();
+    let mut result: *const index_tree_node = core::ptr::null();
     let mut node: *const index_tree_node = (*tree).root;
     while !node.is_null() {
         if (*node).uncompressed_base > target {
@@ -794,14 +794,14 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
         (*iter).internal[ITER_GROUP as usize].p = (*group).node.parent as *const c_void;
     } else {
         (*iter).internal[ITER_METHOD as usize].s = ITER_METHOD_LEFTMOST as size_t;
-        (*iter).internal[ITER_GROUP as usize].p = core::ptr::null::<c_void>();
+        (*iter).internal[ITER_GROUP as usize].p = core::ptr::null();
     }
     (*iter).stream.number = (*stream).number as lzma_vli;
     (*iter).stream.block_count = (*stream).record_count;
     (*iter).stream.compressed_offset = (*stream).node.compressed_base;
     (*iter).stream.uncompressed_offset = (*stream).node.uncompressed_base;
     (*iter).stream.flags = if (*stream).stream_flags.version == UINT32_MAX {
-        core::ptr::null::<lzma_stream_flags>()
+        core::ptr::null()
     } else {
         &raw const (*stream).stream_flags
     };
@@ -877,8 +877,8 @@ pub unsafe extern "C" fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *co
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_iter_rewind(iter: *mut lzma_index_iter) {
-    (*iter).internal[ITER_STREAM as usize].p = core::ptr::null::<c_void>();
-    (*iter).internal[ITER_GROUP as usize].p = core::ptr::null::<c_void>();
+    (*iter).internal[ITER_STREAM as usize].p = core::ptr::null();
+    (*iter).internal[ITER_GROUP as usize].p = core::ptr::null();
     (*iter).internal[ITER_RECORD as usize].s = 0;
     (*iter).internal[ITER_METHOD as usize].s = ITER_METHOD_NORMAL as size_t;
 }
@@ -893,7 +893,7 @@ pub unsafe extern "C" fn lzma_index_iter_next(
     let i: *const lzma_index = (*iter).internal[ITER_INDEX as usize].p as *const lzma_index;
     let mut stream: *const index_stream =
         (*iter).internal[ITER_STREAM as usize].p as *const index_stream;
-    let mut group: *const index_group = core::ptr::null::<index_group>();
+    let mut group: *const index_group = core::ptr::null();
     let mut record: size_t = (*iter).internal[ITER_RECORD as usize].s;
     if mode != LZMA_INDEX_ITER_STREAM {
         match (*iter).internal[ITER_METHOD as usize].s {

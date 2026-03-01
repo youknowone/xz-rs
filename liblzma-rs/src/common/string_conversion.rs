@@ -244,7 +244,7 @@ unsafe extern "C" fn parse_lzma12_preset(
             }
         }
     }
-    core::ptr::null::<c_char>()
+    core::ptr::null()
 }
 unsafe extern "C" fn set_lzma12_preset(
     str: *mut *const c_char,
@@ -260,7 +260,7 @@ unsafe extern "C" fn set_lzma12_preset(
     if lzma_lzma_preset(opts, preset) != 0 {
         return c"Unsupported preset".as_ptr();
     }
-    core::ptr::null::<c_char>()
+    core::ptr::null()
 }
 static lzma12_mode_map: [name_value_map; 3] = unsafe {
     [
@@ -312,7 +312,7 @@ static mut lzma12_optmap: [option_map; 9] = [option_map {
     flags: 0,
     offset: 0,
     u: C2RustUnnamed_0 {
-        map: core::ptr::null::<name_value_map>(),
+        map: core::ptr::null(),
     },
 }; 9];
 unsafe extern "C" fn parse_lzma12(
@@ -335,7 +335,7 @@ unsafe extern "C" fn parse_lzma12(
     if (*opts).lc.wrapping_add((*opts).lp) > LZMA_LCLP_MAX {
         return c"The sum of lc and lp must not exceed 4".as_ptr();
     }
-    core::ptr::null::<c_char>()
+    core::ptr::null()
 }
 static mut filter_name_map: [C2RustUnnamed; 11] = unsafe {
     [
@@ -698,7 +698,7 @@ unsafe extern "C" fn parse_options(
             }
         }
     }
-    core::ptr::null::<c_char>()
+    core::ptr::null()
 }
 unsafe extern "C" fn parse_filter(
     str: *mut *const c_char,
@@ -754,7 +754,7 @@ unsafe extern "C" fn parse_filter(
             }
             (*filter).id = filter_name_map[i as usize].id;
             (*filter).options = options;
-            return core::ptr::null::<c_char>();
+            return core::ptr::null();
         }
         i += 1;
     }
@@ -767,7 +767,7 @@ unsafe extern "C" fn str_to_filters(
     allocator: *const lzma_allocator,
 ) -> *const c_char {
     let mut current_block: u64;
-    let mut errmsg: *const c_char = core::ptr::null::<c_char>();
+    let mut errmsg: *const c_char = core::ptr::null();
     while **str as u8 == b' ' {
         *str = (*str).offset(1);
     }
@@ -815,7 +815,7 @@ unsafe extern "C" fn str_to_filters(
         (*filters).options = opts as *mut c_void;
         (*filters.offset(1)).id = LZMA_VLI_UNKNOWN;
         (*filters.offset(1)).options = core::ptr::null_mut();
-        return core::ptr::null::<c_char>();
+        return core::ptr::null();
     }
     let only_xz: bool = flags & LZMA_STR_ALL_FILTERS as u32 == 0;
     let mut temp_filters: [lzma_filter; 5] = [lzma_filter {
@@ -896,7 +896,7 @@ unsafe extern "C" fn str_to_filters(
                         i_0.wrapping_add(1)
                             .wrapping_mul(core::mem::size_of::<lzma_filter>()),
                     );
-                    return core::ptr::null::<c_char>();
+                    return core::ptr::null();
                 }
             }
         }
@@ -1236,7 +1236,7 @@ unsafe extern "C" fn run_static_initializers() {
             flags: 0,
             offset: 0,
             u: C2RustUnnamed_0 {
-                map: core::ptr::null::<name_value_map>(),
+                map: core::ptr::null(),
             },
         },
         option_map {

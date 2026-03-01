@@ -16,7 +16,7 @@ pub unsafe extern "C" fn lzma_lzma_preset(
     if level > 9 || flags & !supported_flags != 0 {
         return true as lzma_bool;
     }
-    (*options).preset_dict = core::ptr::null::<u8>();
+    (*options).preset_dict = core::ptr::null();
     (*options).preset_dict_size = 0;
     (*options).lc = LZMA_LC_DEFAULT;
     (*options).lp = LZMA_LP_DEFAULT;

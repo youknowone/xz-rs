@@ -30,7 +30,7 @@ pub unsafe extern "C" fn lzma_easy_buffer_encode(
         }; 5],
         opt_lzma: lzma_options_lzma {
             dict_size: 0,
-            preset_dict: core::ptr::null::<u8>(),
+            preset_dict: core::ptr::null(),
             preset_dict_size: 0,
             lc: 0,
             lp: 0,

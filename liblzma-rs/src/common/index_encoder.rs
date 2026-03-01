@@ -322,13 +322,13 @@ pub unsafe extern "C" fn lzma_index_buffer_encode(
     }
     let mut coder: lzma_index_coder = lzma_index_coder {
         sequence: SEQ_INDICATOR,
-        index: core::ptr::null::<lzma_index>(),
+        index: core::ptr::null(),
         iter: lzma_index_iter {
             stream: C2RustUnnamed_2 {
-                flags: core::ptr::null::<lzma_stream_flags>(),
-                reserved_ptr1: core::ptr::null::<c_void>(),
-                reserved_ptr2: core::ptr::null::<c_void>(),
-                reserved_ptr3: core::ptr::null::<c_void>(),
+                flags: core::ptr::null(),
+                reserved_ptr1: core::ptr::null(),
+                reserved_ptr2: core::ptr::null(),
+                reserved_ptr3: core::ptr::null(),
                 number: 0,
                 block_count: 0,
                 compressed_offset: 0,
@@ -355,13 +355,13 @@ pub unsafe extern "C" fn lzma_index_buffer_encode(
                 reserved_vli2: 0,
                 reserved_vli3: 0,
                 reserved_vli4: 0,
-                reserved_ptr1: core::ptr::null::<c_void>(),
-                reserved_ptr2: core::ptr::null::<c_void>(),
-                reserved_ptr3: core::ptr::null::<c_void>(),
-                reserved_ptr4: core::ptr::null::<c_void>(),
+                reserved_ptr1: core::ptr::null(),
+                reserved_ptr2: core::ptr::null(),
+                reserved_ptr3: core::ptr::null(),
+                reserved_ptr4: core::ptr::null(),
             },
             internal: [C2RustUnnamed_0 {
-                p: core::ptr::null::<c_void>(),
+                p: core::ptr::null(),
             }; 6],
         },
         pos: 0,
@@ -371,8 +371,8 @@ pub unsafe extern "C" fn lzma_index_buffer_encode(
     let out_start: size_t = *out_pos;
     let mut ret: lzma_ret = index_encode(
         &raw mut coder as *mut c_void,
-        core::ptr::null::<lzma_allocator>(),
-        core::ptr::null::<u8>(),
+        core::ptr::null(),
+        core::ptr::null(),
         core::ptr::null_mut(),
         0,
         out,

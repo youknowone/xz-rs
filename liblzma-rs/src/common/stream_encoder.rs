@@ -193,7 +193,7 @@ unsafe extern "C" fn stream_encode(
                 let ret_0: lzma_ret = (*coder).index_encoder.code.unwrap()(
                     (*coder).index_encoder.coder,
                     allocator,
-                    core::ptr::null::<u8>(),
+                    core::ptr::null(),
                     core::ptr::null_mut(),
                     0,
                     out,
@@ -463,7 +463,7 @@ unsafe extern "C" fn stream_encoder_init(
         coder as *mut c_void,
         allocator,
         filters,
-        core::ptr::null::<lzma_filter>(),
+        core::ptr::null(),
     )
 }
 #[no_mangle]

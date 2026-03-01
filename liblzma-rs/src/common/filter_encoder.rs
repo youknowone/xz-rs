@@ -332,7 +332,7 @@ extern "C" fn encoder_find(id: lzma_vli) -> *const lzma_filter_encoder {
         }
         i += 1;
     }
-    core::ptr::null::<lzma_filter_encoder>()
+    core::ptr::null()
 }
 extern "C" fn coder_find(id: lzma_vli) -> *const lzma_filter_coder {
     encoder_find(id) as *const lzma_filter_coder

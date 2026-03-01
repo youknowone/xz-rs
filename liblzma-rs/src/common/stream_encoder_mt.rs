@@ -281,7 +281,7 @@ extern "C" fn mythread_create(
     let ret: c_int = unsafe {
         pthread_create(
             thread as *mut pthread_t,
-            core::ptr::null::<pthread_attr_t>(),
+            core::ptr::null(),
             func as Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
             arg as *mut c_void,
         )
@@ -298,7 +298,7 @@ extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
     unsafe {
         pthread_mutex_init(
             mutex as *mut pthread_mutex_t,
-            core::ptr::null::<pthread_mutexattr_t>(),
+            core::ptr::null(),
         )
     }
 }
@@ -320,7 +320,7 @@ extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
         (*mycond).clk_id = _CLOCK_REALTIME;
         pthread_cond_init(
             &raw mut (*mycond).cond,
-            core::ptr::null::<pthread_condattr_t>(),
+            core::ptr::null(),
         )
     };
 }
@@ -1161,7 +1161,7 @@ unsafe extern "C" fn stream_encode_mt(
                 let ret_0: lzma_ret = (*coder).index_encoder.code.unwrap()(
                     (*coder).index_encoder.coder,
                     allocator,
-                    core::ptr::null::<u8>(),
+                    core::ptr::null(),
                     core::ptr::null_mut(),
                     0,
                     out,
@@ -1385,7 +1385,7 @@ unsafe extern "C" fn stream_encoder_mt_init(
         }; 5],
         opt_lzma: lzma_options_lzma {
             dict_size: 0,
-            preset_dict: core::ptr::null::<u8>(),
+            preset_dict: core::ptr::null(),
             preset_dict_size: 0,
             lc: 0,
             lp: 0,
@@ -1410,7 +1410,7 @@ unsafe extern "C" fn stream_encoder_mt_init(
             reserved_ptr2: core::ptr::null_mut(),
         },
     };
-    let mut filters: *const lzma_filter = core::ptr::null::<lzma_filter>();
+    let mut filters: *const lzma_filter = core::ptr::null();
     let mut block_size: u64 = 0;
     let mut outbuf_size_max: u64 = 0;
     let ret_: lzma_ret = get_options(
@@ -1604,7 +1604,7 @@ pub unsafe extern "C" fn lzma_stream_encoder_mt_memusage(options: *const lzma_mt
         }; 5],
         opt_lzma: lzma_options_lzma {
             dict_size: 0,
-            preset_dict: core::ptr::null::<u8>(),
+            preset_dict: core::ptr::null(),
             preset_dict_size: 0,
             lc: 0,
             lp: 0,
@@ -1629,7 +1629,7 @@ pub unsafe extern "C" fn lzma_stream_encoder_mt_memusage(options: *const lzma_mt
             reserved_ptr2: core::ptr::null_mut(),
         },
     };
-    let mut filters: *const lzma_filter = core::ptr::null::<lzma_filter>();
+    let mut filters: *const lzma_filter = core::ptr::null();
     let mut block_size: u64 = 0;
     let mut outbuf_size_max: u64 = 0;
     if get_options(

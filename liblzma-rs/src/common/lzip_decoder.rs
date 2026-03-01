@@ -173,7 +173,7 @@ unsafe extern "C" fn lzip_decode(
                 }
                 (*coder).options.dict_size =
                     (1u32 << b2log).wrapping_sub(fracnum << b2log.wrapping_sub(4));
-                (*coder).options.preset_dict = core::ptr::null::<u8>();
+                (*coder).options.preset_dict = core::ptr::null();
                 (*coder).options.lc = LZIP_LC;
                 (*coder).options.lp = LZIP_LP;
                 (*coder).options.pb = LZIP_PB;

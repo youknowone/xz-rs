@@ -287,7 +287,7 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     (*coder).picky = picky;
     (*coder).pos = 0;
     (*coder).options.dict_size = 0;
-    (*coder).options.preset_dict = core::ptr::null::<u8>();
+    (*coder).options.preset_dict = core::ptr::null();
     (*coder).options.preset_dict_size = 0;
     (*coder).uncompressed_size = 0;
     (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
