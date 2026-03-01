@@ -13,45 +13,6 @@ extern "C" {
     ) -> lzma_ret;
     fn lzma_easy_preset(easy: *mut lzma_options_easy, preset: u32) -> bool;
 }
-pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
-pub const LZMA_RET_INTERNAL7: lzma_ret = 107;
-pub const LZMA_RET_INTERNAL6: lzma_ret = 106;
-pub const LZMA_RET_INTERNAL5: lzma_ret = 105;
-pub const LZMA_RET_INTERNAL4: lzma_ret = 104;
-pub const LZMA_RET_INTERNAL3: lzma_ret = 103;
-pub const LZMA_RET_INTERNAL2: lzma_ret = 102;
-pub const LZMA_RET_INTERNAL1: lzma_ret = 101;
-pub const LZMA_SEEK_NEEDED: lzma_ret = 12;
-pub const LZMA_PROG_ERROR: lzma_ret = 11;
-pub const LZMA_BUF_ERROR: lzma_ret = 10;
-pub const LZMA_DATA_ERROR: lzma_ret = 9;
-pub const LZMA_OPTIONS_ERROR: lzma_ret = 8;
-pub const LZMA_FORMAT_ERROR: lzma_ret = 7;
-pub const LZMA_MEMLIMIT_ERROR: lzma_ret = 6;
-pub const LZMA_MEM_ERROR: lzma_ret = 5;
-pub const LZMA_GET_CHECK: lzma_ret = 4;
-pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
-pub const LZMA_NO_CHECK: lzma_ret = 2;
-pub const LZMA_STREAM_END: lzma_ret = 1;
-pub const LZMA_OK: lzma_ret = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter {
-    pub id: lzma_vli,
-    pub options: *mut c_void,
-}
-pub const LZMA_CHECK_SHA256: lzma_check = 10;
-pub const LZMA_CHECK_CRC64: lzma_check = 4;
-pub const LZMA_CHECK_CRC32: lzma_check = 1;
-pub const LZMA_CHECK_NONE: lzma_check = 0;
-pub const LZMA_MF_BT4: lzma_match_finder = 20;
-pub const LZMA_MF_BT3: lzma_match_finder = 19;
-pub const LZMA_MF_BT2: lzma_match_finder = 18;
-pub const LZMA_MF_HC4: lzma_match_finder = 4;
-pub const LZMA_MF_HC3: lzma_match_finder = 3;
-pub const LZMA_MODE_NORMAL: lzma_mode = 2;
-pub const LZMA_MODE_FAST: lzma_mode = 1;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_lzma {

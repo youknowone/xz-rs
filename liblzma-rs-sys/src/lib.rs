@@ -40,7 +40,7 @@ pub use liblzma_rs::common::common::lzma_stream;
 pub use liblzma_rs::common::filter_common::lzma_options_lzma;
 pub use liblzma_rs::common::index_decoder::lzma_index;
 pub use liblzma_rs::common::stream_flags_decoder::lzma_stream_flags;
-pub use liblzma_rs::delta::delta_common::lzma_filter;
+pub use liblzma_rs::types::lzma_filter;
 pub use liblzma_rs::types::lzma_allocator;
 
 #[repr(C)]
@@ -54,82 +54,43 @@ pub enum lzma_internal {}
 // Constants
 // =========================================================================
 
-// --- Return codes / actions ---
-pub const LZMA_OK: lzma_ret = liblzma_rs::common::common::LZMA_OK as lzma_ret;
-pub const LZMA_STREAM_END: lzma_ret = liblzma_rs::common::common::LZMA_STREAM_END as lzma_ret;
-pub const LZMA_NO_CHECK: lzma_ret = liblzma_rs::common::common::LZMA_NO_CHECK as lzma_ret;
-pub const LZMA_UNSUPPORTED_CHECK: lzma_ret =
-    liblzma_rs::common::common::LZMA_UNSUPPORTED_CHECK as lzma_ret;
-pub const LZMA_GET_CHECK: lzma_ret = liblzma_rs::common::common::LZMA_GET_CHECK as lzma_ret;
-pub const LZMA_MEM_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_MEM_ERROR as lzma_ret;
-pub const LZMA_MEMLIMIT_ERROR: lzma_ret =
-    liblzma_rs::common::common::LZMA_MEMLIMIT_ERROR as lzma_ret;
-pub const LZMA_FORMAT_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_FORMAT_ERROR as lzma_ret;
-pub const LZMA_OPTIONS_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_OPTIONS_ERROR as lzma_ret;
-pub const LZMA_DATA_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_DATA_ERROR as lzma_ret;
-pub const LZMA_BUF_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_BUF_ERROR as lzma_ret;
-pub const LZMA_PROG_ERROR: lzma_ret = liblzma_rs::common::common::LZMA_PROG_ERROR as lzma_ret;
-pub const LZMA_SEEK_NEEDED: lzma_ret = liblzma_rs::common::common::LZMA_SEEK_NEEDED as lzma_ret;
+// --- Return codes ---
+pub use liblzma_rs::types::{
+    LZMA_OK, LZMA_STREAM_END, LZMA_NO_CHECK, LZMA_UNSUPPORTED_CHECK,
+    LZMA_GET_CHECK, LZMA_MEM_ERROR, LZMA_MEMLIMIT_ERROR, LZMA_FORMAT_ERROR,
+    LZMA_OPTIONS_ERROR, LZMA_DATA_ERROR, LZMA_BUF_ERROR, LZMA_PROG_ERROR,
+    LZMA_SEEK_NEEDED,
+};
 
-pub const LZMA_RUN: lzma_action = liblzma_rs::common::common::LZMA_RUN as lzma_action;
-pub const LZMA_SYNC_FLUSH: lzma_action = liblzma_rs::common::common::LZMA_SYNC_FLUSH as lzma_action;
-pub const LZMA_FULL_FLUSH: lzma_action = liblzma_rs::common::common::LZMA_FULL_FLUSH as lzma_action;
-pub const LZMA_FULL_BARRIER: lzma_action =
-    liblzma_rs::common::common::LZMA_FULL_BARRIER as lzma_action;
-pub const LZMA_FINISH: lzma_action = liblzma_rs::common::common::LZMA_FINISH as lzma_action;
+// --- Actions ---
+pub use liblzma_rs::types::{
+    LZMA_RUN, LZMA_SYNC_FLUSH, LZMA_FULL_FLUSH, LZMA_FINISH, LZMA_FULL_BARRIER,
+};
 
 // --- Check types ---
-pub const LZMA_CHECK_NONE: lzma_check = liblzma_rs::check::check::LZMA_CHECK_NONE as lzma_check;
-pub const LZMA_CHECK_CRC32: lzma_check = liblzma_rs::check::check::LZMA_CHECK_CRC32 as lzma_check;
-pub const LZMA_CHECK_CRC64: lzma_check = liblzma_rs::check::check::LZMA_CHECK_CRC64 as lzma_check;
-pub const LZMA_CHECK_SHA256: lzma_check = liblzma_rs::check::check::LZMA_CHECK_SHA256 as lzma_check;
+pub use liblzma_rs::types::{
+    LZMA_CHECK_NONE, LZMA_CHECK_CRC32, LZMA_CHECK_CRC64, LZMA_CHECK_SHA256,
+};
 
-// --- Modes / match finders / filter IDs ---
-pub const LZMA_MODE_FAST: lzma_mode =
-    liblzma_rs::common::filter_common::LZMA_MODE_FAST as lzma_mode;
-pub const LZMA_MODE_NORMAL: lzma_mode =
-    liblzma_rs::common::filter_common::LZMA_MODE_NORMAL as lzma_mode;
-pub const LZMA_MF_HC3: lzma_match_finder =
-    liblzma_rs::common::filter_common::LZMA_MF_HC3 as lzma_match_finder;
-pub const LZMA_MF_HC4: lzma_match_finder =
-    liblzma_rs::common::filter_common::LZMA_MF_HC4 as lzma_match_finder;
-pub const LZMA_MF_BT2: lzma_match_finder =
-    liblzma_rs::common::filter_common::LZMA_MF_BT2 as lzma_match_finder;
-pub const LZMA_MF_BT3: lzma_match_finder =
-    liblzma_rs::common::filter_common::LZMA_MF_BT3 as lzma_match_finder;
-pub const LZMA_MF_BT4: lzma_match_finder =
-    liblzma_rs::common::filter_common::LZMA_MF_BT4 as lzma_match_finder;
+// --- Modes / match finders ---
+pub use liblzma_rs::types::{
+    LZMA_MODE_FAST, LZMA_MODE_NORMAL,
+    LZMA_MF_HC3, LZMA_MF_HC4, LZMA_MF_BT2, LZMA_MF_BT3, LZMA_MF_BT4,
+};
 
-pub const LZMA_FILTER_X86: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_X86 as lzma_vli;
-pub const LZMA_FILTER_POWERPC: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_POWERPC as lzma_vli;
-pub const LZMA_FILTER_IA64: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_IA64 as lzma_vli;
-pub const LZMA_FILTER_ARM: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_ARM as lzma_vli;
-pub const LZMA_FILTER_ARMTHUMB: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_ARMTHUMB as lzma_vli;
-pub const LZMA_FILTER_SPARC: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_SPARC as lzma_vli;
-pub const LZMA_FILTER_ARM64: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_ARM64 as lzma_vli;
-pub const LZMA_FILTER_DELTA: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_DELTA as lzma_vli;
-pub const LZMA_FILTER_RISCV: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_RISCV as lzma_vli;
-pub const LZMA_FILTER_LZMA1: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_LZMA1 as lzma_vli;
-pub const LZMA_FILTER_LZMA2: lzma_vli =
-    liblzma_rs::common::filter_common::LZMA_FILTER_LZMA2 as lzma_vli;
+// --- Filter IDs ---
+pub use liblzma_rs::types::{
+    LZMA_FILTER_X86, LZMA_FILTER_POWERPC, LZMA_FILTER_IA64,
+    LZMA_FILTER_ARM, LZMA_FILTER_ARMTHUMB, LZMA_FILTER_SPARC,
+    LZMA_FILTER_ARM64, LZMA_FILTER_DELTA, LZMA_FILTER_RISCV,
+    LZMA_FILTER_LZMA1, LZMA_FILTER_LZMA2,
+};
 
 // --- Decoder flags ---
-pub const LZMA_TELL_NO_CHECK: u32 = liblzma_rs::common::auto_decoder::LZMA_TELL_NO_CHECK as u32;
-pub const LZMA_TELL_UNSUPPORTED_CHECK: u32 =
-    liblzma_rs::common::auto_decoder::LZMA_TELL_UNSUPPORTED_CHECK as u32;
-pub const LZMA_TELL_ANY_CHECK: u32 = liblzma_rs::common::auto_decoder::LZMA_TELL_ANY_CHECK as u32;
-pub const LZMA_IGNORE_CHECK: u32 = liblzma_rs::common::auto_decoder::LZMA_IGNORE_CHECK as u32;
-pub const LZMA_CONCATENATED: u32 = liblzma_rs::common::auto_decoder::LZMA_CONCATENATED as u32;
+pub use liblzma_rs::types::{
+    LZMA_TELL_NO_CHECK, LZMA_TELL_UNSUPPORTED_CHECK, LZMA_TELL_ANY_CHECK,
+    LZMA_IGNORE_CHECK, LZMA_CONCATENATED,
+};
 
 // --- Presets / option limits ---
 pub const LZMA_PRESET_DEFAULT: u32 =
@@ -138,29 +99,27 @@ pub const LZMA_PRESET_LEVEL_MASK: u32 =
     liblzma_rs::lzma::lzma_encoder_presets::LZMA_PRESET_LEVEL_MASK as u32;
 pub const LZMA_PRESET_EXTREME: u32 =
     liblzma_rs::common::string_conversion::LZMA_PRESET_EXTREME as u32;
-pub const LZMA_DICT_SIZE_MIN: u32 =
-    liblzma_rs::common::string_conversion::LZMA_DICT_SIZE_MIN as u32;
+pub const LZMA_DICT_SIZE_MIN: u32 = liblzma_rs::types::LZMA_DICT_SIZE_MIN as u32;
 pub const LZMA_DICT_SIZE_DEFAULT: u32 =
     liblzma_rs::common::string_conversion::LZMA_DICT_SIZE_DEFAULT as u32;
 pub const LZMA_LCLP_MIN: u32 = liblzma_rs::common::string_conversion::LZMA_LCLP_MIN as u32;
-pub const LZMA_LCLP_MAX: u32 = liblzma_rs::common::string_conversion::LZMA_LCLP_MAX as u32;
+pub const LZMA_LCLP_MAX: u32 = liblzma_rs::types::LZMA_LCLP_MAX as u32;
 pub const LZMA_LC_DEFAULT: u32 = liblzma_rs::lzma::lzma_encoder_presets::LZMA_LC_DEFAULT as u32;
 pub const LZMA_LP_DEFAULT: u32 = liblzma_rs::lzma::lzma_encoder_presets::LZMA_LP_DEFAULT as u32;
 pub const LZMA_PB_MIN: u32 = liblzma_rs::common::string_conversion::LZMA_PB_MIN as u32;
-pub const LZMA_PB_MAX: u32 = liblzma_rs::common::string_conversion::LZMA_PB_MAX as u32;
+pub const LZMA_PB_MAX: u32 = liblzma_rs::types::LZMA_PB_MAX as u32;
 pub const LZMA_PB_DEFAULT: u32 = liblzma_rs::lzma::lzma_encoder_presets::LZMA_PB_DEFAULT as u32;
 
 // --- Backward size / VLI ---
 pub const LZMA_BACKWARD_SIZE_MIN: lzma_vli =
-    liblzma_rs::common::stream_flags_common::LZMA_BACKWARD_SIZE_MIN as lzma_vli;
+    liblzma_rs::types::LZMA_BACKWARD_SIZE_MIN as lzma_vli;
 pub const LZMA_BACKWARD_SIZE_MAX: lzma_vli =
-    liblzma_rs::common::stream_flags_common::LZMA_BACKWARD_SIZE_MAX as lzma_vli;
-pub const LZMA_VLI_MAX: lzma_vli = liblzma_rs::common::vli_encoder::LZMA_VLI_MAX as lzma_vli;
-pub const LZMA_VLI_UNKNOWN: lzma_vli = liblzma_rs::common::common::LZMA_VLI_UNKNOWN as lzma_vli;
-pub const LZMA_VLI_BYTES_MAX: usize = liblzma_rs::common::vli_encoder::LZMA_VLI_BYTES_MAX as usize;
+    liblzma_rs::types::LZMA_BACKWARD_SIZE_MAX as lzma_vli;
+pub use liblzma_rs::types::{LZMA_VLI_MAX, LZMA_VLI_UNKNOWN};
+pub const LZMA_VLI_BYTES_MAX: usize = liblzma_rs::types::LZMA_VLI_BYTES_MAX as usize;
 
 // --- Stream header size ---
-pub const LZMA_STREAM_HEADER_SIZE: u32 = liblzma_rs::common::index::LZMA_STREAM_HEADER_SIZE as u32;
+pub const LZMA_STREAM_HEADER_SIZE: u32 = liblzma_rs::types::LZMA_STREAM_HEADER_SIZE as u32;
 
 // =========================================================================
 // Functions

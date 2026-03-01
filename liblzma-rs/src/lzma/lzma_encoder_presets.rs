@@ -1,13 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_int, c_uint, c_void};
-pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-pub const LZMA_MF_BT4: lzma_match_finder = 20;
-pub const LZMA_MF_BT3: lzma_match_finder = 19;
-pub const LZMA_MF_BT2: lzma_match_finder = 18;
-pub const LZMA_MF_HC4: lzma_match_finder = 4;
-pub const LZMA_MF_HC3: lzma_match_finder = 3;
-pub const LZMA_MODE_NORMAL: lzma_mode = 2;
-pub const LZMA_MODE_FAST: lzma_mode = 1;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_lzma {

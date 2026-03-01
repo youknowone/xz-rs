@@ -3,11 +3,6 @@ use core::ffi::{c_int, c_uint};
 extern "C" {
     static lzma_crc32_table: [[u32; 256]; 8];
 }
-pub const LZMA_FINISH: lzma_action = 3;
-pub const LZMA_FULL_BARRIER: lzma_action = 4;
-pub const LZMA_FULL_FLUSH: lzma_action = 2;
-pub const LZMA_SYNC_FLUSH: lzma_action = 1;
-pub const LZMA_RUN: lzma_action = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_match {
@@ -42,7 +37,6 @@ pub struct lzma_mf_s {
     pub sons_count: u32,
 }
 pub type lzma_mf = lzma_mf_s;
-pub const UINT32_MAX: c_uint = 4294967295;
 #[inline]
 unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     return (*mf).buffer.offset((*mf).read_pos as isize);

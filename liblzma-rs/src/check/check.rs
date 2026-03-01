@@ -1,5 +1,4 @@
 use crate::types::*;
-use core::ffi::c_uint;
 extern "C" {
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64;
@@ -7,10 +6,6 @@ extern "C" {
     fn lzma_sha256_update(buf: *const u8, size: size_t, check: *mut lzma_check_state);
     fn lzma_sha256_finish(check: *mut lzma_check_state);
 }
-pub const LZMA_CHECK_SHA256: lzma_check = 10;
-pub const LZMA_CHECK_CRC64: lzma_check = 4;
-pub const LZMA_CHECK_CRC32: lzma_check = 1;
-pub const LZMA_CHECK_NONE: lzma_check = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_sha256_state {
@@ -37,8 +32,6 @@ pub union C2RustUnnamed_0 {
     pub u32_0: [u32; 16],
     pub u64_0: [u64; 8],
 }
-pub const UINT32_MAX: c_uint = 4294967295;
-pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
 #[no_mangle]
 pub extern "C" fn lzma_check_is_supported(type_0: lzma_check) -> lzma_bool {
     if type_0 > LZMA_CHECK_ID_MAX {

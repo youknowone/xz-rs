@@ -1,23 +1,9 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_raw_decoder_memusage(filters: *const lzma_filter) -> u64;
     fn lzma_easy_preset(easy: *mut lzma_options_easy, preset: u32) -> bool;
 }
-pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter {
-    pub id: lzma_vli,
-    pub options: *mut c_void,
-}
-pub const LZMA_MF_BT4: lzma_match_finder = 20;
-pub const LZMA_MF_BT3: lzma_match_finder = 19;
-pub const LZMA_MF_BT2: lzma_match_finder = 18;
-pub const LZMA_MF_HC4: lzma_match_finder = 4;
-pub const LZMA_MF_HC3: lzma_match_finder = 3;
-pub const LZMA_MODE_NORMAL: lzma_mode = 2;
-pub const LZMA_MODE_FAST: lzma_mode = 1;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_lzma {
@@ -52,7 +38,6 @@ pub struct lzma_options_easy {
     pub filters: [lzma_filter; 5],
     pub opt_lzma: lzma_options_lzma,
 }
-pub const UINT32_MAX: c_uint = 4294967295;
 #[no_mangle]
 pub extern "C" fn lzma_easy_decoder_memusage(preset: u32) -> u64 {
     let mut opt_easy: lzma_options_easy = lzma_options_easy {

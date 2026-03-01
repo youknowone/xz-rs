@@ -20,31 +20,6 @@ extern "C" {
     );
     fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check);
 }
-pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
-pub const LZMA_RET_INTERNAL7: lzma_ret = 107;
-pub const LZMA_RET_INTERNAL6: lzma_ret = 106;
-pub const LZMA_RET_INTERNAL5: lzma_ret = 105;
-pub const LZMA_RET_INTERNAL4: lzma_ret = 104;
-pub const LZMA_RET_INTERNAL3: lzma_ret = 103;
-pub const LZMA_RET_INTERNAL2: lzma_ret = 102;
-pub const LZMA_RET_INTERNAL1: lzma_ret = 101;
-pub const LZMA_SEEK_NEEDED: lzma_ret = 12;
-pub const LZMA_PROG_ERROR: lzma_ret = 11;
-pub const LZMA_BUF_ERROR: lzma_ret = 10;
-pub const LZMA_DATA_ERROR: lzma_ret = 9;
-pub const LZMA_OPTIONS_ERROR: lzma_ret = 8;
-pub const LZMA_FORMAT_ERROR: lzma_ret = 7;
-pub const LZMA_MEMLIMIT_ERROR: lzma_ret = 6;
-pub const LZMA_MEM_ERROR: lzma_ret = 5;
-pub const LZMA_GET_CHECK: lzma_ret = 4;
-pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
-pub const LZMA_NO_CHECK: lzma_ret = 2;
-pub const LZMA_STREAM_END: lzma_ret = 1;
-pub const LZMA_OK: lzma_ret = 0;
-pub const LZMA_CHECK_SHA256: lzma_check = 10;
-pub const LZMA_CHECK_CRC64: lzma_check = 4;
-pub const LZMA_CHECK_CRC32: lzma_check = 1;
-pub const LZMA_CHECK_NONE: lzma_check = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_hash_s {
@@ -101,10 +76,6 @@ pub const SEQ_UNPADDED: C2RustUnnamed_1 = 2;
 pub const SEQ_COUNT: C2RustUnnamed_1 = 1;
 pub const SEQ_BLOCK: C2RustUnnamed_1 = 0;
 pub type lzma_index_hash = lzma_index_hash_s;
-pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
-pub const LZMA_VLI_MAX: c_ulonglong = UINT64_MAX.wrapping_div(2);
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
-pub const LZMA_BACKWARD_SIZE_MAX: c_ulonglong = 1 << 34;
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 pub const INDEX_INDICATOR: c_int = 0;

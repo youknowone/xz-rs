@@ -5,11 +5,6 @@ extern "C" {
     static lzma_rc_prices: [u8; 128];
     static lzma_fastpos: [u8; 8192];
 }
-pub const LZMA_FINISH: lzma_action = 3;
-pub const LZMA_FULL_BARRIER: lzma_action = 4;
-pub const LZMA_FULL_FLUSH: lzma_action = 2;
-pub const LZMA_SYNC_FLUSH: lzma_action = 1;
-pub const LZMA_RUN: lzma_action = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_match {
@@ -63,18 +58,6 @@ pub const RC_DIRECT_1: C2RustUnnamed = 3;
 pub const RC_DIRECT_0: C2RustUnnamed = 2;
 pub const RC_BIT_1: C2RustUnnamed = 1;
 pub const RC_BIT_0: C2RustUnnamed = 0;
-pub const STATE_NONLIT_REP: lzma_lzma_state = 11;
-pub const STATE_NONLIT_MATCH: lzma_lzma_state = 10;
-pub const STATE_LIT_SHORTREP: lzma_lzma_state = 9;
-pub const STATE_LIT_LONGREP: lzma_lzma_state = 8;
-pub const STATE_LIT_MATCH: lzma_lzma_state = 7;
-pub const STATE_SHORTREP_LIT: lzma_lzma_state = 6;
-pub const STATE_REP_LIT: lzma_lzma_state = 5;
-pub const STATE_MATCH_LIT: lzma_lzma_state = 4;
-pub const STATE_SHORTREP_LIT_LIT: lzma_lzma_state = 3;
-pub const STATE_REP_LIT_LIT: lzma_lzma_state = 2;
-pub const STATE_MATCH_LIT_LIT: lzma_lzma_state = 1;
-pub const STATE_LIT_LIT: lzma_lzma_state = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lzma1_encoder_s {
@@ -143,7 +126,6 @@ pub struct lzma_length_encoder {
     pub counters: [u32; 16],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
-pub const UINT32_MAX: c_uint = 4294967295;
 #[inline]
 unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     return (*mf).buffer.offset((*mf).read_pos as isize);

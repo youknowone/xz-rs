@@ -1,36 +1,8 @@
 use crate::types::*;
-use core::ffi::{c_char, c_int, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_char, c_int, c_uint, c_void};
 extern "C" {
     fn lzma_lzma_preset(options: *mut lzma_options_lzma, preset: u32) -> lzma_bool;
     fn lzma_validate_chain(filters: *const lzma_filter, count: *mut size_t) -> lzma_ret;
-}
-pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
-pub const LZMA_RET_INTERNAL7: lzma_ret = 107;
-pub const LZMA_RET_INTERNAL6: lzma_ret = 106;
-pub const LZMA_RET_INTERNAL5: lzma_ret = 105;
-pub const LZMA_RET_INTERNAL4: lzma_ret = 104;
-pub const LZMA_RET_INTERNAL3: lzma_ret = 103;
-pub const LZMA_RET_INTERNAL2: lzma_ret = 102;
-pub const LZMA_RET_INTERNAL1: lzma_ret = 101;
-pub const LZMA_SEEK_NEEDED: lzma_ret = 12;
-pub const LZMA_PROG_ERROR: lzma_ret = 11;
-pub const LZMA_BUF_ERROR: lzma_ret = 10;
-pub const LZMA_DATA_ERROR: lzma_ret = 9;
-pub const LZMA_OPTIONS_ERROR: lzma_ret = 8;
-pub const LZMA_FORMAT_ERROR: lzma_ret = 7;
-pub const LZMA_MEMLIMIT_ERROR: lzma_ret = 6;
-pub const LZMA_MEM_ERROR: lzma_ret = 5;
-pub const LZMA_GET_CHECK: lzma_ret = 4;
-pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
-pub const LZMA_NO_CHECK: lzma_ret = 2;
-pub const LZMA_STREAM_END: lzma_ret = 1;
-pub const LZMA_OK: lzma_ret = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter {
-    pub id: lzma_vli,
-    pub options: *mut c_void,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -73,14 +45,7 @@ pub struct name_value_map {
     pub name: [c_char; 12],
     pub value: u32,
 }
-pub const LZMA_MF_BT4: lzma_match_finder = 20;
-pub const LZMA_MF_BT3: lzma_match_finder = 19;
-pub const LZMA_MF_BT2: lzma_match_finder = 18;
-pub const LZMA_MF_HC4: lzma_match_finder = 4;
-pub const LZMA_MF_HC3: lzma_match_finder = 3;
 pub const OPTMAP_TYPE_LZMA_MATCH_FINDER: C2RustUnnamed_2 = 2;
-pub const LZMA_MODE_NORMAL: lzma_mode = 2;
-pub const LZMA_MODE_FAST: lzma_mode = 1;
 pub const OPTMAP_TYPE_LZMA_MODE: C2RustUnnamed_2 = 1;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -123,7 +88,6 @@ pub struct lzma_options_delta {
     pub reserved_ptr1: *mut c_void,
     pub reserved_ptr2: *mut c_void,
 }
-pub const LZMA_DELTA_TYPE_BYTE: lzma_delta_type = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_bcj {
@@ -137,39 +101,19 @@ pub struct lzma_str {
 }
 pub type C2RustUnnamed_2 = c_uint;
 pub const OPTMAP_TYPE_UINT32: C2RustUnnamed_2 = 0;
-pub const UINT32_MAX: c_uint = 4294967295;
-pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const INT_MAX: c_int = c_int::MAX;
-pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTERS_MAX: c_int = 4;
 pub const LZMA_STR_ALL_FILTERS: c_uint = 0x1;
 pub const LZMA_STR_NO_VALIDATION: c_uint = 0x2;
 pub const LZMA_STR_ENCODER: c_uint = 0x10;
 pub const LZMA_STR_DECODER: c_uint = 0x20;
 pub const LZMA_STR_GETOPT_LONG: c_uint = 0x40;
 pub const LZMA_STR_NO_SPACES: c_uint = 0x80;
-pub const LZMA_FILTER_X86: c_ulonglong = 0x4;
-pub const LZMA_FILTER_POWERPC: c_ulonglong = 0x5;
-pub const LZMA_FILTER_IA64: c_ulonglong = 0x6;
-pub const LZMA_FILTER_ARM: c_ulonglong = 0x7;
-pub const LZMA_FILTER_ARMTHUMB: c_ulonglong = 0x8;
-pub const LZMA_FILTER_SPARC: c_ulonglong = 0x9;
-pub const LZMA_FILTER_ARM64: c_ulonglong = 0xa;
-pub const LZMA_FILTER_RISCV: c_ulonglong = 0xb;
-pub const LZMA_FILTER_DELTA: c_ulonglong = 0x3;
 pub const LZMA_DELTA_DIST_MIN: c_int = 1;
-pub const LZMA_DELTA_DIST_MAX: c_int = 256;
-pub const LZMA_FILTER_LZMA1: c_ulonglong = 0x4000000000000001;
-pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21;
-pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
 pub const LZMA_DICT_SIZE_DEFAULT: c_uint = 1u32 << 23;
 pub const LZMA_LCLP_MIN: c_int = 0;
-pub const LZMA_LCLP_MAX: c_int = 4;
 pub const LZMA_PB_MIN: c_int = 0;
-pub const LZMA_PB_MAX: c_int = 4;
 pub const LZMA_PRESET_DEFAULT: c_uint = 6;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
-pub const LZMA_FILTER_RESERVED_START: c_ulonglong = 1 << 62;
 pub const STR_ALLOC_SIZE: c_int = 800;
 unsafe extern "C" fn str_init(str: *mut lzma_str, allocator: *const lzma_allocator) -> lzma_ret {
     (*str).buf = lzma_alloc(STR_ALLOC_SIZE as size_t, allocator) as *mut c_char;

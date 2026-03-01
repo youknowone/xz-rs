@@ -1,22 +1,8 @@
 use crate::types::*;
-use core::ffi::{c_ulonglong, c_void};
+use core::ffi::c_void;
 extern "C" {
     fn lzma_lzma_preset(options: *mut lzma_options_lzma, preset: u32) -> lzma_bool;
 }
-pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter {
-    pub id: lzma_vli,
-    pub options: *mut c_void,
-}
-pub const LZMA_MF_BT4: lzma_match_finder = 20;
-pub const LZMA_MF_BT3: lzma_match_finder = 19;
-pub const LZMA_MF_BT2: lzma_match_finder = 18;
-pub const LZMA_MF_HC4: lzma_match_finder = 4;
-pub const LZMA_MF_HC3: lzma_match_finder = 3;
-pub const LZMA_MODE_NORMAL: lzma_mode = 2;
-pub const LZMA_MODE_FAST: lzma_mode = 1;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_lzma {
@@ -51,9 +37,6 @@ pub struct lzma_options_easy {
     pub filters: [lzma_filter; 5],
     pub opt_lzma: lzma_options_lzma,
 }
-pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
-pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_FILTER_LZMA2: c_ulonglong = 0x21;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_easy_preset(opt_easy: *mut lzma_options_easy, preset: u32) -> bool {
     if lzma_lzma_preset(&raw mut (*opt_easy).opt_lzma, preset) != 0 {

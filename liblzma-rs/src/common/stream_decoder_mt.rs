@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_char, c_int, c_long, c_uint, c_ulong, c_ulonglong, c_void};
+use core::ffi::{c_char, c_int, c_long, c_uint, c_ulong, c_void};
 pub enum lzma_index_hash_s {}
 extern "C" {
     fn clock_gettime(__clock_id: clockid_t, __tp: *mut timespec) -> c_int;
@@ -191,33 +191,6 @@ pub struct mythread_cond {
     pub clk_id: clockid_t,
 }
 pub type mythread_condtime = timespec;
-pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
-pub const LZMA_RET_INTERNAL7: lzma_ret = 107;
-pub const LZMA_RET_INTERNAL6: lzma_ret = 106;
-pub const LZMA_RET_INTERNAL5: lzma_ret = 105;
-pub const LZMA_RET_INTERNAL4: lzma_ret = 104;
-pub const LZMA_RET_INTERNAL3: lzma_ret = 103;
-pub const LZMA_RET_INTERNAL2: lzma_ret = 102;
-pub const LZMA_RET_INTERNAL1: lzma_ret = 101;
-pub const LZMA_SEEK_NEEDED: lzma_ret = 12;
-pub const LZMA_PROG_ERROR: lzma_ret = 11;
-pub const LZMA_BUF_ERROR: lzma_ret = 10;
-pub const LZMA_DATA_ERROR: lzma_ret = 9;
-pub const LZMA_OPTIONS_ERROR: lzma_ret = 8;
-pub const LZMA_FORMAT_ERROR: lzma_ret = 7;
-pub const LZMA_MEMLIMIT_ERROR: lzma_ret = 6;
-pub const LZMA_MEM_ERROR: lzma_ret = 5;
-pub const LZMA_GET_CHECK: lzma_ret = 4;
-pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
-pub const LZMA_NO_CHECK: lzma_ret = 2;
-pub const LZMA_STREAM_END: lzma_ret = 1;
-pub const LZMA_OK: lzma_ret = 0;
-pub const LZMA_FINISH: lzma_action = 3;
-pub const LZMA_FULL_BARRIER: lzma_action = 4;
-pub const LZMA_FULL_FLUSH: lzma_action = 2;
-pub const LZMA_SYNC_FLUSH: lzma_action = 1;
-pub const LZMA_RUN: lzma_action = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_internal_s {
@@ -235,52 +208,6 @@ pub const ISEQ_FINISH: C2RustUnnamed = 3;
 pub const ISEQ_FULL_FLUSH: C2RustUnnamed = 2;
 pub const ISEQ_SYNC_FLUSH: C2RustUnnamed = 1;
 pub const ISEQ_RUN: C2RustUnnamed = 0;
-pub type lzma_next_coder = lzma_next_coder_s;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_next_coder_s {
-    pub coder: *mut c_void,
-    pub id: lzma_vli,
-    pub init: uintptr_t,
-    pub code: lzma_code_function,
-    pub end: lzma_end_function,
-    pub get_progress: Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> ()>,
-    pub get_check: Option<unsafe extern "C" fn(*const c_void) -> lzma_check>,
-    pub memconfig: Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret>,
-    pub update: Option<
-        unsafe extern "C" fn(
-            *mut c_void,
-            *const lzma_allocator,
-            *const lzma_filter,
-            *const lzma_filter,
-        ) -> lzma_ret,
-    >,
-    pub set_out_limit: Option<unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret>,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter {
-    pub id: lzma_vli,
-    pub options: *mut c_void,
-}
-pub const LZMA_CHECK_SHA256: lzma_check = 10;
-pub const LZMA_CHECK_CRC64: lzma_check = 4;
-pub const LZMA_CHECK_CRC32: lzma_check = 1;
-pub const LZMA_CHECK_NONE: lzma_check = 0;
-pub type lzma_end_function = Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>;
-pub type lzma_code_function = Option<
-    unsafe extern "C" fn(
-        *mut c_void,
-        *const lzma_allocator,
-        *const u8,
-        *mut size_t,
-        size_t,
-        *mut u8,
-        *mut size_t,
-        size_t,
-        lzma_action,
-    ) -> lzma_ret,
->;
 pub type lzma_internal = lzma_internal_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -371,7 +298,6 @@ pub struct lzma_stream_coder {
     pub pos: size_t,
     pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
-pub const LZMA_BLOCK_HEADER_SIZE_MAX: c_int = 1024;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_outq {
@@ -497,7 +423,6 @@ pub const SEQ_BLOCK_THR_INIT: C2RustUnnamed_0 = 3;
 pub const SEQ_BLOCK_INIT: C2RustUnnamed_0 = 2;
 pub const SEQ_BLOCK_HEADER: C2RustUnnamed_0 = 1;
 pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
-pub const UINT64_MAX: c_ulonglong = u64::MAX as c_ulonglong;
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const SIG_SETMASK: c_int = 3;
@@ -613,22 +538,7 @@ extern "C" fn mythread_condtime_set(
         }
     }
 }
-pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
-pub const LZMA_TELL_NO_CHECK: c_uint = 0x1;
-pub const LZMA_TELL_UNSUPPORTED_CHECK: c_uint = 0x2;
-pub const LZMA_TELL_ANY_CHECK: c_uint = 0x4;
-pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
-pub const LZMA_CONCATENATED: c_uint = 0x8;
-pub const LZMA_FAIL_FAST: c_uint = 0x20;
-pub const LZMA_STREAM_HEADER_SIZE: c_int = 12;
 pub const LZMA_THREADS_MAX: c_int = 16384;
-pub const LZMA_MEMUSAGE_BASE: c_ulonglong = 1 << 15;
-pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
-    | LZMA_TELL_UNSUPPORTED_CHECK
-    | LZMA_TELL_ANY_CHECK
-    | LZMA_IGNORE_CHECK
-    | LZMA_CONCATENATED
-    | LZMA_FAIL_FAST;
 pub const INDEX_INDICATOR: c_int = 0;
 #[inline]
 extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
