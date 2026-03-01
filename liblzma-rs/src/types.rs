@@ -606,6 +606,25 @@ pub struct lzma_outq {
     pub bufs_limit: u32,
 }
 
+// Opaque struct forward declarations (used by files that only need pointer types)
+#[repr(C)]
+pub struct lzma_index_s {
+    _opaque: [u8; 0],
+}
+pub type lzma_index = lzma_index_s;
+
+#[repr(C)]
+pub struct lzma_index_hash_s {
+    _opaque: [u8; 0],
+}
+pub type lzma_index_hash = lzma_index_hash_s;
+
+#[repr(C)]
+pub struct lzma_lzma1_encoder_s {
+    _opaque: [u8; 0],
+}
+pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
+
 // lzma_options_bcj struct (shared across simple/filter modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -815,7 +834,44 @@ extern "C" {
     pub fn lzma_lzma_preset(options: *mut lzma_options_lzma, preset: u32) -> lzma_bool;
     pub fn lzma_mf_find(mf: *mut lzma_mf, count: *mut u32, matches: *mut lzma_match) -> u32;
     pub fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u64;
+    pub fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index;
+    pub fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
+    pub fn lzma_index_append(
+        i: *mut lzma_index,
+        allocator: *const lzma_allocator,
+        unpadded_size: lzma_vli,
+        uncompressed_size: lzma_vli,
+    ) -> lzma_ret;
+    pub fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
+    pub fn lzma_index_padding_size(i: *const lzma_index) -> u32;
+    pub fn lzma_index_encoder_init(
+        next: *mut lzma_next_coder,
+        allocator: *const lzma_allocator,
+        i: *const lzma_index,
+    ) -> lzma_ret;
+    pub fn lzma_index_hash_init(
+        index_hash: *mut lzma_index_hash,
+        allocator: *const lzma_allocator,
+    ) -> *mut lzma_index_hash;
+    pub fn lzma_index_hash_end(
+        index_hash: *mut lzma_index_hash,
+        allocator: *const lzma_allocator,
+    );
+    pub fn lzma_index_hash_append(
+        index_hash: *mut lzma_index_hash,
+        unpadded_size: lzma_vli,
+        uncompressed_size: lzma_vli,
+    ) -> lzma_ret;
+    pub fn lzma_index_hash_decode(
+        index_hash: *mut lzma_index_hash,
+        in_0: *const u8,
+        in_pos: *mut size_t,
+        in_size: size_t,
+    ) -> lzma_ret;
+    pub fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli;
     pub fn memcmp(s1: *const c_void, s2: *const c_void, n: size_t) -> c_int;
     pub fn memchr(s: *const c_void, c: c_int, n: size_t) -> *mut c_void;
     pub fn strlen(s: *const c_char) -> size_t;
+    pub static lzma_rc_prices: [u8; 128];
+    pub static lzma_fastpos: [u8; 8192];
 }

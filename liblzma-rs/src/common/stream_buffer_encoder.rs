@@ -1,8 +1,4 @@
 use crate::types::*;
-#[repr(C)]
-pub struct lzma_index_s {
-    _opaque: [u8; 0],
-}
 extern "C" {
     fn lzma_block_buffer_bound(uncompressed_size: size_t) -> size_t;
     fn lzma_block_buffer_encode(
@@ -14,15 +10,6 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
     ) -> lzma_ret;
-    fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index;
-    fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
-    fn lzma_index_append(
-        i: *mut lzma_index,
-        allocator: *const lzma_allocator,
-        unpadded_size: lzma_vli,
-        uncompressed_size: lzma_vli,
-    ) -> lzma_ret;
-    fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
     fn lzma_index_buffer_encode(
         i: *const lzma_index,
         out: *mut u8,
@@ -30,7 +17,6 @@ extern "C" {
         out_size: size_t,
     ) -> lzma_ret;
 }
-pub type lzma_index = lzma_index_s;
 pub const INDEX_BOUND: u32 = 1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 4 + 3 & !(3);
 pub const HEADERS_BOUND: u32 = 2 * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
 #[no_mangle]

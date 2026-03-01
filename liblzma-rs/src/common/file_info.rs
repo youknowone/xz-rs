@@ -1,12 +1,7 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
-#[repr(C)]
-pub struct lzma_index_s {
-    _opaque: [u8; 0],
-}
 extern "C" {
     fn lzma_index_memused(i: *const lzma_index) -> u64;
-    fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
     fn lzma_index_stream_flags(
         i: *mut lzma_index,
         stream_flags: *const lzma_stream_flags,
@@ -25,7 +20,6 @@ extern "C" {
         memlimit: u64,
     ) -> lzma_ret;
 }
-pub type lzma_index = lzma_index_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_file_info_coder {

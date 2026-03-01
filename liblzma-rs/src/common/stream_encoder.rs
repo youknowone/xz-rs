@@ -1,25 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
-#[repr(C)]
-pub struct lzma_index_s {
-    _opaque: [u8; 0],
-}
-extern "C" {
-    fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index;
-    fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
-    fn lzma_index_append(
-        i: *mut lzma_index,
-        allocator: *const lzma_allocator,
-        unpadded_size: lzma_vli,
-        uncompressed_size: lzma_vli,
-    ) -> lzma_ret;
-    fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
-    fn lzma_index_encoder_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        i: *const lzma_index,
-    ) -> lzma_ret;
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_stream_coder {
@@ -34,7 +14,6 @@ pub struct lzma_stream_coder {
     pub buffer_size: size_t,
     pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
-pub type lzma_index = lzma_index_s;
 pub type C2RustUnnamed_0 = c_uint;
 pub const SEQ_STREAM_FOOTER: C2RustUnnamed_0 = 5;
 pub const SEQ_INDEX_ENCODE: C2RustUnnamed_0 = 4;

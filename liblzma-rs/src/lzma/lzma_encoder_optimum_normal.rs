@@ -1,9 +1,5 @@
 use crate::types::*;
 use core::ffi::c_uint;
-extern "C" {
-    static lzma_rc_prices: [u8; 128];
-    static lzma_fastpos: [u8; 8192];
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_range_encoder {

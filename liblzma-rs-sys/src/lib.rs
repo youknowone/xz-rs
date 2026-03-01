@@ -36,7 +36,7 @@ pub type lzma_bool = c_uchar;
 pub type lzma_vli = u64;
 
 // === Canonical struct re-exports ===
-pub use liblzma_rs::common::index_decoder::lzma_index;
+pub use liblzma_rs::types::lzma_index;
 pub use liblzma_rs::types::lzma_allocator;
 pub use liblzma_rs::types::lzma_filter;
 pub use liblzma_rs::types::lzma_options_lzma;

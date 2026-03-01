@@ -1,17 +1,10 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
-#[repr(C)]
-pub struct lzma_index_s {
-    _opaque: [u8; 0],
-}
 extern "C" {
     fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli;
-    fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
     fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *const lzma_index);
     fn lzma_index_iter_next(iter: *mut lzma_index_iter, mode: lzma_index_iter_mode) -> lzma_bool;
-    fn lzma_index_padding_size(i: *const lzma_index) -> u32;
 }
-pub type lzma_index = lzma_index_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_iter {

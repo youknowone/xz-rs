@@ -1,9 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
-#[repr(C)]
-pub struct lzma_lzma1_encoder_s {
-    _opaque: [u8; 0],
-}
 extern "C" {
     fn lzma_lz_encoder_init(
         next: *mut lzma_next_coder,
@@ -37,9 +33,7 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
         read_limit: u32,
-    ) -> lzma_ret;
-    static lzma_fastpos: [u8; 8192];
-}
+    ) -> lzma_ret;}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_options {
@@ -53,7 +47,6 @@ pub struct lzma_lz_options {
     pub preset_dict: *const u8,
     pub preset_dict_size: u32,
 }
-pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lzma2_coder {

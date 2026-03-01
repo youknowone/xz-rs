@@ -1,22 +1,8 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
-#[repr(C)]
-pub struct lzma_index_s {
-    _opaque: [u8; 0],
-}
 extern "C" {
-    fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index;
-    fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
-    fn lzma_index_append(
-        i: *mut lzma_index,
-        allocator: *const lzma_allocator,
-        unpadded_size: lzma_vli,
-        uncompressed_size: lzma_vli,
-    ) -> lzma_ret;
-    fn lzma_index_padding_size(i: *const lzma_index) -> u32;
     fn lzma_index_prealloc(i: *mut lzma_index, records: lzma_vli);
 }
-pub type lzma_index = lzma_index_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_coder {

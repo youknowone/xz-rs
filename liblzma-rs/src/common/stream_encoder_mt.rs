@@ -33,21 +33,7 @@ extern "C" {
         out_pos: *mut size_t,
         out_size: size_t,
     ) -> lzma_ret;
-    fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index;
-    fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator);
-    fn lzma_index_append(
-        i: *mut lzma_index,
-        allocator: *const lzma_allocator,
-        unpadded_size: lzma_vli,
-        uncompressed_size: lzma_vli,
-    ) -> lzma_ret;
-    fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
     fn lzma_block_buffer_bound64(uncompressed_size: u64) -> u64;
-    fn lzma_index_encoder_init(
-        next: *mut lzma_next_coder,
-        allocator: *const lzma_allocator,
-        i: *const lzma_index,
-    ) -> lzma_ret;
     fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64;
     fn lzma_outq_init(
         outq: *mut lzma_outq,
@@ -204,22 +190,6 @@ pub struct lzma_stream_coder_s {
     pub mutex: mythread_mutex,
     pub cond: mythread_cond,
 }
-pub type lzma_outbuf = lzma_outbuf_s;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_outbuf_s {
-    pub next: *mut lzma_outbuf,
-    pub worker: *mut c_void,
-    pub allocated: size_t,
-    pub pos: size_t,
-    pub decoder_in_pos: size_t,
-    pub finished: bool,
-    pub finish_ret: lzma_ret,
-    pub unpadded_size: lzma_vli,
-    pub uncompressed_size: lzma_vli,
-    pub buf: [u8; 0],
-}
-pub type lzma_index = lzma_index_s;
 pub type C2RustUnnamed_0 = c_uint;
 pub const SEQ_STREAM_FOOTER: C2RustUnnamed_0 = 3;
 pub const SEQ_INDEX: C2RustUnnamed_0 = 2;

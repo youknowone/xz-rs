@@ -15,9 +15,7 @@ extern "C" {
             ) -> lzma_ret,
         >,
     ) -> lzma_ret;
-    fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64;
-    static lzma_rc_prices: [u8; 128];
-    fn lzma_lzma_optimum_fast(
+    fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64;    fn lzma_lzma_optimum_fast(
         coder: *mut lzma_lzma1_encoder,
         mf: *mut lzma_mf,
         back_res: *mut u32,
@@ -29,9 +27,7 @@ extern "C" {
         back_res: *mut u32,
         len_res: *mut u32,
         position: u32,
-    );
-    static lzma_fastpos: [u8; 8192];
-}
+    );}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_options {
@@ -1101,8 +1097,8 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
         1 << (*options).pb,
         (*coder).fast_mode,
     );
-    (*coder).match_price_count = UINT32_MAX.wrapping_div(2) as u32;
-    (*coder).align_price_count = UINT32_MAX.wrapping_div(2) as u32;
+    (*coder).match_price_count = UINT32_MAX.wrapping_div(2);
+    (*coder).align_price_count = UINT32_MAX.wrapping_div(2);
     (*coder).opts_end_index = 0;
     (*coder).opts_current_index = 0;
     LZMA_OK

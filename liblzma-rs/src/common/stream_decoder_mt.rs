@@ -24,23 +24,6 @@ extern "C" {
     fn pthread_mutex_lock(_: *mut pthread_mutex_t) -> c_int;
     fn pthread_mutex_unlock(_: *mut pthread_mutex_t) -> c_int;
     fn pthread_sigmask(_: c_int, _: *const sigset_t, _: *mut sigset_t) -> c_int;
-    fn lzma_index_hash_init(
-        index_hash: *mut lzma_index_hash,
-        allocator: *const lzma_allocator,
-    ) -> *mut lzma_index_hash;
-    fn lzma_index_hash_end(index_hash: *mut lzma_index_hash, allocator: *const lzma_allocator);
-    fn lzma_index_hash_append(
-        index_hash: *mut lzma_index_hash,
-        unpadded_size: lzma_vli,
-        uncompressed_size: lzma_vli,
-    ) -> lzma_ret;
-    fn lzma_index_hash_decode(
-        index_hash: *mut lzma_index_hash,
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-    ) -> lzma_ret;
-    fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli;
     fn lzma_outq_init(
         outq: *mut lzma_outq,
         allocator: *const lzma_allocator,
@@ -200,21 +183,6 @@ pub struct lzma_stream_coder {
     pub pos: size_t,
     pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
-pub type lzma_outbuf = lzma_outbuf_s;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_outbuf_s {
-    pub next: *mut lzma_outbuf,
-    pub worker: *mut c_void,
-    pub allocated: size_t,
-    pub pos: size_t,
-    pub decoder_in_pos: size_t,
-    pub finished: bool,
-    pub finish_ret: lzma_ret,
-    pub unpadded_size: lzma_vli,
-    pub uncompressed_size: lzma_vli,
-    pub buf: [u8; 0],
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct worker_thread {
@@ -240,7 +208,6 @@ pub struct worker_thread {
     pub thread_id: mythread,
 }
 pub const THR_EXIT: worker_state = 2;
-pub type lzma_index_hash = lzma_index_hash_s;
 pub type C2RustUnnamed_0 = c_uint;
 pub const SEQ_ERROR: C2RustUnnamed_0 = 11;
 pub const SEQ_STREAM_PADDING: C2RustUnnamed_0 = 10;

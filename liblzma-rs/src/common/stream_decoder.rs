@@ -1,28 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_uint, c_void};
-#[repr(C)]
-pub struct lzma_index_hash_s {
-    _opaque: [u8; 0],
-}
-extern "C" {
-    fn lzma_index_hash_init(
-        index_hash: *mut lzma_index_hash,
-        allocator: *const lzma_allocator,
-    ) -> *mut lzma_index_hash;
-    fn lzma_index_hash_end(index_hash: *mut lzma_index_hash, allocator: *const lzma_allocator);
-    fn lzma_index_hash_append(
-        index_hash: *mut lzma_index_hash,
-        unpadded_size: lzma_vli,
-        uncompressed_size: lzma_vli,
-    ) -> lzma_ret;
-    fn lzma_index_hash_decode(
-        index_hash: *mut lzma_index_hash,
-        in_0: *const u8,
-        in_pos: *mut size_t,
-        in_size: size_t,
-    ) -> lzma_ret;
-    fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli;
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_stream_coder {
@@ -42,7 +19,6 @@ pub struct lzma_stream_coder {
     pub pos: size_t,
     pub buffer: [u8; LZMA_BLOCK_HEADER_SIZE_MAX as usize],
 }
-pub type lzma_index_hash = lzma_index_hash_s;
 pub type C2RustUnnamed_0 = c_uint;
 pub const SEQ_STREAM_PADDING: C2RustUnnamed_0 = 6;
 pub const SEQ_STREAM_FOOTER: C2RustUnnamed_0 = 5;
