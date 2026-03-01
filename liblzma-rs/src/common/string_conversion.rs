@@ -638,8 +638,7 @@ unsafe extern "C" fn parse_options(
                     }
                     if p < name_eq_value_end {
                         let multiplier_start: *const c_char = p;
-                        if (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_BYTE_SUFFIX
-                            == 0
+                        if (*optmap.offset(i as isize)).flags as c_int & OPTMAP_USE_BYTE_SUFFIX == 0
                         {
                             *str = multiplier_start;
                             return b"This option does not support any multiplier suffixes\0"

@@ -319,8 +319,7 @@ pub unsafe extern "C" fn lzma_index_init(allocator: *const lzma_allocator) -> *m
     if i.is_null() {
         return core::ptr::null_mut();
     }
-    let s: *mut index_stream =
-        index_stream_init(0, 0, 1, 0, allocator);
+    let s: *mut index_stream = index_stream_init(0, 0, 1, 0, allocator);
     if s.is_null() {
         lzma_free(i as *mut c_void, allocator);
         return core::ptr::null_mut();
@@ -462,9 +461,8 @@ pub unsafe extern "C" fn lzma_index_checks(i: *const lzma_index) -> u32 {
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_padding_size(i: *const lzma_index) -> u32 {
-    return ((4_u64)
-        .wrapping_sub(index_size_unpadded((*i).record_count, (*i).index_list_size))
-        & 3) as u32;
+    return ((4_u64).wrapping_sub(index_size_unpadded((*i).record_count, (*i).index_list_size)) & 3)
+        as u32;
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_stream_flags(
@@ -487,10 +485,7 @@ pub unsafe extern "C" fn lzma_index_stream_padding(
     i: *mut lzma_index,
     stream_padding: lzma_vli,
 ) -> lzma_ret {
-    if i.is_null()
-        || stream_padding > LZMA_VLI_MAX
-        || stream_padding & 3 != 0
-    {
+    if i.is_null() || stream_padding > LZMA_VLI_MAX || stream_padding & 3 != 0 {
         return LZMA_PROG_ERROR;
     }
     let s: *mut index_stream = (*i).streams.rightmost as *mut index_stream;
@@ -813,8 +808,8 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
     };
     (*iter).stream.padding = (*stream).stream_padding;
     if (*stream).groups.rightmost.is_null() {
-        (*iter).stream.compressed_size = index_size(0, 0)
-            .wrapping_add((2 * LZMA_STREAM_HEADER_SIZE) as lzma_vli);
+        (*iter).stream.compressed_size =
+            index_size(0, 0).wrapping_add((2 * LZMA_STREAM_HEADER_SIZE) as lzma_vli);
         (*iter).stream.uncompressed_size = 0;
     } else {
         let g: *const index_group = (*stream).groups.rightmost as *const index_group;

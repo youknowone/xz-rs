@@ -91,9 +91,6 @@ pub unsafe extern "C" fn lzma_stream_footer_decode(
     }
     (*options).backward_size =
         read32le(in_0.offset(core::mem::size_of::<u32>() as usize as isize)) as lzma_vli;
-    (*options).backward_size = (*options)
-        .backward_size
-        .wrapping_add(1)
-        .wrapping_mul(4);
+    (*options).backward_size = (*options).backward_size.wrapping_add(1).wrapping_mul(4);
     return LZMA_OK;
 }

@@ -57,9 +57,7 @@ unsafe extern "C" fn x86_code(
                 }
             }
             b = *buffer.offset(buffer_pos.wrapping_add(4) as isize);
-            if (b as c_int == 0 || b as c_int == 0xff)
-                && prev_mask >> 1 <= 4
-                && prev_mask >> 1 != 3
+            if (b as c_int == 0 || b as c_int == 0xff) && prev_mask >> 1 <= 4 && prev_mask >> 1 != 3
             {
                 let mut src: u32 = (b as u32) << 24
                     | (*buffer.offset(buffer_pos.wrapping_add(3) as isize) as u32) << 16

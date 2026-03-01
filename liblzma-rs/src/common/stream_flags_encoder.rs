@@ -77,19 +77,12 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     }
     write32le(
         out.offset(4),
-        (*options)
-            .backward_size
-            .wrapping_div(4)
-            .wrapping_sub(1) as u32,
+        (*options).backward_size.wrapping_div(4).wrapping_sub(1) as u32,
     );
     if stream_flags_encode(options, out.offset((2 * 4) as isize)) {
         return LZMA_PROG_ERROR;
     }
-    let crc: u32 = lzma_crc32(
-        out.offset(4),
-        (4 + LZMA_STREAM_FLAGS_SIZE) as size_t,
-        0,
-    ) as u32;
+    let crc: u32 = lzma_crc32(out.offset(4), (4 + LZMA_STREAM_FLAGS_SIZE) as size_t, 0) as u32;
     write32le(out, crc);
     memcpy(
         out.offset((2 * 4) as isize)

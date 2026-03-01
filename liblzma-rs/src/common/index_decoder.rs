@@ -129,9 +129,9 @@ unsafe extern "C" fn index_decode(
                     }
                     (*coder).count = (*coder).count.wrapping_sub(1);
                     (*coder).sequence = (if (*coder).count == 0 {
-                        SEQ_PADDING_INIT as c_int
+                        SEQ_PADDING_INIT
                     } else {
-                        SEQ_UNPADDED as c_int
+                        SEQ_UNPADDED
                     }) as C2RustUnnamed_0;
                 }
                 continue;
@@ -176,9 +176,9 @@ unsafe extern "C" fn index_decode(
                     lzma_index_prealloc((*coder).index, (*coder).count);
                     ret = LZMA_OK;
                     (*coder).sequence = (if (*coder).count == 0 {
-                        SEQ_PADDING_INIT as c_int
+                        SEQ_PADDING_INIT
                     } else {
-                        SEQ_UNPADDED as c_int
+                        SEQ_UNPADDED
                     }) as C2RustUnnamed_0;
                     continue;
                 }

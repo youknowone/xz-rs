@@ -512,16 +512,11 @@ unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
         return lzma_fastpos[dist as usize] as u32;
     }
     if dist < (1) << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
-        return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize]
-            as u32)
-            .wrapping_add(
-                (2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32,
-            );
+        return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
+            .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
     }
     return (lzma_fastpos[(dist >> 0 + 2 * (FASTPOS_BITS - 1)) as usize] as u32)
-        .wrapping_add(
-            (2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32,
-        );
+        .wrapping_add((2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32);
 }
 #[inline]
 unsafe extern "C" fn literal_matched(
@@ -690,9 +685,9 @@ unsafe extern "C" fn match_0(
     len: u32,
 ) {
     (*coder).state = (if ((*coder).state as u32) < LIT_STATES as u32 {
-        STATE_LIT_MATCH as c_int
+        STATE_LIT_MATCH
     } else {
-        STATE_NONLIT_MATCH as c_int
+        STATE_NONLIT_MATCH
     }) as lzma_lzma_state;
     length(
         &raw mut (*coder).rc,
@@ -803,9 +798,9 @@ unsafe extern "C" fn rep_match(coder: *mut lzma_lzma1_encoder, pos_state: u32, r
     }
     if len == 1 {
         (*coder).state = (if ((*coder).state as u32) < LIT_STATES as u32 {
-            STATE_LIT_SHORTREP as c_int
+            STATE_LIT_SHORTREP
         } else {
-            STATE_NONLIT_REP as c_int
+            STATE_NONLIT_REP
         }) as lzma_lzma_state;
     } else {
         length(
@@ -816,9 +811,9 @@ unsafe extern "C" fn rep_match(coder: *mut lzma_lzma1_encoder, pos_state: u32, r
             (*coder).fast_mode,
         );
         (*coder).state = (if ((*coder).state as u32) < LIT_STATES as u32 {
-            STATE_LIT_LONGREP as c_int
+            STATE_LIT_LONGREP
         } else {
-            STATE_NONLIT_REP as c_int
+            STATE_NONLIT_REP
         }) as lzma_lzma_state;
     };
 }

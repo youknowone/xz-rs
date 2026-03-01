@@ -193,55 +193,24 @@ unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
         return lzma_fastpos[dist as usize] as u32;
     }
     if dist < (1) << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
-        return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize]
-            as u32)
-            .wrapping_add(
-                (2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32,
-            );
+        return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
+            .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
     }
     return (lzma_fastpos[(dist >> 0 + 2 * (FASTPOS_BITS - 1)) as usize] as u32)
-        .wrapping_add(
-            (2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32,
-        );
+        .wrapping_add((2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32);
 }
 #[inline]
 unsafe extern "C" fn get_dist_slot_2(dist: u32) -> u32 {
-    if dist
-        < (1)
-            << FASTPOS_BITS
-                + (14 / 2 - 1 + 0 * (FASTPOS_BITS - 1))
-    {
-        return (lzma_fastpos[(dist
-            >> 14 / 2 - 1 + 0 * (FASTPOS_BITS - 1))
-            as usize] as u32)
-            .wrapping_add(
-                (2
-                    * (14 / 2 - 1
-                        + 0 * (FASTPOS_BITS - 1))) as u32,
-            );
+    if dist < (1) << FASTPOS_BITS + (14 / 2 - 1 + 0 * (FASTPOS_BITS - 1)) {
+        return (lzma_fastpos[(dist >> 14 / 2 - 1 + 0 * (FASTPOS_BITS - 1)) as usize] as u32)
+            .wrapping_add((2 * (14 / 2 - 1 + 0 * (FASTPOS_BITS - 1))) as u32);
     }
-    if dist
-        < (1)
-            << FASTPOS_BITS
-                + (14 / 2 - 1 + 1 * (FASTPOS_BITS - 1))
-    {
-        return (lzma_fastpos[(dist
-            >> 14 / 2 - 1 + 1 * (FASTPOS_BITS - 1))
-            as usize] as u32)
-            .wrapping_add(
-                (2
-                    * (14 / 2 - 1
-                        + 1 * (FASTPOS_BITS - 1))) as u32,
-            );
+    if dist < (1) << FASTPOS_BITS + (14 / 2 - 1 + 1 * (FASTPOS_BITS - 1)) {
+        return (lzma_fastpos[(dist >> 14 / 2 - 1 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
+            .wrapping_add((2 * (14 / 2 - 1 + 1 * (FASTPOS_BITS - 1))) as u32);
     }
-    return (lzma_fastpos
-        [(dist >> 14 / 2 - 1 + 2 * (FASTPOS_BITS - 1)) as usize]
-        as u32)
-        .wrapping_add(
-            (2
-                * (14 / 2 - 1
-                    + 2 * (FASTPOS_BITS - 1))) as u32,
-        );
+    return (lzma_fastpos[(dist >> 14 / 2 - 1 + 2 * (FASTPOS_BITS - 1)) as usize] as u32)
+        .wrapping_add((2 * (14 / 2 - 1 + 2 * (FASTPOS_BITS - 1))) as u32);
 }
 #[inline(always)]
 unsafe extern "C" fn lzma_memcmplen(
@@ -520,15 +489,12 @@ unsafe extern "C" fn helper1(
         len_main = (*coder).longest_match_length;
         matches_count = (*coder).matches_count;
     }
-    let buf_avail: u32 = if mf_avail(mf).wrapping_add(1)
-        < (2 + (((1) << 3) + ((1) << 3) + ((1) << 8))
-            - 1) as u32
-    {
-        (mf_avail(mf) as u32).wrapping_add(1)
-    } else {
-        (2 + (((1) << 3) + ((1) << 3) + ((1) << 8))
-            - 1) as u32
-    };
+    let buf_avail: u32 =
+        if mf_avail(mf).wrapping_add(1) < (2 + (((1) << 3) + ((1) << 3) + ((1) << 8)) - 1) as u32 {
+            (mf_avail(mf) as u32).wrapping_add(1)
+        } else {
+            (2 + (((1) << 3) + ((1) << 3) + ((1) << 8)) - 1) as u32
+        };
     if buf_avail < 2 {
         *back_res = UINT32_MAX as u32;
         *len_res = 1;
@@ -712,15 +678,15 @@ unsafe extern "C" fn helper2(
             state = (*coder).opts[(*coder).opts[cur as usize].pos_prev_2 as usize].state;
             if (*coder).opts[cur as usize].back_prev_2 < REPS as u32 {
                 state = (if (state as u32) < LIT_STATES as u32 {
-                    STATE_LIT_LONGREP as c_int
+                    STATE_LIT_LONGREP
                 } else {
-                    STATE_NONLIT_REP as c_int
+                    STATE_NONLIT_REP
                 }) as lzma_lzma_state;
             } else {
                 state = (if (state as u32) < LIT_STATES as u32 {
-                    STATE_LIT_MATCH as c_int
+                    STATE_LIT_MATCH
                 } else {
-                    STATE_NONLIT_MATCH as c_int
+                    STATE_NONLIT_MATCH
                 }) as lzma_lzma_state;
             }
         } else {
@@ -739,9 +705,9 @@ unsafe extern "C" fn helper2(
     if pos_prev == cur.wrapping_sub(1) {
         if (*coder).opts[cur as usize].back_prev == 0 {
             state = (if (state as u32) < LIT_STATES as u32 {
-                STATE_LIT_SHORTREP as c_int
+                STATE_LIT_SHORTREP
             } else {
-                STATE_NONLIT_REP as c_int
+                STATE_NONLIT_REP
             }) as lzma_lzma_state;
         } else {
             state = (if state <= STATE_SHORTREP_LIT_LIT {
@@ -758,23 +724,23 @@ unsafe extern "C" fn helper2(
             pos_prev = (*coder).opts[cur as usize].pos_prev_2;
             pos = (*coder).opts[cur as usize].back_prev_2;
             state = (if (state as u32) < LIT_STATES as u32 {
-                STATE_LIT_LONGREP as c_int
+                STATE_LIT_LONGREP
             } else {
-                STATE_NONLIT_REP as c_int
+                STATE_NONLIT_REP
             }) as lzma_lzma_state;
         } else {
             pos = (*coder).opts[cur as usize].back_prev;
             if pos < REPS as u32 {
                 state = (if (state as u32) < LIT_STATES as u32 {
-                    STATE_LIT_LONGREP as c_int
+                    STATE_LIT_LONGREP
                 } else {
-                    STATE_NONLIT_REP as c_int
+                    STATE_NONLIT_REP
                 }) as lzma_lzma_state;
             } else {
                 state = (if (state as u32) < LIT_STATES as u32 {
-                    STATE_LIT_MATCH as c_int
+                    STATE_LIT_MATCH
                 } else {
-                    STATE_NONLIT_MATCH as c_int
+                    STATE_NONLIT_MATCH
                 }) as lzma_lzma_state;
             }
         }
@@ -956,9 +922,9 @@ unsafe extern "C" fn helper2(
             if len_test_2 >= 2 {
                 let mut state_2_0: lzma_lzma_state = state;
                 state_2_0 = (if (state_2_0 as u32) < LIT_STATES as u32 {
-                    STATE_LIT_LONGREP as c_int
+                    STATE_LIT_LONGREP
                 } else {
-                    STATE_NONLIT_REP as c_int
+                    STATE_NONLIT_REP
                 }) as lzma_lzma_state;
                 let mut pos_state_next_0: u32 =
                     position.wrapping_add(len_test_0) & (*coder).pos_mask;
@@ -1071,9 +1037,9 @@ unsafe extern "C" fn helper2(
                 if len_test_2_0 >= 2 {
                     let mut state_2_1: lzma_lzma_state = state;
                     state_2_1 = (if (state_2_1 as u32) < LIT_STATES as u32 {
-                        STATE_LIT_MATCH as c_int
+                        STATE_LIT_MATCH
                     } else {
-                        STATE_NONLIT_MATCH as c_int
+                        STATE_NONLIT_MATCH
                     }) as lzma_lzma_state;
                     let mut pos_state_next_1: u32 =
                         position.wrapping_add(len_test_1) & (*coder).pos_mask;
@@ -1192,9 +1158,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
             position.wrapping_add(cur),
             cur,
             (*mf).nice_len,
-            if mf_avail(mf).wrapping_add(1)
-                < ((((1) << 12) - 1) as u32).wrapping_sub(cur)
-            {
+            if mf_avail(mf).wrapping_add(1) < ((((1) << 12) - 1) as u32).wrapping_sub(cur) {
                 mf_avail(mf).wrapping_add(1)
             } else {
                 ((((1) << 12) - 1) as u32).wrapping_sub(cur)

@@ -218,9 +218,9 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                 ret = LZMA_OK;
                 (*index_hash).pos = 0;
                 (*index_hash).sequence = (if (*index_hash).remaining == 0 {
-                    SEQ_PADDING_INIT as c_int
+                    SEQ_PADDING_INIT
                 } else {
-                    SEQ_UNPADDED as c_int
+                    SEQ_UNPADDED
                 }) as C2RustUnnamed_1;
                 continue;
             }
@@ -259,9 +259,9 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                     }
                     (*index_hash).remaining = (*index_hash).remaining.wrapping_sub(1);
                     (*index_hash).sequence = (if (*index_hash).remaining == 0 {
-                        SEQ_PADDING_INIT as c_int
+                        SEQ_PADDING_INIT
                     } else {
-                        SEQ_UNPADDED as c_int
+                        SEQ_UNPADDED
                     }) as C2RustUnnamed_1;
                 }
                 continue;

@@ -25,16 +25,8 @@ pub unsafe extern "C" fn lzma_lzma_preset(
     (*options).dict_size = (1u32 << dict_pow2[level as usize] as c_int) as u32;
     if level <= 3 {
         (*options).mode = LZMA_MODE_FAST;
-        (*options).mf = (if level == 0 {
-            LZMA_MF_HC3 as c_int
-        } else {
-            LZMA_MF_HC4 as c_int
-        }) as lzma_match_finder;
-        (*options).nice_len = (if level <= 1 {
-            128
-        } else {
-            273
-        }) as u32;
+        (*options).mf = (if level == 0 { LZMA_MF_HC3 } else { LZMA_MF_HC4 }) as lzma_match_finder;
+        (*options).nice_len = (if level <= 1 { 128 } else { 273 }) as u32;
         static mut depths: [u8; 4] = [4, 8, 24, 48];
         (*options).depth = depths[level as usize] as u32;
     } else {

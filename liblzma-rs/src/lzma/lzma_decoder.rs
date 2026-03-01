@@ -523,9 +523,9 @@ unsafe extern "C" fn lzma_decode(
                                 ) >> RC_MOVE_BITS,
                             ) as probability as probability;
                     state = (if state < LIT_STATES as u32 {
-                        STATE_LIT_SHORTREP as c_int
+                        STATE_LIT_SHORTREP
                     } else {
-                        STATE_NONLIT_REP as c_int
+                        STATE_NONLIT_REP
                     }) as u32;
                     current_block = 5341942013764523046;
                     continue;
@@ -597,9 +597,9 @@ unsafe extern "C" fn lzma_decode(
                                 >> RC_MOVE_BITS,
                         ) as probability as probability;
                     state = (if state < LIT_STATES as u32 {
-                        STATE_LIT_MATCH as c_int
+                        STATE_LIT_MATCH
                     } else {
-                        STATE_NONLIT_MATCH as c_int
+                        STATE_NONLIT_MATCH
                     }) as u32;
                     rep3 = rep2;
                     rep2 = rep1;
@@ -1771,9 +1771,9 @@ unsafe extern "C" fn lzma_decode(
                                     >> RC_MOVE_BITS,
                             ) as probability as probability;
                         state = (if state < LIT_STATES as u32 {
-                            STATE_LIT_MATCH as c_int
+                            STATE_LIT_MATCH
                         } else {
-                            STATE_NONLIT_MATCH as c_int
+                            STATE_NONLIT_MATCH
                         }) as u32;
                         rep3 = rep2;
                         rep2 = rep1;
@@ -1916,8 +1916,7 @@ unsafe extern "C" fn lzma_decode(
                                     as probability;
                                 symbol = (symbol << 1).wrapping_add(1);
                             }
-                            symbol =
-                                symbol.wrapping_add((-((1_i32) << 3) + 2) as u32);
+                            symbol = symbol.wrapping_add((-((1_i32) << 3) + 2) as u32);
                             len = symbol;
                         } else {
                             rc.range = rc.range.wrapping_sub(rc_bound);
@@ -2073,10 +2072,8 @@ unsafe extern "C" fn lzma_decode(
                                         as probability;
                                     symbol = (symbol << 1).wrapping_add(1);
                                 }
-                                symbol = symbol.wrapping_add(
-                                    (-((1_i32) << 3) + 2 + ((1) << 3))
-                                        as u32,
-                                );
+                                symbol =
+                                    symbol.wrapping_add((-((1_i32) << 3) + 2 + ((1) << 3)) as u32);
                                 len = symbol;
                             } else {
                                 rc.range = rc.range.wrapping_sub(rc_bound);
@@ -2344,11 +2341,7 @@ unsafe extern "C" fn lzma_decode(
                                     symbol = (symbol << 1).wrapping_add(1);
                                 }
                                 symbol = symbol.wrapping_add(
-                                    (-((1_i32) << 8)
-                                        + 2
-                                        + ((1) << 3)
-                                        + ((1) << 3))
-                                        as u32,
+                                    (-((1_i32) << 8) + 2 + ((1) << 3) + ((1) << 3)) as u32,
                                 );
                                 len = symbol;
                             }
@@ -2794,9 +2787,9 @@ unsafe extern "C" fn lzma_decode(
                                             ) as probability
                                             as probability;
                                     state = (if state < LIT_STATES as u32 {
-                                        STATE_LIT_SHORTREP as c_int
+                                        STATE_LIT_SHORTREP
                                     } else {
-                                        STATE_NONLIT_REP as c_int
+                                        STATE_NONLIT_REP
                                     }) as u32;
                                     dict_put(&raw mut dict, dict_get(&raw mut dict, rep0));
                                     continue;
@@ -2886,9 +2879,9 @@ unsafe extern "C" fn lzma_decode(
                                 }
                             }
                             state = (if state < LIT_STATES as u32 {
-                                STATE_LIT_LONGREP as c_int
+                                STATE_LIT_LONGREP
                             } else {
-                                STATE_NONLIT_REP as c_int
+                                STATE_NONLIT_REP
                             }) as u32;
                             symbol = 1;
                             if rc.range < RC_TOP_VALUE as u32 {
@@ -3035,8 +3028,7 @@ unsafe extern "C" fn lzma_decode(
                                         as probability;
                                     symbol = (symbol << 1).wrapping_add(1);
                                 }
-                                symbol =
-                                    symbol.wrapping_add((-((1_i32) << 3) + 2) as u32);
+                                symbol = symbol.wrapping_add((-((1_i32) << 3) + 2) as u32);
                                 len = symbol;
                             } else {
                                 rc.range = rc.range.wrapping_sub(rc_bound);
@@ -3192,10 +3184,8 @@ unsafe extern "C" fn lzma_decode(
                                             as probability;
                                         symbol = (symbol << 1).wrapping_add(1);
                                     }
-                                    symbol = symbol.wrapping_add(
-                                        (-((1_i32) << 3) + 2 + ((1) << 3))
-                                            as u32,
-                                    );
+                                    symbol = symbol
+                                        .wrapping_add((-((1_i32) << 3) + 2 + ((1) << 3)) as u32);
                                     len = symbol;
                                 } else {
                                     rc.range = rc.range.wrapping_sub(rc_bound);
@@ -3487,11 +3477,7 @@ unsafe extern "C" fn lzma_decode(
                                         symbol = (symbol << 1).wrapping_add(1);
                                     }
                                     symbol = symbol.wrapping_add(
-                                        (-((1_i32) << 8)
-                                            + 2
-                                            + ((1) << 3)
-                                            + ((1) << 3))
-                                            as u32,
+                                        (-((1_i32) << 8) + 2 + ((1) << 3) + ((1) << 3)) as u32,
                                     );
                                     len = symbol;
                                 }
@@ -3513,9 +3499,9 @@ unsafe extern "C" fn lzma_decode(
             }
             15498320742470848828 => {
                 state = (if state < LIT_STATES as u32 {
-                    STATE_LIT_LONGREP as c_int
+                    STATE_LIT_LONGREP
                 } else {
-                    STATE_NONLIT_REP as c_int
+                    STATE_NONLIT_REP
                 }) as u32;
                 current_block = 12043352250568755004;
                 continue;

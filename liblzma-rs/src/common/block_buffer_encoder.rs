@@ -27,14 +27,8 @@ pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     & !3;
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3;
-pub const HEADERS_BOUND: c_int = 1
-    + 1
-    + 2 * LZMA_VLI_BYTES_MAX
-    + 3
-    + 4
-    + LZMA_CHECK_SIZE_MAX
-    + 3
-    & !(3);
+pub const HEADERS_BOUND: c_int =
+    1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 3 + 4 + LZMA_CHECK_SIZE_MAX + 3 & !(3);
 extern "C" fn lzma2_bound(uncompressed_size: u64) -> u64 {
     if uncompressed_size > COMPRESSED_SIZE_MAX as u64 {
         return 0;

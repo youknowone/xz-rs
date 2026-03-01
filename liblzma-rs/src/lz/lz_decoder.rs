@@ -48,10 +48,7 @@ pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
 unsafe extern "C" fn lz_decoder_reset(coder: *mut lzma_coder) {
     (*coder).dict.pos = LZ_DICT_INIT_POS as size_t;
     (*coder).dict.full = 0;
-    *(*coder)
-        .dict
-        .buf
-        .offset((LZ_DICT_INIT_POS - 1) as isize) = '\0' as i32 as u8;
+    *(*coder).dict.buf.offset((LZ_DICT_INIT_POS - 1) as isize) = '\0' as i32 as u8;
     (*coder).dict.has_wrapped = false;
     (*coder).dict.need_reset = false;
 }

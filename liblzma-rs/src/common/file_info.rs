@@ -508,9 +508,9 @@ unsafe extern "C" fn file_info_decode(
                     return LZMA_STREAM_END;
                 }
                 (*coder).sequence = (if (*coder).temp_size > 0 {
-                    SEQ_PADDING_DECODE as c_int
+                    SEQ_PADDING_DECODE
                 } else {
-                    SEQ_PADDING_SEEK as c_int
+                    SEQ_PADDING_SEEK
                 }) as C2RustUnnamed_0;
             }
             _ => {}
