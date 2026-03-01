@@ -66,38 +66,38 @@ unsafe extern "C" fn riscv_encode(
     i = 0;
     while i <= size {
         let mut inst: u32 = *buffer.offset(i as isize) as u32;
-        if inst == 0xef as u32 {
+        if inst == 0xef {
             let b1: u32 = *buffer.offset(i.wrapping_add(1) as isize) as u32;
-            if !(b1 & 0xd as u32 != 0) {
+            if !(b1 & 0xd != 0) {
                 let b2: u32 = *buffer.offset(i.wrapping_add(2) as isize) as u32;
                 let b3: u32 = *buffer.offset(i.wrapping_add(3) as isize) as u32;
                 let pc: u32 = now_pos.wrapping_add(i as u32);
-                let mut addr: u32 = (b1 & 0xf0 as u32) << 8
-                    | (b2 & 0xf as u32) << 16
-                    | (b2 & 0x10 as u32) << 7
-                    | (b2 & 0xe0 as u32) >> 4
-                    | (b3 & 0x7f as u32) << 4
-                    | (b3 & 0x80 as u32) << 13;
+                let mut addr: u32 = (b1 & 0xf0) << 8
+                    | (b2 & 0xf) << 16
+                    | (b2 & 0x10) << 7
+                    | (b2 & 0xe0) >> 4
+                    | (b3 & 0x7f) << 4
+                    | (b3 & 0x80) << 13;
                 addr = addr.wrapping_add(pc);
                 *buffer.offset(i.wrapping_add(1) as isize) =
-                    (b1 & 0xf as u32 | addr >> 13 & 0xf0 as u32) as u8;
+                    (b1 & 0xf | addr >> 13 & 0xf0) as u8;
                 *buffer.offset(i.wrapping_add(2) as isize) = (addr >> 9) as u8;
                 *buffer.offset(i.wrapping_add(3) as isize) = (addr >> 1) as u8;
                 i = i.wrapping_add((4 - 2) as size_t);
             }
-        } else if inst & 0x7f as u32 == 0x17 as u32 {
+        } else if inst & 0x7f == 0x17 {
             inst |= (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 8;
             inst |= (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 16;
             inst |= (*buffer.offset(i.wrapping_add(3) as isize) as u32) << 24;
-            if inst & 0xe80 as u32 != 0 {
+            if inst & 0xe80 != 0 {
                 let inst2: u32 = read32le(buffer.offset(i as isize).offset(4));
-                if (inst << 8 ^ inst2.wrapping_sub(3)) & 0xf8003 as u32 != 0 {
+                if (inst << 8 ^ inst2.wrapping_sub(3)) & 0xf8003 != 0 {
                     i = i.wrapping_add((6 - 2) as size_t);
                     current_block_22 = 12517898123489920830;
                 } else {
-                    let mut addr_0: u32 = inst & 0xfffff000 as u32;
+                    let mut addr_0: u32 = inst & 0xfffff000;
                     addr_0 = addr_0
-                        .wrapping_add((inst2 >> 20).wrapping_sub(inst2 >> 19 & 0x1000 as u32));
+                        .wrapping_add((inst2 >> 20).wrapping_sub(inst2 >> 19 & 0x1000));
                     addr_0 = addr_0.wrapping_add(now_pos.wrapping_add(i as u32));
                     inst = (0x17 | (2) << 7) as u32 | inst2 << 12;
                     write32le(buffer.offset(i as isize), inst);
@@ -106,13 +106,13 @@ unsafe extern "C" fn riscv_encode(
                 }
             } else {
                 let fake_rs1: u32 = inst >> 27;
-                if inst.wrapping_sub(0x3117 as u32) << 18 >= fake_rs1 & 0x1d as u32 {
+                if inst.wrapping_sub(0x3117) << 18 >= fake_rs1 & 0x1d {
                     i = i.wrapping_add((4 - 2) as size_t);
                     current_block_22 = 12517898123489920830;
                 } else {
                     let fake_addr: u32 = read32le(buffer.offset(i as isize).offset(4)) as u32;
                     let fake_inst2: u32 = inst >> 12 | fake_addr << 20;
-                    inst = 0x17 as u32 | fake_rs1 << 7 | fake_addr & 0xfffff000 as u32;
+                    inst = 0x17 | fake_rs1 << 7 | fake_addr & 0xfffff000;
                     write32le(buffer.offset(i as isize), inst);
                     write32le(buffer.offset(i as isize).offset(4), fake_inst2);
                     current_block_22 = 15125582407903384992;
@@ -173,35 +173,35 @@ unsafe extern "C" fn riscv_decode(
     i = 0;
     while i <= size {
         let mut inst: u32 = *buffer.offset(i as isize) as u32;
-        if inst == 0xef as u32 {
+        if inst == 0xef {
             let b1: u32 = *buffer.offset(i.wrapping_add(1) as isize) as u32;
-            if !(b1 & 0xd as u32 != 0) {
+            if !(b1 & 0xd != 0) {
                 let b2: u32 = *buffer.offset(i.wrapping_add(2) as isize) as u32;
                 let b3: u32 = *buffer.offset(i.wrapping_add(3) as isize) as u32;
                 let pc: u32 = now_pos.wrapping_add(i as u32);
-                let mut addr: u32 = (b1 & 0xf0 as u32) << 13 | b2 << 9 | b3 << 1;
+                let mut addr: u32 = (b1 & 0xf0) << 13 | b2 << 9 | b3 << 1;
                 addr = addr.wrapping_sub(pc);
                 *buffer.offset(i.wrapping_add(1) as isize) =
-                    (b1 & 0xf as u32 | addr >> 8 & 0xf0 as u32) as u8;
+                    (b1 & 0xf | addr >> 8 & 0xf0) as u8;
                 *buffer.offset(i.wrapping_add(2) as isize) =
-                    (addr >> 16 & 0xf as u32 | addr >> 7 & 0x10 as u32 | addr << 4 & 0xe0 as u32)
+                    (addr >> 16 & 0xf | addr >> 7 & 0x10 | addr << 4 & 0xe0)
                         as u8;
                 *buffer.offset(i.wrapping_add(3) as isize) =
-                    (addr >> 4 & 0x7f as u32 | addr >> 13 & 0x80 as u32) as u8;
+                    (addr >> 4 & 0x7f | addr >> 13 & 0x80) as u8;
                 i = i.wrapping_add((4 - 2) as size_t);
             }
-        } else if inst & 0x7f as u32 == 0x17 as u32 {
+        } else if inst & 0x7f == 0x17 {
             let mut inst2: u32 = 0;
             inst |= (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 8;
             inst |= (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 16;
             inst |= (*buffer.offset(i.wrapping_add(3) as isize) as u32) << 24;
-            if inst & 0xe80 as u32 != 0 {
+            if inst & 0xe80 != 0 {
                 inst2 = read32le(buffer.offset(i as isize).offset(4));
-                if (inst << 8 ^ inst2.wrapping_sub(3)) & 0xf8003 as u32 != 0 {
+                if (inst << 8 ^ inst2.wrapping_sub(3)) & 0xf8003 != 0 {
                     i = i.wrapping_add((6 - 2) as size_t);
                     current_block_23 = 12517898123489920830;
                 } else {
-                    let mut addr_0: u32 = inst & 0xfffff000 as u32;
+                    let mut addr_0: u32 = inst & 0xfffff000;
                     addr_0 = addr_0.wrapping_add(inst2 >> 20);
                     inst = (0x17 | (2) << 7) as u32 | inst2 << 12;
                     inst2 = addr_0;
@@ -209,16 +209,16 @@ unsafe extern "C" fn riscv_decode(
                 }
             } else {
                 let inst2_rs1: u32 = inst >> 27;
-                if inst.wrapping_sub(0x3117 as u32) << 18 >= inst2_rs1 & 0x1d as u32 {
+                if inst.wrapping_sub(0x3117) << 18 >= inst2_rs1 & 0x1d {
                     i = i.wrapping_add((4 - 2) as size_t);
                     current_block_23 = 12517898123489920830;
                 } else {
                     let mut addr_1: u32 = read32be(buffer.offset(i as isize).offset(4));
                     addr_1 = addr_1.wrapping_sub(now_pos.wrapping_add(i as u32));
                     inst2 = inst >> 12 | addr_1 << 20;
-                    inst = 0x17 as u32
+                    inst = 0x17
                         | inst2_rs1 << 7
-                        | addr_1.wrapping_add(0x800 as u32) & 0xfffff000 as u32;
+                        | addr_1.wrapping_add(0x800) & 0xfffff000;
                     current_block_23 = 6669252993407410313;
                 }
             }

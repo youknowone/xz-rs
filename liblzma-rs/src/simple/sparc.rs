@@ -28,7 +28,7 @@ unsafe extern "C" fn sparc_code(
             || *buffer.offset(i as isize) == 0x7f
                 && *buffer.offset(i.wrapping_add(1) as isize) & 0xc0 == 0xc0
         {
-            let mut src: u32 = (*buffer.offset(i.wrapping_add(0) as isize) as u32) << 24
+            let mut src: u32 = (*buffer.offset(i as isize) as u32) << 24
                 | (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(3) as isize) as u32;
@@ -40,10 +40,10 @@ unsafe extern "C" fn sparc_code(
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
             dest >>= 2;
-            dest = 0u32.wrapping_sub(dest >> 22 & 1) << 22 & 0x3fffffff as u32
-                | dest & 0x3fffff as u32
-                | 0x40000000 as u32;
-            *buffer.offset(i.wrapping_add(0) as isize) = (dest >> 24) as u8;
+            dest = 0u32.wrapping_sub(dest >> 22 & 1) << 22 & 0x3fffffff
+                | dest & 0x3fffff
+                | 0x40000000;
+            *buffer.offset(i as isize) = (dest >> 24) as u8;
             *buffer.offset(i.wrapping_add(1) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(2) as isize) = (dest >> 8) as u8;
             *buffer.offset(i.wrapping_add(3) as isize) = dest as u8;

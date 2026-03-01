@@ -26,7 +26,7 @@ unsafe extern "C" fn powerpc_code(
         if *buffer.offset(i as isize) >> 2 == 0x12
             && *buffer.offset(i.wrapping_add(3) as isize) & 3 == 1
         {
-            let src: u32 = (*buffer.offset(i.wrapping_add(0) as isize) as u32 & 3) << 24
+            let src: u32 = (*buffer.offset(i as isize) as u32 & 3) << 24
                 | (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 8
                 | *buffer.offset(i.wrapping_add(3) as isize) as u32 & !(3);
@@ -36,8 +36,8 @@ unsafe extern "C" fn powerpc_code(
             } else {
                 dest = src.wrapping_sub(now_pos.wrapping_add(i as u32));
             }
-            *buffer.offset(i.wrapping_add(0) as isize) =
-                (0x48 as u32 | dest >> 24 & 0x3 as u32) as u8;
+            *buffer.offset(i as isize) =
+                (0x48 | dest >> 24 & 0x3) as u8;
             *buffer.offset(i.wrapping_add(1) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(2) as isize) = (dest >> 8) as u8;
             let ref mut fresh0 = *buffer.offset(i.wrapping_add(3) as isize);

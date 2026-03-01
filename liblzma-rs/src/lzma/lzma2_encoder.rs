@@ -151,20 +151,20 @@ unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
     let fresh1 = pos;
     pos = pos.wrapping_add(1);
     (*coder).buf[fresh1 as usize] =
-        ((*coder).buf[fresh1 as usize] as size_t).wrapping_add(size >> 16) as u8 as u8;
+        ((*coder).buf[fresh1 as usize] as size_t).wrapping_add(size >> 16) as u8;
     let fresh2 = pos;
     pos = pos.wrapping_add(1);
-    (*coder).buf[fresh2 as usize] = (size >> 8 & 0xff as size_t) as u8;
+    (*coder).buf[fresh2 as usize] = (size >> 8 & 0xff) as u8;
     let fresh3 = pos;
     pos = pos.wrapping_add(1);
-    (*coder).buf[fresh3 as usize] = (size & 0xff as size_t) as u8;
+    (*coder).buf[fresh3 as usize] = (size & 0xff) as u8;
     size = (*coder).compressed_size.wrapping_sub(1);
     let fresh4 = pos;
     pos = pos.wrapping_add(1);
     (*coder).buf[fresh4 as usize] = (size >> 8) as u8;
     let fresh5 = pos;
     pos = pos.wrapping_add(1);
-    (*coder).buf[fresh5 as usize] = (size & 0xff as size_t) as u8;
+    (*coder).buf[fresh5 as usize] = (size & 0xff) as u8;
     if (*coder).need_properties {
         lzma_lzma_lclppb_encode(
             &raw mut (*coder).opt_cur,
@@ -186,7 +186,7 @@ unsafe extern "C" fn lzma2_header_uncompressed(coder: *mut lzma_lzma2_coder) {
     }
     (*coder).need_dictionary_reset = false;
     (*coder).buf[1] = ((*coder).uncompressed_size.wrapping_sub(1) >> 8) as u8;
-    (*coder).buf[2] = ((*coder).uncompressed_size.wrapping_sub(1) & 0xff as size_t) as u8;
+    (*coder).buf[2] = ((*coder).uncompressed_size.wrapping_sub(1) & 0xff) as u8;
     (*coder).buf_pos = 0;
 }
 unsafe extern "C" fn lzma2_encode(
@@ -429,7 +429,7 @@ unsafe extern "C" fn lzma2_encoder_init(
     let ret_: lzma_ret = lzma_lzma_encoder_create(
         &raw mut (*coder).lzma,
         allocator,
-        0x21 as lzma_vli,
+        0x21,
         &raw mut (*coder).opt_cur,
         lz_options,
     );

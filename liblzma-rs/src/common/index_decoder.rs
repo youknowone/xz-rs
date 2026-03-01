@@ -191,7 +191,7 @@ unsafe extern "C" fn index_decode(
             }
             let fresh2 = *in_pos;
             *in_pos = (*in_pos).wrapping_add(1);
-            if (*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff as u32
+            if (*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff
                 != *in_0.offset(fresh2 as isize) as u32
             {
                 return LZMA_DATA_ERROR;

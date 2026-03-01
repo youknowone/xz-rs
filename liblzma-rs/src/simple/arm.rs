@@ -26,7 +26,7 @@ unsafe extern "C" fn arm_code(
         if *buffer.offset(i.wrapping_add(3) as isize) == 0xeb {
             let mut src: u32 = (*buffer.offset(i.wrapping_add(2) as isize) as u32) << 16
                 | (*buffer.offset(i.wrapping_add(1) as isize) as u32) << 8
-                | *buffer.offset(i.wrapping_add(0) as isize) as u32;
+                | *buffer.offset(i as isize) as u32;
             src <<= 2;
             let mut dest: u32 = 0;
             if is_encoder {
@@ -40,7 +40,7 @@ unsafe extern "C" fn arm_code(
             dest >>= 2;
             *buffer.offset(i.wrapping_add(2) as isize) = (dest >> 16) as u8;
             *buffer.offset(i.wrapping_add(1) as isize) = (dest >> 8) as u8;
-            *buffer.offset(i.wrapping_add(0) as isize) = dest as u8;
+            *buffer.offset(i as isize) = dest as u8;
         }
         i = i.wrapping_add(4);
     }

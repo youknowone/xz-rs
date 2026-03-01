@@ -56,6 +56,6 @@ pub unsafe extern "C" fn lzma_filter_flags_decode(
         in_0.offset(*in_pos as isize),
         props_size as size_t,
     );
-    *in_pos = (*in_pos as lzma_vli).wrapping_add(props_size) as size_t as size_t;
+    *in_pos = (*in_pos as lzma_vli).wrapping_add(props_size) as size_t;
     return ret;
 }

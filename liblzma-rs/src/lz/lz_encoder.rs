@@ -53,7 +53,7 @@ pub struct lzma_coder {
 }
 #[inline]
 extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
-    return match_finder as u32 & 0xf as u32;
+    return match_finder as u32 & 0xf;
 }
 pub const HASH_2_SIZE: c_uint = 1u32 << 10;
 pub const HASH_3_SIZE: c_uint = 1u32 << 16;
@@ -256,7 +256,7 @@ unsafe extern "C" fn lz_encoder_prepare(
     let is_bt: bool = (*lz_options).match_finder & 0x10 != 0;
     let mut hs: u32 = 0;
     if hash_bytes == 2 {
-        hs = 0xffff as u32;
+        hs = 0xffff;
     } else {
         hs = (*lz_options).dict_size.wrapping_sub(1) as u32;
         hs |= hs >> 1;
@@ -264,7 +264,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         hs |= hs >> 4;
         hs |= hs >> 8;
         hs >>= 1;
-        hs |= 0xffff as u32;
+        hs |= 0xffff;
         if hs > (1) << 24 {
             if hash_bytes == 3 {
                 hs = (1u32 << 24).wrapping_sub(1) as u32;

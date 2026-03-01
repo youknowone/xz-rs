@@ -241,7 +241,7 @@ unsafe extern "C" fn get_literal_price(
     if !match_mode {
         price = rc_bittree_price(subcoder, 8, symbol);
     } else {
-        let mut offset: u32 = 0x100 as u32;
+        let mut offset: u32 = 0x100;
         symbol = (symbol as u32).wrapping_add(1u32 << 8) as u32;
         loop {
             match_byte <<= 1;

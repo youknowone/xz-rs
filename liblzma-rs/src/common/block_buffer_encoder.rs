@@ -134,7 +134,7 @@ unsafe extern "C" fn block_encode_uncompressed(
         *out.offset(fresh2 as isize) = (copy_size.wrapping_sub(1) >> 8) as u8;
         let fresh3 = *out_pos;
         *out_pos = (*out_pos).wrapping_add(1);
-        *out.offset(fresh3 as isize) = (copy_size.wrapping_sub(1) & 0xff as size_t) as u8;
+        *out.offset(fresh3 as isize) = (copy_size.wrapping_sub(1) & 0xff) as u8;
         memcpy(
             out.offset(*out_pos as isize) as *mut c_void,
             in_0.offset(in_pos as isize) as *const c_void,

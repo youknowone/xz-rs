@@ -44,18 +44,18 @@ unsafe extern "C" fn arm64_code(
     while i < size {
         let mut pc: u32 = (now_pos as size_t).wrapping_add(i) as u32;
         let mut instr: u32 = read32le(buffer.offset(i as isize));
-        if instr >> 26 == 0x25 as u32 {
+        if instr >> 26 == 0x25 {
             let src: u32 = instr;
-            instr = 0x94000000 as u32;
+            instr = 0x94000000;
             pc >>= 2;
             if !is_encoder {
                 pc = 0u32.wrapping_sub(pc);
             }
-            instr |= src.wrapping_add(pc) & 0x3ffffff as u32;
+            instr |= src.wrapping_add(pc) & 0x3ffffff;
             write32le(buffer.offset(i as isize), instr);
-        } else if instr & 0x9f000000 as u32 == 0x90000000 as u32 {
-            let src_0: u32 = instr >> 29 & 3 | instr >> 3 & 0x1ffffc as u32;
-            if !(src_0.wrapping_add(0x20000 as u32) & 0x1c0000 as u32 != 0) {
+        } else if instr & 0x9f000000 == 0x90000000 {
+            let src_0: u32 = instr >> 29 & 3 | instr >> 3 & 0x1ffffc;
+            if !(src_0.wrapping_add(0x20000) & 0x1c0000 != 0) {
                 instr = (instr & 0x9000001f) as u32;
                 pc >>= 12;
                 if !is_encoder {
@@ -63,9 +63,9 @@ unsafe extern "C" fn arm64_code(
                 }
                 let dest: u32 = src_0.wrapping_add(pc);
                 instr |= (dest & 3) << 29;
-                instr |= (dest & 0x3fffc as u32) << 3;
+                instr |= (dest & 0x3fffc) << 3;
                 instr =
-                    (instr | (0u32.wrapping_sub(dest & 0x20000 as u32) & 0xe00000 as u32)) as u32;
+                    (instr | (0u32.wrapping_sub(dest & 0x20000) & 0xe00000)) as u32;
                 write32le(buffer.offset(i as isize), instr);
             }
         }

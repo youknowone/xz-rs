@@ -34,7 +34,7 @@ unsafe extern "C" fn ia64_code(
         while slot < 3 {
             if !(mask >> slot & 1 == 0) {
                 let byte_pos: size_t = (bit_pos >> 3) as size_t;
-                let bit_res: u32 = bit_pos & 0x7 as u32;
+                let bit_res: u32 = bit_pos & 0x7;
                 let mut instruction: u64 = 0;
                 let mut j: size_t = 0;
                 while j < 6 {
@@ -57,8 +57,8 @@ unsafe extern "C" fn ia64_code(
                     }
                     dest >>= 4;
                     inst_norm &= !((0x8fffff as u64) << 13);
-                    inst_norm |= ((dest & 0xfffff as u32) as u64) << 13;
-                    inst_norm |= ((dest & 0x100000 as u32) as u64) << 36 - 20;
+                    inst_norm |= ((dest & 0xfffff) as u64) << 13;
+                    inst_norm |= ((dest & 0x100000) as u64) << 36 - 20;
                     instruction &= (1u32 << bit_res).wrapping_sub(1) as u64;
                     instruction |= inst_norm << bit_res;
                     let mut j_0: size_t = 0;

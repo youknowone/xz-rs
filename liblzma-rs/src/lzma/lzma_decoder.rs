@@ -1059,7 +1059,7 @@ unsafe extern "C" fn lzma_decode(
                             state.wrapping_sub(6)
                         };
                         len = (dict_get(&raw mut dict, rep0) as u32) << 1;
-                        offset = 0x100 as u32;
+                        offset = 0x100;
                         current_block = 18125716024132132232;
                         continue;
                     }
@@ -1440,7 +1440,7 @@ unsafe extern "C" fn lzma_decode(
                             *fresh27 = *fresh27 - (*probs.offset(symbol as isize) >> RC_MOVE_BITS);
                             symbol = (symbol << 1).wrapping_add(1);
                         }
-                        symbol = symbol.wrapping_add(0);
+
                     } else {
                         state = if state <= STATE_LIT_SHORTREP as u32 {
                             state.wrapping_sub(3)
@@ -1450,7 +1450,7 @@ unsafe extern "C" fn lzma_decode(
                         let mut t_match_byte: u32 = dict_get(&raw mut dict, rep0) as u32;
                         let mut t_match_bit: u32 = 0;
                         let mut t_subcoder_index: u32 = 0;
-                        let mut t_offset: u32 = 0x100 as u32;
+                        let mut t_offset: u32 = 0x100;
                         symbol = 1;
                         t_match_byte <<= 1;
                         t_match_bit = t_match_byte & t_offset;
@@ -3400,7 +3400,7 @@ unsafe extern "C" fn lzma_decoder_reset(coder_ptr: *mut c_void, opt: *const c_vo
     );
     (*coder).literal_context_bits = (*options).lc;
     (*coder).literal_mask =
-        ((0x100 as u32) << (*options).lp).wrapping_sub(0x100 >> (*options).lc) as u32;
+        (0x100u32 << (*options).lp).wrapping_sub(0x100 >> (*options).lc);
     (*coder).state = STATE_LIT_LIT;
     (*coder).rep0 = 0;
     (*coder).rep1 = 0;
@@ -3605,7 +3605,7 @@ pub unsafe extern "C" fn lzma_lzma_lclppb_decode(
         return true;
     }
     (*options).pb = (byte / (9 * 5)) as u32;
-    byte = (byte as u32).wrapping_sub((*options).pb.wrapping_mul(9u32).wrapping_mul(5)) as u8 as u8;
+    byte = (byte as u32).wrapping_sub((*options).pb.wrapping_mul(9u32).wrapping_mul(5)) as u8;
     (*options).lp = (byte / 9) as u32;
     (*options).lc = (byte as u32).wrapping_sub((*options).lp.wrapping_mul(9));
     return (*options).lc.wrapping_add((*options).lp) > LZMA_LCLP_MAX as u32;

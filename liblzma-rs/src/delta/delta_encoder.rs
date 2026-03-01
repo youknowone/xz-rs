@@ -24,7 +24,7 @@ unsafe extern "C" fn copy_and_encode(
     let mut i: size_t = 0;
     while i < size {
         let tmp: u8 = (*coder).history
-            [(distance.wrapping_add((*coder).pos as size_t) & 0xff as size_t) as usize];
+            [(distance.wrapping_add((*coder).pos as size_t) & 0xff) as usize];
         let fresh2 = (*coder).pos;
         (*coder).pos = (*coder).pos.wrapping_sub(1);
         (*coder).history[(fresh2 & 0xff) as usize] = *in_0.offset(i as isize);
@@ -37,7 +37,7 @@ unsafe extern "C" fn encode_in_place(coder: *mut lzma_delta_coder, buffer: *mut 
     let mut i: size_t = 0;
     while i < size {
         let tmp: u8 = (*coder).history
-            [(distance.wrapping_add((*coder).pos as size_t) & 0xff as size_t) as usize];
+            [(distance.wrapping_add((*coder).pos as size_t) & 0xff) as usize];
         let fresh0 = (*coder).pos;
         (*coder).pos = (*coder).pos.wrapping_sub(1);
         (*coder).history[(fresh0 & 0xff) as usize] = *buffer.offset(i as isize);

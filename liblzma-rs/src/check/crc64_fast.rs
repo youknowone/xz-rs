@@ -1052,10 +1052,10 @@ unsafe extern "C" fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mu
         while buf < limit {
             let tmp: u32 = crc as u32 ^ aligned_read32ne(buf) as u32;
             buf = buf.offset(4);
-            crc = lzma_crc64_table[3][(tmp & 0xff as u32) as usize]
-                ^ lzma_crc64_table[2][(tmp >> 8 & 0xff as u32) as usize]
+            crc = lzma_crc64_table[3][(tmp & 0xff) as usize]
+                ^ lzma_crc64_table[2][(tmp >> 8 & 0xff) as usize]
                 ^ crc >> 32
-                ^ lzma_crc64_table[1][(tmp >> 16 & 0xff as u32) as usize]
+                ^ lzma_crc64_table[1][(tmp >> 16 & 0xff) as usize]
                 ^ lzma_crc64_table[0][(tmp >> 24) as usize];
         }
     }

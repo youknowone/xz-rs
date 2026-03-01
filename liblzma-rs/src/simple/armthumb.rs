@@ -30,7 +30,7 @@ unsafe extern "C" fn armthumb_code(
             && *buffer.offset(i.wrapping_add(3) as isize) & 0xf8 == 0xf8
         {
             let mut src: u32 = (*buffer.offset(i.wrapping_add(1) as isize) as u32 & 7) << 19
-                | (*buffer.offset(i.wrapping_add(0) as isize) as u32) << 11
+                | (*buffer.offset(i as isize) as u32) << 11
                 | (*buffer.offset(i.wrapping_add(3) as isize) as u32 & 7) << 8
                 | *buffer.offset(i.wrapping_add(2) as isize) as u32;
             src <<= 1;
@@ -45,10 +45,10 @@ unsafe extern "C" fn armthumb_code(
             }
             dest >>= 1;
             *buffer.offset(i.wrapping_add(1) as isize) =
-                (0xf0 as u32 | dest >> 19 & 0x7 as u32) as u8;
-            *buffer.offset(i.wrapping_add(0) as isize) = (dest >> 11) as u8;
+                (0xf0 | dest >> 19 & 0x7) as u8;
+            *buffer.offset(i as isize) = (dest >> 11) as u8;
             *buffer.offset(i.wrapping_add(3) as isize) =
-                (0xf8 as u32 | dest >> 8 & 0x7 as u32) as u8;
+                (0xf8 | dest >> 8 & 0x7) as u8;
             *buffer.offset(i.wrapping_add(2) as isize) = dest as u8;
             i = i.wrapping_add(2);
         }

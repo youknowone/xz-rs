@@ -20,7 +20,7 @@ pub unsafe extern "C" fn lzma_vli_encode(
         return LZMA_PROG_ERROR;
     }
     vli >>= (*vli_pos).wrapping_mul(7);
-    while vli >= 0x80 as lzma_vli {
+    while vli >= 0x80 {
         *vli_pos = (*vli_pos).wrapping_add(1);
         *out.offset(*out_pos as isize) = vli as u8 | 0x80;
         vli >>= 7;

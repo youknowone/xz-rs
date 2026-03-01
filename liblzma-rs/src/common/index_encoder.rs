@@ -190,7 +190,7 @@ unsafe extern "C" fn index_encode(
                         return LZMA_OK;
                     }
                     *out.offset(*out_pos as isize) =
-                        ((*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff as u32) as u8;
+                        ((*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff) as u8;
                     *out_pos = (*out_pos).wrapping_add(1);
                     (*coder).pos = (*coder).pos.wrapping_add(1);
                     if !((*coder).pos < 4) {

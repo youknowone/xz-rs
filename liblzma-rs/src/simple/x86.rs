@@ -51,7 +51,7 @@ unsafe extern "C" fn x86_code(
             } else {
                 let mut i: u32 = 0;
                 while i < offset {
-                    prev_mask &= 0x77 as u32;
+                    prev_mask &= 0x77;
                     prev_mask <<= 1;
                     i = i.wrapping_add(1);
                 }
@@ -93,7 +93,7 @@ unsafe extern "C" fn x86_code(
                 buffer_pos = buffer_pos.wrapping_add(1);
                 prev_mask |= 1;
                 if b == 0 || b == 0xff {
-                    prev_mask |= 0x10 as u32;
+                    prev_mask |= 0x10;
                 }
             }
         }

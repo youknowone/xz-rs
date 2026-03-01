@@ -144,7 +144,7 @@ pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 #[inline]
 extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
-    return match_finder as u32 & 0xf as u32;
+    return match_finder as u32 & 0xf;
 }
 #[inline]
 unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
@@ -293,7 +293,7 @@ unsafe extern "C" fn rc_shift_low(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> bool {
-    if ((*rc).low as u32) < 0xff000000 as u32 || ((*rc).low >> 32) as u32 != 0 {
+    if ((*rc).low as u32) < 0xff000000 || ((*rc).low >> 32) as u32 != 0 {
         loop {
             if *out_pos == out_size {
                 return true;
@@ -321,7 +321,7 @@ unsafe extern "C" fn rc_shift_low_dummy(
     out_pos: *mut u64,
     out_size: u64,
 ) -> bool {
-    if (*low as u32) < 0xff000000 as u32 || (*low >> 32) as u32 != 0 {
+    if (*low as u32) < 0xff000000 || (*low >> 32) as u32 != 0 {
         loop {
             if *out_pos == out_size {
                 return true;
@@ -524,7 +524,7 @@ unsafe extern "C" fn literal_matched(
     mut match_byte: u32,
     mut symbol: u32,
 ) {
-    let mut offset: u32 = 0x100 as u32;
+    let mut offset: u32 = 0x100;
     symbol = (symbol as u32).wrapping_add(1u32 << 8) as u32;
     loop {
         match_byte <<= 1;
@@ -1078,7 +1078,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
     (*coder).pos_mask = (1u32 << (*options).pb).wrapping_sub(1) as u32;
     (*coder).literal_context_bits = (*options).lc;
     (*coder).literal_mask =
-        ((0x100 as u32) << (*options).lp).wrapping_sub(0x100 >> (*options).lc) as u32;
+        (0x100u32 << (*options).lp).wrapping_sub(0x100 >> (*options).lc);
     rc_reset(&raw mut (*coder).rc);
     (*coder).state = STATE_LIT_LIT;
     let mut i: size_t = 0;

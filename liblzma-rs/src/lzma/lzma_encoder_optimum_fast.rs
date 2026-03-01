@@ -194,7 +194,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
             len_main = (*coder).matches[matches_count.wrapping_sub(1) as usize].len;
             back_main = (*coder).matches[matches_count.wrapping_sub(1) as usize].dist;
         }
-        if len_main == 2 && back_main >= 0x80 as u32 {
+        if len_main == 2 && back_main >= 0x80 {
             len_main = 1;
         }
     }
