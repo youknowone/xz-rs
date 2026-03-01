@@ -282,9 +282,9 @@ pub unsafe extern "C" fn lzma_simple_coder_init(
             (*coder).simple = core::ptr::null_mut();
         }
     }
-    if !(*filters.offset(0)).options.is_null() {
+    if !(*filters).options.is_null() {
         let simple: *const lzma_options_bcj =
-            (*filters.offset(0)).options as *const lzma_options_bcj;
+            (*filters).options as *const lzma_options_bcj;
         (*coder).now_pos = (*simple).start_offset;
         if (*coder).now_pos & alignment.wrapping_sub(1) != 0 {
             return LZMA_OPTIONS_ERROR;

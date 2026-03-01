@@ -100,17 +100,17 @@ pub unsafe extern "C" fn lzma_next_filter_init(
     allocator: *const lzma_allocator,
     filters: *const lzma_filter_info,
 ) -> lzma_ret {
-    if core::mem::transmute::<lzma_init_function, uintptr_t>((*filters.offset(0)).init)
+    if core::mem::transmute::<lzma_init_function, uintptr_t>((*filters).init)
         != (*next).init
     {
         lzma_next_end(next, allocator);
     }
-    (*next).init = core::mem::transmute::<lzma_init_function, uintptr_t>((*filters.offset(0)).init);
-    (*next).id = (*filters.offset(0)).id;
-    if (*filters.offset(0)).init.is_none() {
+    (*next).init = core::mem::transmute::<lzma_init_function, uintptr_t>((*filters).init);
+    (*next).id = (*filters).id;
+    if (*filters).init.is_none() {
         LZMA_OK
     } else {
-        (*filters.offset(0)).init.unwrap()(next, allocator, filters)
+        (*filters).init.unwrap()(next, allocator, filters)
     }
 }
 #[no_mangle]
@@ -119,10 +119,10 @@ pub unsafe extern "C" fn lzma_next_filter_update(
     allocator: *const lzma_allocator,
     reversed_filters: *const lzma_filter,
 ) -> lzma_ret {
-    if (*reversed_filters.offset(0)).id != (*next).id {
+    if (*reversed_filters).id != (*next).id {
         return LZMA_PROG_ERROR;
     }
-    if (*reversed_filters.offset(0)).id == LZMA_VLI_UNKNOWN {
+    if (*reversed_filters).id == LZMA_VLI_UNKNOWN {
         return LZMA_OK;
     }
     (*next).update.unwrap()(

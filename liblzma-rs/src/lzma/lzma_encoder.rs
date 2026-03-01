@@ -134,7 +134,7 @@ pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 #[inline]
 extern "C" fn write32le(buf: *mut u8, num: u32) {
     unsafe {
-        *buf.offset(0) = num as u8;
+        *buf = num as u8;
         *buf.offset(1) = (num >> 8) as u8;
         *buf.offset(2) = (num >> 16) as u8;
         *buf.offset(3) = (num >> 24) as u8;
@@ -869,16 +869,16 @@ unsafe extern "C" fn encode_init(coder: *mut lzma_lzma1_encoder, mf: *mut lzma_m
         (*mf).read_ahead = 0;
         rc_bit(
             &raw mut (*coder).rc,
-            (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16]).offset(0)
+            (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16])
                 as *mut probability)
-                .offset(0) as *mut probability,
+                 as *mut probability,
             0,
         );
         rc_bittree(
             &raw mut (*coder).rc,
-            (&raw mut (*coder).literal as *mut probability).offset(0),
+            &raw mut (*coder).literal as *mut probability ,
             8,
-            *(*mf).buffer.offset(0) as u32,
+            *(*mf).buffer as u32,
         );
         (*coder).uncomp_size = (*coder).uncomp_size.wrapping_add(1);
     }

@@ -501,7 +501,7 @@ unsafe extern "C" fn helper1(
     let mut i: u32 = 0;
     while i < REPS {
         let buf_back: *const u8 = buf.offset(-((*coder).reps[i as usize] as isize)).offset(-1);
-        if *buf.offset(0) != *buf_back.offset(0) || *buf.offset(1) != *buf_back.offset(1) {
+        if *buf != *buf_back || *buf.offset(1) != *buf_back.offset(1) {
             rep_lens[i as usize] = 0;
         } else {
             rep_lens[i as usize] = lzma_memcmplen(buf, buf_back, 2, buf_avail);
@@ -735,7 +735,7 @@ unsafe extern "C" fn helper2(
             }
         }
         if pos < REPS {
-            *reps.offset(0) = (*coder).opts[pos_prev as usize].backs[pos as usize];
+            *reps = (*coder).opts[pos_prev as usize].backs[pos as usize];
             let mut i: u32 = 0;
             i = 1;
             while i <= pos {
@@ -748,7 +748,7 @@ unsafe extern "C" fn helper2(
                 i += 1;
             }
         } else {
-            *reps.offset(0) = pos.wrapping_sub(REPS);
+            *reps = pos.wrapping_sub(REPS);
             let mut i_0: u32 = 1;
             while i_0 < REPS {
                 *reps.offset(i_0 as isize) =
@@ -765,7 +765,7 @@ unsafe extern "C" fn helper2(
     }
     let cur_price: u32 = (*coder).opts[cur as usize].price;
     let current_byte: u8 = *buf;
-    let match_byte: u8 = *buf.offset(-(*reps.offset(0) as isize)).offset(-1);
+    let match_byte: u8 = *buf.offset(-(*reps as isize)).offset(-1);
     let pos_state: u32 = position & (*coder).pos_mask;
     let cur_and_1_price: u32 = cur_price
         .wrapping_add(rc_bit_0_price((*coder).is_match[state as usize][pos_state as usize]) as u32)
@@ -816,7 +816,7 @@ unsafe extern "C" fn helper2(
         nice_len
     };
     if !next_is_literal && match_byte != current_byte {
-        let buf_back: *const u8 = buf.offset(-(*reps.offset(0) as isize)).offset(-1);
+        let buf_back: *const u8 = buf.offset(-(*reps as isize)).offset(-1);
         let limit: u32 = if buf_avail_full < nice_len.wrapping_add(1) {
             buf_avail_full
         } else {
@@ -865,7 +865,7 @@ unsafe extern "C" fn helper2(
         let buf_back_0: *const u8 = buf
             .offset(-(*reps.offset(rep_index as isize) as isize))
             .offset(-1);
-        if *buf.offset(0) == *buf_back_0.offset(0) && *buf.offset(1) == *buf_back_0.offset(1) {
+        if *buf == *buf_back_0 && *buf.offset(1) == *buf_back_0.offset(1) {
             let mut len_test_0: u32 = lzma_memcmplen(buf, buf_back_0, 2, buf_avail);
             while len_end < cur.wrapping_add(len_test_0) {
                 len_end += 1;

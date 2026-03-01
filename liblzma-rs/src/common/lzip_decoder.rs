@@ -54,7 +54,7 @@ pub const SEQ_ID_STRING: C2RustUnnamed_0 = 0;
 #[inline]
 extern "C" fn read32le(buf: *const u8) -> u32 {
     return unsafe {
-        let mut num: u32 = *buf.offset(0) as u32;
+        let mut num: u32 = *buf as u32;
         num |= (*buf.offset(1) as u32) << 8;
         num |= (*buf.offset(2) as u32) << 16;
         num |= (*buf.offset(3) as u32) << 24;
@@ -64,7 +64,7 @@ extern "C" fn read32le(buf: *const u8) -> u32 {
 #[inline]
 extern "C" fn read64le(buf: *const u8) -> u64 {
     return unsafe {
-        let mut num: u64 = *buf.offset(0) as u64;
+        let mut num: u64 = *buf as u64;
         num |= (*buf.offset(1) as u64) << 8;
         num |= (*buf.offset(2) as u64) << 16;
         num |= (*buf.offset(3) as u64) << 24;
@@ -276,7 +276,7 @@ unsafe extern "C" fn lzip_decode(
         (*coder).member_size = (*coder).member_size.wrapping_add(footer_size as u64);
         if !(*coder).ignore_check
             && (*coder).crc32
-                != read32le((&raw mut (*coder).buffer as *mut u8).offset(0) as *mut u8)
+                != read32le((&raw mut (*coder).buffer as *mut u8) as *mut u8)
         {
             return LZMA_DATA_ERROR;
         }

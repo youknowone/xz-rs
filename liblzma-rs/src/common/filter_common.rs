@@ -213,7 +213,7 @@ pub unsafe extern "C" fn lzma_validate_chain(
     filters: *const lzma_filter,
     count: *mut size_t,
 ) -> lzma_ret {
-    if filters.is_null() || (*filters.offset(0)).id == LZMA_VLI_UNKNOWN {
+    if filters.is_null() || (*filters).id == LZMA_VLI_UNKNOWN {
         return LZMA_PROG_ERROR;
     }
     let mut changes_size_count: size_t = 0;

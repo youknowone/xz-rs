@@ -22,7 +22,7 @@ extern "C" {
 #[inline]
 extern "C" fn write32le(buf: *mut u8, num: u32) {
     unsafe {
-        *buf.offset(0) = num as u8;
+        *buf = num as u8;
         *buf.offset(1) = (num >> 8) as u8;
         *buf.offset(2) = (num >> 16) as u8;
         *buf.offset(3) = (num >> 24) as u8;
@@ -48,7 +48,7 @@ pub unsafe extern "C" fn lzma_block_header_size(block: *mut lzma_block) -> lzma_
         }
         size = size.wrapping_add(add_0);
     }
-    if (*block).filters.is_null() || (*(*block).filters.offset(0)).id == LZMA_VLI_UNKNOWN {
+    if (*block).filters.is_null() || (*(*block).filters).id == LZMA_VLI_UNKNOWN {
         return LZMA_PROG_ERROR;
     }
     let mut i: size_t = 0;
@@ -80,7 +80,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
         return LZMA_PROG_ERROR;
     }
     let out_size: size_t = (*block).header_size.wrapping_sub(4) as size_t;
-    *out.offset(0) = out_size.wrapping_div(4) as u8;
+    *out = out_size.wrapping_div(4) as u8;
     *out.offset(1) = 0;
     let mut out_pos: size_t = 2;
     if (*block).compressed_size != LZMA_VLI_UNKNOWN {
@@ -109,7 +109,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
         }
         *out.offset(1) |= 0x80;
     }
-    if (*block).filters.is_null() || (*(*block).filters.offset(0)).id == LZMA_VLI_UNKNOWN {
+    if (*block).filters.is_null() || (*(*block).filters).id == LZMA_VLI_UNKNOWN {
         return LZMA_PROG_ERROR;
     }
     let mut filter_count: size_t = 0;

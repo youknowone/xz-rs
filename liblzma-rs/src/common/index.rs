@@ -949,7 +949,7 @@ pub unsafe extern "C" fn lzma_index_iter_next(
         }
         if record == 0 {
             if (*group).node.uncompressed_base
-                != (*(&raw const (*group).records as *const index_record).offset(0))
+                != (*(&raw const (*group).records as *const index_record))
                     .uncompressed_sum
             {
                 break;

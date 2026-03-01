@@ -15,7 +15,7 @@ extern "C" {
 #[inline]
 extern "C" fn read32be(buf: *const u8) -> u32 {
     return unsafe {
-        let mut num: u32 = (*buf.offset(0) as u32) << 24;
+        let mut num: u32 = (*buf as u32) << 24;
         num |= (*buf.offset(1) as u32) << 16;
         num |= (*buf.offset(2) as u32) << 8;
         num |= *buf.offset(3) as u32;
@@ -25,7 +25,7 @@ extern "C" fn read32be(buf: *const u8) -> u32 {
 #[inline]
 extern "C" fn read32le(buf: *const u8) -> u32 {
     return unsafe {
-        let mut num: u32 = *buf.offset(0) as u32;
+        let mut num: u32 = *buf as u32;
         num |= (*buf.offset(1) as u32) << 8;
         num |= (*buf.offset(2) as u32) << 16;
         num |= (*buf.offset(3) as u32) << 24;
@@ -35,7 +35,7 @@ extern "C" fn read32le(buf: *const u8) -> u32 {
 #[inline]
 extern "C" fn write32be(buf: *mut u8, num: u32) {
     unsafe {
-        *buf.offset(0) = (num >> 24) as u8;
+        *buf = (num >> 24) as u8;
         *buf.offset(1) = (num >> 16) as u8;
         *buf.offset(2) = (num >> 8) as u8;
         *buf.offset(3) = num as u8;
@@ -44,7 +44,7 @@ extern "C" fn write32be(buf: *mut u8, num: u32) {
 #[inline]
 extern "C" fn write32le(buf: *mut u8, num: u32) {
     unsafe {
-        *buf.offset(0) = num as u8;
+        *buf = num as u8;
         *buf.offset(1) = (num >> 8) as u8;
         *buf.offset(2) = (num >> 16) as u8;
         *buf.offset(3) = (num >> 24) as u8;

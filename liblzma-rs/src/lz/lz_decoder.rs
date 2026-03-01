@@ -248,8 +248,8 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
     let ret_: lzma_ret = lz_init.unwrap()(
         &raw mut (*coder).lz,
         allocator,
-        (*filters.offset(0)).id,
-        (*filters.offset(0)).options,
+        (*filters).id,
+        (*filters).options,
         &raw mut lz_options,
     );
     if ret_ != LZMA_OK {

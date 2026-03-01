@@ -8,7 +8,7 @@ extern "C" {
 #[inline]
 extern "C" fn read32le(buf: *const u8) -> u32 {
     return unsafe {
-        let mut num: u32 = *buf.offset(0) as u32;
+        let mut num: u32 = *buf as u32;
         num |= (*buf.offset(1) as u32) << 8;
         num |= (*buf.offset(2) as u32) << 16;
         num |= (*buf.offset(3) as u32) << 24;
@@ -18,7 +18,7 @@ extern "C" fn read32le(buf: *const u8) -> u32 {
 pub const LZMA_STREAM_FLAGS_SIZE: u32 = 2;
 extern "C" fn stream_flags_decode(options: *mut lzma_stream_flags, in_0: *const u8) -> bool {
     return unsafe {
-        if *in_0.offset(0) != 0 || *in_0.offset(1) & 0xf0 != 0 {
+        if *in_0 != 0 || *in_0.offset(1) & 0xf0 != 0 {
             return true;
         }
         (*options).version = 0;

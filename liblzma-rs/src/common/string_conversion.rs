@@ -811,8 +811,8 @@ unsafe extern "C" fn str_to_filters(
             lzma_free(opts as *mut c_void, allocator);
             return c"Unsupported preset".as_ptr();
         }
-        (*filters.offset(0)).id = LZMA_FILTER_LZMA2;
-        (*filters.offset(0)).options = opts as *mut c_void;
+        (*filters).id = LZMA_FILTER_LZMA2;
+        (*filters).options = opts as *mut c_void;
         (*filters.offset(1)).id = LZMA_VLI_UNKNOWN;
         (*filters.offset(1)).options = core::ptr::null_mut();
         return core::ptr::null::<c_char>();
@@ -829,13 +829,13 @@ unsafe extern "C" fn str_to_filters(
             current_block = 6100283484465977373;
             break;
         } else {
-            if *(*str).offset(0) as u8 == b'-' && *(*str).offset(1) as u8 == b'-' {
+            if *(*str) as u8 == b'-' && *(*str).offset(1) as u8 == b'-' {
                 *str = (*str).offset(2);
             }
             let mut filter_end: *const c_char = *str;
-            while *filter_end.offset(0) != 0 {
-                if *filter_end.offset(0) as u8 == b'-' && *filter_end.offset(1) as u8 == b'-'
-                    || *filter_end.offset(0) as u8 == b' '
+            while *filter_end != 0 {
+                if *filter_end as u8 == b'-' && *filter_end.offset(1) as u8 == b'-'
+                    || *filter_end as u8 == b' '
                 {
                     break;
                 }
@@ -1026,7 +1026,7 @@ pub unsafe extern "C" fn lzma_str_from_filters(
     if flags & !supported_flags != 0 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*filters.offset(0)).id == LZMA_VLI_UNKNOWN {
+    if (*filters).id == LZMA_VLI_UNKNOWN {
         return LZMA_OPTIONS_ERROR;
     }
     let mut dest: lzma_str = lzma_str {

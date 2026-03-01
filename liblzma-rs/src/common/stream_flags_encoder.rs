@@ -8,7 +8,7 @@ extern "C" {
 #[inline]
 extern "C" fn write32le(buf: *mut u8, num: u32) {
     unsafe {
-        *buf.offset(0) = num as u8;
+        *buf = num as u8;
         *buf.offset(1) = (num >> 8) as u8;
         *buf.offset(2) = (num >> 16) as u8;
         *buf.offset(3) = (num >> 24) as u8;
@@ -28,7 +28,7 @@ extern "C" fn stream_flags_encode(options: *const lzma_stream_flags, out: *mut u
         if (*options).check > LZMA_CHECK_ID_MAX {
             return true;
         }
-        *out.offset(0) = 0;
+        *out = 0;
         *out.offset(1) = (*options).check as u8;
         false
     };

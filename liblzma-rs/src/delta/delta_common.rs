@@ -44,10 +44,10 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
             set_out_limit: None,
         };
     }
-    if lzma_delta_coder_memusage((*filters.offset(0)).options) == UINT64_MAX {
+    if lzma_delta_coder_memusage((*filters).options) == UINT64_MAX {
         return LZMA_OPTIONS_ERROR;
     }
-    let opt: *const lzma_options_delta = (*filters.offset(0)).options as *const lzma_options_delta;
+    let opt: *const lzma_options_delta = (*filters).options as *const lzma_options_delta;
     (*coder).distance = (*opt).dist as size_t;
     (*coder).pos = 0;
     memset(&raw mut (*coder).history as *mut u8 as *mut c_void, 0, 256);

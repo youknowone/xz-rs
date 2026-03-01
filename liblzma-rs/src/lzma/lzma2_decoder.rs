@@ -315,10 +315,10 @@ pub unsafe extern "C" fn lzma_lzma2_props_decode(
     if props_size != 1 {
         return LZMA_OPTIONS_ERROR;
     }
-    if *props.offset(0) & 0xc0 != 0 {
+    if *props & 0xc0 != 0 {
         return LZMA_OPTIONS_ERROR;
     }
-    if *props.offset(0) > 40 {
+    if *props > 40 {
         return LZMA_OPTIONS_ERROR;
     }
     let opt: *mut lzma_options_lzma =
@@ -326,11 +326,11 @@ pub unsafe extern "C" fn lzma_lzma2_props_decode(
     if opt.is_null() {
         return LZMA_MEM_ERROR;
     }
-    if *props.offset(0) == 40 {
+    if *props == 40 {
         (*opt).dict_size = UINT32_MAX;
     } else {
-        (*opt).dict_size = 2u32 | (u32::from(*props.offset(0)) & 1);
-        (*opt).dict_size <<= u32::from(*props.offset(0)).wrapping_div(2).wrapping_add(11);
+        (*opt).dict_size = 2u32 | (u32::from(*props) & 1);
+        (*opt).dict_size <<= u32::from(*props).wrapping_div(2).wrapping_add(11);
     }
     (*opt).preset_dict = core::ptr::null::<u8>();
     (*opt).preset_dict_size = 0;

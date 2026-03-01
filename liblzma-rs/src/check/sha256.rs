@@ -22,10 +22,10 @@ unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
         state as *const c_void,
         core::mem::size_of::<[u32; 8]>(),
     );
-    W[0] = (*data.offset(0) & 0xff) << 24
-        | (*data.offset(0) & 0xff00) << 8
-        | (*data.offset(0) & 0xff0000) >> 8
-        | (*data.offset(0) & 0xff000000) >> 24;
+    W[0] = (*data & 0xff) << 24
+        | (*data & 0xff00) << 8
+        | (*data & 0xff0000) >> 8
+        | (*data & 0xff000000) >> 24;
     T[7] = T[7].wrapping_add(
         rotr_32(T[4] ^ rotr_32(T[4] ^ rotr_32(T[4], 14), 5), 6)
             .wrapping_add(T[6] ^ T[4] & (T[5] ^ T[6]))

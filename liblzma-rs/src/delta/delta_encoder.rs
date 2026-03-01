@@ -157,6 +157,6 @@ pub unsafe extern "C" fn lzma_delta_props_encode(options: *const c_void, out: *m
         return LZMA_PROG_ERROR;
     }
     let opt: *const lzma_options_delta = options as *const lzma_options_delta;
-    *out.offset(0) = (*opt).dist.wrapping_sub(LZMA_DELTA_DIST_MIN) as u8;
+    *out = (*opt).dist.wrapping_sub(LZMA_DELTA_DIST_MIN) as u8;
     LZMA_OK
 }
