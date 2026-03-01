@@ -50,7 +50,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
     let opt: *const lzma_options_delta = (*filters).options as *const lzma_options_delta;
     (*coder).distance = (*opt).dist as size_t;
     (*coder).pos = 0;
-    memset(&raw mut (*coder).history as *mut u8 as *mut c_void, 0, 256);
+    memset(&raw mut (*coder).history as *mut c_void, 0, 256);
     lzma_next_filter_init(&raw mut (*coder).next, allocator, filters.offset(1))
 }
 #[no_mangle]

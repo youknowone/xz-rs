@@ -43,7 +43,7 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
     }
     memcpy(
         out as *mut c_void,
-        &raw const lzma_header_magic as *const u8 as *const c_void,
+        &raw const lzma_header_magic as *const c_void,
         core::mem::size_of::<[u8; 6]>(),
     );
     if stream_flags_encode(
@@ -87,7 +87,7 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     memcpy(
         out.offset((2 * 4) as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *mut c_void,
-        &raw const lzma_footer_magic as *const u8 as *const c_void,
+        &raw const lzma_footer_magic as *const c_void,
         core::mem::size_of::<[u8; 2]>(),
     );
     LZMA_OK

@@ -539,7 +539,7 @@ unsafe extern "C" fn helper1(
             .wrapping_add(get_literal_price(
                 coder,
                 position,
-                *buf.offset(-(1) as isize) as u32,
+                *buf.offset(-1) as u32,
                 !(((*coder).state as u32) < LIT_STATES),
                 match_byte as u32,
                 current_byte as u32,
@@ -772,7 +772,7 @@ unsafe extern "C" fn helper2(
         .wrapping_add(get_literal_price(
             coder,
             position,
-            *buf.offset(-(1) as isize) as u32,
+            *buf.offset(-1) as u32,
             !((state as u32) < LIT_STATES),
             match_byte as u32,
             current_byte as u32,
@@ -1121,8 +1121,8 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
     }
     let mut reps: [u32; 4] = [0; 4];
     memcpy(
-        &raw mut reps as *mut u32 as *mut c_void,
-        &raw mut (*coder).reps as *mut u32 as *const c_void,
+        &raw mut reps as *mut c_void,
+        &raw mut (*coder).reps as *const c_void,
         core::mem::size_of::<[u32; 4]>(),
     );
     let mut cur: u32 = 0;

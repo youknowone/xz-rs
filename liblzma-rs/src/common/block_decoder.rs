@@ -200,8 +200,8 @@ unsafe extern "C" fn block_decode(
         if !(*coder).ignore_check
             && lzma_check_is_supported((*(*coder).block).check) != 0
             && memcmp(
-                &raw mut (*(*coder).block).raw_check as *mut u8 as *const c_void,
-                &raw mut (*coder).check.buffer.u8_0 as *mut u8 as *const c_void,
+                &raw mut (*(*coder).block).raw_check as *const c_void,
+                &raw mut (*coder).check.buffer.u8_0 as *const c_void,
                 check_size,
             ) != 0
         {

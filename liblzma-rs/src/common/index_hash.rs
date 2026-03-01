@@ -304,9 +304,8 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                     lzma_check_finish(&raw mut (*index_hash).blocks.check, LZMA_CHECK_SHA256);
                     lzma_check_finish(&raw mut (*index_hash).records.check, LZMA_CHECK_SHA256);
                     if memcmp(
-                        &raw mut (*index_hash).blocks.check.buffer.u8_0 as *mut u8 as *const c_void,
-                        &raw mut (*index_hash).records.check.buffer.u8_0 as *mut u8
-                            as *const c_void,
+                        &raw mut (*index_hash).blocks.check.buffer.u8_0 as *const c_void,
+                        &raw mut (*index_hash).records.check.buffer.u8_0 as *const c_void,
                         lzma_check_size(LZMA_CHECK_SHA256) as size_t,
                     ) != 0
                     {

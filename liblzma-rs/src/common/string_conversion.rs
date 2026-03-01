@@ -565,7 +565,7 @@ unsafe extern "C" fn parse_options(
                 }
                 if memcmp(
                     *str as *const c_void,
-                    &raw const (*optmap.offset(i as isize)).name as *const c_char as *const c_void,
+                    &raw const (*optmap.offset(i as isize)).name as *const c_void,
                     name_len,
                 ) == 0
                     && (*optmap.offset(i as isize)).name[name_len as usize] == 0
@@ -599,8 +599,7 @@ unsafe extern "C" fn parse_options(
                         }
                         if memcmp(
                             *str as *const c_void,
-                            &raw const (*map.offset(j as isize)).name as *const c_char
-                                as *const c_void,
+                            &raw const (*map.offset(j as isize)).name as *const c_void,
                             value_len,
                         ) == 0
                             && (*map.offset(j as isize)).name[value_len as usize] == 0
@@ -731,7 +730,7 @@ unsafe extern "C" fn parse_filter(
         if memcmp(
             *str as *const c_void,
             &raw const (*(&raw const filter_name_map as *const C2RustUnnamed).offset(i as isize))
-                .name as *const c_char as *const c_void,
+                .name as *const c_void,
             name_len,
         ) == 0
             && filter_name_map[i as usize].name[name_len as usize] == 0
@@ -892,7 +891,7 @@ unsafe extern "C" fn str_to_filters(
                 _ => {
                     memcpy(
                         filters as *mut c_void,
-                        &raw mut temp_filters as *mut lzma_filter as *const c_void,
+                        &raw mut temp_filters as *const c_void,
                         i_0.wrapping_add(1)
                             .wrapping_mul(core::mem::size_of::<lzma_filter>()),
                     );

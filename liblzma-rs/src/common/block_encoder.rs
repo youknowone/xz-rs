@@ -155,8 +155,8 @@ unsafe extern "C" fn block_encode(
             return LZMA_OK;
         }
         memcpy(
-            &raw mut (*(*coder).block).raw_check as *mut u8 as *mut c_void,
-            &raw mut (*coder).check.buffer.u8_0 as *mut u8 as *const c_void,
+            &raw mut (*(*coder).block).raw_check as *mut c_void,
+            &raw mut (*coder).check.buffer.u8_0 as *const c_void,
             check_size,
         );
         return LZMA_STREAM_END;

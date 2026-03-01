@@ -869,8 +869,8 @@ unsafe extern "C" fn get_thread(
                 allocator,
             );
             memcpy(
-                &raw mut (*(*coder).thr).filters as *mut lzma_filter as *mut c_void,
-                &raw mut (*coder).filters_cache as *mut lzma_filter as *const c_void,
+                &raw mut (*(*coder).thr).filters as *mut c_void,
+                &raw mut (*coder).filters_cache as *const c_void,
                 core::mem::size_of::<[lzma_filter; 5]>(),
             );
             (*coder).filters_cache[0].id = LZMA_VLI_UNKNOWN;
@@ -1248,8 +1248,8 @@ unsafe extern "C" fn stream_encoder_mt_update(
         allocator,
     );
     memcpy(
-        &raw mut (*coder).filters as *mut lzma_filter as *mut c_void,
-        &raw mut temp as *mut lzma_filter as *const c_void,
+        &raw mut (*coder).filters as *mut c_void,
+        &raw mut temp as *const c_void,
         core::mem::size_of::<[lzma_filter; 5]>(),
     );
     LZMA_OK

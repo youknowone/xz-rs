@@ -277,13 +277,13 @@ unsafe extern "C" fn block_buffer_encode(
         lzma_check_update(&raw mut check, (*block).check, in_0, in_size);
         lzma_check_finish(&raw mut check, (*block).check);
         memcpy(
-            &raw mut (*block).raw_check as *mut u8 as *mut c_void,
-            &raw mut check.buffer.u8_0 as *mut u8 as *const c_void,
+            &raw mut (*block).raw_check as *mut c_void,
+            &raw mut check.buffer.u8_0 as *const c_void,
             check_size,
         );
         memcpy(
             out.offset(*out_pos as isize) as *mut c_void,
-            &raw mut check.buffer.u8_0 as *mut u8 as *const c_void,
+            &raw mut check.buffer.u8_0 as *const c_void,
             check_size,
         );
         *out_pos = (*out_pos).wrapping_add(check_size);

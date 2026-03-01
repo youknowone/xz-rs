@@ -653,8 +653,8 @@ pub unsafe extern "C" fn lzma_index_cat(
         (*newg).last = (*g).last;
         (*newg).number_base = (*g).number_base;
         memcpy(
-            &raw mut (*newg).records as *mut index_record as *mut c_void,
-            &raw mut (*g).records as *mut index_record as *const c_void,
+            &raw mut (*newg).records as *mut c_void,
+            &raw mut (*g).records as *const c_void,
             (*newg)
                 .allocated
                 .wrapping_mul(core::mem::size_of::<index_record>()),
@@ -734,7 +734,7 @@ unsafe extern "C" fn index_dup_stream(
     loop {
         memcpy(
             (&raw mut (*destg).records as *mut index_record).offset(i as isize) as *mut c_void,
-            &raw const (*srcg).records as *const index_record as *const c_void,
+            &raw const (*srcg).records as *const c_void,
             (*srcg)
                 .last
                 .wrapping_add(1)

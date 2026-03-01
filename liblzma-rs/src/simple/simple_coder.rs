@@ -137,14 +137,14 @@ unsafe extern "C" fn simple_code(
         } else if unfiltered > 0 {
             *out_pos = (*out_pos).wrapping_sub(unfiltered);
             memcpy(
-                &raw mut (*coder).buffer as *mut u8 as *mut c_void,
+                &raw mut (*coder).buffer as *mut c_void,
                 out.offset(*out_pos as isize) as *const c_void,
                 unfiltered,
             );
         }
     } else if (*coder).pos > 0 {
         memmove(
-            &raw mut (*coder).buffer as *mut u8 as *mut c_void,
+            &raw mut (*coder).buffer as *mut c_void,
             (&raw mut (*coder).buffer as *mut u8).offset((*coder).pos as isize) as *const c_void,
             buf_avail,
         );

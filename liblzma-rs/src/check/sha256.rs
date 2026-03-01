@@ -18,7 +18,7 @@ unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
     let mut W: [u32; 16] = [0; 16];
     let mut T: [u32; 8] = [0; 8];
     memcpy(
-        &raw mut T as *mut u32 as *mut c_void,
+        &raw mut T as *mut c_void,
         state as *const c_void,
         core::mem::size_of::<[u32; 8]>(),
     );
@@ -529,7 +529,7 @@ unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
 unsafe extern "C" fn process(check: *mut lzma_check_state) {
     transform(
         &raw mut (*check).state.sha256.state as *mut u32,
-        &raw mut (*check).buffer.u32_0 as *mut u32 as *const u32,
+        &raw mut (*check).buffer.u32_0 as *const u32,
     );
 }
 #[no_mangle]
@@ -539,8 +539,8 @@ pub unsafe extern "C" fn lzma_sha256_init(check: *mut lzma_check_state) {
         0x5be0cd19,
     ];
     memcpy(
-        &raw mut (*check).state.sha256.state as *mut u32 as *mut c_void,
-        &raw const s as *const u32 as *const c_void,
+        &raw mut (*check).state.sha256.state as *mut c_void,
+        &raw const s as *const c_void,
         core::mem::size_of::<[u32; 8]>(),
     );
     (*check).state.sha256.size = 0;

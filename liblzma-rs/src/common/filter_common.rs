@@ -181,7 +181,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
             dest[i as usize].options = core::ptr::null_mut();
             memcpy(
                 real_dest as *mut c_void,
-                &raw mut dest as *mut lzma_filter as *const c_void,
+                &raw mut dest as *const c_void,
                 i.wrapping_add(1)
                     .wrapping_mul(core::mem::size_of::<lzma_filter>()),
             );

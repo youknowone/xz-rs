@@ -182,7 +182,7 @@ pub unsafe extern "C" fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
         };
     }
     memset(
-        &raw mut (*(*strm).internal).supported_actions as *mut bool as *mut c_void,
+        &raw mut (*(*strm).internal).supported_actions as *mut c_void,
         0,
         core::mem::size_of::<[bool; 5]>(),
     );
