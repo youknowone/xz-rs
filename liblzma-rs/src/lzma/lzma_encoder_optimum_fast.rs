@@ -63,7 +63,7 @@ pub struct lzma_lzma1_encoder_s {
     pub opts_current_index: u32,
     pub opts: [lzma_optimal; OPTS as usize],
 }
-pub const OPTS: u32 = (1) << 12;
+pub const OPTS: u32 = 1 << 12;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_optimal {
@@ -140,10 +140,10 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     }
     let mut buf: *const u8 = mf_ptr(mf).offset(-1);
     let buf_avail: u32 =
-        if mf_avail(mf).wrapping_add(1) < (2 + (((1) << 3) + ((1) << 3) + ((1) << 8)) - 1) as u32 {
+        if mf_avail(mf).wrapping_add(1) < (2 + ((1 << 3) + (1 << 3) + (1 << 8)) - 1) as u32 {
             (mf_avail(mf) as u32).wrapping_add(1)
         } else {
-            (2 + (((1) << 3) + ((1) << 3) + ((1) << 8)) - 1) as u32
+            (2 + ((1 << 3) + (1 << 3) + (1 << 8)) - 1) as u32
         };
     if buf_avail < 2 {
         *back_res = UINT32_MAX;
@@ -200,8 +200,8 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     }
     if rep_len >= 2 {
         if rep_len.wrapping_add(1) >= len_main
-            || rep_len.wrapping_add(2) >= len_main && back_main > (1) << 9
-            || rep_len.wrapping_add(3) >= len_main && back_main > (1) << 15
+            || rep_len.wrapping_add(2) >= len_main && back_main > 1 << 9
+            || rep_len.wrapping_add(3) >= len_main && back_main > 1 << 15
         {
             *back_res = rep_index;
             *len_res = rep_len;

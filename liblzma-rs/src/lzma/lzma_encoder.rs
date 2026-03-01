@@ -484,11 +484,11 @@ unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
 }
 pub const MATCH_LEN_MIN: u32 = 2;
 pub const LEN_LOW_BITS: u32 = 3;
-pub const LEN_LOW_SYMBOLS: u32 = (1) << LEN_LOW_BITS;
+pub const LEN_LOW_SYMBOLS: u32 = 1 << LEN_LOW_BITS;
 pub const LEN_MID_BITS: u32 = 3;
-pub const LEN_MID_SYMBOLS: u32 = (1) << LEN_MID_BITS;
+pub const LEN_MID_SYMBOLS: u32 = 1 << LEN_MID_BITS;
 pub const LEN_HIGH_BITS: u32 = 8;
-pub const LEN_HIGH_SYMBOLS: u32 = (1) << LEN_HIGH_BITS;
+pub const LEN_HIGH_SYMBOLS: u32 = 1 << LEN_HIGH_BITS;
 pub const LEN_SYMBOLS: u32 = LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS + LEN_HIGH_SYMBOLS;
 pub const MATCH_LEN_MAX: u32 = MATCH_LEN_MIN + LEN_SYMBOLS - 1;
 pub const DIST_STATES: u32 = 4;
@@ -498,17 +498,17 @@ pub const DIST_MODEL_END: u32 = 14;
 pub const FULL_DISTANCES_BITS: u32 = DIST_MODEL_END / 2;
 pub const FULL_DISTANCES: u32 = 1 << FULL_DISTANCES_BITS;
 pub const ALIGN_BITS: u32 = 4;
-pub const ALIGN_SIZE: u32 = (1) << ALIGN_BITS;
+pub const ALIGN_SIZE: u32 = 1 << ALIGN_BITS;
 pub const ALIGN_MASK: u32 = ALIGN_SIZE - 1;
 pub const REPS: u32 = 4;
-pub const OPTS: u32 = (1) << 12;
+pub const OPTS: u32 = 1 << 12;
 pub const FASTPOS_BITS: u32 = 13;
 #[inline]
 unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
-    if dist < (1) << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
         return lzma_fastpos[dist as usize] as u32;
     }
-    if dist < (1) << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
         return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
             .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
     }
@@ -1039,13 +1039,13 @@ unsafe extern "C" fn length_encoder_reset(
     let mut pos_state: size_t = 0;
     while pos_state < num_pos_states as size_t {
         let mut bt_i: u32 = 0;
-        while bt_i < ((1) << 3) as u32 {
+        while bt_i < (1 << 3) as u32 {
             (*lencoder).low[pos_state as usize][bt_i as usize] =
                 (RC_BIT_MODEL_TOTAL >> 1) as probability;
             bt_i += 1;
         }
         let mut bt_i_0: u32 = 0;
-        while bt_i_0 < ((1) << 3) as u32 {
+        while bt_i_0 < (1 << 3) as u32 {
             (*lencoder).mid[pos_state as usize][bt_i_0 as usize] =
                 (RC_BIT_MODEL_TOTAL >> 1) as probability;
             bt_i_0 += 1;
@@ -1053,7 +1053,7 @@ unsafe extern "C" fn length_encoder_reset(
         pos_state += 1;
     }
     let mut bt_i_1: u32 = 0;
-    while bt_i_1 < ((1) << 8) as u32 {
+    while bt_i_1 < (1 << 8) as u32 {
         (*lencoder).high[bt_i_1 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         bt_i_1 += 1;
     }
@@ -1111,7 +1111,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
     let mut i_2: size_t = 0;
     while i_2 < DIST_STATES as size_t {
         let mut bt_i: u32 = 0;
-        while bt_i < ((1) << 6) as u32 {
+        while bt_i < (1 << 6) as u32 {
             (*coder).dist_slot[i_2 as usize][bt_i as usize] =
                 (RC_BIT_MODEL_TOTAL >> 1) as probability;
             bt_i += 1;
@@ -1119,18 +1119,18 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
         i_2 += 1;
     }
     let mut bt_i_0: u32 = 0;
-    while bt_i_0 < ((1) << 4) as u32 {
+    while bt_i_0 < (1 << 4) as u32 {
         (*coder).dist_align[bt_i_0 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         bt_i_0 += 1;
     }
     length_encoder_reset(
         &raw mut (*coder).match_len_encoder,
-        (1) << (*options).pb,
+        1 << (*options).pb,
         (*coder).fast_mode,
     );
     length_encoder_reset(
         &raw mut (*coder).rep_len_encoder,
-        (1) << (*options).pb,
+        1 << (*options).pb,
         (*coder).fast_mode,
     );
     (*coder).match_price_count = UINT32_MAX.wrapping_div(2) as u32;
@@ -1160,11 +1160,11 @@ pub unsafe extern "C" fn lzma_lzma_encoder_create(
         }
         2 => {
             (*coder).fast_mode = false;
-            if (*options).dict_size > (1u32 << 30).wrapping_add((1) << 29) {
+            if (*options).dict_size > (1u32 << 30).wrapping_add(1 << 29) {
                 return LZMA_OPTIONS_ERROR;
             }
             let mut log_size: u32 = 0;
-            while (1) << log_size < (*options).dict_size {
+            while 1 << log_size < (*options).dict_size {
                 log_size += 1;
             }
             (*coder).dist_table_size = log_size.wrapping_mul(2);

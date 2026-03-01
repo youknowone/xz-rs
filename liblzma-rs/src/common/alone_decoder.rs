@@ -96,7 +96,7 @@ unsafe extern "C" fn alone_decode(
                 } else {
                     if (*coder).picky
                         && (*coder).uncompressed_size != LZMA_VLI_UNKNOWN
-                        && (*coder).uncompressed_size >= (1) << 38
+                        && (*coder).uncompressed_size >= 1 << 38
                     {
                         return LZMA_FORMAT_ERROR;
                     }

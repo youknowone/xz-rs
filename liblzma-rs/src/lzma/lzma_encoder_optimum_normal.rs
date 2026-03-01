@@ -65,7 +65,7 @@ pub struct lzma_lzma1_encoder_s {
     pub opts_current_index: u32,
     pub opts: [lzma_optimal; OPTS as usize],
 }
-pub const OPTS: u32 = (1) << 12;
+pub const OPTS: u32 = 1 << 12;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_optimal {
@@ -183,16 +183,16 @@ pub const DIST_MODEL_END: u32 = 14;
 pub const FULL_DISTANCES_BITS: u32 = DIST_MODEL_END / 2;
 pub const FULL_DISTANCES: u32 = 1 << FULL_DISTANCES_BITS;
 pub const ALIGN_BITS: u32 = 4;
-pub const ALIGN_SIZE: u32 = (1) << ALIGN_BITS;
+pub const ALIGN_SIZE: u32 = 1 << ALIGN_BITS;
 pub const ALIGN_MASK: u32 = ALIGN_SIZE - 1;
 pub const REPS: u32 = 4;
 pub const FASTPOS_BITS: u32 = 13;
 #[inline]
 unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
-    if dist < (1) << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
         return lzma_fastpos[dist as usize] as u32;
     }
-    if dist < (1) << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
         return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
             .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
     }
@@ -201,11 +201,11 @@ unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
 }
 #[inline]
 unsafe extern "C" fn get_dist_slot_2(dist: u32) -> u32 {
-    if dist < (1) << FASTPOS_BITS + (14 / 2 - 1 + 0 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (14 / 2 - 1 + 0 * (FASTPOS_BITS - 1)) {
         return (lzma_fastpos[(dist >> 14 / 2 - 1 + 0 * (FASTPOS_BITS - 1)) as usize] as u32)
             .wrapping_add((2 * (14 / 2 - 1 + 0 * (FASTPOS_BITS - 1))) as u32);
     }
-    if dist < (1) << FASTPOS_BITS + (14 / 2 - 1 + 1 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (14 / 2 - 1 + 1 * (FASTPOS_BITS - 1)) {
         return (lzma_fastpos[(dist >> 14 / 2 - 1 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
             .wrapping_add((2 * (14 / 2 - 1 + 1 * (FASTPOS_BITS - 1))) as u32);
     }
@@ -485,10 +485,10 @@ unsafe extern "C" fn helper1(
         matches_count = (*coder).matches_count;
     }
     let buf_avail: u32 =
-        if mf_avail(mf).wrapping_add(1) < (2 + (((1) << 3) + ((1) << 3) + ((1) << 8)) - 1) as u32 {
+        if mf_avail(mf).wrapping_add(1) < (2 + ((1 << 3) + (1 << 3) + (1 << 8)) - 1) as u32 {
             (mf_avail(mf) as u32).wrapping_add(1)
         } else {
-            (2 + (((1) << 3) + ((1) << 3) + ((1) << 8)) - 1) as u32
+            (2 + ((1 << 3) + (1 << 3) + (1 << 8)) - 1) as u32
         };
     if buf_avail < 2 {
         *back_res = UINT32_MAX;
@@ -1108,7 +1108,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
         return;
     }
     if (*mf).read_ahead == 0 {
-        if (*coder).match_price_count >= ((1) << 7) as u32 {
+        if (*coder).match_price_count >= (1 << 7) as u32 {
             fill_dist_prices(coder);
         }
         if (*coder).align_price_count >= ALIGN_SIZE {
@@ -1144,10 +1144,10 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
             position.wrapping_add(cur),
             cur,
             (*mf).nice_len,
-            if mf_avail(mf).wrapping_add(1) < ((((1) << 12) - 1) as u32).wrapping_sub(cur) {
+            if mf_avail(mf).wrapping_add(1) < (((1 << 12) - 1) as u32).wrapping_sub(cur) {
                 mf_avail(mf).wrapping_add(1)
             } else {
-                ((((1) << 12) - 1) as u32).wrapping_sub(cur)
+                (((1 << 12) - 1) as u32).wrapping_sub(cur)
             },
         );
         cur += 1;

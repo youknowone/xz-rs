@@ -186,7 +186,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         .after_size
         .wrapping_add((*lz_options).match_len_max) as u32;
     let mut reserve: u32 = (*lz_options).dict_size.wrapping_div(2) as u32;
-    if reserve > (1) << 30 {
+    if reserve > 1 << 30 {
         reserve = reserve.wrapping_div(2);
     }
     reserve = (reserve as size_t).wrapping_add(
@@ -265,7 +265,7 @@ unsafe extern "C" fn lz_encoder_prepare(
         hs |= hs >> 8;
         hs >>= 1;
         hs |= 0xffff;
-        if hs > (1) << 24 {
+        if hs > 1 << 24 {
             if hash_bytes == 3 {
                 hs = (1u32 << 24).wrapping_sub(1) as u32;
             } else {

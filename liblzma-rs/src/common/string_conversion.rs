@@ -1247,7 +1247,7 @@ unsafe extern "C" fn run_static_initializers() {
             u: C2RustUnnamed_0 {
                 range: C2RustUnnamed_1 {
                     min: LZMA_DICT_SIZE_MIN as u32,
-                    max: (1u32 << 30).wrapping_add((1) << 29),
+                    max: (1u32 << 30).wrapping_add(1 << 29),
                 },
             },
         },

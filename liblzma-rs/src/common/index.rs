@@ -213,7 +213,7 @@ unsafe extern "C" fn index_tree_append(tree: *mut index_tree, mut node: *mut ind
     }
     (*(*tree).rightmost).right = node;
     (*tree).rightmost = node;
-    let mut up: u32 = (*tree).count ^ (1) << bsr32((*tree).count);
+    let mut up: u32 = (*tree).count ^ 1 << bsr32((*tree).count);
     if up != 0 {
         up = ctz32((*tree).count).wrapping_add(2);
         loop {

@@ -115,10 +115,10 @@ unsafe extern "C" fn mf_read(
 pub const FASTPOS_BITS: u32 = 13;
 #[inline]
 unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
-    if dist < (1) << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
         return lzma_fastpos[dist as usize] as u32;
     }
-    if dist < (1) << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
+    if dist < 1 << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
         return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
             .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
     }
@@ -141,7 +141,7 @@ unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
     } else {
         pos = 1;
         if (*coder).need_state_reset {
-            (*coder).buf[pos as usize] = (0x80 + ((1) << 5)) as u8;
+            (*coder).buf[pos as usize] = (0x80 + (1 << 5)) as u8;
         } else {
             (*coder).buf[pos as usize] = 0x80 as u8;
         }
@@ -498,13 +498,13 @@ pub unsafe extern "C" fn lzma_lzma2_props_encode(options: *const c_void, out: *m
 pub unsafe extern "C" fn lzma_lzma2_block_size(options: *const c_void) -> u64 {
     let opt: *const lzma_options_lzma = options as *const lzma_options_lzma;
     if (*opt).dict_size < LZMA_DICT_SIZE_MIN as u32
-        || (*opt).dict_size > (1u32 << 30).wrapping_add((1) << 29)
+        || (*opt).dict_size > (1u32 << 30).wrapping_add(1 << 29)
     {
         return UINT64_MAX;
     }
-    if ((*opt).dict_size as u64).wrapping_mul(3) > (1) << 20 {
+    if ((*opt).dict_size as u64).wrapping_mul(3) > 1 << 20 {
         ((*opt).dict_size as u64).wrapping_mul(3)
     } else {
-        (1) << 20
+        1 << 20
     }
 }
