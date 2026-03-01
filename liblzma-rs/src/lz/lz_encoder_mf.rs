@@ -3,40 +3,6 @@ use core::ffi::{c_int, c_uint};
 extern "C" {
     static lzma_crc32_table: [[u32; 256]; 8];
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_match {
-    pub len: u32,
-    pub dist: u32,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_mf_s {
-    pub buffer: *mut u8,
-    pub size: u32,
-    pub keep_size_before: u32,
-    pub keep_size_after: u32,
-    pub offset: u32,
-    pub read_pos: u32,
-    pub read_ahead: u32,
-    pub read_limit: u32,
-    pub write_pos: u32,
-    pub pending: u32,
-    pub find: Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>,
-    pub skip: Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>,
-    pub hash: *mut u32,
-    pub son: *mut u32,
-    pub cyclic_pos: u32,
-    pub cyclic_size: u32,
-    pub hash_mask: u32,
-    pub depth: u32,
-    pub nice_len: u32,
-    pub match_len_max: u32,
-    pub action: lzma_action,
-    pub hash_count: u32,
-    pub sons_count: u32,
-}
-pub type lzma_mf = lzma_mf_s;
 #[inline]
 unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     return (*mf).buffer.offset((*mf).read_pos as isize);
@@ -122,7 +88,7 @@ unsafe extern "C" fn move_pos(mf: *mut lzma_mf) {
         (*mf).cyclic_pos = 0;
     }
     (*mf).read_pos = (*mf).read_pos.wrapping_add(1);
-    if (*mf).read_pos.wrapping_add((*mf).offset) == 4294967295  {
+    if (*mf).read_pos.wrapping_add((*mf).offset) == 4294967295 {
         normalize(mf);
     }
 }

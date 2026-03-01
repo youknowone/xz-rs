@@ -1,10 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_options_bcj {
-    pub start_offset: u32,
-}
 #[inline]
 extern "C" fn read32le(buf: *const u8) -> u32 {
     return unsafe {

@@ -10,34 +10,6 @@ extern "C" {
         out_size: size_t,
     ) -> size_t;
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_outbuf_s {
-    pub next: *mut lzma_outbuf,
-    pub worker: *mut c_void,
-    pub allocated: size_t,
-    pub pos: size_t,
-    pub decoder_in_pos: size_t,
-    pub finished: bool,
-    pub finish_ret: lzma_ret,
-    pub unpadded_size: lzma_vli,
-    pub uncompressed_size: lzma_vli,
-    pub buf: [u8; 0],
-}
-pub type lzma_outbuf = lzma_outbuf_s;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_outq {
-    pub head: *mut lzma_outbuf,
-    pub tail: *mut lzma_outbuf,
-    pub read_pos: size_t,
-    pub cache: *mut lzma_outbuf,
-    pub mem_allocated: u64,
-    pub mem_in_use: u64,
-    pub bufs_in_use: u32,
-    pub bufs_allocated: u32,
-    pub bufs_limit: u32,
-}
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const LZMA_THREADS_MAX: c_int = 16384;

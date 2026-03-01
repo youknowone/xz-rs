@@ -21,26 +21,6 @@ extern "C" {
         out_size: size_t,
     ) -> size_t;
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_options_bcj {
-    pub start_offset: u32,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_simple_coder {
-    pub next: lzma_next_coder,
-    pub end_was_reached: bool,
-    pub is_encoder: bool,
-    pub filter: Option<unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t>,
-    pub simple: *mut c_void,
-    pub now_pos: u32,
-    pub allocated: size_t,
-    pub pos: size_t,
-    pub filtered: size_t,
-    pub size: size_t,
-    pub buffer: [u8; 0],
-}
 unsafe extern "C" fn copy_or_code(
     coder: *mut lzma_simple_coder,
     allocator: *const lzma_allocator,

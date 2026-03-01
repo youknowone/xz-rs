@@ -7,14 +7,6 @@ extern "C" {
         filters: *const lzma_filter_info,
     ) -> lzma_ret;
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_delta_coder {
-    pub next: lzma_next_coder,
-    pub distance: size_t,
-    pub pos: u8,
-    pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
-}
 unsafe extern "C" fn decode_buffer(coder: *mut lzma_delta_coder, buffer: *mut u8, size: size_t) {
     let distance: size_t = (*coder).distance;
     let mut i: size_t = 0;

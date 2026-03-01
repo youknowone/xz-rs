@@ -19,38 +19,10 @@ extern "C" {
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct lzma_dict {
-    pub buf: *mut u8,
-    pub pos: size_t,
-    pub full: size_t,
-    pub limit: size_t,
-    pub size: size_t,
-    pub has_wrapped: bool,
-    pub need_reset: bool,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct lzma_lz_options {
     pub dict_size: size_t,
     pub preset_dict: *const u8,
     pub preset_dict_size: size_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_lz_decoder {
-    pub coder: *mut c_void,
-    pub code: Option<
-        unsafe extern "C" fn(
-            *mut c_void,
-            *mut lzma_dict,
-            *const u8,
-            *mut size_t,
-            size_t,
-        ) -> lzma_ret,
-    >,
-    pub reset: Option<unsafe extern "C" fn(*mut c_void, *const c_void) -> ()>,
-    pub set_uncompressed: Option<unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> ()>,
-    pub end: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -1028,9 +1000,7 @@ unsafe extern "C" fn lzma_decode(
                 }
             }
             5979571030476392895 => {
-                if (might_finish_without_eopm && dict.pos == dict.limit) as c_long
-                    != 0
-                {
+                if (might_finish_without_eopm && dict.pos == dict.limit) as c_long != 0 {
                     if rc.range < RC_TOP_VALUE as u32 {
                         if rc_in_ptr == rc_in_end {
                             (*coder).sequence = SEQ_NORMALIZE;
@@ -1261,7 +1231,7 @@ unsafe extern "C" fn lzma_decode(
             }
             4956146061682418353 => loop {
                 pos_state = (dict.pos & pos_mask as size_t) as u32;
-                if !(rc_in_ptr < rc_in_fast_end) || dict.pos == dict.limit  {
+                if !(rc_in_ptr < rc_in_fast_end) || dict.pos == dict.limit {
                     current_block = 5979571030476392895;
                     continue 'c_9380;
                 }

@@ -13,14 +13,6 @@ extern "C" {
         filters: *const lzma_filter_info,
     ) -> lzma_ret;
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_delta_coder {
-    pub next: lzma_next_coder,
-    pub distance: size_t,
-    pub pos: u8,
-    pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
-}
 pub const LZMA_DELTA_DIST_MIN: c_int = 1;
 unsafe extern "C" fn copy_and_encode(
     coder: *mut lzma_delta_coder,

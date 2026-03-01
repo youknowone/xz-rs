@@ -34,40 +34,6 @@ extern "C" {
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct lzma_match {
-    pub len: u32,
-    pub dist: u32,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_mf_s {
-    pub buffer: *mut u8,
-    pub size: u32,
-    pub keep_size_before: u32,
-    pub keep_size_after: u32,
-    pub offset: u32,
-    pub read_pos: u32,
-    pub read_ahead: u32,
-    pub read_limit: u32,
-    pub write_pos: u32,
-    pub pending: u32,
-    pub find: Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>,
-    pub skip: Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>,
-    pub hash: *mut u32,
-    pub son: *mut u32,
-    pub cyclic_pos: u32,
-    pub cyclic_size: u32,
-    pub hash_mask: u32,
-    pub depth: u32,
-    pub nice_len: u32,
-    pub match_len_max: u32,
-    pub action: lzma_action,
-    pub hash_count: u32,
-    pub sons_count: u32,
-}
-pub type lzma_mf = lzma_mf_s;
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct lzma_lz_options {
     pub before_size: size_t,
     pub dict_size: size_t,
@@ -78,17 +44,6 @@ pub struct lzma_lz_options {
     pub depth: u32,
     pub preset_dict: *const u8,
     pub preset_dict_size: u32,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_lz_encoder {
-    pub coder: *mut c_void,
-    pub code: Option<
-        unsafe extern "C" fn(*mut c_void, *mut lzma_mf, *mut u8, *mut size_t, size_t) -> lzma_ret,
-    >,
-    pub end: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
-    pub options_update: Option<unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret>,
-    pub set_out_limit: Option<unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -1001,9 +956,7 @@ pub unsafe extern "C" fn lzma_lzma_encode(
             );
         }
         encode_symbol(coder, mf, back, len, (*coder).uncomp_size as u32);
-        if (*coder).out_limit != 0
-            && rc_encode_dummy(&raw mut (*coder).rc, (*coder).out_limit)
-        {
+        if (*coder).out_limit != 0 && rc_encode_dummy(&raw mut (*coder).rc, (*coder).out_limit) {
             rc_forget(&raw mut (*coder).rc);
             break;
         } else {

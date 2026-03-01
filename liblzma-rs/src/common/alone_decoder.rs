@@ -68,9 +68,7 @@ unsafe extern "C" fn alone_decode(
                     as u32;
                 (*coder).pos = (*coder).pos.wrapping_add(1);
                 if (*coder).pos == 4 {
-                    if (*coder).picky
-                        && (*coder).options.dict_size != UINT32_MAX as u32
-                    {
+                    if (*coder).picky && (*coder).options.dict_size != UINT32_MAX as u32 {
                         let mut d: u32 = (*coder).options.dict_size.wrapping_sub(1);
                         d |= d >> 2;
                         d |= d >> 3;

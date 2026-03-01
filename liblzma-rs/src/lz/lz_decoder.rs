@@ -10,38 +10,10 @@ extern "C" {
 }
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct lzma_dict {
-    pub buf: *mut u8,
-    pub pos: size_t,
-    pub full: size_t,
-    pub limit: size_t,
-    pub size: size_t,
-    pub has_wrapped: bool,
-    pub need_reset: bool,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct lzma_lz_options {
     pub dict_size: size_t,
     pub preset_dict: *const u8,
     pub preset_dict_size: size_t,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_lz_decoder {
-    pub coder: *mut c_void,
-    pub code: Option<
-        unsafe extern "C" fn(
-            *mut c_void,
-            *mut lzma_dict,
-            *const u8,
-            *mut size_t,
-            size_t,
-        ) -> lzma_ret,
-    >,
-    pub reset: Option<unsafe extern "C" fn(*mut c_void, *const c_void) -> ()>,
-    pub set_uncompressed: Option<unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> ()>,
-    pub end: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
 }
 #[derive(Copy, Clone)]
 #[repr(C)]

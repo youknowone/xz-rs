@@ -8,14 +8,6 @@ extern "C" {
     ) -> lzma_ret;
     fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_delta_coder {
-    pub next: lzma_next_coder,
-    pub distance: size_t,
-    pub pos: u8,
-    pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
-}
 pub const LZMA_DELTA_DIST_MIN: c_int = 1;
 unsafe extern "C" fn delta_coder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;

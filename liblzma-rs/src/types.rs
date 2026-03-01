@@ -404,6 +404,193 @@ pub struct lzma_options_easy {
     pub opt_lzma: lzma_options_lzma,
 }
 
+// lzma_dict struct (shared across decoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_dict {
+    pub buf: *mut u8,
+    pub pos: size_t,
+    pub full: size_t,
+    pub limit: size_t,
+    pub size: size_t,
+    pub has_wrapped: bool,
+    pub need_reset: bool,
+}
+
+// lzma_lz_decoder struct (shared across decoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_lz_decoder {
+    pub coder: *mut c_void,
+    pub code: Option<
+        unsafe extern "C" fn(
+            *mut c_void,
+            *mut lzma_dict,
+            *const u8,
+            *mut size_t,
+            size_t,
+        ) -> lzma_ret,
+    >,
+    pub reset: Option<unsafe extern "C" fn(*mut c_void, *const c_void) -> ()>,
+    pub set_uncompressed: Option<unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> ()>,
+    pub end: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
+}
+
+// lzma_match struct (shared across encoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_match {
+    pub len: u32,
+    pub dist: u32,
+}
+
+// lzma_mf_s struct (shared across encoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_mf_s {
+    pub buffer: *mut u8,
+    pub size: u32,
+    pub keep_size_before: u32,
+    pub keep_size_after: u32,
+    pub offset: u32,
+    pub read_pos: u32,
+    pub read_ahead: u32,
+    pub read_limit: u32,
+    pub write_pos: u32,
+    pub pending: u32,
+    pub find: Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>,
+    pub skip: Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>,
+    pub hash: *mut u32,
+    pub son: *mut u32,
+    pub cyclic_pos: u32,
+    pub cyclic_size: u32,
+    pub hash_mask: u32,
+    pub depth: u32,
+    pub nice_len: u32,
+    pub match_len_max: u32,
+    pub action: lzma_action,
+    pub hash_count: u32,
+    pub sons_count: u32,
+}
+pub type lzma_mf = lzma_mf_s;
+
+// lzma_delta_coder struct (shared across delta modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_delta_coder {
+    pub next: lzma_next_coder,
+    pub distance: size_t,
+    pub pos: u8,
+    pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
+}
+
+// lzma_lz_encoder struct (shared across encoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_lz_encoder {
+    pub coder: *mut c_void,
+    pub code: Option<
+        unsafe extern "C" fn(*mut c_void, *mut lzma_mf, *mut u8, *mut size_t, size_t) -> lzma_ret,
+    >,
+    pub end: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
+    pub options_update: Option<unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret>,
+    pub set_out_limit: Option<unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret>,
+}
+
+// lzma_outbuf_s struct (shared across mt modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_outbuf_s {
+    pub next: *mut lzma_outbuf,
+    pub worker: *mut c_void,
+    pub allocated: size_t,
+    pub pos: size_t,
+    pub decoder_in_pos: size_t,
+    pub finished: bool,
+    pub finish_ret: lzma_ret,
+    pub unpadded_size: lzma_vli,
+    pub uncompressed_size: lzma_vli,
+    pub buf: [u8; 0],
+}
+pub type lzma_outbuf = lzma_outbuf_s;
+
+// lzma_outq struct (shared across mt modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_outq {
+    pub head: *mut lzma_outbuf,
+    pub tail: *mut lzma_outbuf,
+    pub read_pos: size_t,
+    pub cache: *mut lzma_outbuf,
+    pub mem_allocated: u64,
+    pub mem_in_use: u64,
+    pub bufs_in_use: u32,
+    pub bufs_allocated: u32,
+    pub bufs_limit: u32,
+}
+
+// lzma_options_bcj struct (shared across simple/filter modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_options_bcj {
+    pub start_offset: u32,
+}
+
+// lzma_mt struct (shared across mt modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_mt {
+    pub flags: u32,
+    pub threads: u32,
+    pub block_size: u64,
+    pub timeout: u32,
+    pub preset: u32,
+    pub filters: *const lzma_filter,
+    pub check: lzma_check,
+    pub reserved_enum1: lzma_reserved_enum,
+    pub reserved_enum2: lzma_reserved_enum,
+    pub reserved_enum3: lzma_reserved_enum,
+    pub reserved_int1: u32,
+    pub reserved_int2: u32,
+    pub reserved_int3: u32,
+    pub reserved_int4: u32,
+    pub memlimit_threading: u64,
+    pub memlimit_stop: u64,
+    pub reserved_int7: u64,
+    pub reserved_int8: u64,
+    pub reserved_ptr1: *mut c_void,
+    pub reserved_ptr2: *mut c_void,
+    pub reserved_ptr3: *mut c_void,
+    pub reserved_ptr4: *mut c_void,
+}
+
+// lzma_filter_coder struct (shared across filter modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_filter_coder {
+    pub id: lzma_vli,
+    pub init: lzma_init_function,
+    pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
+}
+pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
+
+// lzma_simple_coder struct (shared across simple modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_simple_coder {
+    pub next: lzma_next_coder,
+    pub end_was_reached: bool,
+    pub is_encoder: bool,
+    pub filter: Option<unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t>,
+    pub simple: *mut c_void,
+    pub now_pos: u32,
+    pub allocated: size_t,
+    pub pos: size_t,
+    pub filtered: size_t,
+    pub size: size_t,
+    pub buffer: [u8; 0],
+}
+
 // Common extern functions used across many modules
 extern "C" {
     pub fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;

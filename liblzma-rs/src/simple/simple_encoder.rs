@@ -1,10 +1,5 @@
 use crate::types::*;
 use core::ffi::{c_int, c_void};
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_options_bcj {
-    pub start_offset: u32,
-}
 #[inline]
 extern "C" fn write32le(buf: *mut u8, num: u32) {
     unsafe {

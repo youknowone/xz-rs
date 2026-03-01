@@ -137,9 +137,7 @@ unsafe extern "C" fn stream_decode(
                 (*coder).first_stream = false;
                 (*coder).block_options.check = (*coder).stream_flags.check;
                 (*coder).sequence = SEQ_BLOCK_HEADER;
-                if (*coder).tell_no_check
-                    && (*coder).stream_flags.check == LZMA_CHECK_NONE
-                {
+                if (*coder).tell_no_check && (*coder).stream_flags.check == LZMA_CHECK_NONE {
                     return LZMA_NO_CHECK;
                 }
                 if (*coder).tell_unsupported_check

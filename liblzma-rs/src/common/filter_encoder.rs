@@ -87,14 +87,6 @@ pub struct lzma_filter_encoder {
     pub props_size_fixed: u32,
     pub props_encode: Option<unsafe extern "C" fn(*const c_void, *mut u8) -> lzma_ret>,
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter_coder {
-    pub id: lzma_vli,
-    pub init: lzma_init_function,
-    pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
-}
-pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
 static encoders: [lzma_filter_encoder; 12] = [
     lzma_filter_encoder {
         id: LZMA_FILTER_LZMA1,

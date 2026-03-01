@@ -50,11 +50,6 @@ pub const OPTMAP_TYPE_LZMA_MODE: C2RustUnnamed_2 = 1;
 pub const OPTMAP_TYPE_LZMA_PRESET: C2RustUnnamed_2 = 3;
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct lzma_options_bcj {
-    pub start_offset: u32,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct lzma_str {
     pub buf: *mut c_char,
     pub pos: size_t,
@@ -747,8 +742,7 @@ unsafe extern "C" fn parse_filter(
         ) == 0 as c_int
             && filter_name_map[i as usize].name[name_len as usize] as c_int == '\0' as i32
         {
-            if only_xz && filter_name_map[i as usize].id >= LZMA_FILTER_RESERVED_START
-            {
+            if only_xz && filter_name_map[i as usize].id >= LZMA_FILTER_RESERVED_START {
                 return b"This filter cannot be used in the .xz format\0" as *const u8
                     as *const c_char;
             }

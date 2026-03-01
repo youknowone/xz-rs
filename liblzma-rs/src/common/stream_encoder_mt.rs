@@ -187,32 +187,6 @@ pub struct mythread_cond {
     pub clk_id: clockid_t,
 }
 pub type mythread_condtime = timespec;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_mt {
-    pub flags: u32,
-    pub threads: u32,
-    pub block_size: u64,
-    pub timeout: u32,
-    pub preset: u32,
-    pub filters: *const lzma_filter,
-    pub check: lzma_check,
-    pub reserved_enum1: lzma_reserved_enum,
-    pub reserved_enum2: lzma_reserved_enum,
-    pub reserved_enum3: lzma_reserved_enum,
-    pub reserved_int1: u32,
-    pub reserved_int2: u32,
-    pub reserved_int3: u32,
-    pub reserved_int4: u32,
-    pub memlimit_threading: u64,
-    pub memlimit_stop: u64,
-    pub reserved_int7: u64,
-    pub reserved_int8: u64,
-    pub reserved_ptr1: *mut c_void,
-    pub reserved_ptr2: *mut c_void,
-    pub reserved_ptr3: *mut c_void,
-    pub reserved_ptr4: *mut c_void,
-}
 pub type worker_thread = worker_thread_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -259,19 +233,6 @@ pub struct lzma_stream_coder_s {
     pub progress_out: u64,
     pub mutex: mythread_mutex,
     pub cond: mythread_cond,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_outq {
-    pub head: *mut lzma_outbuf,
-    pub tail: *mut lzma_outbuf,
-    pub read_pos: size_t,
-    pub cache: *mut lzma_outbuf,
-    pub mem_allocated: u64,
-    pub mem_in_use: u64,
-    pub bufs_in_use: u32,
-    pub bufs_allocated: u32,
-    pub bufs_limit: u32,
 }
 pub type lzma_outbuf = lzma_outbuf_s;
 #[derive(Copy, Clone)]

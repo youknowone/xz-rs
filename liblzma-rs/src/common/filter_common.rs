@@ -17,19 +17,6 @@ pub struct C2RustUnnamed {
     pub last_ok: bool,
     pub changes_size: bool,
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_options_bcj {
-    pub start_offset: u32,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter_coder {
-    pub id: lzma_vli,
-    pub init: lzma_init_function,
-    pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
-}
-pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
 static mut features: [C2RustUnnamed; 13] = [
     C2RustUnnamed {
         id: LZMA_FILTER_LZMA1,

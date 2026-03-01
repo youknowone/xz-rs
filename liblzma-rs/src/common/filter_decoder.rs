@@ -109,14 +109,6 @@ pub struct lzma_filter_decoder {
         ) -> lzma_ret,
     >,
 }
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_filter_coder {
-    pub id: lzma_vli,
-    pub init: lzma_init_function,
-    pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
-}
-pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
 static decoders: [lzma_filter_decoder; 12] = [
     lzma_filter_decoder {
         id: LZMA_FILTER_LZMA1,
