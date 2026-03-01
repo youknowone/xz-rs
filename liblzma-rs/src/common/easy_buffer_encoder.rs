@@ -37,13 +37,6 @@ pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct lzma_filter {
     pub id: lzma_vli,
     pub options: *mut c_void,

@@ -18,8 +18,6 @@ extern "C" {
     fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
     fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *const lzma_index);
     fn lzma_index_iter_next(iter: *mut lzma_index_iter, mode: lzma_index_iter_mode) -> lzma_bool;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
     fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_index_padding_size(i: *const lzma_index) -> u32;
@@ -51,13 +49,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_internal_s {
@@ -407,10 +398,7 @@ pub unsafe extern "C" fn lzma_index_encoder_init(
         return LZMA_PROG_ERROR;
     }
     if (*next).coder.is_null() {
-        (*next).coder = lzma_alloc(
-            core::mem::size_of::<lzma_index_coder>() as size_t,
-            allocator,
-        );
+        (*next).coder = lzma_alloc(core::mem::size_of::<lzma_index_coder>(), allocator);
         if (*next).coder.is_null() {
             return LZMA_MEM_ERROR;
         }

@@ -5,9 +5,6 @@ pub struct lzma_lzma1_encoder_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_bufcpy(
         in_0: *const u8,
         in_pos: *mut size_t,
@@ -80,13 +77,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 pub type lzma_next_coder = lzma_next_coder_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -572,10 +562,8 @@ unsafe extern "C" fn lzma2_encoder_init(
     }
     let mut coder: *mut lzma_lzma2_coder = (*lz).coder as *mut lzma_lzma2_coder;
     if coder.is_null() {
-        coder = lzma_alloc(
-            core::mem::size_of::<lzma_lzma2_coder>() as size_t,
-            allocator,
-        ) as *mut lzma_lzma2_coder;
+        coder = lzma_alloc(core::mem::size_of::<lzma_lzma2_coder>(), allocator)
+            as *mut lzma_lzma2_coder;
         if coder.is_null() {
             return LZMA_MEM_ERROR;
         }

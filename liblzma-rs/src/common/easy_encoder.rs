@@ -37,13 +37,6 @@ pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct lzma_internal_s {
     pub next: lzma_next_coder,
     pub sequence: C2RustUnnamed,

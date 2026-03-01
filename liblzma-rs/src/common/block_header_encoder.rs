@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
-    fn memset(__b: *mut c_void, __c: c_int, __len: size_t) -> *mut c_void;
     fn lzma_vli_encode(
         vli: lzma_vli,
         vli_pos: *mut size_t,

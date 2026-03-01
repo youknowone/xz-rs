@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_uint, c_void};
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_mf_find(mf: *mut lzma_mf, count: *mut u32, matches: *mut lzma_match) -> u32;
     static lzma_rc_prices: [u8; 128];
     static lzma_fastpos: [u8; 8192];
@@ -345,11 +344,7 @@ unsafe extern "C" fn get_literal_price(
     return price;
 }
 #[inline]
-extern "C" fn get_len_price(
-    lencoder: *const lzma_length_encoder,
-    len: u32,
-    pos_state: u32,
-) -> u32 {
+extern "C" fn get_len_price(lencoder: *const lzma_length_encoder, len: u32, pos_state: u32) -> u32 {
     return unsafe {
         (*lencoder).prices[pos_state as usize][len.wrapping_sub(MATCH_LEN_MIN as u32) as usize]
     };
@@ -1230,7 +1225,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
     memcpy(
         &raw mut reps as *mut u32 as *mut c_void,
         &raw mut (*coder).reps as *mut u32 as *const c_void,
-        core::mem::size_of::<[u32; 4]>() as size_t,
+        core::mem::size_of::<[u32; 4]>(),
     );
     let mut cur: u32 = 0;
     cur = 1;

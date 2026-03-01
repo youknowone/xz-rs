@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_check_is_supported(check: lzma_check) -> lzma_bool;
     fn lzma_check_size(check: lzma_check) -> u32;
     fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret;
@@ -48,13 +47,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 pub type lzma_next_coder = lzma_next_coder_s;
 #[derive(Copy, Clone)]
 #[repr(C)]

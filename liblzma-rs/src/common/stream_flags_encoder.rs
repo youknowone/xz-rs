@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     static lzma_header_magic: [u8; 6];
     static lzma_footer_magic: [u8; 2];
@@ -95,7 +94,7 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
     memcpy(
         out as *mut c_void,
         &raw const lzma_header_magic as *const u8 as *const c_void,
-        core::mem::size_of::<[u8; 6]>() as size_t,
+        core::mem::size_of::<[u8; 6]>(),
     );
     if stream_flags_encode(
         options,
@@ -146,7 +145,7 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
         out.offset((2 as c_int * 4) as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *mut c_void,
         &raw const lzma_footer_magic as *const u8 as *const c_void,
-        core::mem::size_of::<[u8; 2]>() as size_t,
+        core::mem::size_of::<[u8; 2]>(),
     );
     return LZMA_OK;
 }

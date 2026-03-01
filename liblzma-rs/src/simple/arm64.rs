@@ -38,13 +38,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 pub type lzma_next_coder = lzma_next_coder_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -180,7 +173,7 @@ extern "C" fn arm64_coder_init(
             filters,
             Some(
                 arm64_code
-                    as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t
+                    as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t,
             ),
             0,
             4,

@@ -5,7 +5,6 @@ pub struct lzma_index_s {
     _opaque: [u8; 0],
 }
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_end(strm: *mut lzma_stream);
     fn lzma_filters_copy(
         src: *const lzma_filter,
@@ -27,8 +26,6 @@ extern "C" {
         uncompressed_size: lzma_vli,
     ) -> lzma_ret;
     fn lzma_index_size(i: *const lzma_index) -> lzma_vli;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
     fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_bufcpy(
@@ -77,13 +74,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_internal_s {
@@ -492,7 +482,7 @@ unsafe extern "C" fn stream_encoder_update(
             memcpy(
                 &raw mut (*coder).filters as *mut lzma_filter as *mut c_void,
                 &raw mut temp as *mut lzma_filter as *const c_void,
-                core::mem::size_of::<[lzma_filter; 5]>() as size_t,
+                core::mem::size_of::<[lzma_filter; 5]>(),
             );
             return LZMA_OK;
         }
@@ -550,10 +540,8 @@ unsafe extern "C" fn stream_encoder_init(
     }
     let mut coder: *mut lzma_stream_coder = (*next).coder as *mut lzma_stream_coder;
     if coder.is_null() {
-        coder = lzma_alloc(
-            core::mem::size_of::<lzma_stream_coder>() as size_t,
-            allocator,
-        ) as *mut lzma_stream_coder;
+        coder = lzma_alloc(core::mem::size_of::<lzma_stream_coder>(), allocator)
+            as *mut lzma_stream_coder;
         if coder.is_null() {
             return LZMA_MEM_ERROR;
         }

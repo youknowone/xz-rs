@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_long, c_uint};
+use core::ffi::{c_int, c_uint};
 extern "C" {
     static lzma_crc32_table: [[u32; 256]; 8];
 }
@@ -128,7 +128,7 @@ unsafe extern "C" fn move_pos(mf: *mut lzma_mf) {
         (*mf).cyclic_pos = 0;
     }
     (*mf).read_pos = (*mf).read_pos.wrapping_add(1);
-    if ((*mf).read_pos.wrapping_add((*mf).offset) == 4294967295) as c_int as c_long != 0 {
+    if ((*mf).read_pos.wrapping_add((*mf).offset) == 4294967295) as c_int != 0 {
         normalize(mf);
     }
 }
@@ -226,7 +226,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_find(mf: *mut lzma_mf, matches: *mut lzma_m
         matches.offset(matches_count as isize),
         len_best,
     )
-    .offset_from(matches) as c_long as u32;
+    .offset_from(matches) as u32;
     move_pos(mf);
     return matches_count;
 }
@@ -332,7 +332,7 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(mf: *mut lzma_mf, matches: *mut lzma_m
         matches.offset(matches_count as isize),
         len_best,
     )
-    .offset_from(matches) as c_long as u32;
+    .offset_from(matches) as u32;
     move_pos(mf);
     return matches_count;
 }
@@ -509,7 +509,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_find(mf: *mut lzma_mf, matches: *mut lzma_m
         matches.offset(matches_count as isize),
         1,
     )
-    .offset_from(matches) as c_long as u32;
+    .offset_from(matches) as u32;
     move_pos(mf);
     return matches_count;
 }
@@ -610,7 +610,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_find(mf: *mut lzma_mf, matches: *mut lzma_m
         matches.offset(matches_count as isize),
         len_best,
     )
-    .offset_from(matches) as c_long as u32;
+    .offset_from(matches) as u32;
     move_pos(mf);
     return matches_count;
 }
@@ -747,7 +747,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(mf: *mut lzma_mf, matches: *mut lzma_m
         matches.offset(matches_count as isize),
         len_best,
     )
-    .offset_from(matches) as c_long as u32;
+    .offset_from(matches) as u32;
     move_pos(mf);
     return matches_count;
 }

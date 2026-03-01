@@ -36,12 +36,12 @@ pub type lzma_bool = c_uchar;
 pub type lzma_vli = u64;
 
 // === Canonical struct re-exports ===
-pub use liblzma_rs::common::common::lzma_allocator;
 pub use liblzma_rs::common::common::lzma_stream;
 pub use liblzma_rs::common::filter_common::lzma_options_lzma;
 pub use liblzma_rs::common::index_decoder::lzma_index;
 pub use liblzma_rs::common::stream_flags_decoder::lzma_stream_flags;
 pub use liblzma_rs::delta::delta_common::lzma_filter;
+pub use liblzma_rs::types::lzma_allocator;
 
 #[repr(C)]
 pub struct lzma_options_bcj {

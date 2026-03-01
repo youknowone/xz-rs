@@ -1,10 +1,7 @@
 use crate::types::*;
 use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
 extern "C" {
-    fn memset(__b: *mut c_void, __c: c_int, __len: size_t) -> *mut c_void;
     fn lzma_end(strm: *mut lzma_stream);
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
     fn lzma_next_filter_init(
         next: *mut lzma_next_coder,
@@ -54,13 +51,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_internal_s {
@@ -318,10 +308,8 @@ unsafe extern "C" fn alone_encoder_init(
     ));
     let mut coder: *mut lzma_alone_coder = (*next).coder as *mut lzma_alone_coder;
     if coder.is_null() {
-        coder = lzma_alloc(
-            core::mem::size_of::<lzma_alone_coder>() as size_t,
-            allocator,
-        ) as *mut lzma_alone_coder;
+        coder = lzma_alloc(core::mem::size_of::<lzma_alone_coder>(), allocator)
+            as *mut lzma_alone_coder;
         if coder.is_null() {
             return LZMA_MEM_ERROR;
         }

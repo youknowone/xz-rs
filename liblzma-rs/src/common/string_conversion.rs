@@ -1,14 +1,7 @@
 use crate::types::*;
-use core::ffi::{c_char, c_int, c_long, c_uint, c_ulonglong, c_void};
+use core::ffi::{c_char, c_int, c_uint, c_ulonglong, c_void};
 extern "C" {
-    fn memchr(__s: *const c_void, __c: c_int, __n: size_t) -> *mut c_void;
-    fn memcmp(__s1: *const c_void, __s2: *const c_void, __n: size_t) -> c_int;
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
-    fn strlen(__s: *const c_char) -> size_t;
     fn lzma_lzma_preset(options: *mut lzma_options_lzma, preset: u32) -> lzma_bool;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_alloc_zero(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_validate_chain(filters: *const lzma_filter, count: *mut size_t) -> lzma_ret;
 }
 pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
@@ -33,13 +26,6 @@ pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
 pub const LZMA_NO_CHECK: lzma_ret = 2;
 pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_filter {
@@ -250,7 +236,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
         }
         let mut buf: [c_char; 16] =
             ::core::mem::transmute::<[u8; 16], [c_char; 16]>(*b"\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0");
-        let mut pos: size_t = (core::mem::size_of::<[c_char; 16]>() as size_t).wrapping_sub(1);
+        let mut pos: size_t = (core::mem::size_of::<[c_char; 16]>()).wrapping_sub(1);
         loop {
             pos = pos.wrapping_sub(1);
             buf[pos as usize] = ('0' as i32 as u32).wrapping_add(v.wrapping_rem(10)) as c_char;
@@ -296,8 +282,8 @@ extern "C" fn parse_bcj(
             str_end,
             filter_options,
             &raw const bcj_optmap as *const option_map,
-            (core::mem::size_of::<[option_map; 1]>() as size_t)
-                .wrapping_div(core::mem::size_of::<option_map>() as size_t),
+            (core::mem::size_of::<[option_map; 1]>())
+                .wrapping_div(core::mem::size_of::<option_map>()),
         )
     };
 }
@@ -329,8 +315,8 @@ extern "C" fn parse_delta(
             str_end,
             filter_options,
             &raw const delta_optmap as *const option_map,
-            (core::mem::size_of::<[option_map; 1]>() as size_t)
-                .wrapping_div(core::mem::size_of::<option_map>() as size_t),
+            (core::mem::size_of::<[option_map; 1]>())
+                .wrapping_div(core::mem::size_of::<option_map>()),
         )
     };
 }
@@ -442,8 +428,7 @@ unsafe extern "C" fn parse_lzma12(
         str_end,
         filter_options,
         &raw const lzma12_optmap as *const option_map,
-        (core::mem::size_of::<[option_map; 9]>() as size_t)
-            .wrapping_div(core::mem::size_of::<option_map>() as size_t),
+        (core::mem::size_of::<[option_map; 9]>()).wrapping_div(core::mem::size_of::<option_map>()),
     );
     if !errmsg.is_null() {
         return errmsg;
@@ -655,7 +640,7 @@ unsafe extern "C" fn parse_options(
         if **str as c_int == ',' as i32 {
             *str = (*str).offset(1);
         } else {
-            let str_len: size_t = str_end.offset_from(*str) as c_long as size_t;
+            let str_len: size_t = str_end.offset_from(*str) as size_t;
             let mut name_eq_value_end: *const c_char =
                 memchr(*str as *const c_void, ',' as i32, str_len) as *const c_char;
             if name_eq_value_end.is_null() {
@@ -664,13 +649,13 @@ unsafe extern "C" fn parse_options(
             let equals_sign: *const c_char = memchr(
                 *str as *const c_void,
                 '=' as i32,
-                name_eq_value_end.offset_from(*str) as c_long as size_t,
+                name_eq_value_end.offset_from(*str) as size_t,
             ) as *const c_char;
             if equals_sign.is_null() || **str as c_int == '=' as i32 {
                 return b"Options must be 'name=value' pairs separated with commas\0" as *const u8
                     as *const c_char;
             }
-            let name_len: size_t = equals_sign.offset_from(*str) as c_long as size_t;
+            let name_len: size_t = equals_sign.offset_from(*str) as size_t;
             if name_len > NAME_LEN_MAX as size_t {
                 return b"Unknown option name\0" as *const u8 as *const c_char;
             }
@@ -691,7 +676,7 @@ unsafe extern "C" fn parse_options(
                 i = i.wrapping_add(1);
             }
             *str = equals_sign.offset(1);
-            let value_len: size_t = name_eq_value_end.offset_from(*str) as c_long as size_t;
+            let value_len: size_t = name_eq_value_end.offset_from(*str) as size_t;
             if value_len == 0 {
                 return b"Option value cannot be empty\0" as *const u8 as *const c_char;
             }
@@ -841,7 +826,7 @@ unsafe extern "C" fn parse_filter(
             p = p.offset(1);
         }
     }
-    let name_len: size_t = name_end.offset_from(*str) as c_long as size_t;
+    let name_len: size_t = name_end.offset_from(*str) as size_t;
     if name_len > NAME_LEN_MAX as size_t {
         return b"Unknown filter name\0" as *const u8 as *const c_char;
     }
@@ -928,10 +913,9 @@ unsafe extern "C" fn str_to_filters(
         if !errmsg.is_null() {
             return errmsg;
         }
-        let opts: *mut lzma_options_lzma = lzma_alloc(
-            core::mem::size_of::<lzma_options_lzma>() as size_t,
-            allocator,
-        ) as *mut lzma_options_lzma;
+        let opts: *mut lzma_options_lzma =
+            lzma_alloc(core::mem::size_of::<lzma_options_lzma>(), allocator)
+                as *mut lzma_options_lzma;
         if opts.is_null() {
             return b"Memory allocation failed\0" as *const u8 as *const c_char;
         }
@@ -1027,7 +1011,7 @@ unsafe extern "C" fn str_to_filters(
                         filters as *mut c_void,
                         &raw mut temp_filters as *mut lzma_filter as *const c_void,
                         i_0.wrapping_add(1)
-                            .wrapping_mul(core::mem::size_of::<lzma_filter>() as size_t),
+                            .wrapping_mul(core::mem::size_of::<lzma_filter>()),
                     );
                     return ::core::ptr::null::<c_char>();
                 }
@@ -1067,7 +1051,7 @@ pub unsafe extern "C" fn lzma_str_to_filters(
     let mut used: *const c_char = str;
     let errmsg: *const c_char = str_to_filters(&raw mut used, filters, flags, allocator);
     if !error_pos.is_null() {
-        let n: size_t = used.offset_from(str) as c_long as size_t;
+        let n: size_t = used.offset_from(str) as size_t;
         *error_pos = if n > INT_MAX as size_t {
             INT_MAX
         } else {

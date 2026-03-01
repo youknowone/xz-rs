@@ -1,14 +1,11 @@
 use crate::types::*;
 use core::ffi::{c_int, c_uint, c_ulong, c_ulonglong, c_void};
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
     fn lzma_vli_size(vli: lzma_vli) -> u32;
     fn lzma_stream_flags_compare(
         a: *const lzma_stream_flags,
         b: *const lzma_stream_flags,
     ) -> lzma_ret;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
 }
 pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
 pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
@@ -32,13 +29,6 @@ pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
 pub const LZMA_NO_CHECK: lzma_ret = 2;
 pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 pub const LZMA_CHECK_SHA256: lzma_check = 10;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
@@ -335,7 +325,7 @@ unsafe extern "C" fn index_stream_init(
     allocator: *const lzma_allocator,
 ) -> *mut index_stream {
     let s: *mut index_stream =
-        lzma_alloc(core::mem::size_of::<index_stream>() as size_t, allocator) as *mut index_stream;
+        lzma_alloc(core::mem::size_of::<index_stream>(), allocator) as *mut index_stream;
     if s.is_null() {
         return core::ptr::null_mut();
     }
@@ -364,7 +354,7 @@ unsafe extern "C" fn index_stream_end(node: *mut c_void, allocator: *const lzma_
 }
 unsafe extern "C" fn index_init_plain(allocator: *const lzma_allocator) -> *mut lzma_index {
     let i: *mut lzma_index =
-        lzma_alloc(core::mem::size_of::<lzma_index>() as size_t, allocator) as *mut lzma_index;
+        lzma_alloc(core::mem::size_of::<lzma_index>(), allocator) as *mut lzma_index;
     if !i.is_null() {
         index_tree_init(&raw mut (*i).streams);
         (*i).uncompressed_size = 0 as lzma_vli;
@@ -413,15 +403,13 @@ pub unsafe extern "C" fn lzma_index_prealloc(i: *mut lzma_index, mut records: lz
 }
 #[no_mangle]
 pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u64 {
-    let alloc_overhead: size_t =
-        (4 as size_t).wrapping_mul(core::mem::size_of::<*mut c_void>() as size_t);
-    let stream_base: size_t = (core::mem::size_of::<index_stream>() as size_t)
-        .wrapping_add(core::mem::size_of::<index_group>() as size_t)
+    let alloc_overhead: size_t = (4 as size_t).wrapping_mul(core::mem::size_of::<*mut c_void>());
+    let stream_base: size_t = (core::mem::size_of::<index_stream>())
+        .wrapping_add(core::mem::size_of::<index_group>())
         .wrapping_add((2 as size_t).wrapping_mul(alloc_overhead));
-    let group_base: size_t = (core::mem::size_of::<index_group>() as size_t)
+    let group_base: size_t = (core::mem::size_of::<index_group>())
         .wrapping_add(
-            (INDEX_GROUP_SIZE as size_t)
-                .wrapping_mul(core::mem::size_of::<index_record>() as size_t),
+            (INDEX_GROUP_SIZE as size_t).wrapping_mul(core::mem::size_of::<index_record>()),
         )
         .wrapping_add(alloc_overhead);
     let groups: lzma_vli = blocks
@@ -447,31 +435,33 @@ pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u6
         .wrapping_add(groups_mem);
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
-    return lzma_index_memusage((*i).streams.count as lzma_vli, (*i).record_count);
+pub extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
+    return unsafe { lzma_index_memusage((*i).streams.count as lzma_vli, (*i).record_count) };
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
-    return (*i).record_count;
+pub extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
+    return unsafe { (*i).record_count };
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
-    return (*i).streams.count as lzma_vli;
+pub extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
+    return unsafe { (*i).streams.count as lzma_vli };
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
-    return index_size((*i).record_count, (*i).index_list_size);
+pub extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
+    return unsafe { index_size((*i).record_count, (*i).index_list_size) };
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
-    return (*i).total_size;
+pub extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
+    return unsafe { (*i).total_size };
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
-    return (LZMA_STREAM_HEADER_SIZE as lzma_vli)
-        .wrapping_add((*i).total_size)
-        .wrapping_add(index_size((*i).record_count, (*i).index_list_size))
-        .wrapping_add(LZMA_STREAM_HEADER_SIZE as lzma_vli);
+pub extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
+    return unsafe {
+        (LZMA_STREAM_HEADER_SIZE as lzma_vli)
+            .wrapping_add((*i).total_size)
+            .wrapping_add(index_size((*i).record_count, (*i).index_list_size))
+            .wrapping_add(LZMA_STREAM_HEADER_SIZE as lzma_vli)
+    };
 }
 unsafe extern "C" fn index_file_size(
     compressed_base: lzma_vli,
@@ -625,9 +615,9 @@ pub unsafe extern "C" fn lzma_index_append(
         (*g).last = (*g).last.wrapping_add(1);
     } else {
         g = lzma_alloc(
-            (core::mem::size_of::<index_group>() as size_t).wrapping_add(
+            (core::mem::size_of::<index_group>()).wrapping_add(
                 (*i).prealloc
-                    .wrapping_mul(core::mem::size_of::<index_record>() as size_t),
+                    .wrapping_mul(core::mem::size_of::<index_record>()),
             ),
             allocator,
         ) as *mut index_group;
@@ -707,10 +697,10 @@ pub unsafe extern "C" fn lzma_index_cat(
     let g: *mut index_group = (*s).groups.rightmost as *mut index_group;
     if !g.is_null() && (*g).last.wrapping_add(1) < (*g).allocated {
         let newg: *mut index_group = lzma_alloc(
-            (core::mem::size_of::<index_group>() as size_t).wrapping_add(
+            (core::mem::size_of::<index_group>()).wrapping_add(
                 (*g).last
                     .wrapping_add(1)
-                    .wrapping_mul(core::mem::size_of::<index_record>() as size_t),
+                    .wrapping_mul(core::mem::size_of::<index_record>()),
             ),
             allocator,
         ) as *mut index_group;
@@ -726,7 +716,7 @@ pub unsafe extern "C" fn lzma_index_cat(
             &raw mut (*g).records as *mut index_record as *const c_void,
             (*newg)
                 .allocated
-                .wrapping_mul(core::mem::size_of::<index_record>() as size_t),
+                .wrapping_mul(core::mem::size_of::<index_record>()),
         );
         if !(*g).node.parent.is_null() {
             (*(*g).node.parent).right = &raw mut (*newg).node;
@@ -807,7 +797,7 @@ unsafe extern "C" fn index_dup_stream(
             (*srcg)
                 .last
                 .wrapping_add(1)
-                .wrapping_mul(core::mem::size_of::<index_record>() as size_t),
+                .wrapping_mul(core::mem::size_of::<index_record>()),
         );
         i = i.wrapping_add((*srcg).last.wrapping_add(1));
         srcg = index_tree_next(&raw const (*srcg).node) as *const index_group;

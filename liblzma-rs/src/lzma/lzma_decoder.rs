@@ -1,9 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_long, c_uint, c_ulonglong, c_void};
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_lz_decoder_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -47,13 +44,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 pub type lzma_next_coder = lzma_next_coder_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -791,7 +781,7 @@ unsafe extern "C" fn lzma_decode(
                     (*coder).is_rep[state as usize] = ((*coder).is_rep[state as usize] as c_int
                         - ((*coder).is_rep[state as usize] as c_int >> RC_MOVE_BITS))
                         as probability;
-                    if !(!dict_is_distance_valid(&raw mut dict, 0) as c_int as c_long != 0) {
+                    if !(!dict_is_distance_valid(&raw mut dict, 0) as c_int != 0) {
                         current_block = 4420799852307653083;
                         continue;
                     }
@@ -1402,8 +1392,7 @@ unsafe extern "C" fn lzma_decode(
         }
         match current_block {
             13383302701878543647 => {
-                if !(!dict_is_distance_valid(&raw mut dict, rep0 as size_t) as c_int as c_long != 0)
-                {
+                if !(!dict_is_distance_valid(&raw mut dict, rep0 as size_t) as c_int != 0) {
                     current_block = 17340485688450593529;
                     continue;
                 }
@@ -1413,8 +1402,7 @@ unsafe extern "C" fn lzma_decode(
             }
             4956146061682418353 => loop {
                 pos_state = (dict.pos & pos_mask as size_t) as u32;
-                if (!(rc_in_ptr < rc_in_fast_end) || dict.pos == dict.limit) as c_int as c_long != 0
-                {
+                if (!(rc_in_ptr < rc_in_fast_end) || dict.pos == dict.limit) as c_int != 0 {
                     current_block = 5979571030476392895;
                     continue 'c_9380;
                 }
@@ -2931,7 +2919,7 @@ unsafe extern "C" fn lzma_decode(
                         (*coder).is_rep[state as usize] = ((*coder).is_rep[state as usize] as c_int
                             - ((*coder).is_rep[state as usize] as c_int >> RC_MOVE_BITS))
                             as probability;
-                        if !dict_is_distance_valid(&raw mut dict, 0) as c_int as c_long != 0 {
+                        if !dict_is_distance_valid(&raw mut dict, 0) as c_int != 0 {
                             ret_0 = LZMA_DATA_ERROR;
                             current_block = 4609795085482299213;
                             continue 'c_9380;
@@ -3719,7 +3707,7 @@ unsafe extern "C" fn lzma_decode(
     }
     (*dictptr).full = dict.full;
     (*coder).rc = rc;
-    *in_pos = rc_in_ptr.offset_from(in_0) as c_long as size_t;
+    *in_pos = rc_in_ptr.offset_from(in_0) as size_t;
     (*coder).state = state as lzma_lzma_state;
     (*coder).rep0 = rep0;
     (*coder).rep1 = rep1;
@@ -3874,10 +3862,7 @@ pub unsafe extern "C" fn lzma_lzma_decoder_create(
     lz_options: *mut lzma_lz_options,
 ) -> lzma_ret {
     if (*lz).coder.is_null() {
-        (*lz).coder = lzma_alloc(
-            core::mem::size_of::<lzma_lzma1_decoder>() as size_t,
-            allocator,
-        );
+        (*lz).coder = lzma_alloc(core::mem::size_of::<lzma_lzma1_decoder>(), allocator);
         if (*lz).coder.is_null() {
             return LZMA_MEM_ERROR;
         }
@@ -4009,10 +3994,8 @@ pub unsafe extern "C" fn lzma_lzma_props_decode(
     if props_size != 5 {
         return LZMA_OPTIONS_ERROR;
     }
-    let opt: *mut lzma_options_lzma = lzma_alloc(
-        core::mem::size_of::<lzma_options_lzma>() as size_t,
-        allocator,
-    ) as *mut lzma_options_lzma;
+    let opt: *mut lzma_options_lzma =
+        lzma_alloc(core::mem::size_of::<lzma_options_lzma>(), allocator) as *mut lzma_options_lzma;
     if opt.is_null() {
         return LZMA_MEM_ERROR;
     }

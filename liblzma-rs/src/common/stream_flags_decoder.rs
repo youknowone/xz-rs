@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
-    fn memcmp(__s1: *const c_void, __s2: *const c_void, __n: size_t) -> c_int;
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
     static lzma_header_magic: [u8; 6];
     static lzma_footer_magic: [u8; 2];
@@ -68,8 +67,7 @@ pub const LZMA_VLI_UNKNOWN: c_ulonglong = UINT64_MAX;
 pub const LZMA_STREAM_FLAGS_SIZE: c_int = 2;
 extern "C" fn stream_flags_decode(options: *mut lzma_stream_flags, in_0: *const u8) -> bool {
     return unsafe {
-        if *in_0.offset(0) as c_int != 0 as c_int || *in_0.offset(1) as c_int & 0xf0 as c_int != 0
-        {
+        if *in_0.offset(0) as c_int != 0 as c_int || *in_0.offset(1) as c_int & 0xf0 as c_int != 0 {
             return true;
         }
         (*options).version = 0;
@@ -85,7 +83,7 @@ pub unsafe extern "C" fn lzma_stream_header_decode(
     if memcmp(
         in_0 as *const c_void,
         &raw const lzma_header_magic as *const u8 as *const c_void,
-        core::mem::size_of::<[u8; 6]>() as size_t,
+        core::mem::size_of::<[u8; 6]>(),
     ) != 0 as c_int
     {
         return LZMA_FORMAT_ERROR;
@@ -121,14 +119,14 @@ pub unsafe extern "C" fn lzma_stream_footer_decode(
         in_0.offset((core::mem::size_of::<u32>() as usize).wrapping_mul(2 as usize) as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *const c_void,
         &raw const lzma_footer_magic as *const u8 as *const c_void,
-        core::mem::size_of::<[u8; 2]>() as size_t,
+        core::mem::size_of::<[u8; 2]>(),
     ) != 0 as c_int
     {
         return LZMA_FORMAT_ERROR;
     }
     let crc: u32 = lzma_crc32(
         in_0.offset(core::mem::size_of::<u32>() as usize as isize),
-        (core::mem::size_of::<u32>() as size_t).wrapping_add(LZMA_STREAM_FLAGS_SIZE as size_t),
+        (core::mem::size_of::<u32>()).wrapping_add(LZMA_STREAM_FLAGS_SIZE as size_t),
         0,
     ) as u32;
     if crc != read32le(in_0) {

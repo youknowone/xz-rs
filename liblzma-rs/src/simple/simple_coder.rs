@@ -1,10 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_ulonglong, c_void};
 extern "C" {
-    fn memcpy(__dst: *mut c_void, __src: *const c_void, __n: size_t) -> *mut c_void;
-    fn memmove(__dst: *mut c_void, __src: *const c_void, __len: size_t) -> *mut c_void;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_next_filter_init(
         next: *mut lzma_next_coder,
         allocator: *const lzma_allocator,
@@ -51,13 +47,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 pub type lzma_next_coder = lzma_next_coder_s;
 #[derive(Copy, Clone)]
 #[repr(C)]
@@ -337,7 +326,7 @@ pub unsafe extern "C" fn lzma_simple_coder_init(
     let mut coder: *mut lzma_simple_coder = (*next).coder as *mut lzma_simple_coder;
     if coder.is_null() {
         coder = lzma_alloc(
-            (core::mem::size_of::<lzma_simple_coder>() as size_t)
+            (core::mem::size_of::<lzma_simple_coder>())
                 .wrapping_add((2 as size_t).wrapping_mul(unfiltered_max)),
             allocator,
         ) as *mut lzma_simple_coder;

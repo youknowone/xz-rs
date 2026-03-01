@@ -1,9 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-extern "C" {
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
-}
 pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
 pub const LZMA_RET_INTERNAL7: lzma_ret = 107;
 pub const LZMA_RET_INTERNAL6: lzma_ret = 106;
@@ -25,13 +21,6 @@ pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
 pub const LZMA_NO_CHECK: lzma_ret = 2;
 pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_bcj {
@@ -60,10 +49,8 @@ pub unsafe extern "C" fn lzma_simple_props_decode(
     if props_size != 4 {
         return LZMA_OPTIONS_ERROR;
     }
-    let opt: *mut lzma_options_bcj = lzma_alloc(
-        core::mem::size_of::<lzma_options_bcj>() as size_t,
-        allocator,
-    ) as *mut lzma_options_bcj;
+    let opt: *mut lzma_options_bcj =
+        lzma_alloc(core::mem::size_of::<lzma_options_bcj>(), allocator) as *mut lzma_options_bcj;
     if opt.is_null() {
         return LZMA_MEM_ERROR;
     }

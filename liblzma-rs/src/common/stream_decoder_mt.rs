@@ -2,7 +2,6 @@ use crate::types::*;
 use core::ffi::{c_char, c_int, c_long, c_uint, c_ulong, c_ulonglong, c_void};
 pub enum lzma_index_hash_s {}
 extern "C" {
-    fn memset(__b: *mut c_void, __c: c_int, __len: size_t) -> *mut c_void;
     fn clock_gettime(__clock_id: clockid_t, __tp: *mut timespec) -> c_int;
     fn pthread_cond_destroy(_: *mut pthread_cond_t) -> c_int;
     fn pthread_cond_init(_: *mut pthread_cond_t, _: *const pthread_condattr_t) -> c_int;
@@ -59,8 +58,6 @@ extern "C" {
         in_size: size_t,
     ) -> lzma_ret;
     fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret;
     fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator);
     fn lzma_bufcpy(
@@ -221,13 +218,6 @@ pub const LZMA_FULL_BARRIER: lzma_action = 4;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_RUN: lzma_action = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_internal_s {
@@ -514,7 +504,8 @@ pub const SIG_SETMASK: c_int = 3;
 pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 #[inline]
 extern "C" fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
-    let _ret: c_int = unsafe { pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t) };
+    let _ret: c_int =
+        unsafe { pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t) };
 }
 #[inline]
 extern "C" fn mythread_create(
@@ -582,9 +573,8 @@ extern "C" fn mythread_cond_signal(cond: *mut mythread_cond) {
 }
 #[inline]
 extern "C" fn mythread_cond_wait(cond: *mut mythread_cond, mutex: *mut mythread_mutex) {
-    let _ret: c_int = unsafe {
-        pthread_cond_wait(&raw mut (*cond).cond, mutex as *mut pthread_mutex_t)
-    };
+    let _ret: c_int =
+        unsafe { pthread_cond_wait(&raw mut (*cond).cond, mutex as *mut pthread_mutex_t) };
 }
 #[inline]
 extern "C" fn mythread_cond_timedwait(
@@ -882,8 +872,7 @@ unsafe extern "C" fn initialize_new_thread(
 ) -> lzma_ret {
     if (*coder).threads.is_null() {
         (*coder).threads = lzma_alloc(
-            ((*coder).threads_max as size_t)
-                .wrapping_mul(core::mem::size_of::<worker_thread>() as size_t),
+            ((*coder).threads_max as size_t).wrapping_mul(core::mem::size_of::<worker_thread>()),
             allocator,
         ) as *mut worker_thread;
         if (*coder).threads.is_null() {
@@ -2003,10 +1992,8 @@ unsafe extern "C" fn stream_decoder_mt_init(
     ));
     coder = (*next).coder as *mut lzma_stream_coder;
     if coder.is_null() {
-        coder = lzma_alloc(
-            core::mem::size_of::<lzma_stream_coder>() as size_t,
-            allocator,
-        ) as *mut lzma_stream_coder;
+        coder = lzma_alloc(core::mem::size_of::<lzma_stream_coder>(), allocator)
+            as *mut lzma_stream_coder;
         if coder.is_null() {
             return LZMA_MEM_ERROR;
         }
@@ -2054,7 +2041,7 @@ unsafe extern "C" fn stream_decoder_mt_init(
         memset(
             &raw mut (*coder).outq as *mut c_void,
             0 as c_int,
-            core::mem::size_of::<lzma_outq>() as size_t,
+            core::mem::size_of::<lzma_outq>(),
         );
         (*coder).block_decoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),

@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_uint, c_ulonglong, c_void};
 extern "C" {
-    fn memcmp(__s1: *const c_void, __s2: *const c_void, __n: size_t) -> c_int;
     fn lzma_vli_decode(
         vli: *mut lzma_vli,
         vli_pos: *mut size_t,
@@ -12,8 +11,6 @@ extern "C" {
     fn lzma_vli_size(vli: lzma_vli) -> u32;
     fn lzma_check_size(check: lzma_check) -> u32;
     fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32;
-    fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
-    fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator);
     fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check);
     fn lzma_check_update(
         check: *mut lzma_check_state,
@@ -44,13 +41,6 @@ pub const LZMA_UNSUPPORTED_CHECK: lzma_ret = 3;
 pub const LZMA_NO_CHECK: lzma_ret = 2;
 pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_OK: lzma_ret = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_allocator {
-    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
-    pub opaque: *mut c_void,
-}
 pub const LZMA_CHECK_SHA256: lzma_check = 10;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
@@ -149,8 +139,8 @@ pub unsafe extern "C" fn lzma_index_hash_init(
     allocator: *const lzma_allocator,
 ) -> *mut lzma_index_hash {
     if index_hash.is_null() {
-        index_hash = lzma_alloc(core::mem::size_of::<lzma_index_hash>() as size_t, allocator)
-            as *mut lzma_index_hash;
+        index_hash =
+            lzma_alloc(core::mem::size_of::<lzma_index_hash>(), allocator) as *mut lzma_index_hash;
         if index_hash.is_null() {
             return core::ptr::null_mut();
         }
@@ -180,11 +170,13 @@ pub unsafe extern "C" fn lzma_index_hash_end(
     lzma_free(index_hash as *mut c_void, allocator);
 }
 #[no_mangle]
-pub unsafe extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
-    return index_size(
-        (*index_hash).blocks.count,
-        (*index_hash).blocks.index_list_size,
-    );
+pub extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
+    return unsafe {
+        index_size(
+            (*index_hash).blocks.count,
+            (*index_hash).blocks.index_list_size,
+        )
+    };
 }
 unsafe extern "C" fn hash_append(
     info: *mut lzma_index_hash_info,
@@ -202,7 +194,7 @@ unsafe extern "C" fn hash_append(
         &raw mut (*info).check,
         LZMA_CHECK_SHA256,
         &raw const sizes as *const lzma_vli as *const u8,
-        core::mem::size_of::<[lzma_vli; 2]>() as size_t,
+        core::mem::size_of::<[lzma_vli; 2]>(),
     );
 }
 #[no_mangle]

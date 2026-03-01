@@ -1,7 +1,6 @@
 use crate::types::*;
 use core::ffi::{c_int, c_uint, c_void};
 extern "C" {
-    fn memcmp(__s1: *const c_void, __s2: *const c_void, __n: size_t) -> c_int;
     fn lzma_mf_find(mf: *mut lzma_mf, count: *mut u32, matches: *mut lzma_match) -> u32;
 }
 pub const LZMA_FINISH: lzma_action = 3;
