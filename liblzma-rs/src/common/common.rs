@@ -22,7 +22,7 @@ pub extern "C" fn lzma_version_number() -> u32 {
 }
 #[no_mangle]
 pub extern "C" fn lzma_version_string() -> *const c_char {
-    b"5.8.2\0" as *const u8 as *const c_char
+    c"5.8.2".as_ptr()
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_alloc(
