@@ -747,9 +747,7 @@ unsafe extern "C" fn parse_filter(
             }
             *str = opts_start;
             let errmsg: *const c_char =
-                filter_name_map[i as usize]
-                    .parse
-                    .unwrap()(str, str_end, options);
+                filter_name_map[i as usize].parse.unwrap()(str, str_end, options);
             if !errmsg.is_null() {
                 lzma_free(options, allocator);
                 return errmsg;
@@ -1193,10 +1191,7 @@ pub unsafe extern "C" fn lzma_str_list_filters(
                             let mut k: size_t = 0;
                             while (*m.offset(k as isize)).name[0] != 0 {
                                 if k > 0 {
-                                    str_append_str(
-                                        &raw mut dest,
-                                        c"|".as_ptr(),
-                                    );
+                                    str_append_str(&raw mut dest, c"|".as_ptr());
                                 }
                                 str_append_str(
                                     &raw mut dest,

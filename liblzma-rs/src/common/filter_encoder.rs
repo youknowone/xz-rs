@@ -367,10 +367,7 @@ pub unsafe extern "C" fn lzma_filters_update(
         i += 1;
     }
     reversed_filters[count as usize].id = LZMA_VLI_UNKNOWN;
-    (*(*strm).internal)
-        .next
-        .update
-        .unwrap()(
+    (*(*strm).internal).next.update.unwrap()(
         (*(*strm).internal).next.coder,
         (*strm).allocator,
         filters,
@@ -437,16 +434,18 @@ pub unsafe extern "C" fn lzma_mt_block_size(filters: *const lzma_filter) -> u64 
             return UINT64_MAX;
         }
         if (*fe).block_size.is_some() {
-            let size: u64 = (*fe).block_size.unwrap()(
-                (*filters.offset(i as isize)).options,
-            ) as u64;
+            let size: u64 = (*fe).block_size.unwrap()((*filters.offset(i as isize)).options) as u64;
             if size > max {
                 max = size;
             }
         }
         i += 1;
     }
-    if max == 0 { UINT64_MAX } else { max }
+    if max == 0 {
+        UINT64_MAX
+    } else {
+        max
+    }
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_properties_size(

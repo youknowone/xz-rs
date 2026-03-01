@@ -400,13 +400,7 @@ pub extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -
         hash_count: 0,
         sons_count: 0,
     };
-    if unsafe {
-        lz_encoder_prepare(
-            &raw mut mf,
-            core::ptr::null::<lzma_allocator>(),
-            lz_options,
-        )
-    } {
+    if unsafe { lz_encoder_prepare(&raw mut mf, core::ptr::null::<lzma_allocator>(), lz_options) } {
         return UINT64_MAX;
     }
     (mf.hash_count as u64)
@@ -438,11 +432,7 @@ unsafe extern "C" fn lz_encoder_update(
     if (*coder).lz.options_update.is_none() {
         return LZMA_PROG_ERROR;
     }
-    let ret_: lzma_ret =
-        (*coder)
-            .lz
-            .options_update
-            .unwrap()((*coder).lz.coder, reversed_filters);
+    let ret_: lzma_ret = (*coder).lz.options_update.unwrap()((*coder).lz.coder, reversed_filters);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -459,12 +449,7 @@ unsafe extern "C" fn lz_encoder_set_out_limit(
 ) -> lzma_ret {
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
     if (*coder).next.code.is_none() && (*coder).lz.set_out_limit.is_some() {
-        return (*coder)
-            .lz
-            .set_out_limit
-            .unwrap()(
-            (*coder).lz.coder, uncomp_size, out_limit
-        );
+        return (*coder).lz.set_out_limit.unwrap()((*coder).lz.coder, uncomp_size, out_limit);
     }
     LZMA_OPTIONS_ERROR
 }
@@ -559,7 +544,7 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         after_size: 0,
         match_len_max: 0,
         nice_len: 0,
-        match_finder: 0 as lzma_match_finder,
+        match_finder: 0,
         depth: 0,
         preset_dict: core::ptr::null::<u8>(),
         preset_dict_size: 0,

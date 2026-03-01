@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_long, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_lz_encoder_init(
         next: *mut lzma_next_coder,
@@ -978,7 +978,7 @@ unsafe extern "C" fn lzma_encode(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> lzma_ret {
-    if ((*mf).action == LZMA_SYNC_FLUSH) as c_long != 0 {
+    if (*mf).action == LZMA_SYNC_FLUSH {
         return LZMA_OPTIONS_ERROR;
     }
     lzma_lzma_encode(
@@ -1269,7 +1269,7 @@ pub extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
         after_size: 0,
         match_len_max: 0,
         nice_len: 0,
-        match_finder: 0 as lzma_match_finder,
+        match_finder: 0,
         depth: 0,
         preset_dict: core::ptr::null::<u8>(),
         preset_dict_size: 0,

@@ -73,9 +73,9 @@ unsafe extern "C" fn block_encode_uncompressed(
         lc: 0,
         lp: 0,
         pb: 0,
-        mode: 0 as lzma_mode,
+        mode: 0,
         nice_len: 0,
-        mf: 0 as lzma_match_finder,
+        mf: 0,
         depth: 0,
         ext_flags: 0,
         ext_size_low: 0,
@@ -120,7 +120,7 @@ unsafe extern "C" fn block_encode_uncompressed(
     let mut in_pos: size_t = 0;
     let mut control: u8 = 0x1 as u8;
     while in_pos < in_size {
-                *out.offset(*out_pos as isize) = control;
+        *out.offset(*out_pos as isize) = control;
         *out_pos += 1;
         control = 0x2 as u8;
         let copy_size: size_t = if in_size.wrapping_sub(in_pos) < (1u32 << 16) as size_t {
@@ -128,9 +128,9 @@ unsafe extern "C" fn block_encode_uncompressed(
         } else {
             (1u32 << 16) as size_t
         };
-                *out.offset(*out_pos as isize) = (copy_size.wrapping_sub(1) >> 8) as u8;
+        *out.offset(*out_pos as isize) = (copy_size.wrapping_sub(1) >> 8) as u8;
         *out_pos += 1;
-                *out.offset(*out_pos as isize) = (copy_size.wrapping_sub(1) & 0xff) as u8;
+        *out.offset(*out_pos as isize) = (copy_size.wrapping_sub(1) & 0xff) as u8;
         *out_pos += 1;
         memcpy(
             out.offset(*out_pos as isize) as *mut c_void,
@@ -140,7 +140,7 @@ unsafe extern "C" fn block_encode_uncompressed(
         in_pos = in_pos.wrapping_add(copy_size);
         *out_pos = (*out_pos).wrapping_add(copy_size);
     }
-        *out.offset(*out_pos as isize) = 0;
+    *out.offset(*out_pos as isize) = 0;
     *out_pos += 1;
     LZMA_OK
 }
@@ -264,7 +264,7 @@ unsafe extern "C" fn block_buffer_encode(
     }
     let mut i: size_t = (*block).compressed_size as size_t;
     while i & 3 != 0 {
-                *out.offset(*out_pos as isize) = 0;
+        *out.offset(*out_pos as isize) = 0;
         *out_pos += 1;
         i += 1;
     }

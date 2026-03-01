@@ -162,10 +162,7 @@ unsafe extern "C" fn stream_encode(
                     LZMA_FINISH,
                     LZMA_FINISH,
                 ];
-                let ret: lzma_ret = (*coder)
-                    .block_encoder
-                    .code
-                    .unwrap()(
+                let ret: lzma_ret = (*coder).block_encoder.code.unwrap()(
                     (*coder).block_encoder.coder,
                     allocator,
                     in_0,
@@ -193,10 +190,7 @@ unsafe extern "C" fn stream_encode(
                 (*coder).sequence = SEQ_BLOCK_INIT;
             }
             4 => {
-                let ret_0: lzma_ret = (*coder)
-                    .index_encoder
-                    .code
-                    .unwrap()(
+                let ret_0: lzma_ret = (*coder).index_encoder.code.unwrap()(
                     (*coder).index_encoder.coder,
                     allocator,
                     core::ptr::null::<u8>(),
@@ -281,10 +275,7 @@ unsafe extern "C" fn stream_encoder_update(
             current_block = 8236137900636309791;
         }
     } else if (*coder).sequence <= SEQ_BLOCK_ENCODE {
-        ret = (*coder)
-            .block_encoder
-            .update
-            .unwrap()(
+        ret = (*coder).block_encoder.update.unwrap()(
             (*coder).block_encoder.coder,
             allocator,
             filters,

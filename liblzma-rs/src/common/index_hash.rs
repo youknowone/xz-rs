@@ -328,9 +328,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
             }
             let val = *in_0.offset(*in_pos as isize);
             *in_pos += 1;
-            if (*index_hash).crc32 >> (*index_hash).pos.wrapping_mul(8) & 0xff
-                != val as u32
-            {
+            if (*index_hash).crc32 >> (*index_hash).pos.wrapping_mul(8) & 0xff != val as u32 {
                 return LZMA_DATA_ERROR;
             }
             (*index_hash).pos = (*index_hash).pos.wrapping_add(1);

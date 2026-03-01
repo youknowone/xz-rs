@@ -228,10 +228,7 @@ unsafe extern "C" fn lzip_decode(
             13394712405657322686 => {
                 let in_start: size_t = *in_pos;
                 let out_start: size_t = *out_pos;
-                let ret: lzma_ret = (*coder)
-                    .lzma_decoder
-                    .code
-                    .unwrap()(
+                let ret: lzma_ret = (*coder).lzma_decoder.code.unwrap()(
                     (*coder).lzma_decoder.coder,
                     allocator,
                     in_0,

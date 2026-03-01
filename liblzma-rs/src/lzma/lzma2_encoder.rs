@@ -198,7 +198,7 @@ unsafe extern "C" fn lzma2_encode(
             0 => {
                 if mf_unencoded(mf) == 0 {
                     if (*mf).action == LZMA_FINISH {
-                                                *out.offset(*out_pos as isize) = 0;
+                        *out.offset(*out_pos as isize) = 0;
                         *out_pos += 1;
                     }
                     return if (*mf).action == LZMA_RUN {

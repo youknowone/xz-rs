@@ -445,10 +445,5 @@ pub unsafe extern "C" fn lzma_properties_decode(
             LZMA_OPTIONS_ERROR
         };
     }
-    (*fd).props_decode.unwrap()(
-        &raw mut (*filter).options,
-        allocator,
-        props,
-        props_size,
-    )
+    (*fd).props_decode.unwrap()(&raw mut (*filter).options, allocator, props, props_size)
 }

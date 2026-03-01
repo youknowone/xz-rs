@@ -478,10 +478,7 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
         if in_filled.wrapping_sub((*thr).in_pos) > chunk_size {
             in_filled = (*thr).in_pos.wrapping_add(chunk_size);
         }
-        ret = (*thr)
-            .block_decoder
-            .code
-            .unwrap()(
+        ret = (*thr).block_decoder.code.unwrap()(
             (*thr).block_decoder.coder,
             (*thr).allocator,
             (*thr).in_0,
@@ -1101,10 +1098,7 @@ unsafe extern "C" fn stream_decode_mt(
             7173345243791314703 => {
                 let in_old_1: size_t = *in_pos;
                 let out_old: size_t = *out_pos;
-                let ret_4: lzma_ret = (*coder)
-                    .block_decoder
-                    .code
-                    .unwrap()(
+                let ret_4: lzma_ret = (*coder).block_decoder.code.unwrap()(
                     (*coder).block_decoder.coder,
                     allocator,
                     in_0,

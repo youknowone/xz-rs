@@ -461,8 +461,7 @@ pub unsafe extern "C" fn lzma_index_checks(i: *const lzma_index) -> u32 {
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_padding_size(i: *const lzma_index) -> u32 {
-    ((4_u64).wrapping_sub(index_size_unpadded((*i).record_count, (*i).index_list_size)) & 3)
-        as u32
+    ((4_u64).wrapping_sub(index_size_unpadded((*i).record_count, (*i).index_list_size)) & 3) as u32
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_index_stream_flags(

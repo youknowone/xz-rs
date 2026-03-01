@@ -191,9 +191,7 @@ unsafe extern "C" fn index_decode(
             }
             let val = *in_0.offset(*in_pos as isize);
             *in_pos += 1;
-            if (*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff
-                != val as u32
-            {
+            if (*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff != val as u32 {
                 return LZMA_DATA_ERROR;
             }
             (*coder).pos = (*coder).pos.wrapping_add(1);

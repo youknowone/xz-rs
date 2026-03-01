@@ -175,10 +175,7 @@ unsafe extern "C" fn decode_index(
     update_file_cur_pos: bool,
 ) -> lzma_ret {
     let in_start: size_t = *in_pos;
-    let ret: lzma_ret = (*coder)
-        .index_decoder
-        .code
-        .unwrap()(
+    let ret: lzma_ret = (*coder).index_decoder.code.unwrap()(
         (*coder).index_decoder.coder,
         allocator,
         in_0,
@@ -533,10 +530,7 @@ unsafe extern "C" fn file_info_decoder_memconfig(
         this_index_memusage = lzma_index_memused((*coder).this_index);
     } else if (*coder).sequence == SEQ_INDEX_DECODE {
         let mut dummy: u64 = 0;
-        if (*coder)
-            .index_decoder
-            .memconfig
-            .unwrap()(
+        if (*coder).index_decoder.memconfig.unwrap()(
             (*coder).index_decoder.coder,
             &raw mut this_index_memusage,
             &raw mut dummy,
@@ -559,10 +553,7 @@ unsafe extern "C" fn file_info_decoder_memconfig(
             let idec_new_memlimit: u64 = new_memlimit.wrapping_sub(combined_index_memusage);
             let mut dummy1: u64 = 0;
             let mut dummy2: u64 = 0;
-            if (*coder)
-                .index_decoder
-                .memconfig
-                .unwrap()(
+            if (*coder).index_decoder.memconfig.unwrap()(
                 (*coder).index_decoder.coder,
                 &raw mut dummy1,
                 &raw mut dummy2,

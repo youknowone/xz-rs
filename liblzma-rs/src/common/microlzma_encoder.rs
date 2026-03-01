@@ -37,10 +37,7 @@ unsafe extern "C" fn microlzma_encode(
     let out_start: size_t = *out_pos;
     let in_start: size_t = *in_pos;
     let mut uncomp_size: u64 = 0;
-    if (*coder)
-        .lzma
-        .set_out_limit
-        .unwrap()(
+    if (*coder).lzma.set_out_limit.unwrap()(
         (*coder).lzma.coder,
         &raw mut uncomp_size,
         out_size.wrapping_sub(*out_pos) as u64,

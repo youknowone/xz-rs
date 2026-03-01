@@ -353,10 +353,7 @@ unsafe extern "C" fn stream_decode(
         }
         match current_block_100 {
             721385680381463314 => {
-                let ret_1: lzma_ret = (*coder)
-                    .block_decoder
-                    .code
-                    .unwrap()(
+                let ret_1: lzma_ret = (*coder).block_decoder.code.unwrap()(
                     (*coder).block_decoder.coder,
                     allocator,
                     in_0,

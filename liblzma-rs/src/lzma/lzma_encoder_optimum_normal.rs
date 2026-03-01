@@ -261,9 +261,7 @@ unsafe extern "C" fn get_literal_price(
 }
 #[inline]
 extern "C" fn get_len_price(lencoder: *const lzma_length_encoder, len: u32, pos_state: u32) -> u32 {
-    unsafe {
-        (*lencoder).prices[pos_state as usize][len.wrapping_sub(MATCH_LEN_MIN) as usize]
-    }
+    unsafe { (*lencoder).prices[pos_state as usize][len.wrapping_sub(MATCH_LEN_MIN) as usize] }
 }
 #[inline]
 extern "C" fn get_short_rep_price(

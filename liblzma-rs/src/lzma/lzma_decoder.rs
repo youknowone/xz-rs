@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_long, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_lz_decoder_init(
         next: *mut lzma_next_coder,
@@ -178,7 +178,7 @@ unsafe extern "C" fn dict_put(dict: *mut lzma_dict, byte: u8) {
 }
 #[inline]
 unsafe extern "C" fn dict_put_safe(dict: *mut lzma_dict, byte: u8) -> bool {
-    if ((*dict).pos == (*dict).limit) as c_long != 0 {
+    if (*dict).pos == (*dict).limit {
         return true;
     }
     dict_put(dict, byte);
@@ -263,7 +263,7 @@ unsafe extern "C" fn lzma_decode(
     let mut rc: lzma_range_decoder = (*coder).rc;
     let mut rc_in_ptr: *const u8 = in_0.offset(*in_pos as isize);
     let rc_in_end: *const u8 = in_0.offset(in_size as isize);
-    let rc_in_fast_end: *const u8 = if rc_in_end.offset_from(rc_in_ptr) as c_long <= 20 as c_long {
+    let rc_in_fast_end: *const u8 = if rc_in_end.offset_from(rc_in_ptr) <= 20 {
         rc_in_ptr
     } else {
         rc_in_end.offset(-20)
@@ -377,7 +377,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -413,7 +413,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -452,7 +452,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -496,7 +496,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -537,7 +537,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -570,7 +570,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -615,7 +615,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -635,7 +635,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -679,7 +679,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -707,7 +707,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -744,7 +744,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -801,7 +801,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -846,7 +846,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -884,7 +884,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -932,7 +932,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -966,7 +966,7 @@ unsafe extern "C" fn lzma_decode(
                 }
             }
             5979571030476392895 => {
-                if (might_finish_without_eopm && dict.pos == dict.limit) as c_long != 0 {
+                if might_finish_without_eopm && dict.pos == dict.limit {
                     if rc.range < RC_TOP_VALUE as u32 {
                         if rc_in_ptr == rc_in_end {
                             (*coder).sequence = SEQ_NORMALIZE;
@@ -974,7 +974,7 @@ unsafe extern "C" fn lzma_decode(
                             continue;
                         } else {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                     }
@@ -997,7 +997,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -1060,7 +1060,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -1097,7 +1097,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -1127,7 +1127,7 @@ unsafe extern "C" fn lzma_decode(
                 continue;
             }
             17340485688450593529 => {
-                if dict_repeat(&raw mut dict, rep0, &raw mut len) as c_long != 0 {
+                if dict_repeat(&raw mut dict, rep0, &raw mut len) {
                     (*coder).sequence = SEQ_COPY;
                     current_block = 4609795085482299213;
                     continue;
@@ -1143,7 +1143,7 @@ unsafe extern "C" fn lzma_decode(
                         continue;
                     } else {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
@@ -1192,7 +1192,7 @@ unsafe extern "C" fn lzma_decode(
                 }
                 if rc.range < RC_TOP_VALUE as u32 {
                     rc.range <<= RC_SHIFT_BITS;
-                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                     rc_in_ptr = rc_in_ptr.offset(1);
                 }
                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1225,7 +1225,7 @@ unsafe extern "C" fn lzma_decode(
                         symbol = 1;
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1248,7 +1248,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1271,7 +1271,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1294,7 +1294,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1317,7 +1317,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1340,7 +1340,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1363,7 +1363,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1386,7 +1386,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1423,7 +1423,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1451,7 +1451,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1479,7 +1479,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1507,7 +1507,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1535,7 +1535,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1563,7 +1563,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1591,7 +1591,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1619,7 +1619,7 @@ unsafe extern "C" fn lzma_decode(
                         t_subcoder_index = t_offset.wrapping_add(t_match_bit).wrapping_add(symbol);
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1652,7 +1652,7 @@ unsafe extern "C" fn lzma_decode(
                         - ((*coder).is_match[state as usize][pos_state as usize] >> RC_MOVE_BITS);
                     if rc.range < RC_TOP_VALUE as u32 {
                         rc.range <<= RC_SHIFT_BITS;
-                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1676,7 +1676,7 @@ unsafe extern "C" fn lzma_decode(
                         symbol = 1;
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1692,7 +1692,7 @@ unsafe extern "C" fn lzma_decode(
                             symbol = 1;
                             if rc.range < RC_TOP_VALUE as u32 {
                                 rc.range <<= RC_SHIFT_BITS;
-                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                 rc_in_ptr = rc_in_ptr.offset(1);
                             }
                             rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -1728,7 +1728,7 @@ unsafe extern "C" fn lzma_decode(
                             }
                             if rc.range < RC_TOP_VALUE as u32 {
                                 rc.range <<= RC_SHIFT_BITS;
-                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                 rc_in_ptr = rc_in_ptr.offset(1);
                             }
                             rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -1764,7 +1764,7 @@ unsafe extern "C" fn lzma_decode(
                             }
                             if rc.range < RC_TOP_VALUE as u32 {
                                 rc.range <<= RC_SHIFT_BITS;
-                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                 rc_in_ptr = rc_in_ptr.offset(1);
                             }
                             rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -1807,7 +1807,7 @@ unsafe extern "C" fn lzma_decode(
                                 - ((*coder).match_len_decoder.choice >> RC_MOVE_BITS);
                             if rc.range < RC_TOP_VALUE as u32 {
                                 rc.range <<= RC_SHIFT_BITS;
-                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                 rc_in_ptr = rc_in_ptr.offset(1);
                             }
                             rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -1824,7 +1824,7 @@ unsafe extern "C" fn lzma_decode(
                                 symbol = 1;
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -1863,7 +1863,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -1902,7 +1902,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -1951,7 +1951,7 @@ unsafe extern "C" fn lzma_decode(
                                 symbol = 1;
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -1980,7 +1980,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2009,7 +2009,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2038,7 +2038,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2067,7 +2067,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2096,7 +2096,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2125,7 +2125,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2154,7 +2154,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2198,7 +2198,7 @@ unsafe extern "C" fn lzma_decode(
                         symbol = 1;
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2221,7 +2221,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2244,7 +2244,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2267,7 +2267,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2290,7 +2290,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2313,7 +2313,7 @@ unsafe extern "C" fn lzma_decode(
                         }
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
-                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                             rc_in_ptr = rc_in_ptr.offset(1);
                         }
                         rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2351,7 +2351,7 @@ unsafe extern "C" fn lzma_decode(
                                 loop {
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2386,7 +2386,7 @@ unsafe extern "C" fn lzma_decode(
                                     rep0 = (rep0 << 1).wrapping_add(1);
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc.range >>= 1;
@@ -2403,7 +2403,7 @@ unsafe extern "C" fn lzma_decode(
                                 symbol = 0;
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2434,7 +2434,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2465,7 +2465,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2496,7 +2496,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2531,7 +2531,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                             }
                         }
-                        if !dict_is_distance_valid(&raw mut dict, rep0 as size_t) as c_long != 0 {
+                        if !dict_is_distance_valid(&raw mut dict, rep0 as size_t) {
                             ret_0 = LZMA_DATA_ERROR;
                             current_block = 4609795085482299213;
                             continue 'c_9380;
@@ -2548,7 +2548,7 @@ unsafe extern "C" fn lzma_decode(
                         } else {
                             if rc.range < RC_TOP_VALUE as u32 {
                                 rc.range <<= RC_SHIFT_BITS;
-                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                 rc_in_ptr = rc_in_ptr.offset(1);
                             }
                             rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2564,7 +2564,7 @@ unsafe extern "C" fn lzma_decode(
                                         as probability;
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2607,7 +2607,7 @@ unsafe extern "C" fn lzma_decode(
                                     - ((*coder).is_rep0[state as usize] >> RC_MOVE_BITS);
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2632,7 +2632,7 @@ unsafe extern "C" fn lzma_decode(
                                         - ((*coder).is_rep1[state as usize] >> RC_MOVE_BITS);
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2673,7 +2673,7 @@ unsafe extern "C" fn lzma_decode(
                             symbol = 1;
                             if rc.range < RC_TOP_VALUE as u32 {
                                 rc.range <<= RC_SHIFT_BITS;
-                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                 rc_in_ptr = rc_in_ptr.offset(1);
                             }
                             rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2690,7 +2690,7 @@ unsafe extern "C" fn lzma_decode(
                                 symbol = 1;
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2728,7 +2728,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2766,7 +2766,7 @@ unsafe extern "C" fn lzma_decode(
                                 }
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2811,7 +2811,7 @@ unsafe extern "C" fn lzma_decode(
                                     - ((*coder).rep_len_decoder.choice >> RC_MOVE_BITS);
                                 if rc.range < RC_TOP_VALUE as u32 {
                                     rc.range <<= RC_SHIFT_BITS;
-                                                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                     rc_in_ptr = rc_in_ptr.offset(1);
                                 }
                                 rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
@@ -2828,7 +2828,7 @@ unsafe extern "C" fn lzma_decode(
                                     symbol = 1;
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2867,7 +2867,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2906,7 +2906,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2955,7 +2955,7 @@ unsafe extern "C" fn lzma_decode(
                                     symbol = 1;
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -2986,7 +2986,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -3017,7 +3017,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -3048,7 +3048,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -3079,7 +3079,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -3110,7 +3110,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -3141,7 +3141,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -3172,7 +3172,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     if rc.range < RC_TOP_VALUE as u32 {
                                         rc.range <<= RC_SHIFT_BITS;
-                                                                                rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
+                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                                         rc_in_ptr = rc_in_ptr.offset(1);
                                     }
                                     rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(
@@ -3209,7 +3209,7 @@ unsafe extern "C" fn lzma_decode(
                             }
                         }
                     }
-                    if dict_repeat(&raw mut dict, rep0, &raw mut len) as c_long == 0 {
+                    if !dict_repeat(&raw mut dict, rep0, &raw mut len) {
                         continue;
                     }
                     (*coder).sequence = SEQ_COPY;

@@ -497,10 +497,7 @@ unsafe extern "C" fn worker_encode(
             in_limit = in_pos.wrapping_add(in_chunk_max);
             action = LZMA_RUN;
         }
-        ret = (*thr)
-            .block_encoder
-            .code
-            .unwrap()(
+        ret = (*thr).block_encoder.code.unwrap()(
             (*thr).block_encoder.coder,
             (*thr).allocator,
             (*thr).in_0,
@@ -1161,10 +1158,7 @@ unsafe extern "C" fn stream_encode_mt(
         }
         match current_block_53 {
             7301844830188010456 => {
-                let ret_0: lzma_ret = (*coder)
-                    .index_encoder
-                    .code
-                    .unwrap()(
+                let ret_0: lzma_ret = (*coder).index_encoder.code.unwrap()(
                     (*coder).index_encoder.coder,
                     allocator,
                     core::ptr::null::<u8>(),
@@ -1396,9 +1390,9 @@ unsafe extern "C" fn stream_encoder_mt_init(
             lc: 0,
             lp: 0,
             pb: 0,
-            mode: 0 as lzma_mode,
+            mode: 0,
             nice_len: 0,
-            mf: 0 as lzma_match_finder,
+            mf: 0,
             depth: 0,
             ext_flags: 0,
             ext_size_low: 0,
@@ -1615,9 +1609,9 @@ pub unsafe extern "C" fn lzma_stream_encoder_mt_memusage(options: *const lzma_mt
             lc: 0,
             lp: 0,
             pb: 0,
-            mode: 0 as lzma_mode,
+            mode: 0,
             nice_len: 0,
-            mf: 0 as lzma_match_finder,
+            mf: 0,
             depth: 0,
             ext_flags: 0,
             ext_size_low: 0,

@@ -161,10 +161,7 @@ unsafe extern "C" fn lzma2_decode(
                 );
                 *in_pos += 1;
                 (*coder).sequence = SEQ_COMPRESSED_0;
-                (*coder)
-                    .lzma
-                    .set_uncompressed
-                    .unwrap()(
+                (*coder).lzma.set_uncompressed.unwrap()(
                     (*coder).lzma.coder,
                     (*coder).uncompressed_size as lzma_vli,
                     false,
@@ -185,8 +182,7 @@ unsafe extern "C" fn lzma2_decode(
             5 => {
                 let prop_byte = *in_0.offset(*in_pos as isize);
                 *in_pos += 1;
-                if lzma_lzma_lclppb_decode(&raw mut (*coder).options, prop_byte)
-                {
+                if lzma_lzma_lclppb_decode(&raw mut (*coder).options, prop_byte) {
                     return LZMA_DATA_ERROR;
                 }
                 (*coder).lzma.reset.unwrap()(
@@ -197,13 +193,8 @@ unsafe extern "C" fn lzma2_decode(
             }
             6 => {
                 let in_start: size_t = *in_pos;
-                let ret: lzma_ret = (*coder).lzma.code.unwrap()(
-                    (*coder).lzma.coder,
-                    dict,
-                    in_0,
-                    in_pos,
-                    in_size,
-                );
+                let ret: lzma_ret =
+                    (*coder).lzma.code.unwrap()((*coder).lzma.coder, dict, in_0, in_pos, in_size);
                 let in_used: size_t = (*in_pos).wrapping_sub(in_start);
                 if in_used > (*coder).compressed_size {
                     return LZMA_DATA_ERROR;
