@@ -1,8 +1,8 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint};
-pub const LZMA_LC_DEFAULT: c_int = 3;
-pub const LZMA_LP_DEFAULT: c_int = 0;
-pub const LZMA_PB_DEFAULT: c_int = 2;
+use core::ffi::c_uint;
+pub const LZMA_LC_DEFAULT: u32 = 3;
+pub const LZMA_LP_DEFAULT: u32 = 0;
+pub const LZMA_PB_DEFAULT: u32 = 2;
 pub const LZMA_PRESET_LEVEL_MASK: c_uint = 0x1f;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
 #[no_mangle]
@@ -18,9 +18,9 @@ pub unsafe extern "C" fn lzma_lzma_preset(
     }
     (*options).preset_dict = ::core::ptr::null::<u8>();
     (*options).preset_dict_size = 0;
-    (*options).lc = LZMA_LC_DEFAULT as u32;
-    (*options).lp = LZMA_LP_DEFAULT as u32;
-    (*options).pb = LZMA_PB_DEFAULT as u32;
+    (*options).lc = LZMA_LC_DEFAULT;
+    (*options).lp = LZMA_LP_DEFAULT;
+    (*options).pb = LZMA_PB_DEFAULT;
     static mut dict_pow2: [u8; 10] = [18, 20, 21, 22, 22, 23, 23, 24, 25, 26];
     (*options).dict_size = 1u32 << dict_pow2[level as usize];
     if level <= 3 {

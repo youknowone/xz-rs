@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_long, c_uint, c_void};
+use core::ffi::{c_long, c_uint, c_void};
 extern "C" {
     fn lzma_lz_decoder_init(
         next: *mut lzma_next_coder,
@@ -108,8 +108,8 @@ extern "C" fn read32le(buf: *const u8) -> u32 {
     };
 }
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
-pub const LZ_DICT_REPEAT_MAX: c_int = 288;
-pub const LZ_DICT_INIT_POS: c_int = 2 * LZ_DICT_REPEAT_MAX;
+pub const LZ_DICT_REPEAT_MAX: u32 = 288;
+pub const LZ_DICT_INIT_POS: u32 = 2 * LZ_DICT_REPEAT_MAX;
 #[inline]
 unsafe extern "C" fn dict_get(dict: *const lzma_dict, distance: u32) -> u8 {
     return *(*dict).buf.offset(
@@ -187,12 +187,12 @@ unsafe extern "C" fn dict_put_safe(dict: *mut lzma_dict, byte: u8) -> bool {
     dict_put(dict, byte);
     return false;
 }
-pub const RC_SHIFT_BITS: c_int = 8;
-pub const RC_TOP_BITS: c_int = 24;
+pub const RC_SHIFT_BITS: u32 = 8;
+pub const RC_TOP_BITS: u32 = 24;
 pub const RC_TOP_VALUE: c_uint = 1u32 << RC_TOP_BITS;
-pub const RC_BIT_MODEL_TOTAL_BITS: c_int = 11;
+pub const RC_BIT_MODEL_TOTAL_BITS: u32 = 11;
 pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
-pub const RC_MOVE_BITS: c_int = 5;
+pub const RC_MOVE_BITS: u32 = 5;
 #[inline]
 unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
     return (*options).lc <= LZMA_LCLP_MAX as u32
@@ -200,7 +200,7 @@ unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool 
         && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX as u32
         && (*options).pb <= LZMA_PB_MAX as u32;
 }
-pub const STATES: c_int = 12;
+pub const STATES: u32 = 12;
 pub const LIT_STATES: u32 = 7;
 pub const LITERAL_CODER_SIZE: c_uint = 0x300;
 #[inline]
@@ -212,22 +212,22 @@ unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
         i = i.wrapping_add(1);
     }
 }
-pub const MATCH_LEN_MIN: c_int = 2;
-pub const LEN_LOW_BITS: c_int = 3;
-pub const LEN_LOW_SYMBOLS: c_int = (1) << LEN_LOW_BITS;
-pub const LEN_MID_BITS: c_int = 3;
-pub const LEN_MID_SYMBOLS: c_int = (1) << LEN_MID_BITS;
-pub const LEN_HIGH_BITS: c_int = 8;
-pub const LEN_HIGH_SYMBOLS: c_int = (1) << LEN_HIGH_BITS;
-pub const DIST_STATES: c_int = 4;
-pub const DIST_SLOT_BITS: c_int = 6;
-pub const DIST_SLOTS: c_int = (1) << DIST_SLOT_BITS;
-pub const DIST_MODEL_START: c_int = 4;
+pub const MATCH_LEN_MIN: u32 = 2;
+pub const LEN_LOW_BITS: u32 = 3;
+pub const LEN_LOW_SYMBOLS: u32 = (1) << LEN_LOW_BITS;
+pub const LEN_MID_BITS: u32 = 3;
+pub const LEN_MID_SYMBOLS: u32 = (1) << LEN_MID_BITS;
+pub const LEN_HIGH_BITS: u32 = 8;
+pub const LEN_HIGH_SYMBOLS: u32 = (1) << LEN_HIGH_BITS;
+pub const DIST_STATES: u32 = 4;
+pub const DIST_SLOT_BITS: u32 = 6;
+pub const DIST_SLOTS: u32 = (1) << DIST_SLOT_BITS;
+pub const DIST_MODEL_START: u32 = 4;
 pub const DIST_MODEL_END: u32 = 14;
 pub const FULL_DISTANCES_BITS: u32 = DIST_MODEL_END / 2;
 pub const FULL_DISTANCES: u32 = 1 << FULL_DISTANCES_BITS;
 pub const ALIGN_BITS: u32 = 4;
-pub const ALIGN_SIZE: c_int = (1) << ALIGN_BITS;
+pub const ALIGN_SIZE: u32 = (1) << ALIGN_BITS;
 #[inline]
 unsafe extern "C" fn rc_read_init(
     rc: *mut lzma_range_decoder,
@@ -397,8 +397,8 @@ unsafe extern "C" fn lzma_decode(
                     probs = &raw mut *(&raw mut (*coder).rep_len_decoder.low
                         as *mut [probability; 8])
                         .offset(pos_state as isize) as *mut probability;
-                    limit = LEN_LOW_SYMBOLS as u32;
-                    len = MATCH_LEN_MIN as u32;
+                    limit = LEN_LOW_SYMBOLS;
+                    len = MATCH_LEN_MIN;
                 } else {
                     rc.range = rc.range.wrapping_sub(rc_bound);
                     rc.code = rc.code.wrapping_sub(rc_bound);
@@ -671,7 +671,7 @@ unsafe extern "C" fn lzma_decode(
                     symbol = symbol.wrapping_add(offset);
                 }
                 offset <<= 1;
-                if offset < ALIGN_SIZE as u32 {
+                if offset < ALIGN_SIZE {
                     current_block = 10510472849010538284;
                     continue;
                 }
@@ -779,12 +779,12 @@ unsafe extern "C" fn lzma_decode(
                         *probs.offset(symbol as isize) >> RC_MOVE_BITS;
                     symbol = (symbol << 1).wrapping_add(1);
                 }
-                if symbol < DIST_SLOTS as u32 {
+                if symbol < DIST_SLOTS {
                     current_block = 4174862988780014241;
                     continue;
                 }
-                symbol = symbol.wrapping_sub(DIST_SLOTS as u32);
-                if symbol < DIST_MODEL_START as u32 {
+                symbol = symbol.wrapping_sub(DIST_SLOTS);
+                if symbol < DIST_MODEL_START {
                     rep0 = symbol;
                 } else {
                     limit = (symbol >> 1).wrapping_sub(1);
@@ -844,7 +844,7 @@ unsafe extern "C" fn lzma_decode(
                 len = len.wrapping_add(symbol.wrapping_sub(limit));
                 probs = &raw mut *(&raw mut (*coder).dist_slot as *mut [probability; 64]).offset(
                     (if len < (DIST_STATES + MATCH_LEN_MIN) as u32 {
-                        len.wrapping_sub(MATCH_LEN_MIN as u32)
+                        len.wrapping_sub(MATCH_LEN_MIN)
                     } else {
                         (DIST_STATES - 1) as u32
                     }) as isize,
@@ -879,7 +879,7 @@ unsafe extern "C" fn lzma_decode(
                     probs = &raw mut *(&raw mut (*coder).match_len_decoder.mid
                         as *mut [probability; 8])
                         .offset(pos_state as isize) as *mut probability;
-                    limit = LEN_MID_SYMBOLS as u32;
+                    limit = LEN_MID_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS) as u32;
                 } else {
                     rc.range = rc.range.wrapping_sub(rc_bound);
@@ -887,7 +887,7 @@ unsafe extern "C" fn lzma_decode(
                     (*coder).match_len_decoder.choice2 = (*coder).match_len_decoder.choice2
                         - ((*coder).match_len_decoder.choice2 >> RC_MOVE_BITS);
                     probs = &raw mut (*coder).match_len_decoder.high as *mut probability;
-                    limit = LEN_HIGH_SYMBOLS as u32;
+                    limit = LEN_HIGH_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS) as u32;
                 }
                 current_block = 8485842003490715114;
@@ -918,8 +918,8 @@ unsafe extern "C" fn lzma_decode(
                     probs = &raw mut *(&raw mut (*coder).match_len_decoder.low
                         as *mut [probability; 8])
                         .offset(pos_state as isize) as *mut probability;
-                    limit = LEN_LOW_SYMBOLS as u32;
-                    len = MATCH_LEN_MIN as u32;
+                    limit = LEN_LOW_SYMBOLS;
+                    len = MATCH_LEN_MIN;
                 } else {
                     rc.range = rc.range.wrapping_sub(rc_bound);
                     rc.code = rc.code.wrapping_sub(rc_bound);
@@ -1044,15 +1044,15 @@ unsafe extern "C" fn lzma_decode(
                     );
                     symbol = 1;
                     if state < LIT_STATES {
-                        state = if state <= STATE_SHORTREP_LIT_LIT as u32 {
-                            STATE_LIT_LIT as u32
+                        state = if state <= STATE_SHORTREP_LIT_LIT {
+                            STATE_LIT_LIT
                         } else {
                             state.wrapping_sub(3)
                         };
                         current_block = 13844743919235296534;
                         continue;
                     } else {
-                        state = if state <= STATE_LIT_SHORTREP as u32 {
+                        state = if state <= STATE_LIT_SHORTREP {
                             state.wrapping_sub(3)
                         } else {
                             state.wrapping_sub(6)
@@ -1183,7 +1183,7 @@ unsafe extern "C" fn lzma_decode(
                     probs = &raw mut *(&raw mut (*coder).rep_len_decoder.mid
                         as *mut [probability; 8])
                         .offset(pos_state as isize) as *mut probability;
-                    limit = LEN_MID_SYMBOLS as u32;
+                    limit = LEN_MID_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS) as u32;
                 } else {
                     rc.range = rc.range.wrapping_sub(rc_bound);
@@ -1191,7 +1191,7 @@ unsafe extern "C" fn lzma_decode(
                     (*coder).rep_len_decoder.choice2 = (*coder).rep_len_decoder.choice2
                         - ((*coder).rep_len_decoder.choice2 >> RC_MOVE_BITS);
                     probs = &raw mut (*coder).rep_len_decoder.high as *mut probability;
-                    limit = LEN_HIGH_SYMBOLS as u32;
+                    limit = LEN_HIGH_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS) as u32;
                 }
                 current_block = 16690975975023747857;
@@ -1241,8 +1241,8 @@ unsafe extern "C" fn lzma_decode(
                         ) as isize,
                     );
                     if state < LIT_STATES {
-                        state = if state <= STATE_SHORTREP_LIT_LIT as u32 {
-                            STATE_LIT_LIT as u32
+                        state = if state <= STATE_SHORTREP_LIT_LIT {
+                            STATE_LIT_LIT
                         } else {
                             state.wrapping_sub(3)
                         };
@@ -1440,7 +1440,7 @@ unsafe extern "C" fn lzma_decode(
                             symbol = (symbol << 1).wrapping_add(1);
                         }
                     } else {
-                        state = if state <= STATE_LIT_SHORTREP as u32 {
+                        state = if state <= STATE_LIT_SHORTREP {
                             state.wrapping_sub(3)
                         } else {
                             state.wrapping_sub(6)
@@ -2247,7 +2247,7 @@ unsafe extern "C" fn lzma_decode(
                         probs = &raw mut *(&raw mut (*coder).dist_slot as *mut [probability; 64])
                             .offset(
                                 (if len < (DIST_STATES + MATCH_LEN_MIN) as u32 {
-                                    len.wrapping_sub(MATCH_LEN_MIN as u32)
+                                    len.wrapping_sub(MATCH_LEN_MIN)
                                 } else {
                                     (DIST_STATES - 1) as u32
                                 }) as isize,
@@ -2398,7 +2398,7 @@ unsafe extern "C" fn lzma_decode(
                             symbol = (symbol << 1).wrapping_add(1);
                         }
                         symbol = symbol.wrapping_add(-((1_i32) << 6) as u32);
-                        if symbol < DIST_MODEL_START as u32 {
+                        if symbol < DIST_MODEL_START {
                             rep0 = symbol;
                         } else {
                             limit = (symbol >> 1).wrapping_sub(1);
@@ -3398,7 +3398,7 @@ unsafe extern "C" fn lzma_decoder_reset(coder_ptr: *mut c_void, opt: *const c_vo
     (*coder).rc.code = 0;
     (*coder).rc.init_bytes_left = 5;
     let mut i: u32 = 0;
-    while i < STATES as u32 {
+    while i < STATES {
         let mut j: u32 = 0;
         while j <= (*coder).pos_mask {
             (*coder).is_match[i as usize][j as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
@@ -3413,7 +3413,7 @@ unsafe extern "C" fn lzma_decoder_reset(coder_ptr: *mut c_void, opt: *const c_vo
         i = i.wrapping_add(1);
     }
     let mut i_0: u32 = 0;
-    while i_0 < DIST_STATES as u32 {
+    while i_0 < DIST_STATES {
         let mut bt_i: u32 = 0;
         while bt_i < ((1) << 6) as u32 {
             (*coder).dist_slot[i_0 as usize][bt_i as usize] =

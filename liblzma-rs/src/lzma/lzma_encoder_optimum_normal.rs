@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_mf_find(mf: *mut lzma_mf, count: *mut u32, matches: *mut lzma_match) -> u32;
     static lzma_rc_prices: [u8; 128];
@@ -65,7 +65,7 @@ pub struct lzma_lzma1_encoder_s {
     pub opts_current_index: u32,
     pub opts: [lzma_optimal; OPTS as usize],
 }
-pub const OPTS: c_int = (1) << 12;
+pub const OPTS: u32 = (1) << 12;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_optimal {
@@ -107,10 +107,10 @@ unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
 }
-pub const RC_BIT_MODEL_TOTAL_BITS: c_int = 11;
+pub const RC_BIT_MODEL_TOTAL_BITS: u32 = 11;
 pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
-pub const RC_MOVE_REDUCING_BITS: c_int = 4;
-pub const RC_BIT_PRICE_SHIFT_BITS: c_int = 4;
+pub const RC_MOVE_REDUCING_BITS: u32 = 4;
+pub const RC_BIT_PRICE_SHIFT_BITS: u32 = 4;
 pub const RC_INFINITY_PRICE: c_uint = 1u32 << 30;
 #[inline]
 extern "C" fn rc_bit_price(prob: probability, bit: u32) -> u32 {
@@ -175,18 +175,18 @@ extern "C" fn rc_direct_price(bits: u32) -> u32 {
     return bits << RC_BIT_PRICE_SHIFT_BITS;
 }
 pub const LIT_STATES: u32 = 7;
-pub const MATCH_LEN_MIN: c_int = 2;
-pub const DIST_STATES: c_int = 4;
-pub const DIST_SLOT_BITS: c_int = 6;
-pub const DIST_MODEL_START: c_int = 4;
+pub const MATCH_LEN_MIN: u32 = 2;
+pub const DIST_STATES: u32 = 4;
+pub const DIST_SLOT_BITS: u32 = 6;
+pub const DIST_MODEL_START: u32 = 4;
 pub const DIST_MODEL_END: u32 = 14;
 pub const FULL_DISTANCES_BITS: u32 = DIST_MODEL_END / 2;
 pub const FULL_DISTANCES: u32 = 1 << FULL_DISTANCES_BITS;
 pub const ALIGN_BITS: u32 = 4;
-pub const ALIGN_SIZE: c_int = (1) << ALIGN_BITS;
-pub const ALIGN_MASK: c_int = ALIGN_SIZE - 1;
+pub const ALIGN_SIZE: u32 = (1) << ALIGN_BITS;
+pub const ALIGN_MASK: u32 = ALIGN_SIZE - 1;
 pub const REPS: u32 = 4;
-pub const FASTPOS_BITS: c_int = 13;
+pub const FASTPOS_BITS: u32 = 13;
 #[inline]
 unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
     if dist < (1) << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
@@ -262,7 +262,7 @@ unsafe extern "C" fn get_literal_price(
 #[inline]
 extern "C" fn get_len_price(lencoder: *const lzma_length_encoder, len: u32, pos_state: u32) -> u32 {
     return unsafe {
-        (*lencoder).prices[pos_state as usize][len.wrapping_sub(MATCH_LEN_MIN as u32) as usize]
+        (*lencoder).prices[pos_state as usize][len.wrapping_sub(MATCH_LEN_MIN) as usize]
     };
 }
 #[inline]
@@ -328,7 +328,7 @@ extern "C" fn get_dist_len_price(
 ) -> u32 {
     return unsafe {
         let dist_state: u32 = if len < (DIST_STATES + MATCH_LEN_MIN) as u32 {
-            len.wrapping_sub(MATCH_LEN_MIN as u32)
+            len.wrapping_sub(MATCH_LEN_MIN)
         } else {
             (DIST_STATES - 1) as u32
         };
@@ -338,7 +338,7 @@ extern "C" fn get_dist_len_price(
         } else {
             let dist_slot: u32 = get_dist_slot_2(dist) as u32;
             price = (*coder).dist_slot_prices[dist_state as usize][dist_slot as usize]
-                .wrapping_add((*coder).align_prices[(dist & ALIGN_MASK as u32) as usize]);
+                .wrapping_add((*coder).align_prices[(dist & ALIGN_MASK) as usize]);
         }
         price = price.wrapping_add(get_len_price(
             &raw const (*coder).match_len_encoder,
@@ -350,7 +350,7 @@ extern "C" fn get_dist_len_price(
 }
 unsafe extern "C" fn fill_dist_prices(coder: *mut lzma_lzma1_encoder) {
     let mut dist_state: u32 = 0;
-    while dist_state < DIST_STATES as u32 {
+    while dist_state < DIST_STATES {
         let dist_slot_prices: *mut u32 = &raw mut *(&raw mut (*coder).dist_slot_prices
             as *mut [u32; 64])
             .offset(dist_state as isize) as *mut u32;
@@ -359,7 +359,7 @@ unsafe extern "C" fn fill_dist_prices(coder: *mut lzma_lzma1_encoder) {
             *dist_slot_prices.offset(dist_slot as isize) = rc_bittree_price(
                 &raw mut *(&raw mut (*coder).dist_slot as *mut [probability; 64])
                     .offset(dist_state as isize) as *mut probability,
-                DIST_SLOT_BITS as u32,
+                DIST_SLOT_BITS,
                 dist_slot,
             );
             dist_slot = dist_slot.wrapping_add(1);
@@ -373,14 +373,14 @@ unsafe extern "C" fn fill_dist_prices(coder: *mut lzma_lzma1_encoder) {
             dist_slot_0 = dist_slot_0.wrapping_add(1);
         }
         let mut i: u32 = 0;
-        while i < DIST_MODEL_START as u32 {
+        while i < DIST_MODEL_START {
             (*coder).dist_prices[dist_state as usize][i as usize] =
                 *dist_slot_prices.offset(i as isize);
             i = i.wrapping_add(1);
         }
         dist_state = dist_state.wrapping_add(1);
     }
-    let mut i_0: u32 = DIST_MODEL_START as u32;
+    let mut i_0: u32 = DIST_MODEL_START;
     while i_0 < FULL_DISTANCES {
         let dist_slot_1: u32 = get_dist_slot(i_0) as u32;
         let footer_bits: u32 = (dist_slot_1 >> 1).wrapping_sub(1);
@@ -394,7 +394,7 @@ unsafe extern "C" fn fill_dist_prices(coder: *mut lzma_lzma1_encoder) {
             i_0.wrapping_sub(base),
         ) as u32;
         let mut dist_state_0: u32 = 0;
-        while dist_state_0 < DIST_STATES as u32 {
+        while dist_state_0 < DIST_STATES {
             (*coder).dist_prices[dist_state_0 as usize][i_0 as usize] = price.wrapping_add(
                 (*coder).dist_slot_prices[dist_state_0 as usize][dist_slot_1 as usize],
             );
@@ -406,7 +406,7 @@ unsafe extern "C" fn fill_dist_prices(coder: *mut lzma_lzma1_encoder) {
 }
 unsafe extern "C" fn fill_align_prices(coder: *mut lzma_lzma1_encoder) {
     let mut i: u32 = 0;
-    while i < ALIGN_SIZE as u32 {
+    while i < ALIGN_SIZE {
         (*coder).align_prices[i as usize] = rc_bittree_reverse_price(
             &raw mut (*coder).dist_align as *mut probability,
             ALIGN_BITS,
@@ -1114,7 +1114,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_normal(
         if (*coder).match_price_count >= ((1) << 7) as u32 {
             fill_dist_prices(coder);
         }
-        if (*coder).align_price_count >= ALIGN_SIZE as u32 {
+        if (*coder).align_price_count >= ALIGN_SIZE {
             fill_align_prices(coder);
         }
     }

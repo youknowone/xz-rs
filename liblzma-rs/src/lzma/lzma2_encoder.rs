@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 #[repr(C)]
 pub struct lzma_lzma1_encoder_s {
     _opaque: [u8; 0],
@@ -112,7 +112,7 @@ unsafe extern "C" fn mf_read(
     *out_pos = (*out_pos).wrapping_add(copy_size);
     *left = (*left).wrapping_sub(copy_size);
 }
-pub const FASTPOS_BITS: c_int = 13;
+pub const FASTPOS_BITS: u32 = 13;
 #[inline]
 unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
     if dist < (1) << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
@@ -127,8 +127,8 @@ unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
 }
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 pub const LZMA2_UNCOMPRESSED_MAX: c_uint = 1u32 << 21;
-pub const LZMA2_HEADER_MAX: c_int = 6;
-pub const LZMA2_HEADER_UNCOMPRESSED: c_int = 3;
+pub const LZMA2_HEADER_MAX: u32 = 6;
+pub const LZMA2_HEADER_UNCOMPRESSED: u32 = 3;
 unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
     let mut pos: size_t = 0;
     if (*coder).need_properties {

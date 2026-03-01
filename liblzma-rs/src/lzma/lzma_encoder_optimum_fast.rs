@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_uint, c_void};
+use core::ffi::{c_uint, c_void};
 extern "C" {
     fn lzma_mf_find(mf: *mut lzma_mf, count: *mut u32, matches: *mut lzma_match) -> u32;
 }
@@ -63,7 +63,7 @@ pub struct lzma_lzma1_encoder_s {
     pub opts_current_index: u32,
     pub opts: [lzma_optimal; OPTS as usize],
 }
-pub const OPTS: c_int = (1) << 12;
+pub const OPTS: u32 = (1) << 12;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_optimal {
