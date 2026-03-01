@@ -30,7 +30,7 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
         (*next).coder = coder as *mut c_void;
         (*next).end =
             Some(delta_coder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ())
-                as lzma_end_function;
+               ;
         (*coder).next = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

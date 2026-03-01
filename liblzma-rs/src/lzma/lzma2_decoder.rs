@@ -246,29 +246,14 @@ unsafe extern "C" fn lzma2_decoder_init(
             return LZMA_MEM_ERROR;
         }
         (*lz).coder = coder as *mut c_void;
-        (*lz).code = Some(
-            lzma2_decode
-                as unsafe extern "C" fn(
-                    *mut c_void,
-                    *mut lzma_dict,
-                    *const u8,
-                    *mut size_t,
-                    size_t,
-                ) -> lzma_ret,
-        )
-            as Option<
-                unsafe extern "C" fn(
-                    *mut c_void,
-                    *mut lzma_dict,
-                    *const u8,
-                    *mut size_t,
-                    size_t,
-                ) -> lzma_ret,
-            >;
-        (*lz).end = Some(
-            lzma2_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>;
+        (*lz).code = Some(lzma2_decode as unsafe extern "C" fn(
+            *mut c_void,
+            *mut lzma_dict,
+            *const u8,
+            *mut size_t,
+            size_t,
+        ) -> lzma_ret);
+        (*lz).end = Some(lzma2_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ());
         (*coder).lzma = LZMA_LZ_DECODER_INIT;
     }
     let options: *const lzma_options_lzma = opt as *const lzma_options_lzma;

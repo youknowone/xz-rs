@@ -280,10 +280,10 @@ pub unsafe extern "C" fn lzma_index_encoder_init(
                     size_t,
                     lzma_action,
                 ) -> lzma_ret,
-        ) as lzma_code_function;
+        );
         (*next).end = Some(
             index_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-        ) as lzma_end_function;
+        );
     }
     index_encoder_reset((*next).coder as *mut lzma_index_coder, i);
     LZMA_OK

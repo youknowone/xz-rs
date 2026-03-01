@@ -97,7 +97,7 @@ unsafe extern "C" fn lzip_decode(
         match (*coder).sequence {
             0 => {
                 let lzip_id_string: [u8; 4] = [0x4c as u8, 0x5a as u8, 0x49 as u8, 0x50 as u8];
-                while (*coder).pos < core::mem::size_of::<[u8; 4]>() as usize {
+                while (*coder).pos < core::mem::size_of::<[u8; 4]>() {
                     if *in_pos >= in_size {
                         return if !(*coder).first_member && action == LZMA_FINISH {
                             LZMA_STREAM_END
@@ -386,18 +386,13 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
                     size_t,
                     lzma_action,
                 ) -> lzma_ret,
-        ) as lzma_code_function;
+        );
         (*next).end = Some(
             lzip_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-        ) as lzma_end_function;
+        );
         (*next).get_check =
-            Some(lzip_decoder_get_check as unsafe extern "C" fn(*const c_void) -> lzma_check)
-                as Option<unsafe extern "C" fn(*const c_void) -> lzma_check>;
-        (*next).memconfig = Some(
-            lzip_decoder_memconfig
-                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret>;
+            Some(lzip_decoder_get_check as unsafe extern "C" fn(*const c_void) -> lzma_check);
+        (*next).memconfig = Some(lzip_decoder_memconfig as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret);
         (*coder).lzma_decoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

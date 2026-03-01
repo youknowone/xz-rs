@@ -384,34 +384,15 @@ unsafe extern "C" fn lzma2_encoder_init(
             return LZMA_MEM_ERROR;
         }
         (*lz).coder = coder as *mut c_void;
-        (*lz).code = Some(
-            lzma2_encode
-                as unsafe extern "C" fn(
-                    *mut c_void,
-                    *mut lzma_mf,
-                    *mut u8,
-                    *mut size_t,
-                    size_t,
-                ) -> lzma_ret,
-        )
-            as Option<
-                unsafe extern "C" fn(
-                    *mut c_void,
-                    *mut lzma_mf,
-                    *mut u8,
-                    *mut size_t,
-                    size_t,
-                ) -> lzma_ret,
-            >;
-        (*lz).end = Some(
-            lzma2_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>;
-        (*lz).options_update = Some(
-            lzma2_encoder_options_update
-                as unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret,
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret>;
+        (*lz).code = Some(lzma2_encode as unsafe extern "C" fn(
+            *mut c_void,
+            *mut lzma_mf,
+            *mut u8,
+            *mut size_t,
+            size_t,
+        ) -> lzma_ret);
+        (*lz).end = Some(lzma2_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ());
+        (*lz).options_update = Some(lzma2_encoder_options_update as unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret);
         (*coder).lzma = core::ptr::null_mut();
     }
     (*coder).opt_cur = *(options as *const lzma_options_lzma);

@@ -68,7 +68,7 @@ pub unsafe extern "C" fn lzma_delta_decoder_init(
                 size_t,
                 lzma_action,
             ) -> lzma_ret,
-    ) as lzma_code_function;
+    );
     lzma_delta_coder_init(next, allocator, filters)
 }
 #[no_mangle]

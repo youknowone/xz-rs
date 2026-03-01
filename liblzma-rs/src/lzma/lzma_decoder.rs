@@ -3405,32 +3405,16 @@ pub unsafe extern "C" fn lzma_lzma_decoder_create(
         if (*lz).coder.is_null() {
             return LZMA_MEM_ERROR;
         }
-        (*lz).code = Some(
-            lzma_decode
-                as unsafe extern "C" fn(
-                    *mut c_void,
-                    *mut lzma_dict,
-                    *const u8,
-                    *mut size_t,
-                    size_t,
-                ) -> lzma_ret,
-        )
-            as Option<
-                unsafe extern "C" fn(
-                    *mut c_void,
-                    *mut lzma_dict,
-                    *const u8,
-                    *mut size_t,
-                    size_t,
-                ) -> lzma_ret,
-            >;
+        (*lz).code = Some(lzma_decode as unsafe extern "C" fn(
+            *mut c_void,
+            *mut lzma_dict,
+            *const u8,
+            *mut size_t,
+            size_t,
+        ) -> lzma_ret);
         (*lz).reset =
-            Some(lzma_decoder_reset as unsafe extern "C" fn(*mut c_void, *const c_void) -> ())
-                as Option<unsafe extern "C" fn(*mut c_void, *const c_void) -> ()>;
-        (*lz).set_uncompressed = Some(
-            lzma_decoder_uncompressed as unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> (),
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> ()>;
+            Some(lzma_decoder_reset as unsafe extern "C" fn(*mut c_void, *const c_void) -> ());
+        (*lz).set_uncompressed = Some(lzma_decoder_uncompressed as unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> ());
     }
     (*lz_options).dict_size = (*options).dict_size as size_t;
     (*lz_options).preset_dict = (*options).preset_dict;

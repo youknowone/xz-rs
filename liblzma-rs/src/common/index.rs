@@ -170,8 +170,8 @@ extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli
 }
 pub const INDEX_GROUP_SIZE: u32 = 512;
 pub const PREALLOC_MAX: usize = (SIZE_MAX as usize)
-    .wrapping_sub(core::mem::size_of::<index_group>() as usize)
-    .wrapping_div(core::mem::size_of::<index_record>() as usize);
+    .wrapping_sub(core::mem::size_of::<index_group>())
+    .wrapping_div(core::mem::size_of::<index_record>());
 unsafe extern "C" fn index_tree_init(tree: *mut index_tree) {
     (*tree).root = core::ptr::null_mut();
     (*tree).leftmost = core::ptr::null_mut();
@@ -365,7 +365,7 @@ pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u6
     let streams_mem: u64 = (streams as u64).wrapping_mul(stream_base as u64);
     let groups_mem: u64 = (groups as u64).wrapping_mul(group_base as u64);
     let index_base: u64 =
-        (core::mem::size_of::<lzma_index>() as usize).wrapping_add(alloc_overhead as usize) as u64;
+        (core::mem::size_of::<lzma_index>()).wrapping_add(alloc_overhead as usize) as u64;
     let limit: u64 = (UINT64_MAX).wrapping_sub(index_base);
     if streams == 0
         || streams > UINT32_MAX as lzma_vli

@@ -324,8 +324,8 @@ static encoders: [lzma_filter_encoder; 12] = [
 extern "C" fn encoder_find(id: lzma_vli) -> *const lzma_filter_encoder {
     let mut i: size_t = 0;
     while i
-        < (core::mem::size_of::<[lzma_filter_encoder; 12]>() as usize)
-            .wrapping_div(core::mem::size_of::<lzma_filter_encoder>() as usize)
+        < (core::mem::size_of::<[lzma_filter_encoder; 12]>())
+            .wrapping_div(core::mem::size_of::<lzma_filter_encoder>())
     {
         if encoders[i as usize].id == id {
             return encoders.as_ptr().wrapping_add(i as usize);

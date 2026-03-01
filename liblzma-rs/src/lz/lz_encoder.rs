@@ -211,44 +211,24 @@ unsafe extern "C" fn lz_encoder_prepare(
     (*mf).cyclic_size = (*lz_options).dict_size.wrapping_add(1) as u32;
     match (*lz_options).match_finder {
         3 => {
-            (*mf).find = Some(
-                lzma_mf_hc3_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32,
-            )
-                as Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>;
-            (*mf).skip = Some(lzma_mf_hc3_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ())
-                as Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>;
+            (*mf).find = Some(lzma_mf_hc3_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32);
+            (*mf).skip = Some(lzma_mf_hc3_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ());
         }
         4 => {
-            (*mf).find = Some(
-                lzma_mf_hc4_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32,
-            )
-                as Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>;
-            (*mf).skip = Some(lzma_mf_hc4_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ())
-                as Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>;
+            (*mf).find = Some(lzma_mf_hc4_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32);
+            (*mf).skip = Some(lzma_mf_hc4_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ());
         }
         18 => {
-            (*mf).find = Some(
-                lzma_mf_bt2_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32,
-            )
-                as Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>;
-            (*mf).skip = Some(lzma_mf_bt2_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ())
-                as Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>;
+            (*mf).find = Some(lzma_mf_bt2_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32);
+            (*mf).skip = Some(lzma_mf_bt2_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ());
         }
         19 => {
-            (*mf).find = Some(
-                lzma_mf_bt3_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32,
-            )
-                as Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>;
-            (*mf).skip = Some(lzma_mf_bt3_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ())
-                as Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>;
+            (*mf).find = Some(lzma_mf_bt3_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32);
+            (*mf).skip = Some(lzma_mf_bt3_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ());
         }
         20 => {
-            (*mf).find = Some(
-                lzma_mf_bt4_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32,
-            )
-                as Option<unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32>;
-            (*mf).skip = Some(lzma_mf_bt4_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ())
-                as Option<unsafe extern "C" fn(*mut lzma_mf, u32) -> ()>;
+            (*mf).find = Some(lzma_mf_bt4_find as unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32);
+            (*mf).skip = Some(lzma_mf_bt4_skip as unsafe extern "C" fn(*mut lzma_mf, u32) -> ());
         }
         _ => return true,
     }
@@ -488,32 +468,17 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
                     size_t,
                     lzma_action,
                 ) -> lzma_ret,
-        ) as lzma_code_function;
+        );
         (*next).end =
             Some(lz_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ())
-                as lzma_end_function;
-        (*next).update = Some(
-            lz_encoder_update
-                as unsafe extern "C" fn(
-                    *mut c_void,
-                    *const lzma_allocator,
-                    *const lzma_filter,
-                    *const lzma_filter,
-                ) -> lzma_ret,
-        )
-            as Option<
-                unsafe extern "C" fn(
-                    *mut c_void,
-                    *const lzma_allocator,
-                    *const lzma_filter,
-                    *const lzma_filter,
-                ) -> lzma_ret,
-            >;
-        (*next).set_out_limit = Some(
-            lz_encoder_set_out_limit
-                as unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret,
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret>;
+               ;
+        (*next).update = Some(lz_encoder_update as unsafe extern "C" fn(
+            *mut c_void,
+            *const lzma_allocator,
+            *const lzma_filter,
+            *const lzma_filter,
+        ) -> lzma_ret);
+        (*next).set_out_limit = Some(lz_encoder_set_out_limit as unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret);
         (*coder).lz.coder = core::ptr::null_mut();
         (*coder).lz.code = None;
         (*coder).lz.end = None;

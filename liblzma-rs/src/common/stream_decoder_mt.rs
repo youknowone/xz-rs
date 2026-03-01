@@ -420,7 +420,7 @@ extern "C" fn lzma_outq_is_empty(outq: *const lzma_outq) -> bool {
 }
 #[inline]
 extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
-    (core::mem::size_of::<lzma_outbuf>() as usize).wrapping_add(buf_size as usize) as u64
+    (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
 }
 unsafe extern "C" fn worker_enable_partial_update(thr_ptr: *mut c_void) {
     let thr: *mut worker_thread = thr_ptr as *mut worker_thread;
@@ -1784,23 +1784,14 @@ unsafe extern "C" fn stream_decoder_mt_init(
                     size_t,
                     lzma_action,
                 ) -> lzma_ret,
-        ) as lzma_code_function;
+        );
         (*next).end = Some(
             stream_decoder_mt_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-        ) as lzma_end_function;
+        );
         (*next).get_check =
-            Some(stream_decoder_mt_get_check as unsafe extern "C" fn(*const c_void) -> lzma_check)
-                as Option<unsafe extern "C" fn(*const c_void) -> lzma_check>;
-        (*next).memconfig = Some(
-            stream_decoder_mt_memconfig
-                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret>;
-        (*next).get_progress = Some(
-            stream_decoder_mt_get_progress
-                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> (),
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> ()>;
+            Some(stream_decoder_mt_get_check as unsafe extern "C" fn(*const c_void) -> lzma_check);
+        (*next).memconfig = Some(stream_decoder_mt_memconfig as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret);
+        (*next).get_progress = Some(stream_decoder_mt_get_progress as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> ());
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
         memset(
             &raw mut (*coder).outq as *mut c_void,

@@ -135,7 +135,7 @@ unsafe extern "C" fn reverse_seek(
             .file_target_pos
             .wrapping_sub(LZMA_STREAM_HEADER_SIZE as u64) as size_t;
     } else {
-        (*coder).temp_size = core::mem::size_of::<[u8; 8192]>() as usize as size_t;
+        (*coder).temp_size = core::mem::size_of::<[u8; 8192]>() as size_t;
     }
     if seek_to_pos(
         coder,
@@ -658,15 +658,11 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
                     size_t,
                     lzma_action,
                 ) -> lzma_ret,
-        ) as lzma_code_function;
+        );
         (*next).end = Some(
             file_info_decoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-        ) as lzma_end_function;
-        (*next).memconfig = Some(
-            file_info_decoder_memconfig
-                as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
-        )
-            as Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret>;
+        );
+        (*next).memconfig = Some(file_info_decoder_memconfig as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret);
         (*coder).index_decoder = lzma_next_coder_s {
             coder: core::ptr::null_mut(),
             id: LZMA_VLI_UNKNOWN,

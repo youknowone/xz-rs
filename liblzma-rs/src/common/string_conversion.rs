@@ -125,9 +125,9 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
         if use_byte_suffix {
             while v & 1023 == 0
                 && suf
-                    < (core::mem::size_of::<[[c_char; 4]; 4]>() as usize)
-                        .wrapping_div(core::mem::size_of::<[c_char; 4]>() as usize)
-                        .wrapping_sub(1 as usize)
+                    < (core::mem::size_of::<[[c_char; 4]; 4]>())
+                        .wrapping_div(core::mem::size_of::<[c_char; 4]>())
+                        .wrapping_sub(1)
             {
                 v >>= 10;
                 suf += 1;
@@ -725,8 +725,8 @@ unsafe extern "C" fn parse_filter(
     }
     let mut i: size_t = 0;
     while i
-        < (core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
-            .wrapping_div(core::mem::size_of::<C2RustUnnamed>() as usize)
+        < (core::mem::size_of::<[C2RustUnnamed; 11]>())
+            .wrapping_div(core::mem::size_of::<C2RustUnnamed>())
     {
         if memcmp(
             *str as *const c_void,
@@ -1059,8 +1059,8 @@ pub unsafe extern "C" fn lzma_str_from_filters(
         }
         let mut j: size_t = 0;
         loop {
-            if j == (core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
-                .wrapping_div(core::mem::size_of::<C2RustUnnamed>() as usize)
+            if j == (core::mem::size_of::<[C2RustUnnamed; 11]>())
+                .wrapping_div(core::mem::size_of::<C2RustUnnamed>())
             {
                 str_free(&raw mut dest, allocator);
                 return LZMA_OPTIONS_ERROR;
@@ -1144,8 +1144,8 @@ pub unsafe extern "C" fn lzma_str_list_filters(
     let mut first_filter_printed: bool = false;
     let mut i: size_t = 0;
     while i
-        < (core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
-            .wrapping_div(core::mem::size_of::<C2RustUnnamed>() as usize)
+        < (core::mem::size_of::<[C2RustUnnamed; 11]>())
+            .wrapping_div(core::mem::size_of::<C2RustUnnamed>())
     {
         if filter_id == LZMA_VLI_UNKNOWN || filter_id == filter_name_map[i as usize].id {
             if filter_name_map[i as usize].id < LZMA_FILTER_RESERVED_START

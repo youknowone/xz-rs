@@ -1027,7 +1027,7 @@ unsafe extern "C" fn stream_encode_mt(
                     out_pos,
                     out_size,
                 );
-                if (*coder).header_pos < core::mem::size_of::<[u8; 12]>() as usize {
+                if (*coder).header_pos < core::mem::size_of::<[u8; 12]>() {
                     return LZMA_OK;
                 }
                 (*coder).header_pos = 0;
@@ -1192,7 +1192,7 @@ unsafe extern "C" fn stream_encode_mt(
             out_pos,
             out_size,
         );
-        return if (*coder).header_pos < core::mem::size_of::<[u8; 12]>() as usize {
+        return if (*coder).header_pos < core::mem::size_of::<[u8; 12]>() {
             LZMA_OK
         } else {
             LZMA_STREAM_END
@@ -1464,30 +1464,18 @@ unsafe extern "C" fn stream_encoder_mt_init(
                     size_t,
                     lzma_action,
                 ) -> lzma_ret,
-        ) as lzma_code_function;
+        );
         (*next).end = Some(
             stream_encoder_mt_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-        ) as lzma_end_function;
+        );
         (*next).get_progress =
-            Some(get_progress as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> ())
-                as Option<unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> ()>;
-        (*next).update = Some(
-            stream_encoder_mt_update
-                as unsafe extern "C" fn(
-                    *mut c_void,
-                    *const lzma_allocator,
-                    *const lzma_filter,
-                    *const lzma_filter,
-                ) -> lzma_ret,
-        )
-            as Option<
-                unsafe extern "C" fn(
-                    *mut c_void,
-                    *const lzma_allocator,
-                    *const lzma_filter,
-                    *const lzma_filter,
-                ) -> lzma_ret,
-            >;
+            Some(get_progress as unsafe extern "C" fn(*mut c_void, *mut u64, *mut u64) -> ());
+        (*next).update = Some(stream_encoder_mt_update as unsafe extern "C" fn(
+            *mut c_void,
+            *const lzma_allocator,
+            *const lzma_filter,
+            *const lzma_filter,
+        ) -> lzma_ret);
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
         (*coder).filters_cache[0].id = LZMA_VLI_UNKNOWN;
         (*coder).index_encoder = lzma_next_coder_s {
@@ -1656,7 +1644,7 @@ pub unsafe extern "C" fn lzma_stream_encoder_mt_memusage(options: *const lzma_mt
         .wrapping_add(core::mem::size_of::<lzma_stream_coder>() as u64)
         .wrapping_add(
             ((*options).threads as usize)
-                .wrapping_mul(core::mem::size_of::<worker_thread>() as usize) as u64,
+                .wrapping_mul(core::mem::size_of::<worker_thread>()) as u64,
         );
     if (UINT64_MAX).wrapping_sub(total_memusage) < inbuf_memusage {
         return UINT64_MAX;

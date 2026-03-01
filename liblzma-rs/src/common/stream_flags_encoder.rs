@@ -48,17 +48,17 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
     );
     if stream_flags_encode(
         options,
-        out.offset(core::mem::size_of::<[u8; 6]>() as usize as isize),
+        out.offset(core::mem::size_of::<[u8; 6]>() as isize),
     ) {
         return LZMA_PROG_ERROR;
     }
     let crc: u32 = lzma_crc32(
-        out.offset(core::mem::size_of::<[u8; 6]>() as usize as isize),
+        out.offset(core::mem::size_of::<[u8; 6]>() as isize),
         LZMA_STREAM_FLAGS_SIZE as size_t,
         0,
     ) as u32;
     write32le(
-        out.offset(core::mem::size_of::<[u8; 6]>() as usize as isize)
+        out.offset(core::mem::size_of::<[u8; 6]>() as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize),
         crc,
     );
