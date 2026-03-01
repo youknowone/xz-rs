@@ -211,7 +211,7 @@ pub unsafe extern "C" fn lzma_mf_hc3_skip(mf: *mut lzma_mf, mut amount: u32) {
             move_pos(mf);
         }
         amount -= 1;
-        if !(amount != 0) {
+        if amount == 0 {
             break;
         }
     }
@@ -320,7 +320,7 @@ pub unsafe extern "C" fn lzma_mf_hc4_skip(mf: *mut lzma_mf, mut amount: u32) {
             move_pos(mf);
         }
         amount -= 1;
-        if !(amount != 0) {
+        if amount == 0 {
             break;
         }
     }
@@ -504,7 +504,7 @@ pub unsafe extern "C" fn lzma_mf_bt2_skip(mf: *mut lzma_mf, mut amount: u32) {
             _ => {}
         }
         amount -= 1;
-        if !(amount != 0) {
+        if amount == 0 {
             break;
         }
     }
@@ -613,7 +613,7 @@ pub unsafe extern "C" fn lzma_mf_bt3_skip(mf: *mut lzma_mf, mut amount: u32) {
             _ => {}
         }
         amount -= 1;
-        if !(amount != 0) {
+        if amount == 0 {
             break;
         }
     }
@@ -753,7 +753,7 @@ pub unsafe extern "C" fn lzma_mf_bt4_skip(mf: *mut lzma_mf, mut amount: u32) {
             _ => {}
         }
         amount -= 1;
-        if !(amount != 0) {
+        if amount == 0 {
             break;
         }
     }

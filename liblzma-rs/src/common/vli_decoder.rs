@@ -43,7 +43,7 @@ pub unsafe extern "C" fn lzma_vli_decode(
         if *vli_pos == LZMA_VLI_BYTES_MAX as size_t {
             return LZMA_DATA_ERROR;
         }
-        if !(*in_pos < in_size) {
+        if *in_pos >= in_size {
             break;
         }
     }

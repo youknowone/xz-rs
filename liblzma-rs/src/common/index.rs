@@ -219,7 +219,7 @@ unsafe extern "C" fn index_tree_append(tree: *mut index_tree, mut node: *mut ind
         loop {
             node = (*node).parent;
             up -= 1;
-            if !(up > 0) {
+            if up == 0 {
                 break;
             }
         }

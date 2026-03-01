@@ -192,7 +192,7 @@ unsafe extern "C" fn index_encode(
                         ((*coder).crc32 >> (*coder).pos.wrapping_mul(8) & 0xff) as u8;
                     *out_pos = (*out_pos).wrapping_add(1);
                     (*coder).pos = (*coder).pos.wrapping_add(1);
-                    if !((*coder).pos < 4) {
+                    if (*coder).pos >= 4 {
                         break;
                     }
                 }

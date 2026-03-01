@@ -140,7 +140,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
             pos -= 1;
             buf[pos as usize] = ('0' as i32 as u32).wrapping_add(v.wrapping_rem(10)) as c_char;
             v = v.wrapping_div(10);
-            if !(v != 0) {
+            if v == 0 {
                 break;
             }
         }
@@ -226,13 +226,13 @@ unsafe extern "C" fn parse_lzma12_preset(
     str_end: *const c_char,
     preset: *mut u32,
 ) -> *const c_char {
-    if !(**str as u8 >= b'0' && **str as u8 <= b'9') {
+    if (**str as u8) < b'0' || (**str as u8) > b'9' {
         return b"Unsupported preset\0" as *const u8 as *const c_char;
     }
     *preset = (**str as u8 - b'0') as u32;
     loop {
         *str = (*str).offset(1);
-        if !(*str < str_end) {
+        if *str >= str_end {
             break;
         }
         match **str {
@@ -628,7 +628,7 @@ unsafe extern "C" fn parse_options(
                         }
                         v = v.wrapping_add(add);
                         p = p.offset(1);
-                        if !(p < name_eq_value_end && *p as u8 >= b'0' && *p as u8 <= b'9') {
+                        if p >= name_eq_value_end || (*p as u8) < b'0' || (*p as u8) > b'9' {
                             break;
                         }
                     }
@@ -864,7 +864,7 @@ unsafe extern "C" fn str_to_filters(
                     *str = (*str).offset(1);
                 }
                 i_0 += 1;
-                if !(**str != 0) {
+                if **str == 0 {
                     current_block = 15090052786889560393;
                     break;
                 }
@@ -954,7 +954,7 @@ unsafe extern "C" fn strfy_filter(
 ) {
     let mut i: size_t = 0;
     while i < optmap_count {
-        if !((*optmap.offset(i as isize)).type_0 == OPTMAP_TYPE_LZMA_PRESET) {
+        if (*optmap.offset(i as isize)).type_0 != OPTMAP_TYPE_LZMA_PRESET {
             let mut v: u32 = 0;
             let ptr: *const c_void = (filter_options as *const c_char)
                 .offset((*optmap.offset(i as isize)).offset as isize)
@@ -970,7 +970,7 @@ unsafe extern "C" fn strfy_filter(
                     v = *(ptr as *const u32);
                 }
             }
-            if !(v == 0 && (*optmap.offset(i as isize)).flags & OPTMAP_NO_STRFY_ZERO != 0) {
+            if v != 0 || (*optmap.offset(i as isize)).flags & OPTMAP_NO_STRFY_ZERO == 0 {
                 str_append_str(dest, delimiter);
                 delimiter = b",\0" as *const u8 as *const c_char;
                 str_append_str(
@@ -1149,10 +1149,10 @@ pub unsafe extern "C" fn lzma_str_list_filters(
         < (core::mem::size_of::<[C2RustUnnamed; 11]>() as usize)
             .wrapping_div(core::mem::size_of::<C2RustUnnamed>() as usize)
     {
-        if !(filter_id != LZMA_VLI_UNKNOWN && filter_id != filter_name_map[i as usize].id) {
-            if !(filter_name_map[i as usize].id >= LZMA_FILTER_RESERVED_START
-                && flags & LZMA_STR_ALL_FILTERS as u32 == 0
-                && filter_id == LZMA_VLI_UNKNOWN)
+        if filter_id == LZMA_VLI_UNKNOWN || filter_id == filter_name_map[i as usize].id {
+            if filter_name_map[i as usize].id < LZMA_FILTER_RESERVED_START
+                || flags & LZMA_STR_ALL_FILTERS as u32 != 0
+                || filter_id != LZMA_VLI_UNKNOWN
             {
                 if first_filter_printed {
                     str_append_str(&raw mut dest, filter_delim);

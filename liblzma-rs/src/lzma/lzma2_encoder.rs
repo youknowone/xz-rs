@@ -497,8 +497,8 @@ pub unsafe extern "C" fn lzma_lzma2_props_encode(options: *const c_void, out: *m
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma2_block_size(options: *const c_void) -> u64 {
     let opt: *const lzma_options_lzma = options as *const lzma_options_lzma;
-    if !((*opt).dict_size >= LZMA_DICT_SIZE_MIN as u32
-        && (*opt).dict_size <= (1u32 << 30).wrapping_add((1) << 29))
+    if (*opt).dict_size < LZMA_DICT_SIZE_MIN as u32
+        || (*opt).dict_size > (1u32 << 30).wrapping_add((1) << 29)
     {
         return UINT64_MAX;
     }

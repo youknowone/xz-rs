@@ -68,7 +68,7 @@ unsafe extern "C" fn riscv_encode(
         let mut inst: u32 = *buffer.offset(i as isize) as u32;
         if inst == 0xef {
             let b1: u32 = *buffer.offset(i.wrapping_add(1) as isize) as u32;
-            if !(b1 & 0xd != 0) {
+            if b1 & 0xd == 0 {
                 let b2: u32 = *buffer.offset(i.wrapping_add(2) as isize) as u32;
                 let b3: u32 = *buffer.offset(i.wrapping_add(3) as isize) as u32;
                 let pc: u32 = now_pos.wrapping_add(i as u32);
@@ -173,7 +173,7 @@ unsafe extern "C" fn riscv_decode(
         let mut inst: u32 = *buffer.offset(i as isize) as u32;
         if inst == 0xef {
             let b1: u32 = *buffer.offset(i.wrapping_add(1) as isize) as u32;
-            if !(b1 & 0xd != 0) {
+            if b1 & 0xd == 0 {
                 let b2: u32 = *buffer.offset(i.wrapping_add(2) as isize) as u32;
                 let b3: u32 = *buffer.offset(i.wrapping_add(3) as isize) as u32;
                 let pc: u32 = now_pos.wrapping_add(i as u32);

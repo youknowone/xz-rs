@@ -659,8 +659,8 @@ unsafe extern "C" fn initialize_new_thread(
         .threads
         .offset((*coder).threads_initialized as isize)
         as *mut worker_thread;
-    if !(mythread_mutex_init(&raw mut (*thr).mutex) != 0) {
-        if !(mythread_cond_init(&raw mut (*thr).cond) != 0) {
+    if mythread_mutex_init(&raw mut (*thr).mutex) == 0 {
+        if mythread_cond_init(&raw mut (*thr).cond) == 0 {
             (*thr).state = THR_IDLE;
             (*thr).in_0 = core::ptr::null_mut();
             (*thr).in_size = 0;

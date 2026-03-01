@@ -334,7 +334,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                 return LZMA_DATA_ERROR;
             }
             (*index_hash).pos = (*index_hash).pos.wrapping_add(1);
-            if !((*index_hash).pos < 4) {
+            if (*index_hash).pos >= 4 {
                 break;
             }
         }

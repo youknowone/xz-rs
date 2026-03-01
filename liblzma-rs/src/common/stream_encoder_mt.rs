@@ -761,8 +761,8 @@ unsafe extern "C" fn initialize_new_thread(
     if (*thr).in_0.is_null() {
         return LZMA_MEM_ERROR;
     }
-    if !(mythread_mutex_init(&raw mut (*thr).mutex) != 0) {
-        if !(mythread_cond_init(&raw mut (*thr).cond) != 0) {
+    if mythread_mutex_init(&raw mut (*thr).mutex) == 0 {
+        if mythread_cond_init(&raw mut (*thr).cond) == 0 {
             (*thr).state = THR_IDLE;
             (*thr).allocator = allocator;
             (*thr).coder = coder;

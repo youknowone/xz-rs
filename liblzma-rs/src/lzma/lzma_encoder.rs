@@ -192,7 +192,7 @@ unsafe extern "C" fn rc_bittree_price(
         let bit: u32 = symbol & 1;
         symbol >>= 1;
         price = price.wrapping_add(rc_bit_price(*probs.offset(symbol as isize), bit));
-        if !(symbol != 1) {
+        if symbol == 1 {
             break;
         }
     }
@@ -235,7 +235,7 @@ unsafe extern "C" fn rc_bittree(
             bit,
         );
         model_index = (model_index << 1).wrapping_add(bit);
-        if !(bit_count != 0) {
+        if bit_count == 0 {
             break;
         }
     }
@@ -258,7 +258,7 @@ unsafe extern "C" fn rc_bittree_reverse(
         );
         model_index = (model_index << 1).wrapping_add(bit);
         bit_count -= 1;
-        if !(bit_count != 0) {
+        if bit_count == 0 {
             break;
         }
     }
@@ -270,7 +270,7 @@ unsafe extern "C" fn rc_direct(rc: *mut lzma_range_encoder, value: u32, mut bit_
         (*rc).symbols[(*rc).count as usize] =
             (RC_DIRECT_0 as u32).wrapping_add(value >> bit_count & 1) as C2RustUnnamed;
         (*rc).count += 1;
-        if !(bit_count != 0) {
+        if bit_count == 0 {
             break;
         }
     }
@@ -301,7 +301,7 @@ unsafe extern "C" fn rc_shift_low(
             (*rc).out_total = (*rc).out_total.wrapping_add(1);
             (*rc).cache = 0xff;
             (*rc).cache_size = (*rc).cache_size.wrapping_sub(1);
-            if !((*rc).cache_size != 0) {
+            if (*rc).cache_size == 0 {
                 break;
             }
         }
@@ -327,7 +327,7 @@ unsafe extern "C" fn rc_shift_low_dummy(
             *out_pos = (*out_pos).wrapping_add(1);
             *cache = 0xff;
             *cache_size = (*cache_size).wrapping_sub(1);
-            if !(*cache_size != 0) {
+            if *cache_size == 0 {
                 break;
             }
         }
@@ -383,7 +383,7 @@ unsafe extern "C" fn rc_encode(
                         return true;
                     }
                     (*rc).pos = (*rc).pos.wrapping_add(1);
-                    if !((*rc).pos < (*rc).count) {
+                    if (*rc).pos >= (*rc).count {
                         break;
                     }
                 }
@@ -536,7 +536,7 @@ unsafe extern "C" fn literal_matched(
         );
         symbol <<= 1;
         offset &= !(match_byte ^ symbol);
-        if !(symbol < (1) << 16) {
+        if symbol >= 1 << 16 {
             break;
         }
     }

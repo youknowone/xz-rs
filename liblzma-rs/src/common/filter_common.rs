@@ -128,7 +128,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
     let mut i: size_t = 0;
     i = 0;
     's_15: loop {
-        if !((*src.offset(i as isize)).id != LZMA_VLI_UNKNOWN) {
+        if (*src.offset(i as isize)).id == LZMA_VLI_UNKNOWN {
             current_block = 7175849428784450219;
             break;
         }
@@ -237,7 +237,7 @@ pub unsafe extern "C" fn lzma_validate_chain(
         changes_size_count =
             changes_size_count.wrapping_add(features[j as usize].changes_size as size_t);
         i += 1;
-        if !((*filters.offset(i as isize)).id != LZMA_VLI_UNKNOWN) {
+        if (*filters.offset(i as isize)).id == LZMA_VLI_UNKNOWN {
             break;
         }
     }
@@ -334,7 +334,7 @@ pub unsafe extern "C" fn lzma_raw_coder_memusage(
             total = total.wrapping_add(usage);
         }
         i += 1;
-        if !((*filters.offset(i as isize)).id != LZMA_VLI_UNKNOWN) {
+        if (*filters.offset(i as isize)).id == LZMA_VLI_UNKNOWN {
             break;
         }
     }

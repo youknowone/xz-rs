@@ -151,7 +151,7 @@ unsafe extern "C" fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut 
             back += 1;
             (*dict).pos = (*dict).pos.wrapping_add(1);
             left -= 1;
-            if !(left > 0) {
+            if left == 0 {
                 break;
             }
         }
@@ -598,7 +598,7 @@ unsafe extern "C" fn lzma_decode(
                     rc.code = rc.code.wrapping_sub(rc_bound);
                     (*coder).is_rep[state as usize] = (*coder).is_rep[state as usize]
                         - ((*coder).is_rep[state as usize] >> RC_MOVE_BITS);
-                    if !(!dict_is_distance_valid(&raw mut dict, 0)) {
+                    if dict_is_distance_valid(&raw mut dict, 0) {
                         current_block = 4420799852307653083;
                         continue;
                     }
@@ -1176,7 +1176,7 @@ unsafe extern "C" fn lzma_decode(
         }
         match current_block {
             13383302701878543647 => {
-                if !(!dict_is_distance_valid(&raw mut dict, rep0 as size_t)) {
+                if dict_is_distance_valid(&raw mut dict, rep0 as size_t) {
                     current_block = 17340485688450593529;
                     continue;
                 }
@@ -1186,7 +1186,7 @@ unsafe extern "C" fn lzma_decode(
             }
             4956146061682418353 => loop {
                 pos_state = (dict.pos & pos_mask as size_t) as u32;
-                if !(rc_in_ptr < rc_in_fast_end) || dict.pos == dict.limit {
+                if rc_in_ptr >= rc_in_fast_end || dict.pos == dict.limit {
                     current_block = 5979571030476392895;
                     continue 'c_9380;
                 }
@@ -2376,7 +2376,7 @@ unsafe extern "C" fn lzma_decode(
                                     }
                                     offset <<= 1;
                                     limit -= 1;
-                                    if !(limit > 0) {
+                                    if limit == 0 {
                                         break;
                                     }
                                 }
@@ -2395,7 +2395,7 @@ unsafe extern "C" fn lzma_decode(
                                     rep0 = rep0.wrapping_add(rc_bound);
                                     rc.code = rc.code.wrapping_add(rc.range & rc_bound);
                                     limit -= 1;
-                                    if !(limit > 0) {
+                                    if limit == 0 {
                                         break;
                                     }
                                 }
@@ -3209,7 +3209,7 @@ unsafe extern "C" fn lzma_decode(
                             }
                         }
                     }
-                    if !(dict_repeat(&raw mut dict, rep0, &raw mut len) as c_long != 0) {
+                    if dict_repeat(&raw mut dict, rep0, &raw mut len) as c_long == 0 {
                         continue;
                     }
                     (*coder).sequence = SEQ_COPY;

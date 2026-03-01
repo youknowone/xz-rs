@@ -155,7 +155,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     let mut i: u32 = 0;
     while i < REPS {
         let buf_back: *const u8 = buf.offset(-((*coder).reps[i as usize] as isize)).offset(-1);
-        if !(*buf.offset(0) != *buf_back.offset(0) || *buf.offset(1) != *buf_back.offset(1)) {
+        if *buf.offset(0) == *buf_back.offset(0) && *buf.offset(1) == *buf_back.offset(1) {
             let len: u32 = lzma_memcmplen(buf, buf_back, 2, buf_avail) as u32;
             if len >= nice_len {
                 *back_res = i;
@@ -187,7 +187,7 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
                     .len
                     .wrapping_add(1)
         {
-            if !(back_main >> 7 > (*coder).matches[matches_count.wrapping_sub(2) as usize].dist) {
+            if back_main >> 7 <= (*coder).matches[matches_count.wrapping_sub(2) as usize].dist {
                 break;
             }
             matches_count -= 1;

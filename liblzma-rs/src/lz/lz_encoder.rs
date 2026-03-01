@@ -173,8 +173,8 @@ unsafe extern "C" fn lz_encoder_prepare(
     allocator: *const lzma_allocator,
     lz_options: *const lzma_lz_options,
 ) -> bool {
-    if !((*lz_options).dict_size >= LZMA_DICT_SIZE_MIN as size_t
-        && (*lz_options).dict_size <= (1u32 << 30).wrapping_add(1u32 << 29) as size_t)
+    if (*lz_options).dict_size < LZMA_DICT_SIZE_MIN as size_t
+        || (*lz_options).dict_size > (1u32 << 30).wrapping_add(1u32 << 29) as size_t
         || (*lz_options).nice_len > (*lz_options).match_len_max
     {
         return true;

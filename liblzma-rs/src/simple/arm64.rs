@@ -55,7 +55,7 @@ unsafe extern "C" fn arm64_code(
             write32le(buffer.offset(i as isize), instr);
         } else if instr & 0x9f000000 == 0x90000000 {
             let src_0: u32 = instr >> 29 & 3 | instr >> 3 & 0x1ffffc;
-            if !(src_0.wrapping_add(0x20000) & 0x1c0000 != 0) {
+            if src_0.wrapping_add(0x20000) & 0x1c0000 == 0 {
                 instr = (instr & 0x9000001f) as u32;
                 pc >>= 12;
                 if !is_encoder {

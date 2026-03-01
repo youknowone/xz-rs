@@ -197,7 +197,7 @@ unsafe extern "C" fn index_decode(
                 return LZMA_DATA_ERROR;
             }
             (*coder).pos = (*coder).pos.wrapping_add(1);
-            if !((*coder).pos < 4) {
+            if (*coder).pos >= 4 {
                 break;
             }
         }

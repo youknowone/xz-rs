@@ -32,7 +32,7 @@ unsafe extern "C" fn ia64_code(
         let mut bit_pos: u32 = 5;
         let mut slot: size_t = 0;
         while slot < 3 {
-            if !(mask >> slot & 1 == 0) {
+            if mask >> slot & 1 != 0 {
                 let byte_pos: size_t = (bit_pos >> 3) as size_t;
                 let bit_res: u32 = bit_pos & 0x7;
                 let mut instruction: u64 = 0;
