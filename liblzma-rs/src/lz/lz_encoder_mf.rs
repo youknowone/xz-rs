@@ -3,30 +3,10 @@ use core::ffi::c_uint;
 extern "C" {
     static lzma_crc32_table: [[u32; 256]; 8];
 }
-#[inline]
-unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
-    (*mf).buffer.offset((*mf).read_pos as isize)
-}
-#[inline]
-unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
-    (*mf).write_pos.wrapping_sub((*mf).read_pos)
-}
 pub const HASH_2_MASK: c_uint = HASH_2_SIZE.wrapping_sub(1);
 pub const HASH_3_MASK: c_uint = HASH_3_SIZE.wrapping_sub(1);
 pub const FIX_3_HASH_SIZE: c_uint = 1u32 << 10;
 pub const FIX_4_HASH_SIZE: c_uint = HASH_2_SIZE.wrapping_add(HASH_3_SIZE);
-#[inline(always)]
-unsafe extern "C" fn lzma_memcmplen(
-    buf1: *const u8,
-    buf2: *const u8,
-    mut len: u32,
-    limit: u32,
-) -> u32 {
-    while len < limit && *buf1.offset(len as isize) == *buf2.offset(len as isize) {
-        len += 1;
-    }
-    len
-}
 #[no_mangle]
 pub unsafe extern "C" fn lzma_mf_find(
     mf: *mut lzma_mf,

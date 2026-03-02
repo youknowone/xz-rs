@@ -96,18 +96,6 @@ unsafe extern "C" fn mf_read(
     *out_pos = (*out_pos).wrapping_add(copy_size);
     *left = (*left).wrapping_sub(copy_size);
 }
-#[inline]
-unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
-    if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
-        return lzma_fastpos[dist as usize] as u32;
-    }
-    if dist < 1 << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
-        return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
-            .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
-    }
-    (lzma_fastpos[(dist >> 0 + 2 * (FASTPOS_BITS - 1)) as usize] as u32)
-        .wrapping_add((2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32)
-}
 pub const LZMA2_UNCOMPRESSED_MAX: c_uint = 1u32 << 21;
 pub const LZMA2_HEADER_MAX: u32 = 6;
 unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {

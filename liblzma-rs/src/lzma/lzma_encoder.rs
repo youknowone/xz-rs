@@ -134,51 +134,6 @@ extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
     match_finder as u32 & 0xf
 }
 #[inline]
-unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
-    if amount != 0 {
-        (*mf).skip.unwrap()(mf, amount);
-        (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
-    }
-}
-#[inline]
-extern "C" fn rc_bit_price(prob: probability, bit: u32) -> u32 {
-    unsafe {
-        lzma_rc_prices[((prob as u32
-            ^ 0u32.wrapping_sub(bit) & (RC_BIT_MODEL_TOTAL as u32).wrapping_sub(1))
-            >> RC_MOVE_REDUCING_BITS) as usize] as u32
-    }
-}
-#[inline]
-extern "C" fn rc_bit_0_price(prob: probability) -> u32 {
-    unsafe { lzma_rc_prices[(prob >> RC_MOVE_REDUCING_BITS) as usize] as u32 }
-}
-#[inline]
-extern "C" fn rc_bit_1_price(prob: probability) -> u32 {
-    unsafe {
-        lzma_rc_prices
-            [((prob as u32 ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1)) >> RC_MOVE_REDUCING_BITS) as usize]
-            as u32
-    }
-}
-#[inline]
-unsafe extern "C" fn rc_bittree_price(
-    probs: *const probability,
-    bit_levels: u32,
-    mut symbol: u32,
-) -> u32 {
-    let mut price: u32 = 0;
-    symbol = (symbol as u32).wrapping_add(1u32 << bit_levels) as u32;
-    loop {
-        let bit: u32 = symbol & 1;
-        symbol >>= 1;
-        price = price.wrapping_add(rc_bit_price(*probs.offset(symbol as isize), bit));
-        if symbol == 1 {
-            break;
-        }
-    }
-    price
-}
-#[inline]
 unsafe extern "C" fn rc_reset(rc: *mut lzma_range_encoder) {
     (*rc).low = 0;
     (*rc).cache_size = 1;
@@ -461,18 +416,6 @@ unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
 }
 pub const LEN_SYMBOLS: u32 = LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS + LEN_HIGH_SYMBOLS;
 pub const MATCH_LEN_MAX: u32 = MATCH_LEN_MIN + LEN_SYMBOLS - 1;
-#[inline]
-unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
-    if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
-        return lzma_fastpos[dist as usize] as u32;
-    }
-    if dist < 1 << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
-        return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
-            .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
-    }
-    (lzma_fastpos[(dist >> 0 + 2 * (FASTPOS_BITS - 1)) as usize] as u32)
-        .wrapping_add((2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32)
-}
 #[inline]
 unsafe extern "C" fn literal_matched(
     rc: *mut lzma_range_encoder,

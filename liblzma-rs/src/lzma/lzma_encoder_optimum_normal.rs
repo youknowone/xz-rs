@@ -86,61 +86,8 @@ pub struct lzma_length_encoder {
     pub counters: [u32; 16],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
-#[inline]
-unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
-    (*mf).buffer.offset((*mf).read_pos as isize)
-}
-#[inline]
-unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
-    (*mf).write_pos.wrapping_sub((*mf).read_pos)
-}
-#[inline]
-unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
-    if amount != 0 {
-        (*mf).skip.unwrap()(mf, amount);
-        (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
-    }
-}
 pub const RC_BIT_PRICE_SHIFT_BITS: u32 = 4;
 pub const RC_INFINITY_PRICE: c_uint = 1u32 << 30;
-#[inline]
-extern "C" fn rc_bit_price(prob: probability, bit: u32) -> u32 {
-    unsafe {
-        lzma_rc_prices[((prob as u32
-            ^ 0u32.wrapping_sub(bit) & (RC_BIT_MODEL_TOTAL as u32).wrapping_sub(1))
-            >> RC_MOVE_REDUCING_BITS) as usize] as u32
-    }
-}
-#[inline]
-extern "C" fn rc_bit_0_price(prob: probability) -> u32 {
-    unsafe { lzma_rc_prices[(prob >> RC_MOVE_REDUCING_BITS) as usize] as u32 }
-}
-#[inline]
-extern "C" fn rc_bit_1_price(prob: probability) -> u32 {
-    unsafe {
-        lzma_rc_prices
-            [((prob as u32 ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1)) >> RC_MOVE_REDUCING_BITS) as usize]
-            as u32
-    }
-}
-#[inline]
-unsafe extern "C" fn rc_bittree_price(
-    probs: *const probability,
-    bit_levels: u32,
-    mut symbol: u32,
-) -> u32 {
-    let mut price: u32 = 0;
-    symbol = (symbol as u32).wrapping_add(1u32 << bit_levels) as u32;
-    loop {
-        let bit: u32 = symbol & 1;
-        symbol >>= 1;
-        price = price.wrapping_add(rc_bit_price(*probs.offset(symbol as isize), bit));
-        if symbol == 1 {
-            break;
-        }
-    }
-    price
-}
 #[inline]
 unsafe extern "C" fn rc_bittree_reverse_price(
     probs: *const probability,
@@ -166,18 +113,6 @@ extern "C" fn rc_direct_price(bits: u32) -> u32 {
     bits << RC_BIT_PRICE_SHIFT_BITS
 }
 #[inline]
-unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
-    if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
-        return lzma_fastpos[dist as usize] as u32;
-    }
-    if dist < 1 << FASTPOS_BITS + (0 + 1 * (FASTPOS_BITS - 1)) {
-        return (lzma_fastpos[(dist >> 0 + 1 * (FASTPOS_BITS - 1)) as usize] as u32)
-            .wrapping_add((2 * (0 + 1 * (FASTPOS_BITS - 1))) as u32);
-    }
-    (lzma_fastpos[(dist >> 0 + 2 * (FASTPOS_BITS - 1)) as usize] as u32)
-        .wrapping_add((2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32)
-}
-#[inline]
 unsafe extern "C" fn get_dist_slot_2(dist: u32) -> u32 {
     if dist < 1 << FASTPOS_BITS + (14 / 2 - 1 + 0 * (FASTPOS_BITS - 1)) {
         return (lzma_fastpos[(dist >> 14 / 2 - 1 + 0 * (FASTPOS_BITS - 1)) as usize] as u32)
@@ -189,18 +124,6 @@ unsafe extern "C" fn get_dist_slot_2(dist: u32) -> u32 {
     }
     (lzma_fastpos[(dist >> 14 / 2 - 1 + 2 * (FASTPOS_BITS - 1)) as usize] as u32)
         .wrapping_add((2 * (14 / 2 - 1 + 2 * (FASTPOS_BITS - 1))) as u32)
-}
-#[inline(always)]
-unsafe extern "C" fn lzma_memcmplen(
-    buf1: *const u8,
-    buf2: *const u8,
-    mut len: u32,
-    limit: u32,
-) -> u32 {
-    while len < limit && *buf1.offset(len as isize) == *buf2.offset(len as isize) {
-        len += 1;
-    }
-    len
 }
 unsafe extern "C" fn get_literal_price(
     coder: *const lzma_lzma1_encoder,

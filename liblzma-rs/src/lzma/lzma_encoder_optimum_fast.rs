@@ -86,33 +86,6 @@ pub struct lzma_length_encoder {
     pub counters: [u32; 16],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
-#[inline]
-unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
-    (*mf).buffer.offset((*mf).read_pos as isize)
-}
-#[inline]
-unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
-    (*mf).write_pos.wrapping_sub((*mf).read_pos)
-}
-#[inline]
-unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
-    if amount != 0 {
-        (*mf).skip.unwrap()(mf, amount);
-        (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
-    }
-}
-#[inline(always)]
-unsafe extern "C" fn lzma_memcmplen(
-    buf1: *const u8,
-    buf2: *const u8,
-    mut len: u32,
-    limit: u32,
-) -> u32 {
-    while len < limit && *buf1.offset(len as isize) == *buf2.offset(len as isize) {
-        len += 1;
-    }
-    len
-}
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     coder: *mut lzma_lzma1_encoder,
