@@ -1,29 +1,6 @@
 use crate::types::*;
-use core::ffi::{c_char, c_int, c_long, c_uint, c_ulong, c_void};
-pub enum lzma_index_hash_s {}
+use core::ffi::{c_int, c_long, c_uint, c_ulong, c_void};
 extern "C" {
-    fn clock_gettime(__clock_id: clockid_t, __tp: *mut timespec) -> c_int;
-    fn pthread_cond_destroy(_: *mut pthread_cond_t) -> c_int;
-    fn pthread_cond_init(_: *mut pthread_cond_t, _: *const pthread_condattr_t) -> c_int;
-    fn pthread_cond_signal(_: *mut pthread_cond_t) -> c_int;
-    fn pthread_cond_timedwait(
-        _: *mut pthread_cond_t,
-        _: *mut pthread_mutex_t,
-        _: *const timespec,
-    ) -> c_int;
-    fn pthread_cond_wait(_: *mut pthread_cond_t, _: *mut pthread_mutex_t) -> c_int;
-    fn pthread_create(
-        _: *mut pthread_t,
-        _: *const pthread_attr_t,
-        _: Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
-        _: *mut c_void,
-    ) -> c_int;
-    fn pthread_join(_: pthread_t, _: *mut *mut c_void) -> c_int;
-    fn pthread_mutex_destroy(_: *mut pthread_mutex_t) -> c_int;
-    fn pthread_mutex_init(_: *mut pthread_mutex_t, _: *const pthread_mutexattr_t) -> c_int;
-    fn pthread_mutex_lock(_: *mut pthread_mutex_t) -> c_int;
-    fn pthread_mutex_unlock(_: *mut pthread_mutex_t) -> c_int;
-    fn pthread_sigmask(_: c_int, _: *const sigset_t, _: *mut sigset_t) -> c_int;
     fn lzma_outq_clear_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator);
     fn lzma_outq_clear_cache2(
         outq: *mut lzma_outq,
@@ -35,91 +12,6 @@ extern "C" {
         enable_partial_output: Option<unsafe extern "C" fn(*mut c_void) -> ()>,
     );
 }
-pub type __uint32_t = u32;
-pub type __darwin_time_t = c_long;
-pub type __darwin_sigset_t = __uint32_t;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct __darwin_pthread_handler_rec {
-    pub __routine: Option<unsafe extern "C" fn(*mut c_void) -> ()>,
-    pub __arg: *mut c_void,
-    pub __next: *mut __darwin_pthread_handler_rec,
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct _opaque_pthread_attr_t {
-    pub __sig: c_long,
-    pub __opaque: [c_char; 56],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct _opaque_pthread_cond_t {
-    pub __sig: c_long,
-    pub __opaque: [c_char; 40],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct _opaque_pthread_condattr_t {
-    pub __sig: c_long,
-    pub __opaque: [c_char; 8],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct _opaque_pthread_mutex_t {
-    pub __sig: c_long,
-    pub __opaque: [c_char; 56],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct _opaque_pthread_mutexattr_t {
-    pub __sig: c_long,
-    pub __opaque: [c_char; 8],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct _opaque_pthread_t {
-    pub __sig: c_long,
-    pub __cleanup_stack: *mut __darwin_pthread_handler_rec,
-    pub __opaque: [c_char; 8176],
-}
-pub type __darwin_pthread_attr_t = _opaque_pthread_attr_t;
-pub type __darwin_pthread_cond_t = _opaque_pthread_cond_t;
-pub type __darwin_pthread_condattr_t = _opaque_pthread_condattr_t;
-pub type __darwin_pthread_mutex_t = _opaque_pthread_mutex_t;
-pub type __darwin_pthread_mutexattr_t = _opaque_pthread_mutexattr_t;
-pub type __darwin_pthread_t = *mut _opaque_pthread_t;
-pub type pthread_attr_t = __darwin_pthread_attr_t;
-pub type sigset_t = __darwin_sigset_t;
-pub type time_t = __darwin_time_t;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct timespec {
-    pub tv_sec: __darwin_time_t,
-    pub tv_nsec: c_long,
-}
-pub type clockid_t = c_uint;
-pub const _CLOCK_THREAD_CPUTIME_ID: clockid_t = 16;
-pub const _CLOCK_PROCESS_CPUTIME_ID: clockid_t = 12;
-pub const _CLOCK_UPTIME_RAW_APPROX: clockid_t = 9;
-pub const _CLOCK_UPTIME_RAW: clockid_t = 8;
-pub const _CLOCK_MONOTONIC_RAW_APPROX: clockid_t = 5;
-pub const _CLOCK_MONOTONIC_RAW: clockid_t = 4;
-pub const _CLOCK_MONOTONIC: clockid_t = 6;
-pub const _CLOCK_REALTIME: clockid_t = 0;
-pub type pthread_cond_t = __darwin_pthread_cond_t;
-pub type pthread_condattr_t = __darwin_pthread_condattr_t;
-pub type pthread_mutex_t = __darwin_pthread_mutex_t;
-pub type pthread_mutexattr_t = __darwin_pthread_mutexattr_t;
-pub type pthread_t = __darwin_pthread_t;
-pub type mythread = pthread_t;
-pub type mythread_mutex = pthread_mutex_t;
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct mythread_cond {
-    pub cond: pthread_cond_t,
-    pub clk_id: clockid_t,
-}
-pub type mythread_condtime = timespec;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_stream_coder {
