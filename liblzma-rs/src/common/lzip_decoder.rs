@@ -27,16 +27,6 @@ pub const SEQ_DICT_SIZE: C2RustUnnamed_0 = 2;
 pub const SEQ_VERSION: C2RustUnnamed_0 = 1;
 pub const SEQ_ID_STRING: C2RustUnnamed_0 = 0;
 #[inline]
-extern "C" fn read32le(buf: *const u8) -> u32 {
-    return unsafe {
-        let mut num: u32 = *buf as u32;
-        num |= (*buf.offset(1) as u32) << 8;
-        num |= (*buf.offset(2) as u32) << 16;
-        num |= (*buf.offset(3) as u32) << 24;
-        num
-    };
-}
-#[inline]
 extern "C" fn read64le(buf: *const u8) -> u64 {
     return unsafe {
         let mut num: u64 = *buf as u64;

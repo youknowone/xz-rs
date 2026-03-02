@@ -1,24 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-#[inline]
-extern "C" fn read32le(buf: *const u8) -> u32 {
-    return unsafe {
-        let mut num: u32 = *buf as u32;
-        num |= (*buf.offset(1) as u32) << 8;
-        num |= (*buf.offset(2) as u32) << 16;
-        num |= (*buf.offset(3) as u32) << 24;
-        num
-    };
-}
-#[inline]
-extern "C" fn write32le(buf: *mut u8, num: u32) {
-    unsafe {
-        *buf = num as u8;
-        *buf.offset(1) = (num >> 8) as u8;
-        *buf.offset(2) = (num >> 16) as u8;
-        *buf.offset(3) = (num >> 24) as u8;
-    }
-}
 unsafe extern "C" fn arm64_code(
     _simple: *mut c_void,
     now_pos: u32,

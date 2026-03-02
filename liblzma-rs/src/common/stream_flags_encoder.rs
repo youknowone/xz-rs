@@ -4,15 +4,6 @@ extern "C" {
     static lzma_footer_magic: [u8; 2];
 }
 #[inline]
-extern "C" fn write32le(buf: *mut u8, num: u32) {
-    unsafe {
-        *buf = num as u8;
-        *buf.offset(1) = (num >> 8) as u8;
-        *buf.offset(2) = (num >> 16) as u8;
-        *buf.offset(3) = (num >> 24) as u8;
-    }
-}
-#[inline]
 extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
     unsafe {
         (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli

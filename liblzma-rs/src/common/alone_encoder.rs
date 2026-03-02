@@ -11,15 +11,6 @@ pub struct lzma_alone_coder {
 pub type C2RustUnnamed_0 = c_uint;
 pub const SEQ_CODE: C2RustUnnamed_0 = 1;
 pub const SEQ_HEADER: C2RustUnnamed_0 = 0;
-#[inline]
-extern "C" fn write32le(buf: *mut u8, num: u32) {
-    unsafe {
-        *buf = num as u8;
-        *buf.offset(1) = (num >> 8) as u8;
-        *buf.offset(2) = (num >> 16) as u8;
-        *buf.offset(3) = (num >> 24) as u8;
-    }
-}
 pub const ALONE_HEADER_SIZE: u32 = 1 + 4 + 8;
 unsafe extern "C" fn alone_encode(
     coder_ptr: *mut c_void,
