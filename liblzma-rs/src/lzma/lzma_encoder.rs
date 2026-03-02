@@ -130,10 +130,6 @@ pub struct lzma_length_encoder {
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 #[inline]
-extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
-    match_finder as u32 & 0xf
-}
-#[inline]
 unsafe extern "C" fn rc_reset(rc: *mut lzma_range_encoder) {
     (*rc).low = 0;
     (*rc).cache_size = 1;
@@ -397,22 +393,6 @@ unsafe extern "C" fn rc_encode_dummy(rc: *const lzma_range_encoder, out_limit: u
 #[inline]
 unsafe extern "C" fn rc_pending(rc: *const lzma_range_encoder) -> u64 {
     (*rc).cache_size.wrapping_add(5).wrapping_sub(1)
-}
-#[inline]
-unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
-    (*options).lc <= LZMA_LCLP_MAX
-        && (*options).lp <= LZMA_LCLP_MAX
-        && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX
-        && (*options).pb <= LZMA_PB_MAX
-}
-#[inline]
-unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
-    let coders: size_t = (LITERAL_CODER_SIZE << lc.wrapping_add(lp)) as size_t;
-    let mut i: size_t = 0;
-    while i < coders {
-        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1) as probability;
-        i += 1;
-    }
 }
 pub const LEN_SYMBOLS: u32 = LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS + LEN_HIGH_SYMBOLS;
 pub const MATCH_LEN_MAX: u32 = MATCH_LEN_MIN + LEN_SYMBOLS - 1;

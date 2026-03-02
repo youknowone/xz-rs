@@ -3,14 +3,6 @@ extern "C" {
     static lzma_header_magic: [u8; 6];
     static lzma_footer_magic: [u8; 2];
 }
-#[inline]
-extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
-    unsafe {
-        (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
-            && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX
-            && (*options).backward_size & 3 == 0
-    }
-}
 extern "C" fn stream_flags_encode(options: *const lzma_stream_flags, out: *mut u8) -> bool {
     return unsafe {
         if (*options).check > LZMA_CHECK_ID_MAX {

@@ -1,9 +1,5 @@
 use crate::types::*;
 use core::ffi::c_void;
-#[inline]
-extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
-    (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
-}
 #[no_mangle]
 pub extern "C" fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64 {
     let limit: u64 = (UINT64_MAX)

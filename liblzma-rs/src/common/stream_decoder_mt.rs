@@ -91,10 +91,6 @@ pub const SEQ_BLOCK_THR_INIT: C2RustUnnamed_0 = 3;
 pub const SEQ_BLOCK_INIT: C2RustUnnamed_0 = 2;
 pub const SEQ_BLOCK_HEADER: C2RustUnnamed_0 = 1;
 pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
-#[inline]
-extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
-    (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
-}
 unsafe extern "C" fn worker_enable_partial_update(thr_ptr: *mut c_void) {
     let thr: *mut worker_thread = thr_ptr as *mut worker_thread;
     let mut mythread_i_325: c_uint = 0;

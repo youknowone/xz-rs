@@ -1,12 +1,4 @@
 use crate::types::*;
-#[inline]
-extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
-    unsafe {
-        (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
-            && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX
-            && (*options).backward_size & 3 == 0
-    }
-}
 #[no_mangle]
 pub static mut lzma_header_magic: [u8; 6] = [
     0xfd as u8, 0x37 as u8, 0x7a as u8, 0x58 as u8, 0x5a as u8, 0,

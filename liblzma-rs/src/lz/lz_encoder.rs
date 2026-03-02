@@ -32,10 +32,6 @@ pub struct lzma_coder {
     pub mf: lzma_mf,
     pub next: lzma_next_coder,
 }
-#[inline]
-extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
-    match_finder as u32 & 0xf
-}
 pub const LZMA_MEMCMPLEN_EXTRA: u32 = 0;
 unsafe extern "C" fn move_window(mf: *mut lzma_mf) {
     let move_offset: u32 = (*mf).read_pos.wrapping_sub((*mf).keep_size_before) & !(15);

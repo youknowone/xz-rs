@@ -171,22 +171,6 @@ unsafe extern "C" fn dict_put_safe(dict: *mut lzma_dict, byte: u8) -> bool {
     dict_put(dict, byte);
     false
 }
-#[inline]
-unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
-    (*options).lc <= LZMA_LCLP_MAX
-        && (*options).lp <= LZMA_LCLP_MAX
-        && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX
-        && (*options).pb <= LZMA_PB_MAX
-}
-#[inline]
-unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
-    let coders: size_t = (LITERAL_CODER_SIZE << lc.wrapping_add(lp)) as size_t;
-    let mut i: size_t = 0;
-    while i < coders {
-        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1) as probability;
-        i += 1;
-    }
-}
 pub const DIST_SLOTS: u32 = 1 << DIST_SLOT_BITS;
 #[inline]
 unsafe extern "C" fn rc_read_init(

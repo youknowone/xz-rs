@@ -31,10 +31,6 @@ pub const SEQ_COUNT: C2RustUnnamed_1 = 1;
 pub const SEQ_BLOCK: C2RustUnnamed_1 = 0;
 pub type lzma_index_hash = lzma_index_hash_s;
 #[inline]
-extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
-    vli_ceil4(index_size_unpadded(count, index_list_size))
-}
-#[inline]
 extern "C" fn index_stream_size(
     blocks_size: lzma_vli,
     count: lzma_vli,

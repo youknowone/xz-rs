@@ -1,8 +1,4 @@
 use crate::types::*;
-#[inline]
-unsafe extern "C" fn aligned_read32ne(buf: *const u8) -> u32 {
-    *(buf as *const u32)
-}
 #[no_mangle]
 pub static mut lzma_crc64_table: [[u64; 256]; 4] = [
     [

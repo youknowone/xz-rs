@@ -937,6 +937,46 @@ pub unsafe extern "C" fn rc_bittree_price(
     price
 }
 
+// Shared inline helpers (misc)
+#[inline]
+pub extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
+    match_finder as u32 & 0xf
+}
+#[inline]
+pub unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
+    (*options).lc <= LZMA_LCLP_MAX
+        && (*options).lp <= LZMA_LCLP_MAX
+        && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX
+        && (*options).pb <= LZMA_PB_MAX
+}
+#[inline]
+pub unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
+    let coders: size_t = (LITERAL_CODER_SIZE << lc.wrapping_add(lp)) as size_t;
+    let mut i: size_t = 0;
+    while i < coders {
+        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1) as probability;
+        i += 1;
+    }
+}
+pub extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
+    unsafe {
+        (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
+            && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX
+            && (*options).backward_size & 3 == 0
+    }
+}
+#[inline]
+pub extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
+    vli_ceil4(index_size_unpadded(count, index_list_size))
+}
+pub extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
+    (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
+}
+#[inline]
+pub unsafe extern "C" fn aligned_read32ne(buf: *const u8) -> u32 {
+    *(buf as *const u32)
+}
+
 // lzma_options_bcj struct (shared across simple/filter modules)
 #[derive(Copy, Clone)]
 #[repr(C)]

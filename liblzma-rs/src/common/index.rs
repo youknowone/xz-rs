@@ -138,10 +138,6 @@ extern "C" fn bsr32(n: u32) -> u32 {
 extern "C" fn ctz32(n: u32) -> u32 {
     n.trailing_zeros() as i32 as u32
 }
-#[inline]
-extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
-    vli_ceil4(index_size_unpadded(count, index_list_size))
-}
 pub const INDEX_GROUP_SIZE: u32 = 512;
 pub const PREALLOC_MAX: usize = (SIZE_MAX as usize)
     .wrapping_sub(core::mem::size_of::<index_group>())
