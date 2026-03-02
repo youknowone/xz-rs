@@ -31,16 +31,6 @@ pub const SEQ_COUNT: C2RustUnnamed_1 = 1;
 pub const SEQ_BLOCK: C2RustUnnamed_1 = 0;
 pub type lzma_index_hash = lzma_index_hash_s;
 #[inline]
-extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
-    vli.wrapping_add(3) & !(3)
-}
-#[inline]
-extern "C" fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
-    (1u32.wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
-        .wrapping_add(index_list_size)
-        .wrapping_add(4)
-}
-#[inline]
 extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     vli_ceil4(index_size_unpadded(count, index_list_size))
 }

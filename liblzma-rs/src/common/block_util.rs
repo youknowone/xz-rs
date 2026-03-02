@@ -1,9 +1,5 @@
 use crate::types::*;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: u32 = 8;
-#[inline]
-extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
-    vli.wrapping_add(3) & !(3)
-}
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_compressed_size(
     block: *mut lzma_block,

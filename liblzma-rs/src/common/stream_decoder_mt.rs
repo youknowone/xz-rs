@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_int, c_long, c_uint, c_ulong, c_void};
+use core::ffi::{c_uint, c_ulong, c_void};
 extern "C" {
     fn lzma_outq_clear_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator);
     fn lzma_outq_clear_cache2(
@@ -91,121 +91,6 @@ pub const SEQ_BLOCK_THR_INIT: C2RustUnnamed_0 = 3;
 pub const SEQ_BLOCK_INIT: C2RustUnnamed_0 = 2;
 pub const SEQ_BLOCK_HEADER: C2RustUnnamed_0 = 1;
 pub const SEQ_STREAM_HEADER: C2RustUnnamed_0 = 0;
-#[inline]
-extern "C" fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
-    let _ret: c_int =
-        unsafe { pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t) };
-}
-#[inline]
-extern "C" fn mythread_create(
-    thread: *mut mythread,
-    func: Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
-    arg: *mut c_void,
-) -> c_int {
-    let mut old: sigset_t = 0;
-    let mut all: sigset_t = 0;
-    all = !(0 as sigset_t);
-    mythread_sigmask(SIG_SETMASK, &raw mut all, &raw mut old);
-    let ret: c_int = unsafe {
-        pthread_create(
-            thread as *mut pthread_t,
-            core::ptr::null(),
-            func as Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
-            arg as *mut c_void,
-        )
-    };
-    mythread_sigmask(SIG_SETMASK, &raw mut old, core::ptr::null_mut());
-    ret
-}
-#[inline]
-extern "C" fn mythread_join(thread: mythread) -> c_int {
-    unsafe { pthread_join(thread as pthread_t, core::ptr::null_mut()) }
-}
-#[inline]
-extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
-    unsafe { pthread_mutex_init(mutex as *mut pthread_mutex_t, core::ptr::null()) }
-}
-#[inline]
-extern "C" fn mythread_mutex_destroy(mutex: *mut mythread_mutex) {
-    let _ret: c_int = unsafe { pthread_mutex_destroy(mutex as *mut pthread_mutex_t) };
-}
-#[inline]
-extern "C" fn mythread_mutex_lock(mutex: *mut mythread_mutex) {
-    let _ret: c_int = unsafe { pthread_mutex_lock(mutex as *mut pthread_mutex_t) };
-}
-#[inline]
-extern "C" fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
-    let _ret: c_int = unsafe { pthread_mutex_unlock(mutex as *mut pthread_mutex_t) };
-}
-#[inline]
-extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
-    return unsafe {
-        (*mycond).clk_id = _CLOCK_REALTIME;
-        pthread_cond_init(&raw mut (*mycond).cond, core::ptr::null())
-    };
-}
-#[inline]
-extern "C" fn mythread_cond_destroy(cond: *mut mythread_cond) {
-    let _ret: c_int = unsafe { pthread_cond_destroy(&raw mut (*cond).cond) };
-}
-#[inline]
-extern "C" fn mythread_cond_signal(cond: *mut mythread_cond) {
-    let _ret: c_int = unsafe { pthread_cond_signal(&raw mut (*cond).cond) };
-}
-#[inline]
-extern "C" fn mythread_cond_wait(cond: *mut mythread_cond, mutex: *mut mythread_mutex) {
-    let _ret: c_int =
-        unsafe { pthread_cond_wait(&raw mut (*cond).cond, mutex as *mut pthread_mutex_t) };
-}
-#[inline]
-extern "C" fn mythread_cond_timedwait(
-    cond: *mut mythread_cond,
-    mutex: *mut mythread_mutex,
-    condtime: *const mythread_condtime,
-) -> c_int {
-    let ret: c_int = unsafe {
-        pthread_cond_timedwait(
-            &raw mut (*cond).cond,
-            mutex as *mut pthread_mutex_t,
-            condtime as *const timespec,
-        )
-    };
-    ret
-}
-#[inline]
-extern "C" fn mythread_condtime_set(
-    condtime: *mut mythread_condtime,
-    cond: *const mythread_cond,
-    timeout_ms: u32,
-) {
-    unsafe {
-        (*condtime).tv_sec = timeout_ms.wrapping_div(1000) as time_t as __darwin_time_t;
-        (*condtime).tv_nsec = timeout_ms.wrapping_rem(1000).wrapping_mul(1_000_000) as c_long;
-        let mut now: timespec = timespec {
-            tv_sec: 0,
-            tv_nsec: 0,
-        };
-        let _ret: c_int = clock_gettime((*cond).clk_id, &raw mut now);
-        (*condtime).tv_sec += now.tv_sec;
-        (*condtime).tv_nsec += now.tv_nsec;
-        if (*condtime).tv_nsec >= 1_000_000_000 {
-            (*condtime).tv_nsec -= 1_000_000_000;
-            (*condtime).tv_sec += 1;
-        }
-    }
-}
-#[inline]
-extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
-    vli.wrapping_add(3) & !(3)
-}
-#[inline]
-extern "C" fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
-    unsafe { (*outq).bufs_in_use < (*outq).bufs_limit }
-}
-#[inline]
-extern "C" fn lzma_outq_is_empty(outq: *const lzma_outq) -> bool {
-    unsafe { (*outq).bufs_in_use == 0 }
-}
 #[inline]
 extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
     (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
