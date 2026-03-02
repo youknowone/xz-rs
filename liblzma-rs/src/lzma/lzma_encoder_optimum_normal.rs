@@ -2,25 +2,6 @@ use crate::types::*;
 use core::ffi::c_uint;
 #[derive(Copy, Clone)]
 #[repr(C)]
-pub struct lzma_range_encoder {
-    pub low: u64,
-    pub cache_size: u64,
-    pub range: u32,
-    pub cache: u8,
-    pub out_total: u64,
-    pub count: size_t,
-    pub pos: size_t,
-    pub symbols: [C2RustUnnamed; 53],
-    pub probs: [*mut probability; 53],
-}
-pub type C2RustUnnamed = c_uint;
-pub const RC_FLUSH: C2RustUnnamed = 4;
-pub const RC_DIRECT_1: C2RustUnnamed = 3;
-pub const RC_DIRECT_0: C2RustUnnamed = 2;
-pub const RC_BIT_1: C2RustUnnamed = 1;
-pub const RC_BIT_0: C2RustUnnamed = 0;
-#[derive(Copy, Clone)]
-#[repr(C)]
 pub struct lzma_lzma1_encoder_s {
     pub rc: lzma_range_encoder,
     pub uncomp_size: u64,
@@ -59,31 +40,6 @@ pub struct lzma_lzma1_encoder_s {
     pub opts_end_index: u32,
     pub opts_current_index: u32,
     pub opts: [lzma_optimal; OPTS as usize],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_optimal {
-    pub state: lzma_lzma_state,
-    pub prev_1_is_literal: bool,
-    pub prev_2: bool,
-    pub pos_prev_2: u32,
-    pub back_prev_2: u32,
-    pub price: u32,
-    pub pos_prev: u32,
-    pub back_prev: u32,
-    pub backs: [u32; 4],
-}
-#[derive(Copy, Clone)]
-#[repr(C)]
-pub struct lzma_length_encoder {
-    pub choice: probability,
-    pub choice2: probability,
-    pub low: [[probability; 8]; 16],
-    pub mid: [[probability; 8]; 16],
-    pub high: [probability; 256],
-    pub prices: [[u32; 272]; 16],
-    pub table_size: u32,
-    pub counters: [u32; 16],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 pub const RC_BIT_PRICE_SHIFT_BITS: u32 = 4;

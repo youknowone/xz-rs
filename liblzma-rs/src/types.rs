@@ -977,6 +977,58 @@ pub unsafe extern "C" fn aligned_read32ne(buf: *const u8) -> u32 {
     *(buf as *const u32)
 }
 
+// Range coder symbol type and constants (shared across encoder modules)
+pub type rc_symbol = c_uint;
+pub const RC_FLUSH: rc_symbol = 4;
+pub const RC_DIRECT_1: rc_symbol = 3;
+pub const RC_DIRECT_0: rc_symbol = 2;
+pub const RC_BIT_1: rc_symbol = 1;
+pub const RC_BIT_0: rc_symbol = 0;
+
+// lzma_range_encoder struct (shared across encoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_range_encoder {
+    pub low: u64,
+    pub cache_size: u64,
+    pub range: u32,
+    pub cache: u8,
+    pub out_total: u64,
+    pub count: size_t,
+    pub pos: size_t,
+    pub symbols: [rc_symbol; 53],
+    pub probs: [*mut probability; 53],
+}
+
+// lzma_optimal struct (shared across encoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_optimal {
+    pub state: lzma_lzma_state,
+    pub prev_1_is_literal: bool,
+    pub prev_2: bool,
+    pub pos_prev_2: u32,
+    pub back_prev_2: u32,
+    pub price: u32,
+    pub pos_prev: u32,
+    pub back_prev: u32,
+    pub backs: [u32; 4],
+}
+
+// lzma_length_encoder struct (shared across encoder modules)
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_length_encoder {
+    pub choice: probability,
+    pub choice2: probability,
+    pub low: [[probability; 8]; 16],
+    pub mid: [[probability; 8]; 16],
+    pub high: [probability; 256],
+    pub prices: [[u32; 272]; 16],
+    pub table_size: u32,
+    pub counters: [u32; 16],
+}
+
 // lzma_options_bcj struct (shared across simple/filter modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
