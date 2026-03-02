@@ -619,9 +619,46 @@ pub struct lzma_index_hash_s {
 }
 pub type lzma_index_hash = lzma_index_hash_s;
 
+#[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lzma1_encoder_s {
-    _opaque: [u8; 0],
+    pub rc: lzma_range_encoder,
+    pub uncomp_size: u64,
+    pub out_limit: u64,
+    pub uncomp_size_ptr: *mut u64,
+    pub state: lzma_lzma_state,
+    pub reps: [u32; 4],
+    pub matches: [lzma_match; 274],
+    pub matches_count: u32,
+    pub longest_match_length: u32,
+    pub fast_mode: bool,
+    pub is_initialized: bool,
+    pub is_flushed: bool,
+    pub use_eopm: bool,
+    pub pos_mask: u32,
+    pub literal_context_bits: u32,
+    pub literal_mask: u32,
+    pub literal: [probability; 12288],
+    pub is_match: [[probability; 16]; 12],
+    pub is_rep: [probability; 12],
+    pub is_rep0: [probability; 12],
+    pub is_rep1: [probability; 12],
+    pub is_rep2: [probability; 12],
+    pub is_rep0_long: [[probability; 16]; 12],
+    pub dist_slot: [[probability; 64]; 4],
+    pub dist_special: [probability; 114],
+    pub dist_align: [probability; 16],
+    pub match_len_encoder: lzma_length_encoder,
+    pub rep_len_encoder: lzma_length_encoder,
+    pub dist_slot_prices: [[u32; 64]; 4],
+    pub dist_prices: [[u32; 128]; 4],
+    pub dist_table_size: u32,
+    pub match_price_count: u32,
+    pub align_prices: [u32; 16],
+    pub align_price_count: u32,
+    pub opts_end_index: u32,
+    pub opts_current_index: u32,
+    pub opts: [lzma_optimal; OPTS as usize],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 
