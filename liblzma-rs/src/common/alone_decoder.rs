@@ -275,7 +275,6 @@ pub unsafe extern "C" fn lzma_alone_decoder_init(
     (*coder).memusage = LZMA_MEMUSAGE_BASE;
     LZMA_OK
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_alone_decoder(strm: *mut lzma_stream, memlimit: u64) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm);
     if ret_ != LZMA_OK {

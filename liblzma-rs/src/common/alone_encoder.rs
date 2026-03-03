@@ -191,7 +191,6 @@ unsafe extern "C" fn alone_encoder_init(
         &raw const filters as *const lzma_filter_info,
     )
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_alone_encoder(
     strm: *mut lzma_stream,
     options: *const lzma_options_lzma,

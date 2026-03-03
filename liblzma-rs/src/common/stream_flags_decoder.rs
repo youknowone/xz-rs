@@ -14,7 +14,6 @@ extern "C" fn stream_flags_decode(options: *mut lzma_stream_flags, in_0: *const 
         false
     };
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_header_decode(
     options: *mut lzma_stream_flags,
     in_0: *const u8,
@@ -49,7 +48,6 @@ pub unsafe extern "C" fn lzma_stream_header_decode(
     (*options).backward_size = LZMA_VLI_UNKNOWN;
     LZMA_OK
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_footer_decode(
     options: *mut lzma_stream_flags,
     in_0: *const u8,

@@ -334,7 +334,6 @@ pub unsafe extern "C" fn lzma_index_decoder(
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
     LZMA_OK
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_index_buffer_decode(
     i: *mut *mut lzma_index,
     memlimit: *mut u64,

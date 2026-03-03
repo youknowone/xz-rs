@@ -383,7 +383,6 @@ pub unsafe extern "C" fn lzma_lzip_decoder_init(
     (*coder).pos = 0;
     LZMA_OK
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_lzip_decoder(
     strm: *mut lzma_stream,
     memlimit: u64,

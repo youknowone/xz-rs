@@ -363,7 +363,6 @@ extern "C" fn decoder_find(id: lzma_vli) -> *const lzma_filter_decoder {
 extern "C" fn coder_find(id: lzma_vli) -> *const lzma_filter_coder {
     decoder_find(id) as *const lzma_filter_coder
 }
-#[no_mangle]
 pub extern "C" fn lzma_filter_decoder_is_supported(id: lzma_vli) -> lzma_bool {
     !decoder_find(id).is_null() as lzma_bool
 }
@@ -381,7 +380,6 @@ pub unsafe extern "C" fn lzma_raw_decoder_init(
         false,
     )
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_raw_decoder(
     strm: *mut lzma_stream,
     options: *const lzma_filter,
@@ -403,14 +401,12 @@ pub unsafe extern "C" fn lzma_raw_decoder(
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
     LZMA_OK
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_raw_decoder_memusage(filters: *const lzma_filter) -> u64 {
     lzma_raw_coder_memusage(
         Some(coder_find as unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder),
         filters,
     )
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_properties_decode(
     filter: *mut lzma_filter,
     allocator: *const lzma_allocator,

@@ -450,7 +450,6 @@ pub unsafe extern "C" fn lzma_stream_decoder_init(
     (*coder).first_stream = true;
     stream_decoder_reset(coder, allocator)
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_decoder(
     strm: *mut lzma_stream,
     memlimit: u64,

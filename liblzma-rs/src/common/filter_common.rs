@@ -101,7 +101,6 @@ static mut features: [filter_features; 13] = [
         changes_size: false,
     },
 ];
-#[no_mangle]
 pub unsafe extern "C" fn lzma_filters_copy(
     src: *const lzma_filter,
     real_dest: *mut lzma_filter,

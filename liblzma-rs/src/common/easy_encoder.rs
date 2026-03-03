@@ -6,7 +6,6 @@ extern "C" {
         check: lzma_check,
     ) -> lzma_ret;
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_easy_encoder(
     strm: *mut lzma_stream,
     preset: u32,

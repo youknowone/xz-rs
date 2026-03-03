@@ -19,7 +19,6 @@ extern "C" {
 }
 pub const INDEX_BOUND: u32 = 1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 4 + 3 & !(3);
 pub const HEADERS_BOUND: u32 = 2 * LZMA_STREAM_HEADER_SIZE + INDEX_BOUND;
-#[no_mangle]
 pub extern "C" fn lzma_stream_buffer_bound(uncompressed_size: size_t) -> size_t {
     let block_bound: size_t = unsafe { lzma_block_buffer_bound(uncompressed_size) } as size_t;
     if block_bound == 0 {
@@ -33,7 +32,6 @@ pub extern "C" fn lzma_stream_buffer_bound(uncompressed_size: size_t) -> size_t 
     }
     block_bound.wrapping_add(HEADERS_BOUND as size_t)
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_buffer_encode(
     filters: *mut lzma_filter,
     check: lzma_check,

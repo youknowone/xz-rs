@@ -1,5 +1,4 @@
 use crate::types::*;
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_buffer_decode(
     memlimit: *mut u64,
     flags: u32,

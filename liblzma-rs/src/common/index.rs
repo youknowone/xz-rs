@@ -243,7 +243,6 @@ pub unsafe extern "C" fn lzma_index_init(allocator: *const lzma_allocator) -> *m
     index_tree_append(&raw mut (*i).streams, &raw mut (*s).node);
     i
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator) {
     if !i.is_null() {
         index_tree_end(
@@ -362,7 +361,6 @@ pub unsafe extern "C" fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli 
         (*s).stream_padding,
     )
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_index_uncompressed_size(i: *const lzma_index) -> lzma_vli {
     (*i).uncompressed_size
 }

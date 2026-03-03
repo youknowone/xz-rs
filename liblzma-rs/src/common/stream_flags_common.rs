@@ -5,7 +5,6 @@ pub static mut lzma_header_magic: [u8; 6] = [
 ];
 #[no_mangle]
 pub static mut lzma_footer_magic: [u8; 2] = [0x59 as u8, 0x5a as u8];
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_flags_compare(
     a: *const lzma_stream_flags,
     b: *const lzma_stream_flags,

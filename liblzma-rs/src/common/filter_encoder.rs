@@ -320,11 +320,9 @@ extern "C" fn encoder_find(id: lzma_vli) -> *const lzma_filter_encoder {
 extern "C" fn coder_find(id: lzma_vli) -> *const lzma_filter_coder {
     encoder_find(id) as *const lzma_filter_coder
 }
-#[no_mangle]
 pub extern "C" fn lzma_filter_encoder_is_supported(id: lzma_vli) -> lzma_bool {
     !encoder_find(id).is_null() as lzma_bool
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_filters_update(
     strm: *mut lzma_stream,
     filters: *const lzma_filter,
@@ -371,7 +369,6 @@ pub unsafe extern "C" fn lzma_raw_encoder_init(
         true,
     )
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_raw_encoder(
     strm: *mut lzma_stream,
     filters: *const lzma_filter,
@@ -396,14 +393,12 @@ pub unsafe extern "C" fn lzma_raw_encoder(
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
     LZMA_OK
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_raw_encoder_memusage(filters: *const lzma_filter) -> u64 {
     lzma_raw_coder_memusage(
         Some(coder_find as unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder),
         filters,
     )
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_mt_block_size(filters: *const lzma_filter) -> u64 {
     if filters.is_null() {
         return UINT64_MAX;
@@ -430,7 +425,6 @@ pub unsafe extern "C" fn lzma_mt_block_size(filters: *const lzma_filter) -> u64 
         max
     }
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_properties_size(
     size: *mut u32,
     filter: *const lzma_filter,
@@ -449,7 +443,6 @@ pub unsafe extern "C" fn lzma_properties_size(
     }
     (*fe).props_size_get.unwrap()(size, (*filter).options)
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_properties_encode(
     filter: *const lzma_filter,
     props: *mut u8,

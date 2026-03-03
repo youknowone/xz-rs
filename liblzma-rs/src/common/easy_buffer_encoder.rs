@@ -11,7 +11,6 @@ extern "C" {
         out_size: size_t,
     ) -> lzma_ret;
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_easy_buffer_encode(
     preset: u32,
     check: lzma_check,

@@ -13,7 +13,6 @@ extern "C" fn stream_flags_encode(options: *const lzma_stream_flags, out: *mut u
         false
     };
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_header_encode(
     options: *const lzma_stream_flags,
     out: *mut u8,
@@ -44,7 +43,6 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
     );
     LZMA_OK
 }
-#[no_mangle]
 pub unsafe extern "C" fn lzma_stream_footer_encode(
     options: *const lzma_stream_flags,
     out: *mut u8,
