@@ -32,8 +32,10 @@ pub extern "C" fn lzma_easy_encoder_memusage(preset: u32) -> u64 {
             reserved_ptr2: core::ptr::null_mut(),
         },
     };
-    if unsafe { lzma_easy_preset(&raw mut opt_easy, preset) } {
+    if unsafe { lzma_easy_preset(::core::ptr::addr_of_mut!(opt_easy), preset) } {
         return UINT32_MAX as u64;
     }
-    unsafe { lzma_raw_encoder_memusage(&raw mut opt_easy.filters as *mut lzma_filter) }
+    unsafe {
+        lzma_raw_encoder_memusage(::core::ptr::addr_of_mut!(opt_easy.filters) as *mut lzma_filter)
+    }
 }

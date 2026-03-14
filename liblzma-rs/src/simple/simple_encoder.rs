@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_simple_props_size(
     size: *mut u32,

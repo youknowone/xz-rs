@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 extern "C" {
     fn lzma_index_prealloc(i: *mut lzma_index, records: lzma_vli);
 }
@@ -53,8 +53,8 @@ unsafe extern "C" fn index_decode(
             }
             1 => {
                 ret = lzma_vli_decode(
-                    &raw mut (*coder).count,
-                    &raw mut (*coder).pos,
+                    ::core::ptr::addr_of_mut!((*coder).count),
+                    ::core::ptr::addr_of_mut!((*coder).pos),
                     in_0,
                     in_pos,
                     in_size,
@@ -71,11 +71,17 @@ unsafe extern "C" fn index_decode(
             }
             3 | 4 => {
                 let size: *mut lzma_vli = if (*coder).sequence == SEQ_UNPADDED {
-                    &raw mut (*coder).unpadded_size
+                    ::core::ptr::addr_of_mut!((*coder).unpadded_size)
                 } else {
-                    &raw mut (*coder).uncompressed_size
+                    ::core::ptr::addr_of_mut!((*coder).uncompressed_size)
                 };
-                ret = lzma_vli_decode(size, &raw mut (*coder).pos, in_0, in_pos, in_size);
+                ret = lzma_vli_decode(
+                    size,
+                    ::core::ptr::addr_of_mut!((*coder).pos),
+                    in_0,
+                    in_pos,
+                    in_size,
+                );
                 if ret != LZMA_STREAM_END {
                     break;
                 }
@@ -321,7 +327,7 @@ pub unsafe extern "C" fn lzma_index_decoder(
         return ret_;
     }
     let ret__0: lzma_ret = lzma_index_decoder_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         i,
         memlimit,
@@ -360,13 +366,14 @@ pub unsafe extern "C" fn lzma_index_buffer_decode(
         pos: 0,
         crc32: 0,
     };
-    let ret_: lzma_ret = index_decoder_reset(&raw mut coder, allocator, i, *memlimit);
+    let ret_: lzma_ret =
+        index_decoder_reset(::core::ptr::addr_of_mut!(coder), allocator, i, *memlimit);
     if ret_ != LZMA_OK {
         return ret_;
     }
     let in_start: size_t = *in_pos;
     let mut ret: lzma_ret = index_decode(
-        &raw mut coder as *mut c_void,
+        ::core::ptr::addr_of_mut!(coder) as *mut c_void,
         allocator,
         in_0,
         in_pos,

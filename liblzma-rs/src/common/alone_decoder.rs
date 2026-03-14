@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_alone_coder {
@@ -35,7 +35,7 @@ unsafe extern "C" fn alone_decode(
         match (*coder).sequence {
             0 => {
                 if lzma_lzma_lclppb_decode(
-                    &raw mut (*coder).options,
+                    ::core::ptr::addr_of_mut!((*coder).options),
                     *in_0.offset(*in_pos as isize),
                 ) {
                     return LZMA_FORMAT_ERROR;
@@ -86,7 +86,7 @@ unsafe extern "C" fn alone_decode(
                     (*coder).options.ext_size_low = (*coder).uncompressed_size as u32;
                     (*coder).options.ext_size_high = ((*coder).uncompressed_size >> 32) as u32;
                     (*coder).memusage = lzma_lzma_decoder_memusage_nocheck(
-                        &raw mut (*coder).options as *const c_void,
+                        ::core::ptr::addr_of_mut!((*coder).options) as *const c_void,
                     )
                     .wrapping_add(LZMA_MEMUSAGE_BASE);
                     (*coder).pos = 0;
@@ -129,7 +129,7 @@ unsafe extern "C" fn alone_decode(
                                 )
                                     -> lzma_ret,
                         ),
-                        options: &raw mut (*coder).options as *mut c_void,
+                        options: ::core::ptr::addr_of_mut!((*coder).options) as *mut c_void,
                     },
                     lzma_filter_info_s {
                         id: 0,
@@ -138,9 +138,9 @@ unsafe extern "C" fn alone_decode(
                     },
                 ];
                 let ret_: lzma_ret = lzma_next_filter_init(
-                    &raw mut (*coder).next,
+                    ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
-                    &raw mut filters as *mut lzma_filter_info,
+                    ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter_info,
                 );
                 if ret_ != LZMA_OK {
                     return ret_;
@@ -154,7 +154,7 @@ unsafe extern "C" fn alone_decode(
 }
 unsafe extern "C" fn alone_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
-    lzma_next_end(&raw mut (*coder).next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 unsafe extern "C" fn alone_decoder_memconfig(
@@ -281,7 +281,7 @@ pub unsafe extern "C" fn lzma_alone_decoder(strm: *mut lzma_stream, memlimit: u6
         return ret_;
     }
     let ret__0: lzma_ret = lzma_alone_decoder_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         memlimit,
         false,

@@ -31,7 +31,8 @@ pub unsafe extern "C" fn lzma_block_buffer_decode(
         update: None,
         set_out_limit: None,
     };
-    let mut ret: lzma_ret = lzma_block_decoder_init(&raw mut block_decoder, allocator, block);
+    let mut ret: lzma_ret =
+        lzma_block_decoder_init(::core::ptr::addr_of_mut!(block_decoder), allocator, block);
     if ret == LZMA_OK {
         let in_start: size_t = *in_pos;
         let out_start: size_t = *out_pos;
@@ -60,6 +61,6 @@ pub unsafe extern "C" fn lzma_block_buffer_decode(
             *out_pos = out_start;
         }
     }
-    lzma_next_end(&raw mut block_decoder, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!(block_decoder), allocator);
     ret
 }

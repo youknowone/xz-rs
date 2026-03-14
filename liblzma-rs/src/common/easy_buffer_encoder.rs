@@ -53,11 +53,11 @@ pub unsafe extern "C" fn lzma_easy_buffer_encode(
             reserved_ptr2: core::ptr::null_mut(),
         },
     };
-    if lzma_easy_preset(&raw mut opt_easy, preset) {
+    if lzma_easy_preset(::core::ptr::addr_of_mut!(opt_easy), preset) {
         return LZMA_OPTIONS_ERROR;
     }
     lzma_stream_buffer_encode(
-        &raw mut opt_easy.filters as *mut lzma_filter,
+        ::core::ptr::addr_of_mut!(opt_easy.filters) as *mut lzma_filter,
         check,
         allocator,
         in_0,

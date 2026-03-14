@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 #[no_mangle]
 pub extern "C" fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64 {
     let limit: u64 = (UINT64_MAX)
@@ -164,8 +164,8 @@ pub unsafe extern "C" fn lzma_outq_read(
     }
     let buf: *mut lzma_outbuf = (*outq).head;
     lzma_bufcpy(
-        &raw mut (*buf).buf as *mut u8,
-        &raw mut (*outq).read_pos,
+        ::core::ptr::addr_of_mut!((*buf).buf) as *mut u8,
+        ::core::ptr::addr_of_mut!((*outq).read_pos),
         (*buf).pos,
         out,
         out_pos,

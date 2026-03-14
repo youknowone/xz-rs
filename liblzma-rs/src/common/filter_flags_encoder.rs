@@ -35,7 +35,7 @@ pub unsafe extern "C" fn lzma_filter_flags_encode(
         return ret_;
     }
     let mut props_size: u32 = 0;
-    let ret__0: lzma_ret = lzma_properties_size(&raw mut props_size, filter);
+    let ret__0: lzma_ret = lzma_properties_size(::core::ptr::addr_of_mut!(props_size), filter);
     if ret__0 != LZMA_OK {
         return ret__0;
     }

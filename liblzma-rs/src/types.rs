@@ -1,10 +1,6 @@
-use core::ffi::{c_char, c_int, c_long, c_uchar, c_uint, c_ulong, c_ulonglong, c_void};
-
-// Platform-dependent type aliases
+use libc::{c_char, c_int, c_long, c_uchar, c_uint, c_ulong, c_ulonglong, c_void};
 pub type size_t = libc::size_t;
 pub type uintptr_t = libc::uintptr_t;
-
-// lzma type aliases
 pub type lzma_bool = c_uchar;
 pub type lzma_ret = c_uint;
 pub type lzma_action = c_uint;
@@ -16,8 +12,6 @@ pub type lzma_match_finder = c_uint;
 pub type lzma_lzma_state = c_uint;
 pub type lzma_delta_type = c_uint;
 pub type probability = u16;
-
-// Common struct shared across all modules
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_allocator {
@@ -25,14 +19,12 @@ pub struct lzma_allocator {
     pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void) -> ()>,
     pub opaque: *mut c_void,
 }
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_filter {
     pub id: lzma_vli,
     pub options: *mut c_void,
 }
-
 pub type lzma_end_function = Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>;
 pub type lzma_code_function = Option<
     unsafe extern "C" fn(
@@ -69,7 +61,6 @@ pub struct lzma_next_coder_s {
     >,
     pub set_out_limit: Option<unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret>,
 }
-
 pub type lzma_init_function = Option<
     unsafe extern "C" fn(
         *mut lzma_next_coder,
@@ -85,7 +76,6 @@ pub struct lzma_filter_info_s {
     pub options: *mut c_void,
 }
 pub type lzma_filter_info = lzma_filter_info_s;
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_lzma {
@@ -114,8 +104,6 @@ pub struct lzma_options_lzma {
     pub reserved_ptr1: *mut c_void,
     pub reserved_ptr2: *mut c_void,
 }
-
-// lzma_internal sequence enum
 pub type lzma_internal_sequence = c_uint;
 pub const ISEQ_RUN: lzma_internal_sequence = 0;
 pub const ISEQ_SYNC_FLUSH: lzma_internal_sequence = 1;
@@ -124,7 +112,6 @@ pub const ISEQ_FINISH: lzma_internal_sequence = 3;
 pub const ISEQ_FULL_BARRIER: lzma_internal_sequence = 4;
 pub const ISEQ_END: lzma_internal_sequence = 5;
 pub const ISEQ_ERROR: lzma_internal_sequence = 6;
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_internal_s {
@@ -135,7 +122,6 @@ pub struct lzma_internal_s {
     pub allow_buf_error: bool,
 }
 pub type lzma_internal = lzma_internal_s;
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_stream {
@@ -158,8 +144,6 @@ pub struct lzma_stream {
     pub reserved_enum1: lzma_reserved_enum,
     pub reserved_enum2: lzma_reserved_enum,
 }
-
-// lzma_ret constants
 pub const LZMA_OK: lzma_ret = 0;
 pub const LZMA_STREAM_END: lzma_ret = 1;
 pub const LZMA_NO_CHECK: lzma_ret = 2;
@@ -181,49 +165,29 @@ pub const LZMA_RET_INTERNAL5: lzma_ret = 105;
 pub const LZMA_RET_INTERNAL6: lzma_ret = 106;
 pub const LZMA_RET_INTERNAL7: lzma_ret = 107;
 pub const LZMA_RET_INTERNAL8: lzma_ret = 108;
-
-// lzma_action constants
 pub const LZMA_RUN: lzma_action = 0;
 pub const LZMA_SYNC_FLUSH: lzma_action = 1;
 pub const LZMA_FULL_FLUSH: lzma_action = 2;
 pub const LZMA_FINISH: lzma_action = 3;
 pub const LZMA_FULL_BARRIER: lzma_action = 4;
-
-// lzma_check constants
 pub const LZMA_CHECK_NONE: lzma_check = 0;
 pub const LZMA_CHECK_CRC32: lzma_check = 1;
 pub const LZMA_CHECK_CRC64: lzma_check = 4;
 pub const LZMA_CHECK_SHA256: lzma_check = 10;
-
-// lzma_reserved_enum constant
 pub const LZMA_RESERVED_ENUM: lzma_reserved_enum = 0;
-
-// Integer max constants
 pub const UINT32_MAX: c_uint = u32::MAX;
 pub const UINT64_MAX: u64 = u64::MAX;
-
-// VLI constants
 pub const LZMA_VLI_MAX: lzma_vli = u64::MAX / 2;
 pub const LZMA_VLI_UNKNOWN: lzma_vli = u64::MAX;
-
-// lzma_match_finder constants
 pub const LZMA_MF_HC3: lzma_match_finder = 3;
 pub const LZMA_MF_HC4: lzma_match_finder = 4;
 pub const LZMA_MF_BT2: lzma_match_finder = 18;
 pub const LZMA_MF_BT3: lzma_match_finder = 19;
 pub const LZMA_MF_BT4: lzma_match_finder = 20;
-
-// lzma_mode constants
 pub const LZMA_MODE_FAST: lzma_mode = 1;
 pub const LZMA_MODE_NORMAL: lzma_mode = 2;
-
-// lzma_check additional constants
 pub const LZMA_CHECK_ID_MAX: lzma_check = 15;
-
-// lzma_delta_type constants
 pub const LZMA_DELTA_TYPE_BYTE: lzma_delta_type = 0;
-
-// LZMA filter IDs
 pub const LZMA_FILTER_DELTA: lzma_vli = 0x3;
 pub const LZMA_FILTER_X86: lzma_vli = 0x4;
 pub const LZMA_FILTER_POWERPC: lzma_vli = 0x5;
@@ -237,22 +201,16 @@ pub const LZMA_FILTER_LZMA1: lzma_vli = 0x4000000000000001;
 pub const LZMA_FILTER_LZMA1EXT: lzma_vli = 0x4000000000000002;
 pub const LZMA_FILTER_LZMA2: lzma_vli = 0x21;
 pub const LZMA_FILTER_RESERVED_START: lzma_vli = 1 << 62;
-
-// Decoder flags
 pub const LZMA_TELL_NO_CHECK: c_uint = 0x1;
 pub const LZMA_TELL_UNSUPPORTED_CHECK: c_uint = 0x2;
 pub const LZMA_TELL_ANY_CHECK: c_uint = 0x4;
 pub const LZMA_CONCATENATED: c_uint = 0x8;
 pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
-
-// Stream/block size constants
 pub const LZMA_STREAM_HEADER_SIZE: u32 = 12;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: u32 = 1024;
 pub const LZMA_MEMUSAGE_BASE: u64 = 1 << 15;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
-
-// lzma_lzma_state constants
 pub const STATE_LIT_LIT: lzma_lzma_state = 0;
 pub const STATE_MATCH_LIT_LIT: lzma_lzma_state = 1;
 pub const STATE_REP_LIT_LIT: lzma_lzma_state = 2;
@@ -265,33 +223,19 @@ pub const STATE_LIT_LONGREP: lzma_lzma_state = 8;
 pub const STATE_LIT_SHORTREP: lzma_lzma_state = 9;
 pub const STATE_NONLIT_MATCH: lzma_lzma_state = 10;
 pub const STATE_NONLIT_REP: lzma_lzma_state = 11;
-
-// VLI encoding constants
 pub const LZMA_VLI_BYTES_MAX: u32 = 9;
-
-// Filter chain limit
 pub const LZMA_FILTERS_MAX: u32 = 4;
-
-// LZMA option limits
 pub const LZMA_LCLP_MAX: u32 = 4;
 pub const LZMA_PB_MAX: u32 = 4;
-
-// Delta filter
 pub const LZMA_DELTA_DIST_MAX: u32 = 256;
-
-// Stream flags
 pub const LZMA_BACKWARD_SIZE_MIN: u32 = 4;
 pub const LZMA_BACKWARD_SIZE_MAX: u64 = 1 << 34;
-
-// Decoder supported flags
 pub const LZMA_SUPPORTED_FLAGS: c_uint = LZMA_TELL_NO_CHECK
     | LZMA_TELL_UNSUPPORTED_CHECK
     | LZMA_TELL_ANY_CHECK
     | LZMA_IGNORE_CHECK
     | LZMA_CONCATENATED
     | LZMA_FAIL_FAST;
-
-// Common constants used across many modules
 pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
 pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
 pub const INDEX_INDICATOR: u8 = 0;
@@ -300,8 +244,6 @@ pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
 pub const LZMA_THREADS_MAX: u32 = 16384;
 pub const LZMA_DELTA_DIST_MIN: u32 = 1;
 pub const LZMA_LZMA1EXT_ALLOW_EOPM: c_uint = 0x1;
-
-// LZMA range coder and match constants
 pub const RC_BIT_MODEL_TOTAL_BITS: u32 = 11;
 pub const RC_BIT_MODEL_TOTAL: c_uint = 1u32 << RC_BIT_MODEL_TOTAL_BITS;
 pub const MATCH_LEN_MIN: u32 = 2;
@@ -311,8 +253,6 @@ pub const FASTPOS_BITS: u32 = 13;
 pub const OPTS: u32 = 1 << 12;
 pub const LZ_DICT_REPEAT_MAX: u32 = 288;
 pub const LZ_DICT_INIT_POS: u32 = 2 * LZ_DICT_REPEAT_MAX;
-
-// LZMA encoder/decoder shared constants
 pub const ALIGN_BITS: u32 = 4;
 pub const ALIGN_SIZE: u32 = 1 << ALIGN_BITS;
 pub const ALIGN_MASK: u32 = ALIGN_SIZE - 1;
@@ -337,37 +277,24 @@ pub const RC_TOP_VALUE: c_uint = 1u32 << RC_TOP_BITS;
 pub const RC_MOVE_REDUCING_BITS: u32 = 4;
 pub const LZMA2_CHUNK_MAX: c_uint = 1u32 << 16;
 pub const LZMA2_HEADER_UNCOMPRESSED: u32 = 3;
-
-// LZ encoder constants
 pub const HASH_2_SIZE: c_uint = 1u32 << 10;
 pub const HASH_3_SIZE: c_uint = 1u32 << 16;
-
-// Stream/block constants
 pub const LZMA_CHECK_SIZE_MAX: u32 = 64;
 pub const LZMA_STREAM_FLAGS_SIZE: u32 = 2;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
 pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
     .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as u64)
     .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64);
-
-// Thread-related constants
 pub const MYTHREAD_RET_VALUE: *mut c_void = core::ptr::null_mut();
 pub const SIG_SETMASK: c_int = 3;
-
-// Type aliases used in multiple modules
 pub type worker_state = c_uint;
 pub type lzma_index_iter_mode = c_uint;
-
-// Worker state constants
 pub const THR_IDLE: worker_state = 0;
 pub const THR_RUN: worker_state = 1;
-
-// Index iterator mode constants
 pub const LZMA_INDEX_ITER_ANY: lzma_index_iter_mode = 0;
 pub const LZMA_INDEX_ITER_STREAM: lzma_index_iter_mode = 1;
 pub const LZMA_INDEX_ITER_BLOCK: lzma_index_iter_mode = 2;
 pub const LZMA_INDEX_ITER_NONEMPTY_BLOCK: lzma_index_iter_mode = 3;
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_iter {
@@ -422,8 +349,6 @@ pub struct lzma_index_iter_stream {
     pub reserved_vli3: lzma_vli,
     pub reserved_vli4: lzma_vli,
 }
-
-// lzma_block struct (shared across 12 modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_block {
@@ -458,8 +383,6 @@ pub struct lzma_block {
     pub reserved_bool7: lzma_bool,
     pub reserved_bool8: lzma_bool,
 }
-
-// lzma_stream_flags struct (shared across 11 modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_stream_flags {
@@ -481,16 +404,12 @@ pub struct lzma_stream_flags {
     pub reserved_int1: u32,
     pub reserved_int2: u32,
 }
-
-// lzma_sha256_state struct (shared across check modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_sha256_state {
     pub state: [u32; 8],
     pub size: u64,
 }
-
-// lzma_check_state unions and struct (shared across check/block modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub union lzma_check_state_buffer {
@@ -498,7 +417,6 @@ pub union lzma_check_state_buffer {
     pub u32_0: [u32; 16],
     pub u64_0: [u64; 8],
 }
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub union lzma_check_state_inner {
@@ -506,15 +424,12 @@ pub union lzma_check_state_inner {
     pub crc64: u64,
     pub sha256: lzma_sha256_state,
 }
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_check_state {
     pub buffer: lzma_check_state_buffer,
     pub state: lzma_check_state_inner,
 }
-
-// lzma_options_delta struct (shared across delta modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_delta {
@@ -527,16 +442,12 @@ pub struct lzma_options_delta {
     pub reserved_ptr1: *mut c_void,
     pub reserved_ptr2: *mut c_void,
 }
-
-// lzma_options_easy struct (shared across easy modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_easy {
     pub filters: [lzma_filter; 5],
     pub opt_lzma: lzma_options_lzma,
 }
-
-// lzma_dict struct (shared across decoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_dict {
@@ -548,8 +459,6 @@ pub struct lzma_dict {
     pub has_wrapped: bool,
     pub need_reset: bool,
 }
-
-// lzma_lz_decoder struct (shared across decoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_decoder {
@@ -567,16 +476,12 @@ pub struct lzma_lz_decoder {
     pub set_uncompressed: Option<unsafe extern "C" fn(*mut c_void, lzma_vli, bool) -> ()>,
     pub end: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
 }
-
-// lzma_match struct (shared across encoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_match {
     pub len: u32,
     pub dist: u32,
 }
-
-// lzma_mf_s struct (shared across encoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_mf_s {
@@ -605,8 +510,6 @@ pub struct lzma_mf_s {
     pub sons_count: u32,
 }
 pub type lzma_mf = lzma_mf_s;
-
-// lzma_delta_coder struct (shared across delta modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_delta_coder {
@@ -615,8 +518,6 @@ pub struct lzma_delta_coder {
     pub pos: u8,
     pub history: [u8; LZMA_DELTA_DIST_MAX as usize],
 }
-
-// lzma_lz_encoder struct (shared across encoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_encoder {
@@ -628,8 +529,6 @@ pub struct lzma_lz_encoder {
     pub options_update: Option<unsafe extern "C" fn(*mut c_void, *const lzma_filter) -> lzma_ret>,
     pub set_out_limit: Option<unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret>,
 }
-
-// lzma_outbuf_s struct (shared across mt modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_outbuf_s {
@@ -645,8 +544,6 @@ pub struct lzma_outbuf_s {
     pub buf: [u8; 0],
 }
 pub type lzma_outbuf = lzma_outbuf_s;
-
-// lzma_outq struct (shared across mt modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_outq {
@@ -660,20 +557,16 @@ pub struct lzma_outq {
     pub bufs_allocated: u32,
     pub bufs_limit: u32,
 }
-
-// Opaque struct forward declarations (used by files that only need pointer types)
 #[repr(C)]
 pub struct lzma_index_s {
     _opaque: [u8; 0],
 }
 pub type lzma_index = lzma_index_s;
-
 #[repr(C)]
 pub struct lzma_index_hash_s {
     _opaque: [u8; 0],
 }
 pub type lzma_index_hash = lzma_index_hash_s;
-
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lzma1_encoder_s {
@@ -716,8 +609,6 @@ pub struct lzma_lzma1_encoder_s {
     pub opts: [lzma_optimal; OPTS as usize],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
-
-// Byte-order helper functions (shared across many modules)
 #[inline]
 pub extern "C" fn read32le(buf: *const u8) -> u32 {
     return unsafe {
@@ -737,8 +628,6 @@ pub extern "C" fn write32le(buf: *mut u8, num: u32) {
         *buf.offset(3) = (num >> 24) as u8;
     }
 }
-
-// Darwin/pthread types (shared by stream_decoder_mt and stream_encoder_mt)
 pub type __uint32_t = u32;
 pub type __darwin_time_t = c_long;
 pub type __darwin_sigset_t = __uint32_t;
@@ -824,8 +713,6 @@ pub struct mythread_cond {
     pub clk_id: clockid_t,
 }
 pub type mythread_condtime = timespec;
-
-// Shared inline helper functions (mythread wrappers, used by mt modules)
 #[inline]
 pub extern "C" fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
     let _ret: c_int =
@@ -840,7 +727,11 @@ pub extern "C" fn mythread_create(
     let mut old: sigset_t = 0;
     let mut all: sigset_t = 0;
     all = !(0 as sigset_t);
-    mythread_sigmask(SIG_SETMASK, &raw mut all, &raw mut old);
+    mythread_sigmask(
+        SIG_SETMASK,
+        ::core::ptr::addr_of_mut!(all),
+        ::core::ptr::addr_of_mut!(old),
+    );
     let ret: c_int = unsafe {
         pthread_create(
             thread as *mut pthread_t,
@@ -849,7 +740,11 @@ pub extern "C" fn mythread_create(
             arg as *mut c_void,
         )
     };
-    mythread_sigmask(SIG_SETMASK, &raw mut old, core::ptr::null_mut());
+    mythread_sigmask(
+        SIG_SETMASK,
+        ::core::ptr::addr_of_mut!(old),
+        core::ptr::null_mut(),
+    );
     ret
 }
 #[inline]
@@ -876,21 +771,25 @@ pub extern "C" fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
 pub extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
     return unsafe {
         (*mycond).clk_id = _CLOCK_REALTIME;
-        pthread_cond_init(&raw mut (*mycond).cond, core::ptr::null())
+        pthread_cond_init(::core::ptr::addr_of_mut!((*mycond).cond), core::ptr::null())
     };
 }
 #[inline]
 pub extern "C" fn mythread_cond_destroy(cond: *mut mythread_cond) {
-    let _ret: c_int = unsafe { pthread_cond_destroy(&raw mut (*cond).cond) };
+    let _ret: c_int = unsafe { pthread_cond_destroy(::core::ptr::addr_of_mut!((*cond).cond)) };
 }
 #[inline]
 pub extern "C" fn mythread_cond_signal(cond: *mut mythread_cond) {
-    let _ret: c_int = unsafe { pthread_cond_signal(&raw mut (*cond).cond) };
+    let _ret: c_int = unsafe { pthread_cond_signal(::core::ptr::addr_of_mut!((*cond).cond)) };
 }
 #[inline]
 pub extern "C" fn mythread_cond_wait(cond: *mut mythread_cond, mutex: *mut mythread_mutex) {
-    let _ret: c_int =
-        unsafe { pthread_cond_wait(&raw mut (*cond).cond, mutex as *mut pthread_mutex_t) };
+    let _ret: c_int = unsafe {
+        pthread_cond_wait(
+            ::core::ptr::addr_of_mut!((*cond).cond),
+            mutex as *mut pthread_mutex_t,
+        )
+    };
 }
 #[inline]
 pub extern "C" fn mythread_cond_timedwait(
@@ -900,7 +799,7 @@ pub extern "C" fn mythread_cond_timedwait(
 ) -> c_int {
     let ret: c_int = unsafe {
         pthread_cond_timedwait(
-            &raw mut (*cond).cond,
+            ::core::ptr::addr_of_mut!((*cond).cond),
             mutex as *mut pthread_mutex_t,
             condtime as *const timespec,
         )
@@ -920,7 +819,7 @@ pub extern "C" fn mythread_condtime_set(
             tv_sec: 0,
             tv_nsec: 0,
         };
-        let _ret: c_int = clock_gettime((*cond).clk_id, &raw mut now);
+        let _ret: c_int = clock_gettime((*cond).clk_id, ::core::ptr::addr_of_mut!(now));
         (*condtime).tv_sec += now.tv_sec;
         (*condtime).tv_nsec += now.tv_nsec;
         if (*condtime).tv_nsec >= 1_000_000_000 {
@@ -929,8 +828,6 @@ pub extern "C" fn mythread_condtime_set(
         }
     }
 }
-
-// Shared inline helpers (used by index, block, and mt modules)
 #[inline]
 pub extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     vli.wrapping_add(3) & !(3)
@@ -949,8 +846,6 @@ pub extern "C" fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
 pub extern "C" fn lzma_outq_is_empty(outq: *const lzma_outq) -> bool {
     unsafe { (*outq).bufs_in_use == 0 }
 }
-
-// Shared inline helpers (encoder match-finder and range coder)
 #[inline]
 pub unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     (*mf).buffer.offset((*mf).read_pos as isize)
@@ -1028,8 +923,6 @@ pub unsafe extern "C" fn rc_bittree_price(
     }
     price
 }
-
-// Shared inline helpers (misc)
 #[inline]
 pub extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
     match_finder as u32 & 0xf
@@ -1068,16 +961,12 @@ pub extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
 pub unsafe extern "C" fn aligned_read32ne(buf: *const u8) -> u32 {
     *(buf as *const u32)
 }
-
-// Range coder symbol type and constants (shared across encoder modules)
 pub type rc_symbol = c_uint;
 pub const RC_FLUSH: rc_symbol = 4;
 pub const RC_DIRECT_1: rc_symbol = 3;
 pub const RC_DIRECT_0: rc_symbol = 2;
 pub const RC_BIT_1: rc_symbol = 1;
 pub const RC_BIT_0: rc_symbol = 0;
-
-// lzma_range_encoder struct (shared across encoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_range_encoder {
@@ -1091,8 +980,6 @@ pub struct lzma_range_encoder {
     pub symbols: [rc_symbol; 53],
     pub probs: [*mut probability; 53],
 }
-
-// lzma_optimal struct (shared across encoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_optimal {
@@ -1106,8 +993,6 @@ pub struct lzma_optimal {
     pub back_prev: u32,
     pub backs: [u32; 4],
 }
-
-// lzma_length_encoder struct (shared across encoder modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_length_encoder {
@@ -1120,15 +1005,11 @@ pub struct lzma_length_encoder {
     pub table_size: u32,
     pub counters: [u32; 16],
 }
-
-// lzma_options_bcj struct (shared across simple/filter modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_bcj {
     pub start_offset: u32,
 }
-
-// lzma_mt struct (shared across mt modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_mt {
@@ -1155,8 +1036,6 @@ pub struct lzma_mt {
     pub reserved_ptr3: *mut c_void,
     pub reserved_ptr4: *mut c_void,
 }
-
-// lzma_filter_coder struct (shared across filter modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_filter_coder {
@@ -1165,8 +1044,6 @@ pub struct lzma_filter_coder {
     pub memusage: Option<unsafe extern "C" fn(*const c_void) -> u64>,
 }
 pub type lzma_filter_find = Option<unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder>;
-
-// lzma_simple_coder struct (shared across simple modules)
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_simple_coder {
@@ -1182,8 +1059,6 @@ pub struct lzma_simple_coder {
     pub size: size_t,
     pub buffer: [u8; 0],
 }
-
-// Common extern functions used across many modules
 extern "C" {
     pub fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;
     pub fn lzma_alloc_zero(size: size_t, allocator: *const lzma_allocator) -> *mut c_void;

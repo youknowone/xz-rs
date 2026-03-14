@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 extern "C" {
     static lzma_header_magic: [u8; 6];
     static lzma_footer_magic: [u8; 2];
@@ -20,7 +20,7 @@ pub unsafe extern "C" fn lzma_stream_header_decode(
 ) -> lzma_ret {
     if memcmp(
         in_0 as *const c_void,
-        &raw const lzma_header_magic as *const c_void,
+        ::core::ptr::addr_of!(lzma_header_magic) as *const c_void,
         core::mem::size_of::<[u8; 6]>(),
     ) != 0
     {
@@ -55,7 +55,7 @@ pub unsafe extern "C" fn lzma_stream_footer_decode(
     if memcmp(
         in_0.offset((core::mem::size_of::<u32>()).wrapping_mul(2) as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *const c_void,
-        &raw const lzma_footer_magic as *const c_void,
+        ::core::ptr::addr_of!(lzma_footer_magic) as *const c_void,
         core::mem::size_of::<[u8; 2]>(),
     ) != 0
     {

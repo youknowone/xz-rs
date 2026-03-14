@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 extern "C" {
     fn lzma_lz_decoder_init(
         next: *mut lzma_next_coder,
@@ -73,7 +73,7 @@ unsafe extern "C" fn dict_write(
         in_pos,
         in_size,
         (*dict).buf,
-        &raw mut (*dict).pos,
+        ::core::ptr::addr_of_mut!((*dict).pos),
         (*dict).limit,
     ));
     if !(*dict).has_wrapped {
@@ -119,7 +119,7 @@ unsafe extern "C" fn lzma2_decode(
                         if control >= 0xa0 {
                             (*coder).lzma.reset.unwrap()(
                                 (*coder).lzma.coder,
-                                &raw mut (*coder).options as *const c_void,
+                                ::core::ptr::addr_of_mut!((*coder).options) as *const c_void,
                             );
                         }
                     }
@@ -170,12 +170,12 @@ unsafe extern "C" fn lzma2_decode(
             5 => {
                 let prop_byte = *in_0.offset(*in_pos as isize);
                 *in_pos += 1;
-                if lzma_lzma_lclppb_decode(&raw mut (*coder).options, prop_byte) {
+                if lzma_lzma_lclppb_decode(::core::ptr::addr_of_mut!((*coder).options), prop_byte) {
                     return LZMA_DATA_ERROR;
                 }
                 (*coder).lzma.reset.unwrap()(
                     (*coder).lzma.coder,
-                    &raw mut (*coder).options as *const c_void,
+                    ::core::ptr::addr_of_mut!((*coder).options) as *const c_void,
                 );
                 (*coder).sequence = SEQ_LZMA;
             }
@@ -202,7 +202,7 @@ unsafe extern "C" fn lzma2_decode(
                     in_0,
                     in_pos,
                     in_size,
-                    &raw mut (*coder).compressed_size,
+                    ::core::ptr::addr_of_mut!((*coder).compressed_size),
                 );
                 if (*coder).compressed_size != 0 {
                     return LZMA_OK;
@@ -254,7 +254,12 @@ unsafe extern "C" fn lzma2_decoder_init(
     (*coder).need_properties = true;
     (*coder).need_dictionary_reset =
         (*options).preset_dict.is_null() || (*options).preset_dict_size == 0;
-    lzma_lzma_decoder_create(&raw mut (*coder).lzma, allocator, options, lz_options)
+    lzma_lzma_decoder_create(
+        ::core::ptr::addr_of_mut!((*coder).lzma),
+        allocator,
+        options,
+        lz_options,
+    )
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma2_decoder_init(

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 extern "C" {
     fn lzma_lz_decoder_init(
         next: *mut lzma_next_coder,
@@ -201,7 +201,12 @@ unsafe extern "C" fn lzma_decode(
 ) -> lzma_ret {
     let mut current_block: u64;
     let coder: *mut lzma_lzma1_decoder = coder_ptr as *mut lzma_lzma1_decoder;
-    let ret: lzma_ret = rc_read_init(&raw mut (*coder).rc, in_0, in_pos, in_size);
+    let ret: lzma_ret = rc_read_init(
+        ::core::ptr::addr_of_mut!((*coder).rc),
+        in_0,
+        in_pos,
+        in_size,
+    );
     if ret != LZMA_STREAM_END {
         return ret;
     }
@@ -337,9 +342,12 @@ unsafe extern "C" fn lzma_decode(
                             RC_BIT_MODEL_TOTAL.wrapping_sub((*coder).rep_len_decoder.choice as u32)
                                 >> RC_MOVE_BITS,
                         ) as probability;
-                    probs = &raw mut *(&raw mut (*coder).rep_len_decoder.low
+                    probs = ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!(
+                        (*coder).rep_len_decoder.low
+                    )
                         as *mut [probability; 8])
-                        .offset(pos_state as isize) as *mut probability;
+                        .offset(pos_state as isize))
+                        as *mut probability;
                     limit = LEN_LOW_SYMBOLS;
                     len = MATCH_LEN_MIN;
                 } else {
@@ -427,7 +435,10 @@ unsafe extern "C" fn lzma_decode(
                 current_block = 15498320742470848828;
             }
             5341942013764523046 => {
-                if dict_put_safe(&raw mut dict, dict_get(&raw mut dict, rep0)) {
+                if dict_put_safe(
+                    ::core::ptr::addr_of_mut!(dict),
+                    dict_get(::core::ptr::addr_of_mut!(dict), rep0),
+                ) {
                     (*coder).sequence = SEQ_SHORTREP;
                     current_block = 4609795085482299213;
                     continue;
@@ -545,7 +556,7 @@ unsafe extern "C" fn lzma_decode(
                     rc.code = rc.code.wrapping_sub(rc_bound);
                     (*coder).is_rep[state as usize] = (*coder).is_rep[state as usize]
                         - ((*coder).is_rep[state as usize] >> RC_MOVE_BITS);
-                    if dict_is_distance_valid(&raw mut dict, 0) {
+                    if dict_is_distance_valid(::core::ptr::addr_of_mut!(dict), 0) {
                         current_block = 4420799852307653083;
                         continue;
                     }
@@ -724,7 +735,8 @@ unsafe extern "C" fn lzma_decode(
                     rep0 = (2u32).wrapping_add(symbol & 1);
                     if symbol < DIST_MODEL_END {
                         rep0 <<= limit;
-                        probs = (&raw mut (*coder).pos_special as *mut probability)
+                        probs = (::core::ptr::addr_of_mut!((*coder).pos_special)
+                            as *mut probability)
                             .offset(rep0 as isize)
                             .offset(-(symbol as isize))
                             .offset(-1);
@@ -774,13 +786,15 @@ unsafe extern "C" fn lzma_decode(
                     continue;
                 }
                 len = len.wrapping_add(symbol.wrapping_sub(limit));
-                probs = &raw mut *(&raw mut (*coder).dist_slot as *mut [probability; 64]).offset(
-                    (if len < (DIST_STATES + MATCH_LEN_MIN) as u32 {
-                        len.wrapping_sub(MATCH_LEN_MIN)
-                    } else {
-                        (DIST_STATES - 1) as u32
-                    }) as isize,
-                ) as *mut probability;
+                probs = ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).dist_slot)
+                    as *mut [probability; 64])
+                    .offset(
+                        (if len < (DIST_STATES + MATCH_LEN_MIN) as u32 {
+                            len.wrapping_sub(MATCH_LEN_MIN)
+                        } else {
+                            (DIST_STATES - 1) as u32
+                        }) as isize,
+                    )) as *mut probability;
                 symbol = 1;
                 current_block = 4174862988780014241;
                 continue;
@@ -807,9 +821,12 @@ unsafe extern "C" fn lzma_decode(
                                 .wrapping_sub((*coder).match_len_decoder.choice2 as u32)
                                 >> RC_MOVE_BITS,
                         ) as probability;
-                    probs = &raw mut *(&raw mut (*coder).match_len_decoder.mid
+                    probs = ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!(
+                        (*coder).match_len_decoder.mid
+                    )
                         as *mut [probability; 8])
-                        .offset(pos_state as isize) as *mut probability;
+                        .offset(pos_state as isize))
+                        as *mut probability;
                     limit = LEN_MID_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS) as u32;
                 } else {
@@ -817,7 +834,8 @@ unsafe extern "C" fn lzma_decode(
                     rc.code = rc.code.wrapping_sub(rc_bound);
                     (*coder).match_len_decoder.choice2 = (*coder).match_len_decoder.choice2
                         - ((*coder).match_len_decoder.choice2 >> RC_MOVE_BITS);
-                    probs = &raw mut (*coder).match_len_decoder.high as *mut probability;
+                    probs = ::core::ptr::addr_of_mut!((*coder).match_len_decoder.high)
+                        as *mut probability;
                     limit = LEN_HIGH_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS) as u32;
                 }
@@ -845,9 +863,12 @@ unsafe extern "C" fn lzma_decode(
                                 .wrapping_sub((*coder).match_len_decoder.choice as u32)
                                 >> RC_MOVE_BITS,
                         ) as probability;
-                    probs = &raw mut *(&raw mut (*coder).match_len_decoder.low
+                    probs = ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!(
+                        (*coder).match_len_decoder.low
+                    )
                         as *mut [probability; 8])
-                        .offset(pos_state as isize) as *mut probability;
+                        .offset(pos_state as isize))
+                        as *mut probability;
                     limit = LEN_LOW_SYMBOLS;
                     len = MATCH_LEN_MIN;
                 } else {
@@ -861,7 +882,7 @@ unsafe extern "C" fn lzma_decode(
                 current_block = 8485842003490715114;
             }
             10535798129821001304 => {
-                if dict_put_safe(&raw mut dict, symbol as u8) {
+                if dict_put_safe(::core::ptr::addr_of_mut!(dict), symbol as u8) {
                     (*coder).sequence = SEQ_LITERAL_WRITE;
                     current_block = 4609795085482299213;
                     continue;
@@ -962,13 +983,15 @@ unsafe extern "C" fn lzma_decode(
                         )
                         as probability
                         as probability;
-                    probs = (&raw mut (*coder).literal as *mut probability).offset(
-                        (3_usize).wrapping_mul(
-                            ((dict.pos << 8).wrapping_add(dict_get0(&raw mut dict) as size_t)
-                                & literal_mask as size_t)
-                                << literal_context_bits,
-                        ) as isize,
-                    );
+                    probs = (::core::ptr::addr_of_mut!((*coder).literal) as *mut probability)
+                        .offset(
+                            (3_usize).wrapping_mul(
+                                ((dict.pos << 8).wrapping_add(
+                                    dict_get0(::core::ptr::addr_of_mut!(dict)) as size_t,
+                                ) & literal_mask as size_t)
+                                    << literal_context_bits,
+                            ) as isize,
+                        );
                     symbol = 1;
                     if state < LIT_STATES {
                         state = if state <= STATE_SHORTREP_LIT_LIT {
@@ -984,7 +1007,7 @@ unsafe extern "C" fn lzma_decode(
                         } else {
                             state.wrapping_sub(6)
                         };
-                        len = (dict_get(&raw mut dict, rep0) as u32) << 1;
+                        len = (dict_get(::core::ptr::addr_of_mut!(dict), rep0) as u32) << 1;
                         offset = 0x100;
                         current_block = 18125716024132132232;
                         continue;
@@ -1074,7 +1097,11 @@ unsafe extern "C" fn lzma_decode(
                 continue;
             }
             17340485688450593529 => {
-                if dict_repeat(&raw mut dict, rep0, &raw mut len) {
+                if dict_repeat(
+                    ::core::ptr::addr_of_mut!(dict),
+                    rep0,
+                    ::core::ptr::addr_of_mut!(len),
+                ) {
                     (*coder).sequence = SEQ_COPY;
                     current_block = 4609795085482299213;
                     continue;
@@ -1104,9 +1131,12 @@ unsafe extern "C" fn lzma_decode(
                                 .wrapping_sub((*coder).rep_len_decoder.choice2 as u32)
                                 >> RC_MOVE_BITS,
                         ) as probability;
-                    probs = &raw mut *(&raw mut (*coder).rep_len_decoder.mid
+                    probs = ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!(
+                        (*coder).rep_len_decoder.mid
+                    )
                         as *mut [probability; 8])
-                        .offset(pos_state as isize) as *mut probability;
+                        .offset(pos_state as isize))
+                        as *mut probability;
                     limit = LEN_MID_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS) as u32;
                 } else {
@@ -1114,7 +1144,8 @@ unsafe extern "C" fn lzma_decode(
                     rc.code = rc.code.wrapping_sub(rc_bound);
                     (*coder).rep_len_decoder.choice2 = (*coder).rep_len_decoder.choice2
                         - ((*coder).rep_len_decoder.choice2 >> RC_MOVE_BITS);
-                    probs = &raw mut (*coder).rep_len_decoder.high as *mut probability;
+                    probs = ::core::ptr::addr_of_mut!((*coder).rep_len_decoder.high)
+                        as *mut probability;
                     limit = LEN_HIGH_SYMBOLS;
                     len = (MATCH_LEN_MIN + LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS) as u32;
                 }
@@ -1123,7 +1154,7 @@ unsafe extern "C" fn lzma_decode(
         }
         match current_block {
             13383302701878543647 => {
-                if dict_is_distance_valid(&raw mut dict, rep0 as size_t) {
+                if dict_is_distance_valid(::core::ptr::addr_of_mut!(dict), rep0 as size_t) {
                     current_block = 17340485688450593529;
                     continue;
                 }
@@ -1156,13 +1187,15 @@ unsafe extern "C" fn lzma_decode(
                         )
                         as probability
                         as probability;
-                    probs = (&raw mut (*coder).literal as *mut probability).offset(
-                        (3_usize).wrapping_mul(
-                            ((dict.pos << 8).wrapping_add(dict_get0(&raw mut dict) as size_t)
-                                & literal_mask as size_t)
-                                << literal_context_bits,
-                        ) as isize,
-                    );
+                    probs = (::core::ptr::addr_of_mut!((*coder).literal) as *mut probability)
+                        .offset(
+                            (3_usize).wrapping_mul(
+                                ((dict.pos << 8).wrapping_add(
+                                    dict_get0(::core::ptr::addr_of_mut!(dict)) as size_t,
+                                ) & literal_mask as size_t)
+                                    << literal_context_bits,
+                            ) as isize,
+                        );
                     if state < LIT_STATES {
                         state = if state <= STATE_SHORTREP_LIT_LIT {
                             STATE_LIT_LIT
@@ -1360,7 +1393,8 @@ unsafe extern "C" fn lzma_decode(
                         } else {
                             state.wrapping_sub(6)
                         };
-                        let mut t_match_byte: u32 = dict_get(&raw mut dict, rep0) as u32;
+                        let mut t_match_byte: u32 =
+                            dict_get(::core::ptr::addr_of_mut!(dict), rep0) as u32;
                         let mut t_match_bit: u32 = 0;
                         let mut t_subcoder_index: u32 = 0;
                         let mut t_offset: u32 = 0x100;
@@ -1590,7 +1624,7 @@ unsafe extern "C" fn lzma_decode(
                             t_offset &= t_match_bit;
                         }
                     }
-                    dict_put(&raw mut dict, symbol as u8);
+                    dict_put(::core::ptr::addr_of_mut!(dict), symbol as u8);
                 } else {
                     rc.range = rc.range.wrapping_sub(rc_bound);
                     rc.code = rc.code.wrapping_sub(rc_bound);
@@ -2132,14 +2166,17 @@ unsafe extern "C" fn lzma_decode(
                                 len = symbol;
                             }
                         }
-                        probs = &raw mut *(&raw mut (*coder).dist_slot as *mut [probability; 64])
+                        probs = ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!(
+                            (*coder).dist_slot
+                        )
+                            as *mut [probability; 64])
                             .offset(
                                 (if len < (DIST_STATES + MATCH_LEN_MIN) as u32 {
                                     len.wrapping_sub(MATCH_LEN_MIN)
                                 } else {
                                     (DIST_STATES - 1) as u32
                                 }) as isize,
-                            ) as *mut probability;
+                            )) as *mut probability;
                         symbol = 1;
                         if rc.range < RC_TOP_VALUE as u32 {
                             rc.range <<= RC_SHIFT_BITS;
@@ -2287,7 +2324,8 @@ unsafe extern "C" fn lzma_decode(
                             rep0 = (2u32).wrapping_add(symbol & 1);
                             if symbol < DIST_MODEL_END {
                                 rep0 <<= limit;
-                                probs = (&raw mut (*coder).pos_special as *mut probability)
+                                probs = (::core::ptr::addr_of_mut!((*coder).pos_special)
+                                    as *mut probability)
                                     .offset(rep0 as isize)
                                     .offset(-(symbol as isize))
                                     .offset(-1);
@@ -2476,7 +2514,8 @@ unsafe extern "C" fn lzma_decode(
                                 }
                             }
                         }
-                        if !dict_is_distance_valid(&raw mut dict, rep0 as size_t) {
+                        if !dict_is_distance_valid(::core::ptr::addr_of_mut!(dict), rep0 as size_t)
+                        {
                             ret_0 = LZMA_DATA_ERROR;
                             current_block = 4609795085482299213;
                             continue 'c_9380;
@@ -2486,7 +2525,7 @@ unsafe extern "C" fn lzma_decode(
                         rc.code = rc.code.wrapping_sub(rc_bound);
                         (*coder).is_rep[state as usize] = (*coder).is_rep[state as usize]
                             - ((*coder).is_rep[state as usize] >> RC_MOVE_BITS);
-                        if !dict_is_distance_valid(&raw mut dict, 0) {
+                        if !dict_is_distance_valid(::core::ptr::addr_of_mut!(dict), 0) {
                             ret_0 = LZMA_DATA_ERROR;
                             current_block = 4609795085482299213;
                             continue 'c_9380;
@@ -2534,7 +2573,10 @@ unsafe extern "C" fn lzma_decode(
                                     } else {
                                         STATE_NONLIT_REP
                                     }) as u32;
-                                    dict_put(&raw mut dict, dict_get(&raw mut dict, rep0));
+                                    dict_put(
+                                        ::core::ptr::addr_of_mut!(dict),
+                                        dict_get(::core::ptr::addr_of_mut!(dict), rep0),
+                                    );
                                     continue;
                                 } else {
                                     rc.range = rc.range.wrapping_sub(rc_bound);
@@ -3154,7 +3196,11 @@ unsafe extern "C" fn lzma_decode(
                             }
                         }
                     }
-                    if !dict_repeat(&raw mut dict, rep0, &raw mut len) {
+                    if !dict_repeat(
+                        ::core::ptr::addr_of_mut!(dict),
+                        rep0,
+                        ::core::ptr::addr_of_mut!(len),
+                    ) {
                         continue;
                     }
                     (*coder).sequence = SEQ_COPY;
@@ -3238,7 +3284,7 @@ unsafe extern "C" fn lzma_decoder_reset(coder_ptr: *mut c_void, opt: *const c_vo
     let options: *const lzma_options_lzma = opt as *const lzma_options_lzma;
     (*coder).pos_mask = (1u32 << (*options).pb).wrapping_sub(1) as u32;
     literal_init(
-        &raw mut (*coder).literal as *mut probability,
+        ::core::ptr::addr_of_mut!((*coder).literal) as *mut probability,
         (*options).lc,
         (*options).lp,
     );

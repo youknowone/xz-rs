@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 extern "C" {
     fn lzma_lz_encoder_init(
         next: *mut lzma_next_coder,
@@ -131,8 +131,8 @@ unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
     pos += 1;
     if (*coder).need_properties {
         lzma_lzma_lclppb_encode(
-            &raw mut (*coder).opt_cur,
-            (&raw mut (*coder).buf as *mut u8).offset(pos as isize),
+            ::core::ptr::addr_of_mut!((*coder).opt_cur),
+            (::core::ptr::addr_of_mut!((*coder).buf) as *mut u8).offset(pos as isize),
         );
     }
     (*coder).need_properties = false;
@@ -179,7 +179,7 @@ unsafe extern "C" fn lzma2_encode(
                 if (*coder).need_state_reset {
                     let ret_: lzma_ret = lzma_lzma_encoder_reset(
                         (*coder).lzma as *mut lzma_lzma1_encoder,
-                        &raw mut (*coder).opt_cur,
+                        ::core::ptr::addr_of_mut!((*coder).opt_cur),
                     );
                     if ret_ != LZMA_OK {
                         return ret_;
@@ -198,8 +198,8 @@ unsafe extern "C" fn lzma2_encode(
             }
             3 => {
                 lzma_bufcpy(
-                    &raw mut (*coder).buf as *mut u8,
-                    &raw mut (*coder).buf_pos,
+                    ::core::ptr::addr_of_mut!((*coder).buf) as *mut u8,
+                    ::core::ptr::addr_of_mut!((*coder).buf_pos),
                     LZMA2_HEADER_UNCOMPRESSED as size_t,
                     out,
                     out_pos,
@@ -225,7 +225,7 @@ unsafe extern "C" fn lzma2_encode(
                     out,
                     out_pos,
                     out_size,
-                    &raw mut (*coder).uncompressed_size,
+                    ::core::ptr::addr_of_mut!((*coder).uncompressed_size),
                 );
                 if (*coder).uncompressed_size != 0 {
                     return LZMA_OK;
@@ -251,8 +251,9 @@ unsafe extern "C" fn lzma2_encode(
                 let ret: lzma_ret = lzma_lzma_encode(
                     (*coder).lzma as *mut lzma_lzma1_encoder,
                     mf,
-                    (&raw mut (*coder).buf as *mut u8).offset(LZMA2_HEADER_MAX as isize),
-                    &raw mut (*coder).compressed_size,
+                    (::core::ptr::addr_of_mut!((*coder).buf) as *mut u8)
+                        .offset(LZMA2_HEADER_MAX as isize),
+                    ::core::ptr::addr_of_mut!((*coder).compressed_size),
                     LZMA2_CHUNK_MAX as size_t,
                     limit,
                 );
@@ -285,8 +286,8 @@ unsafe extern "C" fn lzma2_encode(
         match current_block_45 {
             13410404938545238636 => {
                 lzma_bufcpy(
-                    &raw mut (*coder).buf as *mut u8,
-                    &raw mut (*coder).buf_pos,
+                    ::core::ptr::addr_of_mut!((*coder).buf) as *mut u8,
+                    ::core::ptr::addr_of_mut!((*coder).buf_pos),
                     (*coder).compressed_size,
                     out,
                     out_pos,
@@ -379,10 +380,10 @@ unsafe extern "C" fn lzma2_encoder_init(
     (*coder).need_dictionary_reset =
         (*coder).opt_cur.preset_dict.is_null() || (*coder).opt_cur.preset_dict_size == 0;
     let ret_: lzma_ret = lzma_lzma_encoder_create(
-        &raw mut (*coder).lzma,
+        ::core::ptr::addr_of_mut!((*coder).lzma),
         allocator,
         0x21,
-        &raw mut (*coder).opt_cur,
+        ::core::ptr::addr_of_mut!((*coder).opt_cur),
         lz_options,
     );
     if ret_ != LZMA_OK {

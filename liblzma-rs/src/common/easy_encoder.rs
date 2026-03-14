@@ -43,8 +43,12 @@ pub unsafe extern "C" fn lzma_easy_encoder(
             reserved_ptr2: core::ptr::null_mut(),
         },
     };
-    if lzma_easy_preset(&raw mut opt_easy, preset) {
+    if lzma_easy_preset(::core::ptr::addr_of_mut!(opt_easy), preset) {
         return LZMA_OPTIONS_ERROR;
     }
-    lzma_stream_encoder(strm, &raw mut opt_easy.filters as *mut lzma_filter, check)
+    lzma_stream_encoder(
+        strm,
+        ::core::ptr::addr_of_mut!(opt_easy.filters) as *mut lzma_filter,
+        check,
+    )
 }

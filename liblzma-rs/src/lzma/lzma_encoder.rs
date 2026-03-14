@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 extern "C" {
     fn lzma_lz_encoder_init(
         next: *mut lzma_next_coder,
@@ -254,10 +254,10 @@ unsafe extern "C" fn rc_encode_dummy(rc: *const lzma_range_encoder, out_limit: u
     loop {
         if range < RC_TOP_VALUE as u32 {
             if rc_shift_low_dummy(
-                &raw mut low,
-                &raw mut cache_size,
-                &raw mut cache,
-                &raw mut out_pos,
+                ::core::ptr::addr_of_mut!(low),
+                ::core::ptr::addr_of_mut!(cache_size),
+                ::core::ptr::addr_of_mut!(cache),
+                ::core::ptr::addr_of_mut!(out_pos),
                 out_limit,
             ) {
                 return true;
@@ -292,10 +292,10 @@ unsafe extern "C" fn rc_encode_dummy(rc: *const lzma_range_encoder, out_limit: u
     pos = 0;
     while pos < 5 {
         if rc_shift_low_dummy(
-            &raw mut low,
-            &raw mut cache_size,
-            &raw mut cache,
-            &raw mut out_pos,
+            ::core::ptr::addr_of_mut!(low),
+            ::core::ptr::addr_of_mut!(cache_size),
+            ::core::ptr::addr_of_mut!(cache),
+            ::core::ptr::addr_of_mut!(out_pos),
             out_limit,
         ) {
             return true;
@@ -341,26 +341,32 @@ unsafe extern "C" fn literal(coder: *mut lzma_lzma1_encoder, mf: *mut lzma_mf, p
     let cur_byte: u8 = *(*mf)
         .buffer
         .offset((*mf).read_pos.wrapping_sub((*mf).read_ahead) as isize);
-    let subcoder: *mut probability = (&raw mut (*coder).literal as *mut probability).offset(
-        (3u32).wrapping_mul(
-            ((position << 8).wrapping_add(
-                *(*mf).buffer.offset(
-                    (*mf)
-                        .read_pos
-                        .wrapping_sub((*mf).read_ahead)
-                        .wrapping_sub(1) as isize,
-                ) as u32,
-            ) & (*coder).literal_mask)
-                << (*coder).literal_context_bits,
-        ) as isize,
-    );
+    let subcoder: *mut probability =
+        (::core::ptr::addr_of_mut!((*coder).literal) as *mut probability).offset(
+            (3u32).wrapping_mul(
+                ((position << 8).wrapping_add(
+                    *(*mf).buffer.offset(
+                        (*mf)
+                            .read_pos
+                            .wrapping_sub((*mf).read_ahead)
+                            .wrapping_sub(1) as isize,
+                    ) as u32,
+                ) & (*coder).literal_mask)
+                    << (*coder).literal_context_bits,
+            ) as isize,
+        );
     if ((*coder).state as u32) < LIT_STATES {
         (*coder).state = (if (*coder).state <= STATE_SHORTREP_LIT_LIT {
             STATE_LIT_LIT
         } else {
             ((*coder).state as u32).wrapping_sub(3)
         }) as lzma_lzma_state;
-        rc_bittree(&raw mut (*coder).rc, subcoder, 8, cur_byte as u32);
+        rc_bittree(
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            subcoder,
+            8,
+            cur_byte as u32,
+        );
     } else {
         (*coder).state = (if (*coder).state <= STATE_LIT_SHORTREP {
             ((*coder).state as u32).wrapping_sub(3)
@@ -375,7 +381,7 @@ unsafe extern "C" fn literal(coder: *mut lzma_lzma1_encoder, mf: *mut lzma_mf, p
                 .wrapping_sub((*mf).read_ahead) as isize,
         );
         literal_matched(
-            &raw mut (*coder).rc,
+            ::core::ptr::addr_of_mut!((*coder).rc),
             subcoder,
             match_byte as u32,
             cur_byte as u32,
@@ -389,14 +395,16 @@ unsafe extern "C" fn length_update_prices(lc: *mut lzma_length_encoder, pos_stat
     let a1: u32 = rc_bit_1_price((*lc).choice) as u32;
     let b0: u32 = a1.wrapping_add(rc_bit_0_price((*lc).choice2) as u32);
     let b1: u32 = a1.wrapping_add(rc_bit_1_price((*lc).choice2) as u32);
-    let prices: *mut u32 =
-        &raw mut *(&raw mut (*lc).prices as *mut [u32; 272]).offset(pos_state as isize) as *mut u32;
+    let prices: *mut u32 = ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*lc).prices)
+        as *mut [u32; 272])
+        .offset(pos_state as isize)) as *mut u32;
     let mut i: u32 = 0;
     i = 0;
     while i < table_size && i < LEN_LOW_SYMBOLS {
         *prices.offset(i as isize) = a0.wrapping_add(rc_bittree_price(
-            &raw mut *(&raw mut (*lc).low as *mut [probability; 8]).offset(pos_state as isize)
-                as *mut probability,
+            ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*lc).low)
+                as *mut [probability; 8])
+                .offset(pos_state as isize)) as *mut probability,
             LEN_LOW_BITS,
             i,
         ));
@@ -404,8 +412,9 @@ unsafe extern "C" fn length_update_prices(lc: *mut lzma_length_encoder, pos_stat
     }
     while i < table_size && i < (LEN_LOW_SYMBOLS + LEN_MID_SYMBOLS) as u32 {
         *prices.offset(i as isize) = b0.wrapping_add(rc_bittree_price(
-            &raw mut *(&raw mut (*lc).mid as *mut [probability; 8]).offset(pos_state as isize)
-                as *mut probability,
+            ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*lc).mid)
+                as *mut [probability; 8])
+                .offset(pos_state as isize)) as *mut probability,
             LEN_MID_BITS,
             i.wrapping_sub(LEN_LOW_SYMBOLS),
         ));
@@ -413,7 +422,7 @@ unsafe extern "C" fn length_update_prices(lc: *mut lzma_length_encoder, pos_stat
     }
     while i < table_size {
         *prices.offset(i as isize) = b1.wrapping_add(rc_bittree_price(
-            &raw mut (*lc).high as *mut probability,
+            ::core::ptr::addr_of_mut!((*lc).high) as *mut probability,
             LEN_HIGH_BITS,
             i.wrapping_sub(LEN_LOW_SYMBOLS)
                 .wrapping_sub(LEN_MID_SYMBOLS),
@@ -431,32 +440,34 @@ unsafe extern "C" fn length(
 ) {
     len = len.wrapping_sub(MATCH_LEN_MIN);
     if len < LEN_LOW_SYMBOLS {
-        rc_bit(rc, &raw mut (*lc).choice, 0);
+        rc_bit(rc, ::core::ptr::addr_of_mut!((*lc).choice), 0);
         rc_bittree(
             rc,
-            &raw mut *(&raw mut (*lc).low as *mut [probability; 8]).offset(pos_state as isize)
-                as *mut probability,
+            ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*lc).low)
+                as *mut [probability; 8])
+                .offset(pos_state as isize)) as *mut probability,
             LEN_LOW_BITS,
             len,
         );
     } else {
-        rc_bit(rc, &raw mut (*lc).choice, 1);
+        rc_bit(rc, ::core::ptr::addr_of_mut!((*lc).choice), 1);
         len = len.wrapping_sub(LEN_LOW_SYMBOLS);
         if len < LEN_MID_SYMBOLS {
-            rc_bit(rc, &raw mut (*lc).choice2, 0);
+            rc_bit(rc, ::core::ptr::addr_of_mut!((*lc).choice2), 0);
             rc_bittree(
                 rc,
-                &raw mut *(&raw mut (*lc).mid as *mut [probability; 8]).offset(pos_state as isize)
-                    as *mut probability,
+                ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*lc).mid)
+                    as *mut [probability; 8])
+                    .offset(pos_state as isize)) as *mut probability,
                 LEN_MID_BITS,
                 len,
             );
         } else {
-            rc_bit(rc, &raw mut (*lc).choice2, 1);
+            rc_bit(rc, ::core::ptr::addr_of_mut!((*lc).choice2), 1);
             len = len.wrapping_sub(LEN_MID_SYMBOLS);
             rc_bittree(
                 rc,
-                &raw mut (*lc).high as *mut probability,
+                ::core::ptr::addr_of_mut!((*lc).high) as *mut probability,
                 LEN_HIGH_BITS,
                 len,
             );
@@ -482,8 +493,8 @@ unsafe extern "C" fn match_0(
         STATE_NONLIT_MATCH
     }) as lzma_lzma_state;
     length(
-        &raw mut (*coder).rc,
-        &raw mut (*coder).match_len_encoder,
+        ::core::ptr::addr_of_mut!((*coder).rc),
+        ::core::ptr::addr_of_mut!((*coder).match_len_encoder),
         pos_state,
         len,
         (*coder).fast_mode,
@@ -495,9 +506,10 @@ unsafe extern "C" fn match_0(
         (DIST_STATES - 1) as u32
     };
     rc_bittree(
-        &raw mut (*coder).rc,
-        &raw mut *(&raw mut (*coder).dist_slot as *mut [probability; 64])
-            .offset(dist_state as isize) as *mut probability,
+        ::core::ptr::addr_of_mut!((*coder).rc),
+        ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).dist_slot)
+            as *mut [probability; 64])
+            .offset(dist_state as isize)) as *mut probability,
         DIST_SLOT_BITS,
         dist_slot,
     );
@@ -507,8 +519,8 @@ unsafe extern "C" fn match_0(
         let dist_reduced: u32 = distance.wrapping_sub(base);
         if dist_slot < DIST_MODEL_END {
             rc_bittree_reverse(
-                &raw mut (*coder).rc,
-                (&raw mut (*coder).dist_special as *mut probability)
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                (::core::ptr::addr_of_mut!((*coder).dist_special) as *mut probability)
                     .offset(base as isize)
                     .offset(-(dist_slot as isize))
                     .offset(-1),
@@ -517,13 +529,13 @@ unsafe extern "C" fn match_0(
             );
         } else {
             rc_direct(
-                &raw mut (*coder).rc,
+                ::core::ptr::addr_of_mut!((*coder).rc),
                 dist_reduced >> ALIGN_BITS,
                 footer_bits.wrapping_sub(ALIGN_BITS),
             );
             rc_bittree_reverse(
-                &raw mut (*coder).rc,
-                &raw mut (*coder).dist_align as *mut probability,
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                ::core::ptr::addr_of_mut!((*coder).dist_align) as *mut probability,
                 ALIGN_BITS,
                 dist_reduced & ALIGN_MASK,
             );
@@ -540,44 +552,45 @@ unsafe extern "C" fn match_0(
 unsafe extern "C" fn rep_match(coder: *mut lzma_lzma1_encoder, pos_state: u32, rep: u32, len: u32) {
     if rep == 0 {
         rc_bit(
-            &raw mut (*coder).rc,
-            (&raw mut (*coder).is_rep0 as *mut probability).offset((*coder).state as isize)
-                as *mut probability,
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            (::core::ptr::addr_of_mut!((*coder).is_rep0) as *mut probability)
+                .offset((*coder).state as isize) as *mut probability,
             0,
         );
         rc_bit(
-            &raw mut (*coder).rc,
-            (&raw mut *(&raw mut (*coder).is_rep0_long as *mut [probability; 16])
-                .offset((*coder).state as isize) as *mut probability)
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            (::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).is_rep0_long)
+                as *mut [probability; 16])
+                .offset((*coder).state as isize)) as *mut probability)
                 .offset(pos_state as isize) as *mut probability,
             (len != 1) as u32,
         );
     } else {
         let distance: u32 = (*coder).reps[rep as usize];
         rc_bit(
-            &raw mut (*coder).rc,
-            (&raw mut (*coder).is_rep0 as *mut probability).offset((*coder).state as isize)
-                as *mut probability,
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            (::core::ptr::addr_of_mut!((*coder).is_rep0) as *mut probability)
+                .offset((*coder).state as isize) as *mut probability,
             1,
         );
         if rep == 1 {
             rc_bit(
-                &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep1 as *mut probability).offset((*coder).state as isize)
-                    as *mut probability,
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                (::core::ptr::addr_of_mut!((*coder).is_rep1) as *mut probability)
+                    .offset((*coder).state as isize) as *mut probability,
                 0,
             );
         } else {
             rc_bit(
-                &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep1 as *mut probability).offset((*coder).state as isize)
-                    as *mut probability,
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                (::core::ptr::addr_of_mut!((*coder).is_rep1) as *mut probability)
+                    .offset((*coder).state as isize) as *mut probability,
                 1,
             );
             rc_bit(
-                &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep2 as *mut probability).offset((*coder).state as isize)
-                    as *mut probability,
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                (::core::ptr::addr_of_mut!((*coder).is_rep2) as *mut probability)
+                    .offset((*coder).state as isize) as *mut probability,
                 rep.wrapping_sub(2),
             );
             if rep == 3 {
@@ -596,8 +609,8 @@ unsafe extern "C" fn rep_match(coder: *mut lzma_lzma1_encoder, pos_state: u32, r
         }) as lzma_lzma_state;
     } else {
         length(
-            &raw mut (*coder).rc,
-            &raw mut (*coder).rep_len_encoder,
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            ::core::ptr::addr_of_mut!((*coder).rep_len_encoder),
             pos_state,
             len,
             (*coder).fast_mode,
@@ -619,34 +632,36 @@ unsafe extern "C" fn encode_symbol(
     let pos_state: u32 = position & (*coder).pos_mask;
     if back == UINT32_MAX {
         rc_bit(
-            &raw mut (*coder).rc,
-            (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16])
-                .offset((*coder).state as isize) as *mut probability)
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            (::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).is_match)
+                as *mut [probability; 16])
+                .offset((*coder).state as isize)) as *mut probability)
                 .offset(pos_state as isize) as *mut probability,
             0,
         );
         literal(coder, mf, position);
     } else {
         rc_bit(
-            &raw mut (*coder).rc,
-            (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16])
-                .offset((*coder).state as isize) as *mut probability)
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            (::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).is_match)
+                as *mut [probability; 16])
+                .offset((*coder).state as isize)) as *mut probability)
                 .offset(pos_state as isize) as *mut probability,
             1,
         );
         if back < REPS {
             rc_bit(
-                &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep as *mut probability).offset((*coder).state as isize)
-                    as *mut probability,
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                (::core::ptr::addr_of_mut!((*coder).is_rep) as *mut probability)
+                    .offset((*coder).state as isize) as *mut probability,
                 1,
             );
             rep_match(coder, pos_state, back, len);
         } else {
             rc_bit(
-                &raw mut (*coder).rc,
-                (&raw mut (*coder).is_rep as *mut probability).offset((*coder).state as isize)
-                    as *mut probability,
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                (::core::ptr::addr_of_mut!((*coder).is_rep) as *mut probability)
+                    .offset((*coder).state as isize) as *mut probability,
                 0,
             );
             match_0(coder, pos_state, back.wrapping_sub(REPS), len);
@@ -663,14 +678,15 @@ unsafe extern "C" fn encode_init(coder: *mut lzma_lzma1_encoder, mf: *mut lzma_m
         mf_skip(mf, 1);
         (*mf).read_ahead = 0;
         rc_bit(
-            &raw mut (*coder).rc,
-            (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16]) as *mut probability)
-                as *mut probability,
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            (::core::ptr::addr_of_mut!(
+                *(::core::ptr::addr_of_mut!((*coder).is_match) as *mut [probability; 16])
+            ) as *mut probability) as *mut probability,
             0,
         );
         rc_bittree(
-            &raw mut (*coder).rc,
-            &raw mut (*coder).literal as *mut probability,
+            ::core::ptr::addr_of_mut!((*coder).rc),
+            ::core::ptr::addr_of_mut!((*coder).literal) as *mut probability,
             8,
             *(*mf).buffer as u32,
         );
@@ -682,16 +698,17 @@ unsafe extern "C" fn encode_init(coder: *mut lzma_lzma1_encoder, mf: *mut lzma_m
 unsafe extern "C" fn encode_eopm(coder: *mut lzma_lzma1_encoder, position: u32) {
     let pos_state: u32 = position & (*coder).pos_mask;
     rc_bit(
-        &raw mut (*coder).rc,
-        (&raw mut *(&raw mut (*coder).is_match as *mut [probability; 16])
-            .offset((*coder).state as isize) as *mut probability)
+        ::core::ptr::addr_of_mut!((*coder).rc),
+        (::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).is_match)
+            as *mut [probability; 16])
+            .offset((*coder).state as isize)) as *mut probability)
             .offset(pos_state as isize) as *mut probability,
         1,
     );
     rc_bit(
-        &raw mut (*coder).rc,
-        (&raw mut (*coder).is_rep as *mut probability).offset((*coder).state as isize)
-            as *mut probability,
+        ::core::ptr::addr_of_mut!((*coder).rc),
+        (::core::ptr::addr_of_mut!((*coder).is_rep) as *mut probability)
+            .offset((*coder).state as isize) as *mut probability,
         0,
     );
     match_0(coder, pos_state, UINT32_MAX, MATCH_LEN_MIN);
@@ -709,7 +726,12 @@ pub unsafe extern "C" fn lzma_lzma_encode(
     if !(*coder).is_initialized && !encode_init(coder, mf) {
         return LZMA_OK;
     }
-    if rc_encode(&raw mut (*coder).rc, out, out_pos, out_size) {
+    if rc_encode(
+        ::core::ptr::addr_of_mut!((*coder).rc),
+        out,
+        out_pos,
+        out_size,
+    ) {
         return LZMA_OK;
     }
     if (*coder).is_flushed {
@@ -717,7 +739,7 @@ pub unsafe extern "C" fn lzma_lzma_encode(
     }
     while !(limit != UINT32_MAX
         && ((*mf).read_pos.wrapping_sub((*mf).read_ahead) >= limit
-            || (*out_pos as u64).wrapping_add(rc_pending(&raw mut (*coder).rc))
+            || (*out_pos as u64).wrapping_add(rc_pending(::core::ptr::addr_of_mut!((*coder).rc)))
                 >= LZMA2_CHUNK_MAX.wrapping_sub(LOOP_INPUT_MAX) as u64))
     {
         if (*mf).read_pos >= (*mf).read_limit {
@@ -731,23 +753,35 @@ pub unsafe extern "C" fn lzma_lzma_encode(
         let mut len: u32 = 0;
         let mut back: u32 = 0;
         if (*coder).fast_mode {
-            lzma_lzma_optimum_fast(coder, mf, &raw mut back, &raw mut len);
+            lzma_lzma_optimum_fast(
+                coder,
+                mf,
+                ::core::ptr::addr_of_mut!(back),
+                ::core::ptr::addr_of_mut!(len),
+            );
         } else {
             lzma_lzma_optimum_normal(
                 coder,
                 mf,
-                &raw mut back,
-                &raw mut len,
+                ::core::ptr::addr_of_mut!(back),
+                ::core::ptr::addr_of_mut!(len),
                 (*coder).uncomp_size as u32,
             );
         }
         encode_symbol(coder, mf, back, len, (*coder).uncomp_size as u32);
-        if (*coder).out_limit != 0 && rc_encode_dummy(&raw mut (*coder).rc, (*coder).out_limit) {
-            rc_forget(&raw mut (*coder).rc);
+        if (*coder).out_limit != 0
+            && rc_encode_dummy(::core::ptr::addr_of_mut!((*coder).rc), (*coder).out_limit)
+        {
+            rc_forget(::core::ptr::addr_of_mut!((*coder).rc));
             break;
         } else {
             (*coder).uncomp_size = (*coder).uncomp_size.wrapping_add(len as u64);
-            if rc_encode(&raw mut (*coder).rc, out, out_pos, out_size) {
+            if rc_encode(
+                ::core::ptr::addr_of_mut!((*coder).rc),
+                out,
+                out_pos,
+                out_size,
+            ) {
                 return LZMA_OK;
             }
         }
@@ -758,8 +792,13 @@ pub unsafe extern "C" fn lzma_lzma_encode(
     if (*coder).use_eopm {
         encode_eopm(coder, (*coder).uncomp_size as u32);
     }
-    rc_flush(&raw mut (*coder).rc);
-    if rc_encode(&raw mut (*coder).rc, out, out_pos, out_size) {
+    rc_flush(::core::ptr::addr_of_mut!((*coder).rc));
+    if rc_encode(
+        ::core::ptr::addr_of_mut!((*coder).rc),
+        out,
+        out_pos,
+        out_size,
+    ) {
         (*coder).is_flushed = true;
         return LZMA_OK;
     }
@@ -870,7 +909,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
     (*coder).pos_mask = (1u32 << (*options).pb).wrapping_sub(1) as u32;
     (*coder).literal_context_bits = (*options).lc;
     (*coder).literal_mask = (0x100u32 << (*options).lp).wrapping_sub(0x100 >> (*options).lc);
-    rc_reset(&raw mut (*coder).rc);
+    rc_reset(::core::ptr::addr_of_mut!((*coder).rc));
     (*coder).state = STATE_LIT_LIT;
     let mut i: size_t = 0;
     while i < REPS as size_t {
@@ -878,7 +917,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
         i += 1;
     }
     literal_init(
-        &raw mut (*coder).literal as *mut probability,
+        ::core::ptr::addr_of_mut!((*coder).literal) as *mut probability,
         (*options).lc,
         (*options).lp,
     );
@@ -918,12 +957,12 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
         bt_i_0 += 1;
     }
     length_encoder_reset(
-        &raw mut (*coder).match_len_encoder,
+        ::core::ptr::addr_of_mut!((*coder).match_len_encoder),
         1 << (*options).pb,
         (*coder).fast_mode,
     );
     length_encoder_reset(
-        &raw mut (*coder).rep_len_encoder,
+        ::core::ptr::addr_of_mut!((*coder).rep_len_encoder),
         1 << (*options).pb,
         (*coder).fast_mode,
     );
@@ -1013,7 +1052,7 @@ unsafe extern "C" fn lzma_encoder_init(
         lzma_lzma_set_out_limit as unsafe extern "C" fn(*mut c_void, *mut u64, u64) -> lzma_ret,
     );
     lzma_lzma_encoder_create(
-        &raw mut (*lz).coder,
+        ::core::ptr::addr_of_mut!((*lz).coder),
         allocator,
         id,
         options as *const lzma_options_lzma,
@@ -1058,8 +1097,12 @@ pub extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
         preset_dict: core::ptr::null(),
         preset_dict_size: 0,
     };
-    set_lz_options(&raw mut lz_options, options as *const lzma_options_lzma);
-    let lz_memusage: u64 = unsafe { lzma_lz_encoder_memusage(&raw mut lz_options) } as u64;
+    set_lz_options(
+        ::core::ptr::addr_of_mut!(lz_options),
+        options as *const lzma_options_lzma,
+    );
+    let lz_memusage: u64 =
+        unsafe { lzma_lz_encoder_memusage(::core::ptr::addr_of_mut!(lz_options)) } as u64;
     if lz_memusage == UINT64_MAX {
         return UINT64_MAX;
     }

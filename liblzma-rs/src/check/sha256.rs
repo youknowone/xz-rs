@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_uint;
+use libc::c_uint;
 #[inline]
 extern "C" fn rotr_32(num: u32, amount: c_uint) -> u32 {
     num >> amount | num << 32u32.wrapping_sub(amount)
@@ -19,7 +19,7 @@ unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
     let mut T: [u32; 8] = [0; 8];
     core::ptr::copy_nonoverlapping(
         state as *const u8,
-        &raw mut T as *mut u8,
+        ::core::ptr::addr_of_mut!(T) as *mut u8,
         core::mem::size_of::<[u32; 8]>(),
     );
     W[0] = (*data & 0xff) << 24
@@ -528,8 +528,8 @@ unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
 }
 unsafe extern "C" fn process(check: *mut lzma_check_state) {
     transform(
-        &raw mut (*check).state.sha256.state as *mut u32,
-        &raw mut (*check).buffer.u32_0 as *const u32,
+        ::core::ptr::addr_of_mut!((*check).state.sha256.state) as *mut u32,
+        ::core::ptr::addr_of_mut!((*check).buffer.u32_0) as *const u32,
     );
 }
 #[no_mangle]
@@ -539,8 +539,8 @@ pub unsafe extern "C" fn lzma_sha256_init(check: *mut lzma_check_state) {
         0x5be0cd19,
     ];
     core::ptr::copy_nonoverlapping(
-        &raw const s as *const u8,
-        &raw mut (*check).state.sha256.state as *mut u8,
+        ::core::ptr::addr_of!(s) as *const u8,
+        ::core::ptr::addr_of_mut!((*check).state.sha256.state) as *mut u8,
         core::mem::size_of::<[u32; 8]>(),
     );
     (*check).state.sha256.size = 0;
@@ -559,7 +559,8 @@ pub unsafe extern "C" fn lzma_sha256_update(
         }
         core::ptr::copy_nonoverlapping(
             buf as *const u8,
-            (&raw mut (*check).buffer.u8_0 as *mut u8).offset(copy_start as isize) as *mut u8,
+            (::core::ptr::addr_of_mut!((*check).buffer.u8_0) as *mut u8).offset(copy_start as isize)
+                as *mut u8,
             copy_size,
         );
         buf = buf.offset(copy_size as isize);

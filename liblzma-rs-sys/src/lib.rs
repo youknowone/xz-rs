@@ -15,14 +15,14 @@
     clippy::all
 )]
 
-use core::ffi::{c_char, c_uchar, c_uint, c_void};
 use libc::size_t;
+use libc::{c_char, c_int, c_uchar, c_uint, c_void};
 
 // === Canonical type aliases ===
 // On MSVC, C enums are c_int; elsewhere c_uint (matching liblzma-sys manual.rs)
 #[cfg(target_env = "msvc")]
 #[doc(hidden)]
-pub type __enum_ty = core::ffi::c_int;
+pub type __enum_ty = c_int;
 #[cfg(not(target_env = "msvc"))]
 #[doc(hidden)]
 pub type __enum_ty = c_uint;

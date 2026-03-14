@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lzip_coder {
@@ -142,9 +142,11 @@ unsafe extern "C" fn lzip_decode(
                 (*coder).options.lc = LZIP_LC;
                 (*coder).options.lp = LZIP_LP;
                 (*coder).options.pb = LZIP_PB;
-                (*coder).memusage =
-                    lzma_lzma_decoder_memusage_nocheck(&raw mut (*coder).options as *const c_void)
-                        .wrapping_add(LZMA_MEMUSAGE_BASE);
+                (*coder).memusage = lzma_lzma_decoder_memusage_nocheck(::core::ptr::addr_of_mut!(
+                    (*coder).options
+                )
+                    as *const c_void)
+                .wrapping_add(LZMA_MEMUSAGE_BASE);
                 (*coder).sequence = SEQ_CODER_INIT;
                 current_block_80 = 15476230294461844687;
             }
@@ -167,7 +169,7 @@ unsafe extern "C" fn lzip_decode(
                                 )
                                     -> lzma_ret,
                         ),
-                        options: &raw mut (*coder).options as *mut c_void,
+                        options: ::core::ptr::addr_of_mut!((*coder).options) as *mut c_void,
                     },
                     lzma_filter_info_s {
                         id: 0,
@@ -176,9 +178,9 @@ unsafe extern "C" fn lzip_decode(
                     },
                 ];
                 let ret_: lzma_ret = lzma_next_filter_init(
-                    &raw mut (*coder).lzma_decoder,
+                    ::core::ptr::addr_of_mut!((*coder).lzma_decoder),
                     allocator,
-                    &raw const filters as *const lzma_filter_info,
+                    ::core::ptr::addr_of!(filters) as *const lzma_filter_info,
                 );
                 if ret_ != LZMA_OK {
                     return ret_;
@@ -230,8 +232,8 @@ unsafe extern "C" fn lzip_decode(
             in_0,
             in_pos,
             in_size,
-            &raw mut (*coder).buffer as *mut u8,
-            &raw mut (*coder).pos,
+            ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+            ::core::ptr::addr_of_mut!((*coder).pos),
             footer_size,
         );
         if (*coder).pos < footer_size {
@@ -240,18 +242,23 @@ unsafe extern "C" fn lzip_decode(
         (*coder).pos = 0;
         (*coder).member_size = (*coder).member_size.wrapping_add(footer_size as u64);
         if !(*coder).ignore_check
-            && (*coder).crc32 != read32le((&raw mut (*coder).buffer as *mut u8) as *mut u8)
+            && (*coder).crc32
+                != read32le((::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8) as *mut u8)
         {
             return LZMA_DATA_ERROR;
         }
         if (*coder).uncompressed_size
-            != read64le((&raw mut (*coder).buffer as *mut u8).offset(4) as *mut u8)
+            != read64le(
+                (::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8).offset(4) as *mut u8,
+            )
         {
             return LZMA_DATA_ERROR;
         }
         if (*coder).version > 0 {
             if (*coder).member_size
-                != read64le((&raw mut (*coder).buffer as *mut u8).offset(12) as *mut u8)
+                != read64le(
+                    (::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8).offset(12) as *mut u8,
+                )
             {
                 return LZMA_DATA_ERROR;
             }
@@ -265,7 +272,7 @@ unsafe extern "C" fn lzip_decode(
 }
 unsafe extern "C" fn lzip_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_lzip_coder = coder_ptr as *mut lzma_lzip_coder;
-    lzma_next_end(&raw mut (*coder).lzma_decoder, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).lzma_decoder), allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 extern "C" fn lzip_decoder_get_check(_coder_ptr: *const c_void) -> lzma_check {
@@ -393,7 +400,7 @@ pub unsafe extern "C" fn lzma_lzip_decoder(
         return ret_;
     }
     let ret__0: lzma_ret = lzma_lzip_decoder_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         memlimit,
         flags,

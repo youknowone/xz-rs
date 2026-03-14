@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 extern "C" {
     fn lzma_mf_hc3_find(dict: *mut lzma_mf, matches: *mut lzma_match) -> u32;
     fn lzma_mf_hc3_skip(dict: *mut lzma_mf, amount: u32);
@@ -55,7 +55,7 @@ unsafe extern "C" fn fill_window(
     action: lzma_action,
 ) -> lzma_ret {
     if (*coder).mf.read_pos >= (*coder).mf.size.wrapping_sub((*coder).mf.keep_size_after) {
-        move_window(&raw mut (*coder).mf);
+        move_window(::core::ptr::addr_of_mut!((*coder).mf));
     }
     let mut write_pos: size_t = (*coder).mf.write_pos as size_t;
     let mut ret: lzma_ret = LZMA_OK;
@@ -65,7 +65,7 @@ unsafe extern "C" fn fill_window(
             in_pos,
             in_size,
             (*coder).mf.buffer,
-            &raw mut write_pos,
+            ::core::ptr::addr_of_mut!(write_pos),
             (*coder).mf.size as size_t,
         );
         ret = if action != LZMA_RUN && *in_pos == in_size {
@@ -81,7 +81,7 @@ unsafe extern "C" fn fill_window(
             in_pos,
             in_size,
             (*coder).mf.buffer,
-            &raw mut write_pos,
+            ::core::ptr::addr_of_mut!(write_pos),
             (*coder).mf.size as size_t,
             action,
         );
@@ -106,7 +106,7 @@ unsafe extern "C" fn fill_window(
         let pending: u32 = (*coder).mf.pending;
         (*coder).mf.pending = 0;
         (*coder).mf.read_pos = (*coder).mf.read_pos.wrapping_sub(pending);
-        (*coder).mf.skip.unwrap()(&raw mut (*coder).mf, pending);
+        (*coder).mf.skip.unwrap()(::core::ptr::addr_of_mut!((*coder).mf), pending);
     }
     ret
 }
@@ -131,7 +131,7 @@ unsafe extern "C" fn lz_encode(
         }
         let ret: lzma_ret = (*coder).lz.code.unwrap()(
             (*coder).lz.coder,
-            &raw mut (*coder).mf,
+            ::core::ptr::addr_of_mut!((*coder).mf),
             out,
             out_pos,
             out_size,
@@ -365,7 +365,7 @@ pub extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -
         hash_count: 0,
         sons_count: 0,
     };
-    if unsafe { lz_encoder_prepare(&raw mut mf, core::ptr::null(), lz_options) } {
+    if unsafe { lz_encoder_prepare(::core::ptr::addr_of_mut!(mf), core::ptr::null(), lz_options) } {
         return UINT64_MAX;
     }
     (mf.hash_count as u64)
@@ -376,7 +376,7 @@ pub extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -
 }
 unsafe extern "C" fn lz_encoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
-    lzma_next_end(&raw mut (*coder).next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
     lzma_free((*coder).mf.son as *mut c_void, allocator);
     lzma_free((*coder).mf.hash as *mut c_void, allocator);
     lzma_free((*coder).mf.buffer as *mut c_void, allocator);
@@ -402,7 +402,7 @@ unsafe extern "C" fn lz_encoder_update(
         return ret_;
     }
     lzma_next_filter_update(
-        &raw mut (*coder).next,
+        ::core::ptr::addr_of_mut!((*coder).next),
         allocator,
         reversed_filters.offset(1),
     )
@@ -505,22 +505,34 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         preset_dict_size: 0,
     };
     let ret_: lzma_ret = lz_init.unwrap()(
-        &raw mut (*coder).lz,
+        ::core::ptr::addr_of_mut!((*coder).lz),
         allocator,
         (*filters).id,
         (*filters).options,
-        &raw mut lz_options,
+        ::core::ptr::addr_of_mut!(lz_options),
     );
     if ret_ != LZMA_OK {
         return ret_;
     }
-    if lz_encoder_prepare(&raw mut (*coder).mf, allocator, &raw mut lz_options) {
+    if lz_encoder_prepare(
+        ::core::ptr::addr_of_mut!((*coder).mf),
+        allocator,
+        ::core::ptr::addr_of_mut!(lz_options),
+    ) {
         return LZMA_OPTIONS_ERROR;
     }
-    if lz_encoder_init(&raw mut (*coder).mf, allocator, &raw mut lz_options) {
+    if lz_encoder_init(
+        ::core::ptr::addr_of_mut!((*coder).mf),
+        allocator,
+        ::core::ptr::addr_of_mut!(lz_options),
+    ) {
         return LZMA_MEM_ERROR;
     }
-    lzma_next_filter_init(&raw mut (*coder).next, allocator, filters.offset(1))
+    lzma_next_filter_init(
+        ::core::ptr::addr_of_mut!((*coder).next),
+        allocator,
+        filters.offset(1),
+    )
 }
 pub extern "C" fn lzma_mf_is_supported(mf: lzma_match_finder) -> lzma_bool {
     match mf {

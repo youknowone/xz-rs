@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_s {
@@ -199,7 +199,7 @@ unsafe extern "C" fn index_stream_init(
     (*s).node.right = core::ptr::null_mut();
     (*s).number = stream_number;
     (*s).block_number_base = block_number_base;
-    index_tree_init(&raw mut (*s).groups);
+    index_tree_init(::core::ptr::addr_of_mut!((*s).groups));
     (*s).record_count = 0;
     (*s).index_list_size = 0;
     (*s).stream_flags.version = UINT32_MAX;
@@ -209,7 +209,7 @@ unsafe extern "C" fn index_stream_init(
 unsafe extern "C" fn index_stream_end(node: *mut c_void, allocator: *const lzma_allocator) {
     let s: *mut index_stream = node as *mut index_stream;
     index_tree_end(
-        &raw mut (*s).groups,
+        ::core::ptr::addr_of_mut!((*s).groups),
         allocator,
         Some(lzma_free as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()),
     );
@@ -219,7 +219,7 @@ unsafe extern "C" fn index_init_plain(allocator: *const lzma_allocator) -> *mut 
     let i: *mut lzma_index =
         lzma_alloc(core::mem::size_of::<lzma_index>(), allocator) as *mut lzma_index;
     if !i.is_null() {
-        index_tree_init(&raw mut (*i).streams);
+        index_tree_init(::core::ptr::addr_of_mut!((*i).streams));
         (*i).uncompressed_size = 0;
         (*i).total_size = 0;
         (*i).record_count = 0;
@@ -240,13 +240,16 @@ pub unsafe extern "C" fn lzma_index_init(allocator: *const lzma_allocator) -> *m
         lzma_free(i as *mut c_void, allocator);
         return core::ptr::null_mut();
     }
-    index_tree_append(&raw mut (*i).streams, &raw mut (*s).node);
+    index_tree_append(
+        ::core::ptr::addr_of_mut!((*i).streams),
+        ::core::ptr::addr_of_mut!((*s).node),
+    );
     i
 }
 pub unsafe extern "C" fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator) {
     if !i.is_null() {
         index_tree_end(
-            &raw mut (*i).streams,
+            ::core::ptr::addr_of_mut!((*i).streams),
             allocator,
             Some(
                 index_stream_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
@@ -353,8 +356,9 @@ pub unsafe extern "C" fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli 
         if g.is_null() {
             0
         } else {
-            (*(&raw const (*g).records as *const index_record).offset((*g).last as isize))
-                .unpadded_sum
+            (*(::core::ptr::addr_of!((*g).records) as *const index_record)
+                .offset((*g).last as isize))
+            .unpadded_sum
         },
         (*s).record_count,
         (*s).index_list_size,
@@ -431,13 +435,16 @@ pub unsafe extern "C" fn lzma_index_append(
         0
     } else {
         vli_ceil4(
-            (*(&raw mut (*g).records as *mut index_record).offset((*g).last as isize)).unpadded_sum,
+            (*(::core::ptr::addr_of_mut!((*g).records) as *mut index_record)
+                .offset((*g).last as isize))
+            .unpadded_sum,
         ) as lzma_vli
     };
     let uncompressed_base: lzma_vli = if g.is_null() {
         0
     } else {
-        (*(&raw mut (*g).records as *mut index_record).offset((*g).last as isize)).uncompressed_sum
+        (*(::core::ptr::addr_of_mut!((*g).records) as *mut index_record).offset((*g).last as isize))
+            .uncompressed_sum
     };
     let index_list_size_add: u32 =
         (lzma_vli_size(unpadded_size) as u32).wrapping_add(lzma_vli_size(uncompressed_size) as u32);
@@ -485,12 +492,15 @@ pub unsafe extern "C" fn lzma_index_append(
         (*g).node.uncompressed_base = uncompressed_base;
         (*g).node.compressed_base = compressed_base;
         (*g).number_base = (*s).record_count.wrapping_add(1);
-        index_tree_append(&raw mut (*s).groups, &raw mut (*g).node);
+        index_tree_append(
+            ::core::ptr::addr_of_mut!((*s).groups),
+            ::core::ptr::addr_of_mut!((*g).node),
+        );
     }
-    (*(&raw mut (*g).records as *mut index_record).offset((*g).last as isize)).uncompressed_sum =
-        uncompressed_base.wrapping_add(uncompressed_size);
-    (*(&raw mut (*g).records as *mut index_record).offset((*g).last as isize)).unpadded_sum =
-        compressed_base.wrapping_add(unpadded_size);
+    (*(::core::ptr::addr_of_mut!((*g).records) as *mut index_record).offset((*g).last as isize))
+        .uncompressed_sum = uncompressed_base.wrapping_add(uncompressed_size);
+    (*(::core::ptr::addr_of_mut!((*g).records) as *mut index_record).offset((*g).last as isize))
+        .unpadded_sum = compressed_base.wrapping_add(unpadded_size);
     (*s).record_count = (*s).record_count.wrapping_add(1);
     (*s).index_list_size = (*s)
         .index_list_size
@@ -518,7 +528,7 @@ unsafe extern "C" fn index_cat_helper(info: *const index_cat_info, this: *mut in
     (*this).block_number_base = (*this)
         .block_number_base
         .wrapping_add((*info).block_number_add);
-    index_tree_append((*info).streams, &raw mut (*this).node);
+    index_tree_append((*info).streams, ::core::ptr::addr_of_mut!((*this).node));
     if !right.is_null() {
         index_cat_helper(info, right);
     }
@@ -567,20 +577,20 @@ pub unsafe extern "C" fn lzma_index_cat(
         (*newg).last = (*g).last;
         (*newg).number_base = (*g).number_base;
         core::ptr::copy_nonoverlapping(
-            &raw mut (*g).records as *const u8,
-            &raw mut (*newg).records as *mut u8,
+            ::core::ptr::addr_of_mut!((*g).records) as *const u8,
+            ::core::ptr::addr_of_mut!((*newg).records) as *mut u8,
             (*newg)
                 .allocated
                 .wrapping_mul(core::mem::size_of::<index_record>()),
         );
         if !(*g).node.parent.is_null() {
-            (*(*g).node.parent).right = &raw mut (*newg).node;
+            (*(*g).node.parent).right = ::core::ptr::addr_of_mut!((*newg).node);
         }
-        if (*s).groups.leftmost == &raw mut (*g).node {
-            (*s).groups.leftmost = &raw mut (*newg).node;
-            (*s).groups.root = &raw mut (*newg).node;
+        if (*s).groups.leftmost == ::core::ptr::addr_of_mut!((*g).node) {
+            (*s).groups.leftmost = ::core::ptr::addr_of_mut!((*newg).node);
+            (*s).groups.root = ::core::ptr::addr_of_mut!((*newg).node);
         }
-        (*s).groups.rightmost = &raw mut (*newg).node;
+        (*s).groups.rightmost = ::core::ptr::addr_of_mut!((*newg).node);
         lzma_free(g as *mut c_void, allocator);
     }
     (*dest).checks = lzma_index_checks(dest);
@@ -589,9 +599,12 @@ pub unsafe extern "C" fn lzma_index_cat(
         file_size: dest_file_size,
         block_number_add: (*dest).record_count,
         stream_number_add: (*dest).streams.count,
-        streams: &raw mut (*dest).streams,
+        streams: ::core::ptr::addr_of_mut!((*dest).streams),
     };
-    index_cat_helper(&raw const info, (*src).streams.root as *mut index_stream);
+    index_cat_helper(
+        ::core::ptr::addr_of!(info),
+        (*src).streams.root as *mut index_stream,
+    );
     (*dest).uncompressed_size = (*dest)
         .uncompressed_size
         .wrapping_add((*src).uncompressed_size);
@@ -647,20 +660,24 @@ unsafe extern "C" fn index_dup_stream(
     let mut i: size_t = 0;
     loop {
         core::ptr::copy_nonoverlapping(
-            &raw const (*srcg).records as *const u8,
-            (&raw mut (*destg).records as *mut index_record).offset(i as isize) as *mut u8,
+            ::core::ptr::addr_of!((*srcg).records) as *const u8,
+            (::core::ptr::addr_of_mut!((*destg).records) as *mut index_record).offset(i as isize)
+                as *mut u8,
             (*srcg)
                 .last
                 .wrapping_add(1)
                 .wrapping_mul(core::mem::size_of::<index_record>()),
         );
         i = i.wrapping_add((*srcg).last.wrapping_add(1));
-        srcg = index_tree_next(&raw const (*srcg).node) as *const index_group;
+        srcg = index_tree_next(::core::ptr::addr_of!((*srcg).node)) as *const index_group;
         if srcg.is_null() {
             break;
         }
     }
-    index_tree_append(&raw mut (*dest).groups, &raw mut (*destg).node);
+    index_tree_append(
+        ::core::ptr::addr_of_mut!((*dest).groups),
+        ::core::ptr::addr_of_mut!((*destg).node),
+    );
     dest
 }
 #[no_mangle]
@@ -683,8 +700,12 @@ pub unsafe extern "C" fn lzma_index_dup(
             lzma_index_end(dest, allocator);
             return core::ptr::null_mut();
         }
-        index_tree_append(&raw mut (*dest).streams, &raw mut (*deststream).node);
-        srcstream = index_tree_next(&raw const (*srcstream).node) as *const index_stream;
+        index_tree_append(
+            ::core::ptr::addr_of_mut!((*dest).streams),
+            ::core::ptr::addr_of_mut!((*deststream).node),
+        );
+        srcstream =
+            index_tree_next(::core::ptr::addr_of!((*srcstream).node)) as *const index_stream;
         if srcstream.is_null() {
             break;
         }
@@ -699,11 +720,15 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
     let record: size_t = (*iter).internal[ITER_RECORD as usize].s;
     if group.is_null() {
         (*iter).internal[ITER_METHOD as usize].s = ITER_METHOD_LEFTMOST as size_t;
-    } else if (*i).streams.rightmost != &raw const (*stream).node as *mut index_tree_node
-        || (*stream).groups.rightmost != &raw const (*group).node as *mut index_tree_node
+    } else if (*i).streams.rightmost
+        != ::core::ptr::addr_of!((*stream).node) as *mut index_tree_node
+        || (*stream).groups.rightmost
+            != ::core::ptr::addr_of!((*group).node) as *mut index_tree_node
     {
         (*iter).internal[ITER_METHOD as usize].s = ITER_METHOD_NORMAL as size_t;
-    } else if (*stream).groups.leftmost != &raw const (*group).node as *mut index_tree_node {
+    } else if (*stream).groups.leftmost
+        != ::core::ptr::addr_of!((*group).node) as *mut index_tree_node
+    {
         (*iter).internal[ITER_METHOD as usize].s = ITER_METHOD_NEXT as size_t;
         (*iter).internal[ITER_GROUP as usize].p = (*group).node.parent as *const c_void;
     } else {
@@ -717,7 +742,7 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
     (*iter).stream.flags = if (*stream).stream_flags.version == UINT32_MAX {
         core::ptr::null()
     } else {
-        &raw const (*stream).stream_flags
+        ::core::ptr::addr_of!((*stream).stream_flags)
     };
     (*iter).stream.padding = (*stream).stream_padding;
     if (*stream).groups.rightmost.is_null() {
@@ -732,10 +757,12 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
                 (*stream).index_list_size,
             ))
             .wrapping_add(vli_ceil4(
-                (*(&raw const (*g).records as *const index_record).offset((*g).last as isize))
-                    .unpadded_sum,
+                (*(::core::ptr::addr_of!((*g).records) as *const index_record)
+                    .offset((*g).last as isize))
+                .unpadded_sum,
             ));
-        (*iter).stream.uncompressed_size = (*(&raw const (*g).records as *const index_record)
+        (*iter).stream.uncompressed_size = (*(::core::ptr::addr_of!((*g).records)
+            as *const index_record)
             .offset((*g).last as isize))
         .uncompressed_sum;
     }
@@ -749,7 +776,7 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
             (*group).node.compressed_base
         } else {
             vli_ceil4(
-                (*(&raw const (*group).records as *const index_record)
+                (*(::core::ptr::addr_of!((*group).records) as *const index_record)
                     .offset(record.wrapping_sub(1) as isize))
                 .unpadded_sum,
             )
@@ -757,15 +784,17 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
         (*iter).block.uncompressed_stream_offset = if record == 0 {
             (*group).node.uncompressed_base
         } else {
-            (*(&raw const (*group).records as *const index_record)
+            (*(::core::ptr::addr_of!((*group).records) as *const index_record)
                 .offset(record.wrapping_sub(1) as isize))
             .uncompressed_sum
         };
-        (*iter).block.uncompressed_size = (*(&raw const (*group).records as *const index_record)
+        (*iter).block.uncompressed_size = (*(::core::ptr::addr_of!((*group).records)
+            as *const index_record)
             .offset(record as isize))
         .uncompressed_sum
         .wrapping_sub((*iter).block.uncompressed_stream_offset);
-        (*iter).block.unpadded_size = (*(&raw const (*group).records as *const index_record)
+        (*iter).block.unpadded_size = (*(::core::ptr::addr_of!((*group).records)
+            as *const index_record)
             .offset(record as isize))
         .unpadded_sum
         .wrapping_sub((*iter).block.compressed_stream_offset);
@@ -830,7 +859,8 @@ pub unsafe extern "C" fn lzma_index_iter_next(
             stream = (*i).streams.leftmost as *const index_stream;
             if mode >= LZMA_INDEX_ITER_BLOCK {
                 while (*stream).groups.leftmost.is_null() {
-                    stream = index_tree_next(&raw const (*stream).node) as *const index_stream;
+                    stream = index_tree_next(::core::ptr::addr_of!((*stream).node))
+                        as *const index_stream;
                     if stream.is_null() {
                         return true as lzma_bool;
                     }
@@ -843,11 +873,12 @@ pub unsafe extern "C" fn lzma_index_iter_next(
         } else {
             record = 0;
             if !group.is_null() {
-                group = index_tree_next(&raw const (*group).node) as *const index_group;
+                group = index_tree_next(::core::ptr::addr_of!((*group).node)) as *const index_group;
             }
             if group.is_null() {
                 loop {
-                    stream = index_tree_next(&raw const (*stream).node) as *const index_stream;
+                    stream = index_tree_next(::core::ptr::addr_of!((*stream).node))
+                        as *const index_stream;
                     if stream.is_null() {
                         return true as lzma_bool;
                     }
@@ -863,15 +894,17 @@ pub unsafe extern "C" fn lzma_index_iter_next(
         }
         if record == 0 {
             if (*group).node.uncompressed_base
-                != (*(&raw const (*group).records as *const index_record)).uncompressed_sum
+                != (*(::core::ptr::addr_of!((*group).records) as *const index_record))
+                    .uncompressed_sum
             {
                 break;
             }
-        } else if (*(&raw const (*group).records as *const index_record)
+        } else if (*(::core::ptr::addr_of!((*group).records) as *const index_record)
             .offset(record.wrapping_sub(1) as isize))
         .uncompressed_sum
-            != (*(&raw const (*group).records as *const index_record).offset(record as isize))
-                .uncompressed_sum
+            != (*(::core::ptr::addr_of!((*group).records) as *const index_record)
+                .offset(record as isize))
+            .uncompressed_sum
         {
             break;
         }
@@ -892,15 +925,15 @@ pub unsafe extern "C" fn lzma_index_iter_locate(
         return true as lzma_bool;
     }
     let stream: *const index_stream =
-        index_tree_locate(&raw const (*i).streams, target) as *const index_stream;
+        index_tree_locate(::core::ptr::addr_of!((*i).streams), target) as *const index_stream;
     target = target.wrapping_sub((*stream).node.uncompressed_base);
     let group: *const index_group =
-        index_tree_locate(&raw const (*stream).groups, target) as *const index_group;
+        index_tree_locate(::core::ptr::addr_of!((*stream).groups), target) as *const index_group;
     let mut left: size_t = 0;
     let mut right: size_t = (*group).last;
     while left < right {
         let pos: size_t = left.wrapping_add(right.wrapping_sub(left).wrapping_div(2));
-        if (*(&raw const (*group).records as *const index_record).offset(pos as isize))
+        if (*(::core::ptr::addr_of!((*group).records) as *const index_record).offset(pos as isize))
             .uncompressed_sum
             <= target
         {

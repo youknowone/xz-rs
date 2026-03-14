@@ -23,7 +23,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_encode(
         update: None,
         set_out_limit: None,
     };
-    let ret_: lzma_ret = lzma_raw_encoder_init(&raw mut next, allocator, filters);
+    let ret_: lzma_ret = lzma_raw_encoder_init(::core::ptr::addr_of_mut!(next), allocator, filters);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -33,14 +33,14 @@ pub unsafe extern "C" fn lzma_raw_buffer_encode(
         next.coder,
         allocator,
         in_0,
-        &raw mut in_pos,
+        ::core::ptr::addr_of_mut!(in_pos),
         in_size,
         out,
         out_pos,
         out_size,
         LZMA_FINISH,
     );
-    lzma_next_end(&raw mut next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!(next), allocator);
     if ret == LZMA_STREAM_END {
         ret = LZMA_OK;
     } else {

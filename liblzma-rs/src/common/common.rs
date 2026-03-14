@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_char, c_uint, c_void};
+use libc::{c_char, c_uint, c_void};
 extern "C" {
     fn malloc(__size: size_t) -> *mut c_void;
     fn calloc(__count: size_t, __size: size_t) -> *mut c_void;
@@ -20,7 +20,7 @@ pub extern "C" fn lzma_version_number() -> u32 {
     LZMA_VERSION as u32
 }
 pub extern "C" fn lzma_version_string() -> *const c_char {
-    c"5.8.2".as_ptr()
+    crate::c_str!("5.8.2")
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_alloc(
@@ -178,7 +178,7 @@ pub unsafe extern "C" fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
         };
     }
     core::ptr::write_bytes(
-        &raw mut (*(*strm).internal).supported_actions as *mut u8,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).supported_actions) as *mut u8,
         0 as u8,
         core::mem::size_of::<[bool; 5]>(),
     );
@@ -255,10 +255,10 @@ pub unsafe extern "C" fn lzma_code(strm: *mut lzma_stream, action: lzma_action) 
         (*(*strm).internal).next.coder,
         (*strm).allocator,
         (*strm).next_in,
-        &raw mut in_pos,
+        ::core::ptr::addr_of_mut!(in_pos),
         (*strm).avail_in,
         (*strm).next_out,
-        &raw mut out_pos,
+        ::core::ptr::addr_of_mut!(out_pos),
         (*strm).avail_out,
         action,
     );
@@ -328,7 +328,10 @@ pub unsafe extern "C" fn lzma_code(strm: *mut lzma_stream, action: lzma_action) 
 }
 pub unsafe extern "C" fn lzma_end(strm: *mut lzma_stream) {
     if !strm.is_null() && !(*strm).internal.is_null() {
-        lzma_next_end(&raw mut (*(*strm).internal).next, (*strm).allocator);
+        lzma_next_end(
+            ::core::ptr::addr_of_mut!((*(*strm).internal).next),
+            (*strm).allocator,
+        );
         lzma_free((*strm).internal as *mut c_void, (*strm).allocator);
         (*strm).internal = core::ptr::null_mut();
     }
@@ -366,8 +369,8 @@ pub extern "C" fn lzma_memusage(strm: *const lzma_stream) -> u64 {
             || (*(*strm).internal).next.memconfig.is_none()
             || (*(*strm).internal).next.memconfig.unwrap()(
                 (*(*strm).internal).next.coder,
-                &raw mut memusage,
-                &raw mut old_memlimit,
+                ::core::ptr::addr_of_mut!(memusage),
+                ::core::ptr::addr_of_mut!(old_memlimit),
                 0,
             ) != LZMA_OK
         {
@@ -385,8 +388,8 @@ pub extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
             || (*(*strm).internal).next.memconfig.is_none()
             || (*(*strm).internal).next.memconfig.unwrap()(
                 (*(*strm).internal).next.coder,
-                &raw mut memusage,
-                &raw mut old_memlimit,
+                ::core::ptr::addr_of_mut!(memusage),
+                ::core::ptr::addr_of_mut!(old_memlimit),
                 0,
             ) != LZMA_OK
         {
@@ -410,8 +413,8 @@ pub unsafe extern "C" fn lzma_memlimit_set(
     }
     (*(*strm).internal).next.memconfig.unwrap()(
         (*(*strm).internal).next.coder,
-        &raw mut memusage,
-        &raw mut old_memlimit,
+        ::core::ptr::addr_of_mut!(memusage),
+        ::core::ptr::addr_of_mut!(old_memlimit),
         new_memlimit,
     )
 }

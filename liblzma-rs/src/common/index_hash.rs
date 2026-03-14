@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_index_hash_s {
@@ -66,8 +66,14 @@ pub unsafe extern "C" fn lzma_index_hash_init(
     (*index_hash).uncompressed_size = 0;
     (*index_hash).pos = 0;
     (*index_hash).crc32 = 0;
-    lzma_check_init(&raw mut (*index_hash).blocks.check, LZMA_CHECK_SHA256);
-    lzma_check_init(&raw mut (*index_hash).records.check, LZMA_CHECK_SHA256);
+    lzma_check_init(
+        ::core::ptr::addr_of_mut!((*index_hash).blocks.check),
+        LZMA_CHECK_SHA256,
+    );
+    lzma_check_init(
+        ::core::ptr::addr_of_mut!((*index_hash).records.check),
+        LZMA_CHECK_SHA256,
+    );
     index_hash
 }
 #[no_mangle]
@@ -99,9 +105,9 @@ unsafe extern "C" fn hash_append(
     (*info).count = (*info).count.wrapping_add(1);
     let sizes: [lzma_vli; 2] = [unpadded_size, uncompressed_size];
     lzma_check_update(
-        &raw mut (*info).check,
+        ::core::ptr::addr_of_mut!((*info).check),
         LZMA_CHECK_SHA256,
-        &raw const sizes as *const lzma_vli as *const u8,
+        ::core::ptr::addr_of!(sizes) as *const lzma_vli as *const u8,
         core::mem::size_of::<[lzma_vli; 2]>(),
     );
 }
@@ -120,7 +126,7 @@ pub unsafe extern "C" fn lzma_index_hash_append(
         return LZMA_PROG_ERROR;
     }
     hash_append(
-        &raw mut (*index_hash).blocks,
+        ::core::ptr::addr_of_mut!((*index_hash).blocks),
         unpadded_size,
         uncompressed_size,
     );
@@ -166,8 +172,8 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
             }
             1 => {
                 ret = lzma_vli_decode(
-                    &raw mut (*index_hash).remaining,
-                    &raw mut (*index_hash).pos,
+                    ::core::ptr::addr_of_mut!((*index_hash).remaining),
+                    ::core::ptr::addr_of_mut!((*index_hash).pos),
                     in_0,
                     in_pos,
                     in_size,
@@ -189,11 +195,17 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
             }
             2 | 3 => {
                 let size: *mut lzma_vli = if (*index_hash).sequence == SEQ_UNPADDED {
-                    &raw mut (*index_hash).unpadded_size
+                    ::core::ptr::addr_of_mut!((*index_hash).unpadded_size)
                 } else {
-                    &raw mut (*index_hash).uncompressed_size
+                    ::core::ptr::addr_of_mut!((*index_hash).uncompressed_size)
                 };
-                ret = lzma_vli_decode(size, &raw mut (*index_hash).pos, in_0, in_pos, in_size);
+                ret = lzma_vli_decode(
+                    size,
+                    ::core::ptr::addr_of_mut!((*index_hash).pos),
+                    in_0,
+                    in_pos,
+                    in_size,
+                );
                 if ret != LZMA_STREAM_END {
                     break;
                 }
@@ -208,7 +220,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                     (*index_hash).sequence = SEQ_UNCOMPRESSED;
                 } else {
                     hash_append(
-                        &raw mut (*index_hash).records,
+                        ::core::ptr::addr_of_mut!((*index_hash).records),
                         (*index_hash).unpadded_size,
                         (*index_hash).uncompressed_size,
                     );
@@ -264,11 +276,19 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
                     {
                         return LZMA_DATA_ERROR;
                     }
-                    lzma_check_finish(&raw mut (*index_hash).blocks.check, LZMA_CHECK_SHA256);
-                    lzma_check_finish(&raw mut (*index_hash).records.check, LZMA_CHECK_SHA256);
+                    lzma_check_finish(
+                        ::core::ptr::addr_of_mut!((*index_hash).blocks.check),
+                        LZMA_CHECK_SHA256,
+                    );
+                    lzma_check_finish(
+                        ::core::ptr::addr_of_mut!((*index_hash).records.check),
+                        LZMA_CHECK_SHA256,
+                    );
                     if memcmp(
-                        &raw mut (*index_hash).blocks.check.buffer.u8_0 as *const c_void,
-                        &raw mut (*index_hash).records.check.buffer.u8_0 as *const c_void,
+                        ::core::ptr::addr_of_mut!((*index_hash).blocks.check.buffer.u8_0)
+                            as *const c_void,
+                        ::core::ptr::addr_of_mut!((*index_hash).records.check.buffer.u8_0)
+                            as *const c_void,
                         lzma_check_size(LZMA_CHECK_SHA256) as size_t,
                     ) != 0
                     {

@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 extern "C" {
     fn lzma_alone_decoder_init(
         next: *mut lzma_next_coder,
@@ -41,7 +41,7 @@ unsafe extern "C" fn auto_decode(
             (*coder).sequence = SEQ_CODE;
             if *in_0.offset(*in_pos as isize) == 0xfd {
                 let ret_: lzma_ret = lzma_stream_decoder_init(
-                    &raw mut (*coder).next,
+                    ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
                     (*coder).memlimit,
                     (*coder).flags,
@@ -51,7 +51,7 @@ unsafe extern "C" fn auto_decode(
                 }
             } else {
                 let ret__0: lzma_ret = lzma_alone_decoder_init(
-                    &raw mut (*coder).next,
+                    ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
                     (*coder).memlimit,
                     true,
@@ -107,7 +107,7 @@ unsafe extern "C" fn auto_decode(
 }
 unsafe extern "C" fn auto_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_auto_coder = coder_ptr as *mut lzma_auto_coder;
-    lzma_next_end(&raw mut (*coder).next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 extern "C" fn auto_decoder_get_check(coder_ptr: *const c_void) -> lzma_check {
@@ -247,7 +247,7 @@ pub unsafe extern "C" fn lzma_auto_decoder(
         return ret_;
     }
     let ret__0: lzma_ret = auto_decoder_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         memlimit,
         flags,

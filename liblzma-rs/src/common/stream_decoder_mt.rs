@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_ulong, c_void};
+use libc::{c_uint, c_ulong, c_void};
 extern "C" {
     fn lzma_outq_clear_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator);
     fn lzma_outq_clear_cache2(
@@ -95,17 +95,17 @@ unsafe extern "C" fn worker_enable_partial_update(thr_ptr: *mut c_void) {
     let thr: *mut worker_thread = thr_ptr as *mut worker_thread;
     let mut mythread_i_325: c_uint = 0;
     while if mythread_i_325 != 0 {
-        mythread_mutex_unlock(&raw mut (*thr).mutex);
+        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*thr).mutex));
         0
     } else {
-        mythread_mutex_lock(&raw mut (*thr).mutex);
+        mythread_mutex_lock(::core::ptr::addr_of_mut!((*thr).mutex));
         1
     } != 0
     {
         let mut mythread_j_325: c_uint = 0;
         while mythread_j_325 == 0 {
             (*thr).partial_update_enabled = true;
-            mythread_cond_signal(&raw mut (*thr).cond);
+            mythread_cond_signal(::core::ptr::addr_of_mut!((*thr).cond));
             mythread_j_325 = 1;
         }
         mythread_i_325 = 1;
@@ -117,17 +117,23 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
     let mut partial_update_enabled: bool = false;
     let mut ret: lzma_ret = LZMA_OK;
     loop {
-        mythread_mutex_lock(&raw mut (*thr).mutex);
+        mythread_mutex_lock(::core::ptr::addr_of_mut!((*thr).mutex));
         loop {
             if (*thr).state == THR_IDLE {
-                mythread_cond_wait(&raw mut (*thr).cond, &raw mut (*thr).mutex);
+                mythread_cond_wait(
+                    ::core::ptr::addr_of_mut!((*thr).cond),
+                    ::core::ptr::addr_of_mut!((*thr).mutex),
+                );
             } else {
                 if (*thr).state == THR_EXIT {
-                    mythread_mutex_unlock(&raw mut (*thr).mutex);
+                    mythread_mutex_unlock(::core::ptr::addr_of_mut!((*thr).mutex));
                     lzma_free((*thr).in_0 as *mut c_void, (*thr).allocator);
-                    lzma_next_end(&raw mut (*thr).block_decoder, (*thr).allocator);
-                    mythread_mutex_destroy(&raw mut (*thr).mutex);
-                    mythread_cond_destroy(&raw mut (*thr).cond);
+                    lzma_next_end(
+                        ::core::ptr::addr_of_mut!((*thr).block_decoder),
+                        (*thr).allocator,
+                    );
+                    mythread_mutex_destroy(::core::ptr::addr_of_mut!((*thr).mutex));
+                    mythread_cond_destroy(::core::ptr::addr_of_mut!((*thr).cond));
                     return MYTHREAD_RET_VALUE;
                 }
                 (*thr).progress_in = (*thr).in_pos;
@@ -139,10 +145,13 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
                 {
                     break;
                 }
-                mythread_cond_wait(&raw mut (*thr).cond, &raw mut (*thr).mutex);
+                mythread_cond_wait(
+                    ::core::ptr::addr_of_mut!((*thr).cond),
+                    ::core::ptr::addr_of_mut!((*thr).mutex),
+                );
             }
         }
-        mythread_mutex_unlock(&raw mut (*thr).mutex);
+        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*thr).mutex));
         let chunk_size: size_t = 16384;
         if in_filled.wrapping_sub((*thr).in_pos) > chunk_size {
             in_filled = (*thr).in_pos.wrapping_add(chunk_size);
@@ -151,10 +160,10 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
             (*thr).block_decoder.coder,
             (*thr).allocator,
             (*thr).in_0,
-            &raw mut (*thr).in_pos,
+            ::core::ptr::addr_of_mut!((*thr).in_pos),
             in_filled,
-            &raw mut (*(*thr).outbuf).buf as *mut u8,
-            &raw mut (*thr).out_pos,
+            ::core::ptr::addr_of_mut!((*(*thr).outbuf).buf) as *mut u8,
+            ::core::ptr::addr_of_mut!((*thr).out_pos),
             (*(*thr).outbuf).allocated,
             LZMA_RUN,
         );
@@ -163,10 +172,10 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
                 (*thr).partial_update_started = true;
                 let mut mythread_i_415: c_uint = 0;
                 while if mythread_i_415 != 0 {
-                    mythread_mutex_unlock(&raw mut (*(*thr).coder).mutex);
+                    mythread_mutex_unlock(::core::ptr::addr_of_mut!((*(*thr).coder).mutex));
                     0
                 } else {
-                    mythread_mutex_lock(&raw mut (*(*thr).coder).mutex);
+                    mythread_mutex_lock(::core::ptr::addr_of_mut!((*(*thr).coder).mutex));
                     1
                 } != 0
                 {
@@ -174,7 +183,7 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
                     while mythread_j_415 == 0 {
                         (*(*thr).outbuf).pos = (*thr).out_pos;
                         (*(*thr).outbuf).decoder_in_pos = (*thr).in_pos;
-                        mythread_cond_signal(&raw mut (*(*thr).coder).cond);
+                        mythread_cond_signal(::core::ptr::addr_of_mut!((*(*thr).coder).cond));
                         mythread_j_415 = 1;
                     }
                     mythread_i_415 = 1;
@@ -183,10 +192,10 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
         } else {
             let mut mythread_i_434: c_uint = 0;
             while if mythread_i_434 != 0 {
-                mythread_mutex_unlock(&raw mut (*thr).mutex);
+                mythread_mutex_unlock(::core::ptr::addr_of_mut!((*thr).mutex));
                 0
             } else {
-                mythread_mutex_lock(&raw mut (*thr).mutex);
+                mythread_mutex_lock(::core::ptr::addr_of_mut!((*thr).mutex));
                 1
             } != 0
             {
@@ -208,10 +217,10 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
             }
             let mut mythread_i_458: c_uint = 0;
             while if mythread_i_458 != 0 {
-                mythread_mutex_unlock(&raw mut (*(*thr).coder).mutex);
+                mythread_mutex_unlock(::core::ptr::addr_of_mut!((*(*thr).coder).mutex));
                 0
             } else {
-                mythread_mutex_lock(&raw mut (*(*thr).coder).mutex);
+                mythread_mutex_lock(::core::ptr::addr_of_mut!((*(*thr).coder).mutex));
                 1
             } != 0
             {
@@ -244,7 +253,7 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
                         (*thr).next = (*(*thr).coder).threads_free;
                         (*(*thr).coder).threads_free = thr;
                     }
-                    mythread_cond_signal(&raw mut (*(*thr).coder).cond);
+                    mythread_cond_signal(::core::ptr::addr_of_mut!((*(*thr).coder).cond));
                     mythread_j_458 = 1;
                 }
                 mythread_i_458 = 1;
@@ -257,17 +266,23 @@ unsafe extern "C" fn threads_end(coder: *mut lzma_stream_coder, allocator: *cons
     while i < (*coder).threads_initialized {
         let mut mythread_i_502: c_uint = 0;
         while if mythread_i_502 != 0 {
-            mythread_mutex_unlock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
+            mythread_mutex_unlock(::core::ptr::addr_of_mut!(
+                (*(*coder).threads.offset(i as isize)).mutex
+            ));
             0
         } else {
-            mythread_mutex_lock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
+            mythread_mutex_lock(::core::ptr::addr_of_mut!(
+                (*(*coder).threads.offset(i as isize)).mutex
+            ));
             1
         } != 0
         {
             let mut mythread_j_502: c_uint = 0;
             while mythread_j_502 == 0 {
                 (*(*coder).threads.offset(i as isize)).state = THR_EXIT;
-                mythread_cond_signal(&raw mut (*(*coder).threads.offset(i as isize)).cond);
+                mythread_cond_signal(::core::ptr::addr_of_mut!(
+                    (*(*coder).threads.offset(i as isize)).cond
+                ));
                 mythread_j_502 = 1;
             }
             mythread_i_502 = 1;
@@ -291,10 +306,14 @@ unsafe extern "C" fn threads_stop(coder: *mut lzma_stream_coder) {
     while i < (*coder).threads_initialized {
         let mut mythread_i_538: c_uint = 0;
         while if mythread_i_538 != 0 {
-            mythread_mutex_unlock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
+            mythread_mutex_unlock(::core::ptr::addr_of_mut!(
+                (*(*coder).threads.offset(i as isize)).mutex
+            ));
             0
         } else {
-            mythread_mutex_lock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
+            mythread_mutex_lock(::core::ptr::addr_of_mut!(
+                (*(*coder).threads.offset(i as isize)).mutex
+            ));
             1
         } != 0
         {
@@ -325,8 +344,8 @@ unsafe extern "C" fn initialize_new_thread(
         .threads
         .offset((*coder).threads_initialized as isize)
         as *mut worker_thread;
-    if mythread_mutex_init(&raw mut (*thr).mutex) == 0 {
-        if mythread_cond_init(&raw mut (*thr).cond) == 0 {
+    if mythread_mutex_init(::core::ptr::addr_of_mut!((*thr).mutex)) == 0 {
+        if mythread_cond_init(::core::ptr::addr_of_mut!((*thr).cond)) == 0 {
             (*thr).state = THR_IDLE;
             (*thr).in_0 = core::ptr::null_mut();
             (*thr).in_size = 0;
@@ -347,19 +366,19 @@ unsafe extern "C" fn initialize_new_thread(
             };
             (*thr).mem_filters = 0;
             if mythread_create(
-                &raw mut (*thr).thread_id,
+                ::core::ptr::addr_of_mut!((*thr).thread_id),
                 Some(worker_decoder as unsafe extern "C" fn(*mut c_void) -> *mut c_void),
                 thr as *mut c_void,
             ) != 0
             {
-                mythread_cond_destroy(&raw mut (*thr).cond);
+                mythread_cond_destroy(::core::ptr::addr_of_mut!((*thr).cond));
             } else {
                 (*coder).threads_initialized = (*coder).threads_initialized.wrapping_add(1);
                 (*coder).thr = thr;
                 return LZMA_OK;
             }
         }
-        mythread_mutex_destroy(&raw mut (*thr).mutex);
+        mythread_mutex_destroy(::core::ptr::addr_of_mut!((*thr).mutex));
     }
     LZMA_MEM_ERROR
 }
@@ -369,10 +388,10 @@ unsafe extern "C" fn get_thread(
 ) -> lzma_ret {
     let mut mythread_i_608: c_uint = 0;
     while if mythread_i_608 != 0 {
-        mythread_mutex_unlock(&raw mut (*coder).mutex);
+        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*coder).mutex));
         0
     } else {
-        mythread_mutex_lock(&raw mut (*coder).mutex);
+        mythread_mutex_lock(::core::ptr::addr_of_mut!((*coder).mutex));
         1
     } != 0
     {
@@ -418,10 +437,10 @@ unsafe extern "C" fn read_output_and_wait(
     let mut ret: lzma_ret = LZMA_OK;
     let mut mythread_i_654: c_uint = 0;
     while if mythread_i_654 != 0 {
-        mythread_mutex_unlock(&raw mut (*coder).mutex);
+        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*coder).mutex));
         0
     } else {
-        mythread_mutex_lock(&raw mut (*coder).mutex);
+        mythread_mutex_lock(::core::ptr::addr_of_mut!((*coder).mutex));
         1
     } != 0
     {
@@ -431,7 +450,7 @@ unsafe extern "C" fn read_output_and_wait(
                 let out_start: size_t = *out_pos;
                 loop {
                     ret = lzma_outq_read(
-                        &raw mut (*coder).outq,
+                        ::core::ptr::addr_of_mut!((*coder).outq),
                         allocator,
                         out,
                         out_pos,
@@ -441,7 +460,7 @@ unsafe extern "C" fn read_output_and_wait(
                     );
                     if ret == LZMA_STREAM_END {
                         lzma_outq_enable_partial_output(
-                            &raw mut (*coder).outq,
+                            ::core::ptr::addr_of_mut!((*coder).outq),
                             Some(
                                 worker_enable_partial_update
                                     as unsafe extern "C" fn(*mut c_void) -> (),
@@ -472,7 +491,7 @@ unsafe extern "C" fn read_output_and_wait(
                         .wrapping_sub((*coder).mem_in_use)
                         .wrapping_sub((*coder).outq.mem_in_use)
                         >= (*coder).mem_next_block
-                    && lzma_outq_has_buf(&raw mut (*coder).outq)
+                    && lzma_outq_has_buf(::core::ptr::addr_of_mut!((*coder).outq))
                     && ((*coder).threads_initialized < (*coder).threads_max
                         || !(*coder).threads_free.is_null())
                 {
@@ -482,10 +501,10 @@ unsafe extern "C" fn read_output_and_wait(
                     if !waiting_allowed {
                         break;
                     }
-                    if lzma_outq_is_empty(&raw mut (*coder).outq) {
+                    if lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
                         break;
                     }
-                    if lzma_outq_is_readable(&raw mut (*coder).outq) {
+                    if lzma_outq_is_readable(::core::ptr::addr_of_mut!((*coder).outq)) {
                         break;
                     }
                     if !(*coder).thr.is_null() && (*(*coder).thr).partial_update_enabled {
@@ -498,13 +517,13 @@ unsafe extern "C" fn read_output_and_wait(
                             *has_blocked = true;
                             mythread_condtime_set(
                                 wait_abs,
-                                &raw mut (*coder).cond,
+                                ::core::ptr::addr_of_mut!((*coder).cond),
                                 (*coder).timeout,
                             );
                         }
                         if mythread_cond_timedwait(
-                            &raw mut (*coder).cond,
-                            &raw mut (*coder).mutex,
+                            ::core::ptr::addr_of_mut!((*coder).cond),
+                            ::core::ptr::addr_of_mut!((*coder).mutex),
                             wait_abs,
                         ) != 0
                         {
@@ -512,7 +531,10 @@ unsafe extern "C" fn read_output_and_wait(
                             break;
                         }
                     } else {
-                        mythread_cond_wait(&raw mut (*coder).cond, &raw mut (*coder).mutex);
+                        mythread_cond_wait(
+                            ::core::ptr::addr_of_mut!((*coder).cond),
+                            ::core::ptr::addr_of_mut!((*coder).mutex),
+                        );
                     }
                     if ret != LZMA_OK {
                         break;
@@ -550,8 +572,8 @@ unsafe extern "C" fn decode_block_header(
         in_0,
         in_pos,
         in_size,
-        &raw mut (*coder).buffer as *mut u8,
-        &raw mut (*coder).pos,
+        ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+        ::core::ptr::addr_of_mut!((*coder).pos),
         (*coder).block_options.header_size as size_t,
     );
     if (*coder).pos < (*coder).block_options.header_size as size_t {
@@ -559,11 +581,12 @@ unsafe extern "C" fn decode_block_header(
     }
     (*coder).pos = 0;
     (*coder).block_options.version = 1;
-    (*coder).block_options.filters = &raw mut (*coder).filters as *mut lzma_filter;
+    (*coder).block_options.filters =
+        ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter;
     let ret_: lzma_ret = lzma_block_header_decode(
-        &raw mut (*coder).block_options,
+        ::core::ptr::addr_of_mut!((*coder).block_options),
         allocator,
-        &raw mut (*coder).buffer as *mut u8,
+        ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
     );
     if ret_ != LZMA_OK {
         return ret_;
@@ -622,8 +645,8 @@ unsafe extern "C" fn stream_decode_mt(
                     in_0,
                     in_pos,
                     in_size,
-                    &raw mut (*coder).buffer as *mut u8,
-                    &raw mut (*coder).pos,
+                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    ::core::ptr::addr_of_mut!((*coder).pos),
                     LZMA_STREAM_HEADER_SIZE as size_t,
                 );
                 (*coder).progress_in = (*coder)
@@ -634,8 +657,8 @@ unsafe extern "C" fn stream_decode_mt(
                 }
                 (*coder).pos = 0;
                 let ret: lzma_ret = lzma_stream_header_decode(
-                    &raw mut (*coder).stream_flags,
-                    &raw mut (*coder).buffer as *mut u8,
+                    ::core::ptr::addr_of_mut!((*coder).stream_flags),
+                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
                 );
                 if ret != LZMA_OK {
                     return if ret == LZMA_FORMAT_ERROR && !(*coder).first_stream {
@@ -681,23 +704,26 @@ unsafe extern "C" fn stream_decode_mt(
                     out_size,
                     core::ptr::null_mut(),
                     true,
-                    &raw mut wait_abs,
-                    &raw mut has_blocked,
+                    ::core::ptr::addr_of_mut!(wait_abs),
+                    ::core::ptr::addr_of_mut!(has_blocked),
                 );
                 if ret__3 != LZMA_OK {
                     return ret__3;
                 }
-                if !lzma_outq_is_empty(&raw mut (*coder).outq) {
+                if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
                     return LZMA_OK;
                 }
-                lzma_outq_clear_cache(&raw mut (*coder).outq, allocator);
+                lzma_outq_clear_cache(::core::ptr::addr_of_mut!((*coder).outq), allocator);
                 threads_end(coder, allocator);
                 let ret_3: lzma_ret = lzma_block_decoder_init(
-                    &raw mut (*coder).block_decoder,
+                    ::core::ptr::addr_of_mut!((*coder).block_decoder),
                     allocator,
-                    &raw mut (*coder).block_options,
+                    ::core::ptr::addr_of_mut!((*coder).block_options),
                 );
-                lzma_filters_free(&raw mut (*coder).filters as *mut lzma_filter, allocator);
+                lzma_filters_free(
+                    ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
+                    allocator,
+                );
                 (*coder).block_options.filters = core::ptr::null_mut();
                 if ret_3 != LZMA_OK {
                     return ret_3;
@@ -718,13 +744,13 @@ unsafe extern "C" fn stream_decode_mt(
                     out_size,
                     core::ptr::null_mut(),
                     true,
-                    &raw mut wait_abs,
-                    &raw mut has_blocked,
+                    ::core::ptr::addr_of_mut!(wait_abs),
+                    ::core::ptr::addr_of_mut!(has_blocked),
                 );
                 if ret__5 != LZMA_OK {
                     return ret__5;
                 }
-                if !lzma_outq_is_empty(&raw mut (*coder).outq) {
+                if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
                     return LZMA_OK;
                 }
                 (*coder).sequence = SEQ_INDEX_DECODE;
@@ -749,13 +775,13 @@ unsafe extern "C" fn stream_decode_mt(
                         out_size,
                         core::ptr::null_mut(),
                         true,
-                        &raw mut wait_abs,
-                        &raw mut has_blocked,
+                        ::core::ptr::addr_of_mut!(wait_abs),
+                        ::core::ptr::addr_of_mut!(has_blocked),
                     );
                     if ret__8 != LZMA_OK {
                         return ret__8;
                     }
-                    if !lzma_outq_is_empty(&raw mut (*coder).outq) {
+                    if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
                         return LZMA_OK;
                     }
                 }
@@ -789,7 +815,7 @@ unsafe extern "C" fn stream_decode_mt(
                 }
                 let ret__4: lzma_ret = lzma_index_hash_append(
                     (*coder).index_hash,
-                    lzma_block_unpadded_size(&raw mut (*coder).block_options),
+                    lzma_block_unpadded_size(::core::ptr::addr_of_mut!((*coder).block_options)),
                     (*coder).block_options.uncompressed_size,
                 );
                 if ret__4 != LZMA_OK {
@@ -817,8 +843,8 @@ unsafe extern "C" fn stream_decode_mt(
                         out_size,
                         core::ptr::null_mut(),
                         waiting_allowed,
-                        &raw mut wait_abs,
-                        &raw mut has_blocked,
+                        ::core::ptr::addr_of_mut!(wait_abs),
+                        ::core::ptr::addr_of_mut!(has_blocked),
                     );
                     if ret_ != LZMA_OK {
                         return ret_;
@@ -837,8 +863,9 @@ unsafe extern "C" fn stream_decode_mt(
                     (*coder).sequence = SEQ_ERROR;
                     current_block_239 = 11639917216603986996;
                 } else {
-                    (*coder).mem_next_filters =
-                        lzma_raw_decoder_memusage(&raw mut (*coder).filters as *mut lzma_filter);
+                    (*coder).mem_next_filters = lzma_raw_decoder_memusage(
+                        ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
+                    );
                     if (*coder).mem_next_filters == UINT64_MAX {
                         (*coder).pending_error = LZMA_OPTIONS_ERROR;
                         (*coder).sequence = SEQ_ERROR;
@@ -878,13 +905,13 @@ unsafe extern "C" fn stream_decode_mt(
                         out_size,
                         core::ptr::null_mut(),
                         true,
-                        &raw mut wait_abs,
-                        &raw mut has_blocked,
+                        ::core::ptr::addr_of_mut!(wait_abs),
+                        ::core::ptr::addr_of_mut!(has_blocked),
                     );
                     if ret__0 != LZMA_OK {
                         return ret__0;
                     }
-                    if !lzma_outq_is_empty(&raw mut (*coder).outq) {
+                    if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
                         return LZMA_OK;
                     }
                     return LZMA_MEMLIMIT_ERROR;
@@ -910,11 +937,16 @@ unsafe extern "C" fn stream_decode_mt(
                             (*coder).sequence = SEQ_BLOCK_DIRECT_INIT;
                             current_block_239 = 11639917216603986996;
                         } else {
-                            lzma_next_end(&raw mut (*coder).block_decoder, allocator);
+                            lzma_next_end(
+                                ::core::ptr::addr_of_mut!((*coder).block_decoder),
+                                allocator,
+                            );
                             (*coder).mem_direct_mode = 0;
                             let ret_1: lzma_ret = lzma_index_hash_append(
                                 (*coder).index_hash,
-                                lzma_block_unpadded_size(&raw mut (*coder).block_options),
+                                lzma_block_unpadded_size(::core::ptr::addr_of_mut!(
+                                    (*coder).block_options
+                                )),
                                 (*coder).block_options.uncompressed_size,
                             );
                             if ret_1 != LZMA_OK {
@@ -935,8 +967,8 @@ unsafe extern "C" fn stream_decode_mt(
                     in_0,
                     in_pos,
                     in_size,
-                    &raw mut (*coder).buffer as *mut u8,
-                    &raw mut (*coder).pos,
+                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    ::core::ptr::addr_of_mut!((*coder).pos),
                     LZMA_STREAM_HEADER_SIZE as size_t,
                 );
                 (*coder).progress_in = (*coder)
@@ -966,8 +998,8 @@ unsafe extern "C" fn stream_decode_mt(
                     reserved_int2: 0,
                 };
                 let ret_6: lzma_ret = lzma_stream_footer_decode(
-                    &raw mut footer_flags,
-                    &raw mut (*coder).buffer as *mut u8,
+                    ::core::ptr::addr_of_mut!(footer_flags),
+                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
                 );
                 if ret_6 != LZMA_OK {
                     return if ret_6 == LZMA_FORMAT_ERROR {
@@ -980,8 +1012,8 @@ unsafe extern "C" fn stream_decode_mt(
                     return LZMA_DATA_ERROR;
                 }
                 let ret__6: lzma_ret = lzma_stream_flags_compare(
-                    &raw mut (*coder).stream_flags,
-                    &raw mut footer_flags,
+                    ::core::ptr::addr_of_mut!((*coder).stream_flags),
+                    ::core::ptr::addr_of_mut!(footer_flags),
                 );
                 if ret__6 != LZMA_OK {
                     return ret__6;
@@ -1033,10 +1065,10 @@ unsafe extern "C" fn stream_decode_mt(
                     out,
                     out_pos,
                     out_size,
-                    &raw mut block_can_start,
+                    ::core::ptr::addr_of_mut!(block_can_start),
                     true,
-                    &raw mut wait_abs,
-                    &raw mut has_blocked,
+                    ::core::ptr::addr_of_mut!(wait_abs),
+                    ::core::ptr::addr_of_mut!(has_blocked),
                 );
                 if ret__1 != LZMA_OK {
                     return ret__1;
@@ -1053,10 +1085,10 @@ unsafe extern "C" fn stream_decode_mt(
                     let mut thr: *mut worker_thread = core::ptr::null_mut();
                     let mut mythread_i_1347: c_uint = 0;
                     while if mythread_i_1347 != 0 {
-                        mythread_mutex_unlock(&raw mut (*coder).mutex);
+                        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*coder).mutex));
                         0
                     } else {
-                        mythread_mutex_lock(&raw mut (*coder).mutex);
+                        mythread_mutex_lock(::core::ptr::addr_of_mut!((*coder).mutex));
                         1
                     } != 0
                     {
@@ -1078,7 +1110,7 @@ unsafe extern "C" fn stream_decode_mt(
                         > mem_max
                     {
                         lzma_outq_clear_cache2(
-                            &raw mut (*coder).outq,
+                            ::core::ptr::addr_of_mut!((*coder).outq),
                             allocator,
                             (*coder).block_options.uncompressed_size as size_t,
                         );
@@ -1094,7 +1126,10 @@ unsafe extern "C" fn stream_decode_mt(
                             thr = (*thr).next;
                         }
                         while !thr.is_null() {
-                            lzma_next_end(&raw mut (*thr).block_decoder, allocator);
+                            lzma_next_end(
+                                ::core::ptr::addr_of_mut!((*thr).block_decoder),
+                                allocator,
+                            );
                             mem_freed = mem_freed.wrapping_add((*thr).mem_filters);
                             (*thr).mem_filters = 0;
                             thr = (*thr).next;
@@ -1102,10 +1137,10 @@ unsafe extern "C" fn stream_decode_mt(
                     }
                     let mut mythread_i_1410: c_uint = 0;
                     while if mythread_i_1410 != 0 {
-                        mythread_mutex_unlock(&raw mut (*coder).mutex);
+                        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*coder).mutex));
                         0
                     } else {
-                        mythread_mutex_lock(&raw mut (*coder).mutex);
+                        mythread_mutex_lock(::core::ptr::addr_of_mut!((*coder).mutex));
                         1
                     } != 0
                     {
@@ -1120,7 +1155,7 @@ unsafe extern "C" fn stream_decode_mt(
                         mythread_i_1410 = 1;
                     }
                     let mut ret_2: lzma_ret = lzma_outq_prealloc_buf(
-                        &raw mut (*coder).outq,
+                        ::core::ptr::addr_of_mut!((*coder).outq),
                         allocator,
                         (*coder).block_options.uncompressed_size as size_t,
                     );
@@ -1136,11 +1171,14 @@ unsafe extern "C" fn stream_decode_mt(
                     (*(*coder).thr).mem_filters = (*coder).mem_next_filters;
                     (*(*coder).thr).block_options = (*coder).block_options;
                     ret_2 = lzma_block_decoder_init(
-                        &raw mut (*(*coder).thr).block_decoder,
+                        ::core::ptr::addr_of_mut!((*(*coder).thr).block_decoder),
                         allocator,
-                        &raw mut (*(*coder).thr).block_options,
+                        ::core::ptr::addr_of_mut!((*(*coder).thr).block_options),
                     );
-                    lzma_filters_free(&raw mut (*coder).filters as *mut lzma_filter, allocator);
+                    lzma_filters_free(
+                        ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
+                        allocator,
+                    );
                     (*(*coder).thr).block_options.filters = core::ptr::null_mut();
                     if ret_2 != LZMA_OK {
                         (*coder).pending_error = ret_2;
@@ -1154,38 +1192,42 @@ unsafe extern "C" fn stream_decode_mt(
                             threads_stop(coder);
                             return LZMA_MEM_ERROR;
                         }
-                        (*(*coder).thr).outbuf =
-                            lzma_outq_get_buf(&raw mut (*coder).outq, (*coder).thr as *mut c_void);
+                        (*(*coder).thr).outbuf = lzma_outq_get_buf(
+                            ::core::ptr::addr_of_mut!((*coder).outq),
+                            (*coder).thr as *mut c_void,
+                        );
                         let mut mythread_i_1478: c_uint = 0;
                         while if mythread_i_1478 != 0 {
-                            mythread_mutex_unlock(&raw mut (*(*coder).thr).mutex);
+                            mythread_mutex_unlock(::core::ptr::addr_of_mut!((*(*coder).thr).mutex));
                             0
                         } else {
-                            mythread_mutex_lock(&raw mut (*(*coder).thr).mutex);
+                            mythread_mutex_lock(::core::ptr::addr_of_mut!((*(*coder).thr).mutex));
                             1
                         } != 0
                         {
                             let mut mythread_j_1478: c_uint = 0;
                             while mythread_j_1478 == 0 {
                                 (*(*coder).thr).state = THR_RUN;
-                                mythread_cond_signal(&raw mut (*(*coder).thr).cond);
+                                mythread_cond_signal(::core::ptr::addr_of_mut!(
+                                    (*(*coder).thr).cond
+                                ));
                                 mythread_j_1478 = 1;
                             }
                             mythread_i_1478 = 1;
                         }
                         let mut mythread_i_1486: c_uint = 0;
                         while if mythread_i_1486 != 0 {
-                            mythread_mutex_unlock(&raw mut (*coder).mutex);
+                            mythread_mutex_unlock(::core::ptr::addr_of_mut!((*coder).mutex));
                             0
                         } else {
-                            mythread_mutex_lock(&raw mut (*coder).mutex);
+                            mythread_mutex_lock(::core::ptr::addr_of_mut!((*coder).mutex));
                             1
                         } != 0
                         {
                             let mut mythread_j_1486: c_uint = 0;
                             while mythread_j_1486 == 0 {
                                 lzma_outq_enable_partial_output(
-                                    &raw mut (*coder).outq,
+                                    ::core::ptr::addr_of_mut!((*coder).outq),
                                     Some(
                                         worker_enable_partial_update
                                             as unsafe extern "C" fn(*mut c_void) -> (),
@@ -1220,22 +1262,22 @@ unsafe extern "C" fn stream_decode_mt(
                     in_pos,
                     in_size,
                     (*(*coder).thr).in_0,
-                    &raw mut cur_in_filled,
+                    ::core::ptr::addr_of_mut!(cur_in_filled),
                     (*(*coder).thr).in_size,
                 );
                 let mut mythread_i_1517: c_uint = 0;
                 while if mythread_i_1517 != 0 {
-                    mythread_mutex_unlock(&raw mut (*(*coder).thr).mutex);
+                    mythread_mutex_unlock(::core::ptr::addr_of_mut!((*(*coder).thr).mutex));
                     0
                 } else {
-                    mythread_mutex_lock(&raw mut (*(*coder).thr).mutex);
+                    mythread_mutex_lock(::core::ptr::addr_of_mut!((*(*coder).thr).mutex));
                     1
                 } != 0
                 {
                     let mut mythread_j_1517: c_uint = 0;
                     while mythread_j_1517 == 0 {
                         (*(*coder).thr).in_filled = cur_in_filled;
-                        mythread_cond_signal(&raw mut (*(*coder).thr).cond);
+                        mythread_cond_signal(::core::ptr::addr_of_mut!((*(*coder).thr).cond));
                         mythread_j_1517 = 1;
                     }
                     mythread_i_1517 = 1;
@@ -1248,8 +1290,8 @@ unsafe extern "C" fn stream_decode_mt(
                     out_size,
                     core::ptr::null_mut(),
                     waiting_allowed && *in_pos == in_size,
-                    &raw mut wait_abs,
-                    &raw mut has_blocked,
+                    ::core::ptr::addr_of_mut!(wait_abs),
+                    ::core::ptr::addr_of_mut!(has_blocked),
                 );
                 if ret__2 != LZMA_OK {
                     return ret__2;
@@ -1274,9 +1316,12 @@ unsafe extern "C" fn stream_decoder_mt_end(
 ) {
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     threads_end(coder, allocator);
-    lzma_outq_end(&raw mut (*coder).outq, allocator);
-    lzma_next_end(&raw mut (*coder).block_decoder, allocator);
-    lzma_filters_free(&raw mut (*coder).filters as *mut lzma_filter, allocator);
+    lzma_outq_end(::core::ptr::addr_of_mut!((*coder).outq), allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).block_decoder), allocator);
+    lzma_filters_free(
+        ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
+        allocator,
+    );
     lzma_index_hash_end((*coder).index_hash, allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
@@ -1295,10 +1340,10 @@ unsafe extern "C" fn stream_decoder_mt_memconfig(
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut mythread_i_1829: c_uint = 0;
     while if mythread_i_1829 != 0 {
-        mythread_mutex_unlock(&raw mut (*coder).mutex);
+        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*coder).mutex));
         0
     } else {
-        mythread_mutex_lock(&raw mut (*coder).mutex);
+        mythread_mutex_lock(::core::ptr::addr_of_mut!((*coder).mutex));
         1
     } != 0
     {
@@ -1333,10 +1378,10 @@ unsafe extern "C" fn stream_decoder_mt_get_progress(
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut mythread_i_1862: c_uint = 0;
     while if mythread_i_1862 != 0 {
-        mythread_mutex_unlock(&raw mut (*coder).mutex);
+        mythread_mutex_unlock(::core::ptr::addr_of_mut!((*coder).mutex));
         0
     } else {
-        mythread_mutex_lock(&raw mut (*coder).mutex);
+        mythread_mutex_lock(::core::ptr::addr_of_mut!((*coder).mutex));
         1
     } != 0
     {
@@ -1348,10 +1393,14 @@ unsafe extern "C" fn stream_decoder_mt_get_progress(
             while i < (*coder).threads_initialized as size_t {
                 let mut mythread_i_1867: c_uint = 0;
                 while if mythread_i_1867 != 0 {
-                    mythread_mutex_unlock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
+                    mythread_mutex_unlock(::core::ptr::addr_of_mut!(
+                        (*(*coder).threads.offset(i as isize)).mutex
+                    ));
                     0
                 } else {
-                    mythread_mutex_lock(&raw mut (*(*coder).threads.offset(i as isize)).mutex);
+                    mythread_mutex_lock(::core::ptr::addr_of_mut!(
+                        (*(*coder).threads.offset(i as isize)).mutex
+                    ));
                     1
                 } != 0
                 {
@@ -1431,12 +1480,12 @@ unsafe extern "C" fn stream_decoder_mt_init(
             return LZMA_MEM_ERROR;
         }
         (*next).coder = coder as *mut c_void;
-        if mythread_mutex_init(&raw mut (*coder).mutex) != 0 {
+        if mythread_mutex_init(::core::ptr::addr_of_mut!((*coder).mutex)) != 0 {
             lzma_free(coder as *mut c_void, allocator);
             return LZMA_MEM_ERROR;
         }
-        if mythread_cond_init(&raw mut (*coder).cond) != 0 {
-            mythread_mutex_destroy(&raw mut (*coder).mutex);
+        if mythread_cond_init(::core::ptr::addr_of_mut!((*coder).cond)) != 0 {
+            mythread_mutex_destroy(::core::ptr::addr_of_mut!((*coder).mutex));
             lzma_free(coder as *mut c_void, allocator);
             return LZMA_MEM_ERROR;
         }
@@ -1469,7 +1518,7 @@ unsafe extern "C" fn stream_decoder_mt_init(
         );
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
         core::ptr::write_bytes(
-            &raw mut (*coder).outq as *mut u8,
+            ::core::ptr::addr_of_mut!((*coder).outq) as *mut u8,
             0 as u8,
             core::mem::size_of::<lzma_outq>(),
         );
@@ -1491,7 +1540,10 @@ unsafe extern "C" fn stream_decoder_mt_init(
         (*coder).threads_free = core::ptr::null_mut();
         (*coder).threads_initialized = 0;
     }
-    lzma_filters_free(&raw mut (*coder).filters as *mut lzma_filter, allocator);
+    lzma_filters_free(
+        ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
+        allocator,
+    );
     threads_end(coder, allocator);
     (*coder).mem_in_use = 0;
     (*coder).mem_cached = 0;
@@ -1526,7 +1578,11 @@ unsafe extern "C" fn stream_decoder_mt_init(
     (*coder).out_was_filled = false;
     (*coder).pos = 0;
     (*coder).threads_max = (*options).threads;
-    let ret_: lzma_ret = lzma_outq_init(&raw mut (*coder).outq, allocator, (*coder).threads_max);
+    let ret_: lzma_ret = lzma_outq_init(
+        ::core::ptr::addr_of_mut!((*coder).outq),
+        allocator,
+        (*coder).threads_max,
+    );
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -1541,7 +1597,7 @@ pub unsafe extern "C" fn lzma_stream_decoder_mt(
         return ret_;
     }
     let ret__0: lzma_ret = stream_decoder_mt_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         options,
     );

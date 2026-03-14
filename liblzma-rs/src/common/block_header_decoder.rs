@@ -42,10 +42,10 @@ pub unsafe extern "C" fn lzma_block_header_decode(
     let mut in_pos: size_t = 2;
     if *in_0.offset(1) & 0x40 != 0 {
         let ret_: lzma_ret = lzma_vli_decode(
-            &raw mut (*block).compressed_size,
+            ::core::ptr::addr_of_mut!((*block).compressed_size),
             core::ptr::null_mut(),
             in_0,
-            &raw mut in_pos,
+            ::core::ptr::addr_of_mut!(in_pos),
             in_size,
         );
         if ret_ != LZMA_OK {
@@ -59,10 +59,10 @@ pub unsafe extern "C" fn lzma_block_header_decode(
     }
     if *in_0.offset(1) & 0x80 != 0 {
         let ret__0: lzma_ret = lzma_vli_decode(
-            &raw mut (*block).uncompressed_size,
+            ::core::ptr::addr_of_mut!((*block).uncompressed_size),
             core::ptr::null_mut(),
             in_0,
-            &raw mut in_pos,
+            ::core::ptr::addr_of_mut!(in_pos),
             in_size,
         );
         if ret__0 != LZMA_OK {
@@ -78,7 +78,7 @@ pub unsafe extern "C" fn lzma_block_header_decode(
             (*block).filters.offset(i_0 as isize) as *mut lzma_filter,
             allocator,
             in_0,
-            &raw mut in_pos,
+            ::core::ptr::addr_of_mut!(in_pos),
             in_size,
         );
         if ret != LZMA_OK {

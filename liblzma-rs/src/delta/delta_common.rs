@@ -1,8 +1,8 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 unsafe extern "C" fn delta_coder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
-    lzma_next_end(&raw mut (*coder).next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 #[no_mangle]
@@ -40,8 +40,16 @@ pub unsafe extern "C" fn lzma_delta_coder_init(
     let opt: *const lzma_options_delta = (*filters).options as *const lzma_options_delta;
     (*coder).distance = (*opt).dist as size_t;
     (*coder).pos = 0;
-    core::ptr::write_bytes(&raw mut (*coder).history as *mut u8, 0 as u8, 256);
-    lzma_next_filter_init(&raw mut (*coder).next, allocator, filters.offset(1))
+    core::ptr::write_bytes(
+        ::core::ptr::addr_of_mut!((*coder).history) as *mut u8,
+        0 as u8,
+        256,
+    );
+    lzma_next_filter_init(
+        ::core::ptr::addr_of_mut!((*coder).next),
+        allocator,
+        filters.offset(1),
+    )
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_delta_coder_memusage(options: *const c_void) -> u64 {

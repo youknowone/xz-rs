@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 extern "C" {
     fn lzma_lzma_props_encode(options: *const c_void, out: *mut u8) -> lzma_ret;
     fn lzma_lzma2_encoder_init(
@@ -352,7 +352,7 @@ pub unsafe extern "C" fn lzma_filters_update(
         (*(*strm).internal).next.coder,
         (*strm).allocator,
         filters,
-        &raw mut reversed_filters as *mut lzma_filter,
+        ::core::ptr::addr_of_mut!(reversed_filters) as *mut lzma_filter,
     )
 }
 #[no_mangle]
@@ -378,7 +378,7 @@ pub unsafe extern "C" fn lzma_raw_encoder(
         return ret_;
     }
     let ret__0: lzma_ret = lzma_raw_coder_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         filters,
         Some(coder_find as unsafe extern "C" fn(lzma_vli) -> *const lzma_filter_coder),

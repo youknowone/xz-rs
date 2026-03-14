@@ -20,7 +20,6 @@ pub extern "C" fn tuklib_physmem() -> u64 {
         }
         0
     }
-
     #[cfg(target_os = "linux")]
     {
         let pages = unsafe { libc::sysconf(libc::_SC_PHYS_PAGES) };
@@ -30,14 +29,10 @@ pub extern "C" fn tuklib_physmem() -> u64 {
         }
         0
     }
-
     #[cfg(target_os = "windows")]
     {
-        // On Windows, use GetSystemInfo-based approach or return 0
-        // Windows support would need winapi/windows-sys crate
         0
     }
-
     #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]
     {
         0

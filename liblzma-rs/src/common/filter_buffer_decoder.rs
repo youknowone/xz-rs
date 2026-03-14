@@ -30,7 +30,7 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
         update: None,
         set_out_limit: None,
     };
-    let ret_: lzma_ret = lzma_raw_decoder_init(&raw mut next, allocator, filters);
+    let ret_: lzma_ret = lzma_raw_decoder_init(::core::ptr::addr_of_mut!(next), allocator, filters);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -64,8 +64,8 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
                     in_0,
                     in_pos,
                     in_size,
-                    &raw mut tmp as *mut u8,
-                    &raw mut tmp_pos,
+                    ::core::ptr::addr_of_mut!(tmp) as *mut u8,
+                    ::core::ptr::addr_of_mut!(tmp_pos),
                     1,
                     LZMA_FINISH,
                 );
@@ -79,6 +79,6 @@ pub unsafe extern "C" fn lzma_raw_buffer_decode(
         *in_pos = in_start;
         *out_pos = out_start;
     }
-    lzma_next_end(&raw mut next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!(next), allocator);
     ret
 }

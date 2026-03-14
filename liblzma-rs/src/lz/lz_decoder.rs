@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lz_options {
@@ -74,7 +74,7 @@ unsafe extern "C" fn decode_buffer(
         );
         let ret: lzma_ret = (*coder).lz.code.unwrap()(
             (*coder).lz.coder,
-            &raw mut (*coder).dict,
+            ::core::ptr::addr_of_mut!((*coder).dict),
             in_0,
             in_pos,
             in_size,
@@ -123,8 +123,8 @@ unsafe extern "C" fn lz_decode(
                 in_0,
                 in_pos,
                 in_size,
-                &raw mut (*coder).temp.buffer as *mut u8,
-                &raw mut (*coder).temp.size,
+                ::core::ptr::addr_of_mut!((*coder).temp.buffer) as *mut u8,
+                ::core::ptr::addr_of_mut!((*coder).temp.size),
                 LZMA_BUFFER_SIZE as size_t,
                 action,
             );
@@ -145,8 +145,8 @@ unsafe extern "C" fn lz_decode(
         }
         let ret_0: lzma_ret = decode_buffer(
             coder,
-            &raw mut (*coder).temp.buffer as *mut u8,
-            &raw mut (*coder).temp.pos,
+            ::core::ptr::addr_of_mut!((*coder).temp.buffer) as *mut u8,
+            ::core::ptr::addr_of_mut!((*coder).temp.pos),
             (*coder).temp.size,
             out,
             out_pos,
@@ -164,7 +164,7 @@ unsafe extern "C" fn lz_decode(
 }
 unsafe extern "C" fn lz_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
-    lzma_next_end(&raw mut (*coder).next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
     lzma_free((*coder).dict.buf as *mut c_void, allocator);
     if (*coder).lz.end.is_some() {
         (*coder).lz.end.unwrap()((*coder).lz.coder, allocator);
@@ -233,11 +233,11 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
         preset_dict_size: 0,
     };
     let ret_: lzma_ret = lz_init.unwrap()(
-        &raw mut (*coder).lz,
+        ::core::ptr::addr_of_mut!((*coder).lz),
         allocator,
         (*filters).id,
         (*filters).options,
-        &raw mut lz_options,
+        ::core::ptr::addr_of_mut!(lz_options),
     );
     if ret_ != LZMA_OK {
         return ret_;
@@ -286,7 +286,11 @@ pub unsafe extern "C" fn lzma_lz_decoder_init(
     (*coder).this_finished = false;
     (*coder).temp.pos = 0;
     (*coder).temp.size = 0;
-    lzma_next_filter_init(&raw mut (*coder).next, allocator, filters.offset(1))
+    lzma_next_filter_init(
+        ::core::ptr::addr_of_mut!((*coder).next),
+        allocator,
+        filters.offset(1),
+    )
 }
 #[no_mangle]
 pub extern "C" fn lzma_lz_decoder_memusage(dictionary_size: size_t) -> u64 {

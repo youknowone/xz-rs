@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 unsafe extern "C" fn copy_and_encode(
     coder: *mut lzma_delta_coder,
     in_0: *const u8,
@@ -93,7 +93,7 @@ unsafe extern "C" fn delta_encoder_update(
 ) -> lzma_ret {
     let coder: *mut lzma_delta_coder = coder_ptr as *mut lzma_delta_coder;
     lzma_next_filter_update(
-        &raw mut (*coder).next,
+        ::core::ptr::addr_of_mut!((*coder).next),
         allocator,
         reversed_filters.offset(1),
     )

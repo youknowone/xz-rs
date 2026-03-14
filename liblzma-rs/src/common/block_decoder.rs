@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::{c_uint, c_void};
+use libc::{c_uint, c_void};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_block_coder {
@@ -34,157 +34,145 @@ unsafe extern "C" fn block_decode(
     action: lzma_action,
 ) -> lzma_ret {
     let coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
-    's_177: {
-        let current_block_40: u64;
-        match (*coder).sequence {
-            0 => {
-                let in_start: size_t = *in_pos;
-                let out_start: size_t = *out_pos;
-                let in_stop: size_t = (*in_pos).wrapping_add(
-                    (if (in_size.wrapping_sub(*in_pos) as lzma_vli)
-                        < (*coder)
-                            .compressed_limit
-                            .wrapping_sub((*coder).compressed_size)
-                    {
-                        in_size.wrapping_sub(*in_pos) as lzma_vli
-                    } else {
-                        (*coder)
-                            .compressed_limit
-                            .wrapping_sub((*coder).compressed_size)
-                    }) as size_t,
-                );
-                let out_stop: size_t = (*out_pos).wrapping_add(
-                    (if (out_size.wrapping_sub(*out_pos) as lzma_vli)
-                        < (*coder)
-                            .uncompressed_limit
-                            .wrapping_sub((*coder).uncompressed_size)
-                    {
-                        out_size.wrapping_sub(*out_pos) as lzma_vli
-                    } else {
-                        (*coder)
-                            .uncompressed_limit
-                            .wrapping_sub((*coder).uncompressed_size)
-                    }) as size_t,
-                );
-                let ret: lzma_ret = (*coder).next.code.unwrap()(
-                    (*coder).next.coder,
-                    allocator,
-                    in_0,
-                    in_pos,
-                    in_stop,
-                    out,
-                    out_pos,
-                    out_stop,
-                    action,
-                );
-                let in_used: size_t = (*in_pos).wrapping_sub(in_start);
-                let out_used: size_t = (*out_pos).wrapping_sub(out_start);
-                (*coder).compressed_size =
-                    (*coder).compressed_size.wrapping_add(in_used as lzma_vli);
-                (*coder).uncompressed_size = (*coder)
-                    .uncompressed_size
-                    .wrapping_add(out_used as lzma_vli);
-                if ret == LZMA_OK {
-                    let comp_done: bool =
-                        (*coder).compressed_size == (*(*coder).block).compressed_size;
-                    let uncomp_done: bool =
-                        (*coder).uncompressed_size == (*(*coder).block).uncompressed_size;
-                    if comp_done && uncomp_done {
-                        return LZMA_DATA_ERROR;
-                    }
-                    if comp_done && *out_pos < out_size {
-                        return LZMA_DATA_ERROR;
-                    }
-                    if uncomp_done && *in_pos < in_size {
-                        return LZMA_DATA_ERROR;
-                    }
-                }
-                if !(*coder).ignore_check && out_used > 0 {
-                    lzma_check_update(
-                        &raw mut (*coder).check,
-                        (*(*coder).block).check,
-                        out.offset(out_start as isize),
-                        out_used,
-                    );
-                }
-                if ret != LZMA_STREAM_END {
-                    return ret;
-                }
-                if !is_size_valid((*coder).compressed_size, (*(*coder).block).compressed_size)
-                    || !is_size_valid(
-                        (*coder).uncompressed_size,
-                        (*(*coder).block).uncompressed_size,
-                    )
+    let current_block_40: u64 = match (*coder).sequence {
+        0 => {
+            let in_start: size_t = *in_pos;
+            let out_start: size_t = *out_pos;
+            let in_stop: size_t = (*in_pos).wrapping_add(
+                (if (in_size.wrapping_sub(*in_pos) as lzma_vli)
+                    < (*coder)
+                        .compressed_limit
+                        .wrapping_sub((*coder).compressed_size)
                 {
+                    in_size.wrapping_sub(*in_pos) as lzma_vli
+                } else {
+                    (*coder)
+                        .compressed_limit
+                        .wrapping_sub((*coder).compressed_size)
+                }) as size_t,
+            );
+            let out_stop: size_t = (*out_pos).wrapping_add(
+                (if (out_size.wrapping_sub(*out_pos) as lzma_vli)
+                    < (*coder)
+                        .uncompressed_limit
+                        .wrapping_sub((*coder).uncompressed_size)
+                {
+                    out_size.wrapping_sub(*out_pos) as lzma_vli
+                } else {
+                    (*coder)
+                        .uncompressed_limit
+                        .wrapping_sub((*coder).uncompressed_size)
+                }) as size_t,
+            );
+            let ret: lzma_ret = (*coder).next.code.unwrap()(
+                (*coder).next.coder,
+                allocator,
+                in_0,
+                in_pos,
+                in_stop,
+                out,
+                out_pos,
+                out_stop,
+                action,
+            );
+            let in_used: size_t = (*in_pos).wrapping_sub(in_start);
+            let out_used: size_t = (*out_pos).wrapping_sub(out_start);
+            (*coder).compressed_size = (*coder).compressed_size.wrapping_add(in_used as lzma_vli);
+            (*coder).uncompressed_size = (*coder)
+                .uncompressed_size
+                .wrapping_add(out_used as lzma_vli);
+            if ret == LZMA_OK {
+                let comp_done: bool = (*coder).compressed_size == (*(*coder).block).compressed_size;
+                let uncomp_done: bool =
+                    (*coder).uncompressed_size == (*(*coder).block).uncompressed_size;
+                if comp_done && uncomp_done {
                     return LZMA_DATA_ERROR;
                 }
-                (*(*coder).block).compressed_size = (*coder).compressed_size;
-                (*(*coder).block).uncompressed_size = (*coder).uncompressed_size;
-                (*coder).sequence = SEQ_PADDING;
-                current_block_40 = 17473121293339793080;
-            }
-            1 => {
-                current_block_40 = 17473121293339793080;
-            }
-            2 => {
-                current_block_40 = 9393557385011460022;
-            }
-            _ => {
-                break 's_177;
-            }
-        }
-        match current_block_40 {
-            17473121293339793080 => {
-                while (*coder).compressed_size & 3 != 0 {
-                    if *in_pos >= in_size {
-                        return LZMA_OK;
-                    }
-                    (*coder).compressed_size = (*coder).compressed_size.wrapping_add(1);
-                    let byte = *in_0.offset(*in_pos as isize);
-                    *in_pos += 1;
-                    if byte != 0 {
-                        return LZMA_DATA_ERROR;
-                    }
+                if comp_done && *out_pos < out_size {
+                    return LZMA_DATA_ERROR;
                 }
-                if (*(*coder).block).check == LZMA_CHECK_NONE {
-                    return LZMA_STREAM_END;
+                if uncomp_done && *in_pos < in_size {
+                    return LZMA_DATA_ERROR;
                 }
-                if !(*coder).ignore_check {
-                    lzma_check_finish(&raw mut (*coder).check, (*(*coder).block).check);
-                }
-                (*coder).sequence = SEQ_CHECK;
             }
-            _ => {}
+            if !(*coder).ignore_check && out_used > 0 {
+                lzma_check_update(
+                    ::core::ptr::addr_of_mut!((*coder).check),
+                    (*(*coder).block).check,
+                    out.offset(out_start as isize),
+                    out_used,
+                );
+            }
+            if ret != LZMA_STREAM_END {
+                return ret;
+            }
+            if !is_size_valid((*coder).compressed_size, (*(*coder).block).compressed_size)
+                || !is_size_valid(
+                    (*coder).uncompressed_size,
+                    (*(*coder).block).uncompressed_size,
+                )
+            {
+                return LZMA_DATA_ERROR;
+            }
+            (*(*coder).block).compressed_size = (*coder).compressed_size;
+            (*(*coder).block).uncompressed_size = (*coder).uncompressed_size;
+            (*coder).sequence = SEQ_PADDING;
+            17473121293339793080
         }
-        let check_size: size_t = lzma_check_size((*(*coder).block).check) as size_t;
-        lzma_bufcpy(
-            in_0,
-            in_pos,
-            in_size,
-            &raw mut (*(*coder).block).raw_check as *mut u8,
-            &raw mut (*coder).check_pos,
-            check_size,
-        );
-        if (*coder).check_pos < check_size {
-            return LZMA_OK;
+        1 => 17473121293339793080,
+        2 => 9393557385011460022,
+        _ => return LZMA_PROG_ERROR,
+    };
+    if current_block_40 == 17473121293339793080 {
+        while (*coder).compressed_size & 3 != 0 {
+            if *in_pos >= in_size {
+                return LZMA_OK;
+            }
+            (*coder).compressed_size = (*coder).compressed_size.wrapping_add(1);
+            let byte = *in_0.offset(*in_pos as isize);
+            *in_pos += 1;
+            if byte != 0 {
+                return LZMA_DATA_ERROR;
+            }
         }
-        if !(*coder).ignore_check
-            && lzma_check_is_supported((*(*coder).block).check) != 0
-            && memcmp(
-                &raw mut (*(*coder).block).raw_check as *const c_void,
-                &raw mut (*coder).check.buffer.u8_0 as *const c_void,
-                check_size,
-            ) != 0
-        {
-            return LZMA_DATA_ERROR;
+        if (*(*coder).block).check == LZMA_CHECK_NONE {
+            return LZMA_STREAM_END;
         }
-        return LZMA_STREAM_END;
+        if !(*coder).ignore_check {
+            lzma_check_finish(
+                ::core::ptr::addr_of_mut!((*coder).check),
+                (*(*coder).block).check,
+            );
+        }
+        (*coder).sequence = SEQ_CHECK;
     }
-    LZMA_PROG_ERROR
+    let check_size: size_t = lzma_check_size((*(*coder).block).check) as size_t;
+    lzma_bufcpy(
+        in_0,
+        in_pos,
+        in_size,
+        ::core::ptr::addr_of_mut!((*(*coder).block).raw_check) as *mut u8,
+        ::core::ptr::addr_of_mut!((*coder).check_pos),
+        check_size,
+    );
+    if (*coder).check_pos < check_size {
+        return LZMA_OK;
+    }
+    if !(*coder).ignore_check
+        && lzma_check_is_supported((*(*coder).block).check) != 0
+        && memcmp(
+            ::core::ptr::addr_of_mut!((*(*coder).block).raw_check) as *const c_void,
+            ::core::ptr::addr_of_mut!((*coder).check.buffer.u8_0) as *const c_void,
+            check_size,
+        ) != 0
+    {
+        return LZMA_DATA_ERROR;
+    }
+    LZMA_STREAM_END
 }
 unsafe extern "C" fn block_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
-    lzma_next_end(&raw mut (*coder).next, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 #[no_mangle]
@@ -291,13 +279,17 @@ pub unsafe extern "C" fn lzma_block_decoder_init(
         (*block).uncompressed_size
     };
     (*coder).check_pos = 0;
-    lzma_check_init(&raw mut (*coder).check, (*block).check);
+    lzma_check_init(::core::ptr::addr_of_mut!((*coder).check), (*block).check);
     (*coder).ignore_check = if (*block).version >= 1 {
         (*block).ignore_check != 0
     } else {
         false
     };
-    lzma_raw_decoder_init(&raw mut (*coder).next, allocator, (*block).filters)
+    lzma_raw_decoder_init(
+        ::core::ptr::addr_of_mut!((*coder).next),
+        allocator,
+        (*block).filters,
+    )
 }
 #[no_mangle]
 pub unsafe extern "C" fn lzma_block_decoder(
@@ -308,8 +300,11 @@ pub unsafe extern "C" fn lzma_block_decoder(
     if ret_ != LZMA_OK {
         return ret_;
     }
-    let ret__0: lzma_ret =
-        lzma_block_decoder_init(&raw mut (*(*strm).internal).next, (*strm).allocator, block);
+    let ret__0: lzma_ret = lzma_block_decoder_init(
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
+        (*strm).allocator,
+        block,
+    );
     if ret__0 != LZMA_OK {
         lzma_end(strm);
         return ret__0;

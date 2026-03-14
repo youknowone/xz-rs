@@ -8,7 +8,7 @@ pub unsafe extern "C" fn lzma_vli_decode(
 ) -> lzma_ret {
     let mut vli_pos_internal: size_t = 0;
     if vli_pos.is_null() {
-        vli_pos = &raw mut vli_pos_internal;
+        vli_pos = ::core::ptr::addr_of_mut!(vli_pos_internal);
         *vli = 0;
         if *in_pos >= in_size {
             return LZMA_DATA_ERROR;
@@ -33,7 +33,7 @@ pub unsafe extern "C" fn lzma_vli_decode(
             if byte == 0 && *vli_pos > 1 {
                 return LZMA_DATA_ERROR;
             }
-            return if vli_pos == &raw mut vli_pos_internal {
+            return if vli_pos == ::core::ptr::addr_of_mut!(vli_pos_internal) {
                 LZMA_OK
             } else {
                 LZMA_STREAM_END
@@ -46,7 +46,7 @@ pub unsafe extern "C" fn lzma_vli_decode(
             break;
         }
     }
-    if vli_pos == &raw mut vli_pos_internal {
+    if vli_pos == ::core::ptr::addr_of_mut!(vli_pos_internal) {
         LZMA_DATA_ERROR
     } else {
         LZMA_OK

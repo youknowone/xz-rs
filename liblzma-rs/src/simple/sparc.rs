@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 unsafe extern "C" fn sparc_code(
     _simple: *mut c_void,
     now_pos: u32,

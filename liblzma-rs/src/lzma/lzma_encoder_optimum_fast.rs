@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 #[no_mangle]
 pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     coder: *mut lzma_lzma1_encoder,
@@ -13,8 +13,8 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     if (*mf).read_ahead == 0 {
         len_main = lzma_mf_find(
             mf,
-            &raw mut matches_count,
-            &raw mut (*coder).matches as *mut lzma_match,
+            ::core::ptr::addr_of_mut!(matches_count),
+            ::core::ptr::addr_of_mut!((*coder).matches) as *mut lzma_match,
         );
     } else {
         len_main = (*coder).longest_match_length;
@@ -98,8 +98,8 @@ pub unsafe extern "C" fn lzma_lzma_optimum_fast(
     }
     (*coder).longest_match_length = lzma_mf_find(
         mf,
-        &raw mut (*coder).matches_count,
-        &raw mut (*coder).matches as *mut lzma_match,
+        ::core::ptr::addr_of_mut!((*coder).matches_count),
+        ::core::ptr::addr_of_mut!((*coder).matches) as *mut lzma_match,
     );
     if (*coder).longest_match_length >= 2 {
         let new_dist: u32 = (*coder).matches[(*coder).matches_count.wrapping_sub(1) as usize].dist;

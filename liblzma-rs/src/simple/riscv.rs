@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 #[inline]
 extern "C" fn read32be(buf: *const u8) -> u32 {
     return unsafe {

@@ -7,9 +7,12 @@
     unused_assignments,
     clippy::all
 )]
-
-pub mod types;
-
+#[macro_export]
+macro_rules! c_str {
+    ($s:literal) => {
+        concat!($s, "\0").as_ptr() as *const ::libc::c_char
+    };
+}
 pub mod check;
 pub mod common;
 pub mod delta;
@@ -18,3 +21,4 @@ pub mod lzma;
 pub mod rangecoder;
 pub mod simple;
 pub mod tuklib;
+pub mod types;

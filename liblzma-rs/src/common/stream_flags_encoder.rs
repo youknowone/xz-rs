@@ -21,7 +21,7 @@ pub unsafe extern "C" fn lzma_stream_header_encode(
         return LZMA_OPTIONS_ERROR;
     }
     core::ptr::copy_nonoverlapping(
-        &raw const lzma_header_magic as *const u8,
+        ::core::ptr::addr_of!(lzma_header_magic) as *const u8,
         out as *mut u8,
         core::mem::size_of::<[u8; 6]>(),
     );
@@ -63,7 +63,7 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     let crc: u32 = lzma_crc32(out.offset(4), (4 + LZMA_STREAM_FLAGS_SIZE) as size_t, 0) as u32;
     write32le(out, crc);
     core::ptr::copy_nonoverlapping(
-        &raw const lzma_footer_magic as *const u8,
+        ::core::ptr::addr_of!(lzma_footer_magic) as *const u8,
         out.offset((2 * 4) as isize)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *mut u8,
         core::mem::size_of::<[u8; 2]>(),

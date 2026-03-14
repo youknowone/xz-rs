@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 extern "C" {
     fn lzma_lzma_decoder_memusage(options: *const c_void) -> u64;
     fn lzma_lzma_props_decode(
@@ -389,7 +389,7 @@ pub unsafe extern "C" fn lzma_raw_decoder(
         return ret_;
     }
     let ret__0: lzma_ret = lzma_raw_decoder_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         options,
     );
@@ -425,5 +425,10 @@ pub unsafe extern "C" fn lzma_properties_decode(
             LZMA_OPTIONS_ERROR
         };
     }
-    (*fd).props_decode.unwrap()(&raw mut (*filter).options, allocator, props, props_size)
+    (*fd).props_decode.unwrap()(
+        ::core::ptr::addr_of_mut!((*filter).options),
+        allocator,
+        props,
+        props_size,
+    )
 }

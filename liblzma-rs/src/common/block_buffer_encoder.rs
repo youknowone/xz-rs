@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 pub const HEADERS_BOUND: u32 =
     1 + 1 + 2 * LZMA_VLI_BYTES_MAX + 3 + 4 + LZMA_CHECK_SIZE_MAX + 3 & !(3);
 extern "C" fn lzma2_bound(uncompressed_size: u64) -> u64 {
@@ -70,10 +70,10 @@ unsafe extern "C" fn block_encode_uncompressed(
         options: core::ptr::null_mut(),
     }; 2];
     filters[0].id = LZMA_FILTER_LZMA2;
-    filters[0].options = &raw mut lzma2 as *mut c_void;
+    filters[0].options = ::core::ptr::addr_of_mut!(lzma2) as *mut c_void;
     filters[1].id = LZMA_VLI_UNKNOWN;
     let filters_orig: *mut lzma_filter = (*block).filters;
-    (*block).filters = &raw mut filters as *mut lzma_filter;
+    (*block).filters = ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter;
     if lzma_block_header_size(block) != LZMA_OK {
         (*block).filters = filters_orig;
         return LZMA_PROG_ERROR;
@@ -150,15 +150,18 @@ unsafe extern "C" fn block_encode_normal(
         update: None,
         set_out_limit: None,
     };
-    let mut ret: lzma_ret =
-        lzma_raw_encoder_init(&raw mut raw_encoder, allocator, (*block).filters);
+    let mut ret: lzma_ret = lzma_raw_encoder_init(
+        ::core::ptr::addr_of_mut!(raw_encoder),
+        allocator,
+        (*block).filters,
+    );
     if ret == LZMA_OK {
         let mut in_pos: size_t = 0;
         ret = raw_encoder.code.unwrap()(
             raw_encoder.coder,
             allocator,
             in_0,
-            &raw mut in_pos,
+            ::core::ptr::addr_of_mut!(in_pos),
             in_size,
             out,
             out_pos,
@@ -166,7 +169,7 @@ unsafe extern "C" fn block_encode_normal(
             LZMA_FINISH,
         );
     }
-    lzma_next_end(&raw mut raw_encoder, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!(raw_encoder), allocator);
     if ret == LZMA_STREAM_END {
         (*block).compressed_size = (*out_pos)
             .wrapping_sub(out_start.wrapping_add((*block).header_size as size_t))
@@ -246,16 +249,21 @@ unsafe extern "C" fn block_buffer_encode(
             buffer: lzma_check_state_buffer { u8_0: [0; 64] },
             state: lzma_check_state_inner { crc32: 0 },
         };
-        lzma_check_init(&raw mut check, (*block).check);
-        lzma_check_update(&raw mut check, (*block).check, in_0, in_size);
-        lzma_check_finish(&raw mut check, (*block).check);
+        lzma_check_init(::core::ptr::addr_of_mut!(check), (*block).check);
+        lzma_check_update(
+            ::core::ptr::addr_of_mut!(check),
+            (*block).check,
+            in_0,
+            in_size,
+        );
+        lzma_check_finish(::core::ptr::addr_of_mut!(check), (*block).check);
         core::ptr::copy_nonoverlapping(
-            &raw mut check.buffer.u8_0 as *const u8,
-            &raw mut (*block).raw_check as *mut u8,
+            ::core::ptr::addr_of_mut!(check.buffer.u8_0) as *const u8,
+            ::core::ptr::addr_of_mut!((*block).raw_check) as *mut u8,
             check_size,
         );
         core::ptr::copy_nonoverlapping(
-            &raw mut check.buffer.u8_0 as *const u8,
+            ::core::ptr::addr_of_mut!(check.buffer.u8_0) as *const u8,
             out.offset(*out_pos as isize) as *mut u8,
             check_size,
         );

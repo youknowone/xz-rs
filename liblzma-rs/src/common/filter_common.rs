@@ -170,7 +170,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
             dest[i as usize].id = LZMA_VLI_UNKNOWN;
             dest[i as usize].options = core::ptr::null_mut();
             core::ptr::copy_nonoverlapping(
-                &raw mut dest as *const u8,
+                ::core::ptr::addr_of_mut!(dest) as *const u8,
                 real_dest as *mut u8,
                 i.wrapping_add(1)
                     .wrapping_mul(core::mem::size_of::<lzma_filter>()),
@@ -246,7 +246,7 @@ pub unsafe extern "C" fn lzma_raw_coder_init(
     is_encoder: bool,
 ) -> lzma_ret {
     let mut count: size_t = 0;
-    let ret_: lzma_ret = lzma_validate_chain(options, &raw mut count);
+    let ret_: lzma_ret = lzma_validate_chain(options, ::core::ptr::addr_of_mut!(count));
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -285,8 +285,11 @@ pub unsafe extern "C" fn lzma_raw_coder_init(
     }
     filters[count as usize].id = LZMA_VLI_UNKNOWN;
     filters[count as usize].init = None;
-    let ret: lzma_ret =
-        lzma_next_filter_init(next, allocator, &raw mut filters as *mut lzma_filter_info);
+    let ret: lzma_ret = lzma_next_filter_init(
+        next,
+        allocator,
+        ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter_info,
+    );
     if ret != LZMA_OK {
         lzma_next_end(next, allocator);
     }
@@ -298,7 +301,7 @@ pub unsafe extern "C" fn lzma_raw_coder_memusage(
     filters: *const lzma_filter,
 ) -> u64 {
     let mut tmp: size_t = 0;
-    if lzma_validate_chain(filters, &raw mut tmp) != LZMA_OK {
+    if lzma_validate_chain(filters, ::core::ptr::addr_of_mut!(tmp)) != LZMA_OK {
         return UINT64_MAX;
     }
     let mut total: u64 = 0;

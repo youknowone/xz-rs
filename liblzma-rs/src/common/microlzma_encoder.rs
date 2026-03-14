@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_microlzma_coder {
@@ -23,7 +23,7 @@ unsafe extern "C" fn microlzma_encode(
     let mut uncomp_size: u64 = 0;
     if (*coder).lzma.set_out_limit.unwrap()(
         (*coder).lzma.coder,
-        &raw mut uncomp_size,
+        ::core::ptr::addr_of_mut!(uncomp_size),
         out_size.wrapping_sub(*out_pos) as u64,
     ) != LZMA_OK
     {
@@ -55,7 +55,7 @@ unsafe extern "C" fn microlzma_encoder_end(
     allocator: *const lzma_allocator,
 ) {
     let coder: *mut lzma_microlzma_coder = coder_ptr as *mut lzma_microlzma_coder;
-    lzma_next_end(&raw mut (*coder).lzma, allocator);
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).lzma), allocator);
     lzma_free(coder as *mut c_void, allocator);
 }
 unsafe extern "C" fn microlzma_encoder_init(
@@ -138,7 +138,7 @@ unsafe extern "C" fn microlzma_encoder_init(
             set_out_limit: None,
         };
     }
-    if lzma_lzma_lclppb_encode(options, &raw mut (*coder).props) {
+    if lzma_lzma_lclppb_encode(options, ::core::ptr::addr_of_mut!((*coder).props)) {
         return LZMA_OPTIONS_ERROR;
     }
     let filters: [lzma_filter_info; 2] = [
@@ -161,9 +161,9 @@ unsafe extern "C" fn microlzma_encoder_init(
         },
     ];
     lzma_next_filter_init(
-        &raw mut (*coder).lzma,
+        ::core::ptr::addr_of_mut!((*coder).lzma),
         allocator,
-        &raw const filters as *const lzma_filter_info,
+        ::core::ptr::addr_of!(filters) as *const lzma_filter_info,
     )
 }
 #[no_mangle]
@@ -176,7 +176,7 @@ pub unsafe extern "C" fn lzma_microlzma_encoder(
         return ret_;
     }
     let ret__0: lzma_ret = microlzma_encoder_init(
-        &raw mut (*(*strm).internal).next,
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         options,
     );

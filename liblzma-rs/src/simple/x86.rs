@@ -1,5 +1,5 @@
 use crate::types::*;
-use core::ffi::c_void;
+use libc::c_void;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_simple_x86 {
@@ -137,7 +137,7 @@ pub unsafe extern "C" fn lzma_bcj_x86_encode(
         prev_pos: (-5_i32) as u32,
     };
     x86_code(
-        &raw mut simple as *mut c_void,
+        ::core::ptr::addr_of_mut!(simple) as *mut c_void,
         start_offset,
         true,
         buf,
@@ -163,7 +163,7 @@ pub unsafe extern "C" fn lzma_bcj_x86_decode(
         prev_pos: (-5_i32) as u32,
     };
     x86_code(
-        &raw mut simple as *mut c_void,
+        ::core::ptr::addr_of_mut!(simple) as *mut c_void,
         start_offset,
         false,
         buf,
