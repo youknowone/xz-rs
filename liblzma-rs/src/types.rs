@@ -1288,8 +1288,19 @@ extern "C" {
     pub fn pthread_mutex_unlock(_: *mut pthread_mutex_t) -> c_int;
     pub fn pthread_sigmask(_: c_int, _: *const sigset_t, _: *mut sigset_t) -> c_int;
     pub fn memcmp(s1: *const c_void, s2: *const c_void, n: size_t) -> c_int;
+    #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
     pub fn memchr(s: *const c_void, c: c_int, n: size_t) -> *mut c_void;
     pub fn strlen(s: *const c_char) -> size_t;
     pub static lzma_rc_prices: [u8; 128];
     pub static lzma_fastpos: [u8; 8192];
+}
+
+#[cfg(all(target_family = "wasm", target_os = "unknown"))]
+pub unsafe fn memchr(s: *const c_void, c: c_int, n: size_t) -> *mut c_void {
+    let bytes = core::slice::from_raw_parts(s as *const u8, n);
+    let needle = c as u8;
+    match bytes.iter().position(|&byte| byte == needle) {
+        Some(index) => (s as *const u8).add(index) as *mut c_void,
+        None => core::ptr::null_mut(),
+    }
 }
