@@ -26,7 +26,7 @@ pub const SEQ_BLOCK_RUN: stream_decoder_seq = 3;
 pub const SEQ_BLOCK_INIT: stream_decoder_seq = 2;
 pub const SEQ_BLOCK_HEADER: stream_decoder_seq = 1;
 pub const SEQ_STREAM_HEADER: stream_decoder_seq = 0;
-unsafe extern "C" fn stream_decoder_reset(
+unsafe fn stream_decoder_reset(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {
@@ -132,10 +132,8 @@ unsafe extern "C" fn stream_decode(
                         (*coder).sequence = SEQ_INDEX;
                         current_block_100 = 16789764818708874114;
                     } else {
-                        (*coder).block_options.header_size = (*in_0.offset(*in_pos as isize)
-                            as u32)
-                            .wrapping_add(1)
-                            .wrapping_mul(4);
+                        (*coder).block_options.header_size =
+                            ((*in_0.offset(*in_pos as isize) as u32) + 1) * 4;
                         current_block_100 = 13242334135786603907;
                     }
                 } else {
@@ -238,11 +236,11 @@ unsafe extern "C" fn stream_decode(
                     if *in_0.offset(*in_pos as isize) != 0 {
                         break;
                     }
-                    *in_pos = (*in_pos).wrapping_add(1);
-                    (*coder).pos = (*coder).pos.wrapping_add(1) & 3;
+                    *in_pos += 1;
+                    (*coder).pos = ((*coder).pos + 1) & 3;
                 }
                 if (*coder).pos != 0 {
-                    *in_pos = (*in_pos).wrapping_add(1);
+                    *in_pos += 1;
                     return LZMA_DATA_ERROR;
                 }
                 let ret__2: lzma_ret = stream_decoder_reset(coder, allocator);

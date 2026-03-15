@@ -20,7 +20,7 @@ pub const SEQ_BLOCK_ENCODE: stream_encoder_seq = 3;
 pub const SEQ_BLOCK_HEADER: stream_encoder_seq = 2;
 pub const SEQ_BLOCK_INIT: stream_encoder_seq = 1;
 pub const SEQ_STREAM_HEADER: stream_encoder_seq = 0;
-unsafe extern "C" fn block_encoder_init(
+unsafe fn block_encoder_init(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {
@@ -207,16 +207,16 @@ unsafe extern "C" fn stream_encoder_update(
     filters: *const lzma_filter,
     reversed_filters: *const lzma_filter,
 ) -> lzma_ret {
-    let current_block: u64;
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
-    let mut ret: lzma_ret = LZMA_OK;
     let mut temp: [lzma_filter; 5] = [lzma_filter {
         id: 0,
         options: core::ptr::null_mut(),
     }; 5];
+    let temp_ptr = ::core::ptr::addr_of_mut!(temp) as *mut lzma_filter;
+    let filters_ptr = ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter;
     let ret_: lzma_ret = lzma_filters_copy(
         filters,
-        ::core::ptr::addr_of_mut!(temp) as *mut lzma_filter,
+        temp_ptr,
         allocator,
     );
     if ret_ != LZMA_OK {
@@ -224,53 +224,33 @@ unsafe extern "C" fn stream_encoder_update(
     }
     if (*coder).sequence <= SEQ_BLOCK_INIT {
         (*coder).block_encoder_is_initialized = false;
-        (*coder).block_options.filters = ::core::ptr::addr_of_mut!(temp) as *mut lzma_filter;
-        ret = block_encoder_init(coder, allocator);
-        (*coder).block_options.filters =
-            ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter;
+        (*coder).block_options.filters = temp_ptr;
+        let ret = block_encoder_init(coder, allocator);
+        (*coder).block_options.filters = filters_ptr;
         if ret != LZMA_OK {
-            current_block = 9913398440939854562;
-        } else {
-            (*coder).block_encoder_is_initialized = true;
-            current_block = 8236137900636309791;
+            lzma_filters_free(temp_ptr, allocator);
+            return ret;
         }
+        (*coder).block_encoder_is_initialized = true;
     } else if (*coder).sequence <= SEQ_BLOCK_ENCODE {
-        ret = (*coder).block_encoder.update.unwrap()(
+        let ret = (*coder).block_encoder.update.unwrap()(
             (*coder).block_encoder.coder,
             allocator,
             filters,
             reversed_filters,
         );
         if ret != LZMA_OK {
-            current_block = 9913398440939854562;
-        } else {
-            current_block = 8236137900636309791;
-        }
-    } else {
-        ret = LZMA_PROG_ERROR;
-        current_block = 9913398440939854562;
-    }
-    match current_block {
-        9913398440939854562 => {
-            lzma_filters_free(
-                ::core::ptr::addr_of_mut!(temp) as *mut lzma_filter,
-                allocator,
-            );
+            lzma_filters_free(temp_ptr, allocator);
             return ret;
         }
-        _ => {
-            lzma_filters_free(
-                ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
-                allocator,
-            );
-            core::ptr::copy_nonoverlapping(
-                ::core::ptr::addr_of_mut!(temp) as *const u8,
-                ::core::ptr::addr_of_mut!((*coder).filters) as *mut u8,
-                core::mem::size_of::<[lzma_filter; 5]>(),
-            );
-            return LZMA_OK;
-        }
-    };
+    } else {
+        lzma_filters_free(temp_ptr, allocator);
+        return LZMA_PROG_ERROR;
+    }
+
+    lzma_filters_free(filters_ptr, allocator);
+    (*coder).filters = temp;
+    LZMA_OK
 }
 unsafe extern "C" fn stream_encoder_init(
     next: *mut lzma_next_coder,

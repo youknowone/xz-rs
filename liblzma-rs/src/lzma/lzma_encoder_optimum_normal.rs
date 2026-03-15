@@ -1,3 +1,4 @@
+use crate::lzma::lzma_encoder::MATCH_LEN_MAX;
 use crate::types::*;
 pub const RC_BIT_PRICE_SHIFT_BITS: u32 = 4;
 pub const RC_INFINITY_PRICE: c_uint = 1u32 << 30;
@@ -236,7 +237,7 @@ unsafe fn make_short_rep(optimal: *mut lzma_optimal) {
     (*optimal).back_prev = 0;
     (*optimal).prev_1_is_literal = false;
 }
-unsafe extern "C" fn backward(
+unsafe fn backward(
     coder: *mut lzma_lzma1_encoder,
     len_res: *mut u32,
     back_res: *mut u32,
@@ -251,12 +252,14 @@ unsafe extern "C" fn backward(
                 (::core::ptr::addr_of_mut!((*coder).opts) as *mut lzma_optimal)
                     .offset(pos_mem as isize) as *mut lzma_optimal,
             );
-            (*coder).opts[pos_mem as usize].pos_prev = pos_mem.wrapping_sub(1);
+            debug_assert!(pos_mem > 0);
+            let literal_pos_prev = pos_mem - 1;
+            (*coder).opts[pos_mem as usize].pos_prev = literal_pos_prev;
             if (*coder).opts[cur as usize].prev_2 {
-                (*coder).opts[pos_mem.wrapping_sub(1) as usize].prev_1_is_literal = false;
-                (*coder).opts[pos_mem.wrapping_sub(1) as usize].pos_prev =
+                (*coder).opts[literal_pos_prev as usize].prev_1_is_literal = false;
+                (*coder).opts[literal_pos_prev as usize].pos_prev =
                     (*coder).opts[cur as usize].pos_prev_2;
-                (*coder).opts[pos_mem.wrapping_sub(1) as usize].back_prev =
+                (*coder).opts[literal_pos_prev as usize].back_prev =
                     (*coder).opts[cur as usize].back_prev_2;
             }
         }
@@ -276,7 +279,7 @@ unsafe extern "C" fn backward(
     *back_res = (*coder).opts[0].back_prev;
 }
 #[inline]
-unsafe extern "C" fn helper1(
+unsafe fn helper1(
     coder: *mut lzma_lzma1_encoder,
     mf: *mut lzma_mf,
     back_res: *mut u32,
@@ -293,15 +296,11 @@ unsafe extern "C" fn helper1(
             ::core::ptr::addr_of_mut!((*coder).matches) as *mut lzma_match,
         );
     } else {
+        debug_assert!((*mf).read_ahead == 1);
         len_main = (*coder).longest_match_length;
         matches_count = (*coder).matches_count;
     }
-    let buf_avail: u32 =
-        if mf_avail(mf).wrapping_add(1) < (2 + ((1 << 3) + (1 << 3) + (1 << 8)) - 1) as u32 {
-            (mf_avail(mf) as u32).wrapping_add(1)
-        } else {
-            (2 + ((1 << 3) + (1 << 3) + (1 << 8)) - 1) as u32
-        };
+    let buf_avail: u32 = core::cmp::min(mf_avail(mf) + 1, MATCH_LEN_MAX);
     if buf_avail < 2 {
         *back_res = UINT32_MAX;
         *len_res = 1;
@@ -326,15 +325,14 @@ unsafe extern "C" fn helper1(
     if rep_lens[rep_max_index as usize] >= nice_len {
         *back_res = rep_max_index;
         *len_res = rep_lens[rep_max_index as usize];
-        mf_skip(mf, (*len_res).wrapping_sub(1));
+        mf_skip(mf, *len_res - 1);
         return UINT32_MAX;
     }
     if len_main >= nice_len {
-        *back_res = (*coder).matches[matches_count.wrapping_sub(1) as usize]
-            .dist
-            .wrapping_add(REPS);
+        debug_assert!(matches_count > 0);
+        *back_res = (*coder).matches[(matches_count - 1) as usize].dist + REPS;
         *len_res = len_main;
-        mf_skip(mf, len_main.wrapping_sub(1));
+        mf_skip(mf, len_main - 1);
         return UINT32_MAX;
     }
     let current_byte: u8 = *buf;
@@ -348,14 +346,14 @@ unsafe extern "C" fn helper1(
     let pos_state: u32 = position & (*coder).pos_mask;
     (*coder).opts[1].price =
         rc_bit_0_price((*coder).is_match[(*coder).state as usize][pos_state as usize])
-            .wrapping_add(get_literal_price(
+            + get_literal_price(
                 coder,
                 position,
                 *buf.offset(-1) as u32,
                 !(((*coder).state as u32) < LIT_STATES),
                 match_byte as u32,
                 current_byte as u32,
-            ));
+            );
     make_literal(
         (::core::ptr::addr_of_mut!((*coder).opts) as *mut lzma_optimal).offset(1)
             as *mut lzma_optimal,
@@ -363,11 +361,10 @@ unsafe extern "C" fn helper1(
     let match_price: u32 =
         rc_bit_1_price((*coder).is_match[(*coder).state as usize][pos_state as usize]) as u32;
     let rep_match_price: u32 =
-        match_price.wrapping_add(rc_bit_1_price((*coder).is_rep[(*coder).state as usize]) as u32);
+        match_price + rc_bit_1_price((*coder).is_rep[(*coder).state as usize]) as u32;
     if match_byte == current_byte {
         let short_rep_price: u32 =
-            rep_match_price
-                .wrapping_add(get_short_rep_price(coder, (*coder).state, pos_state) as u32);
+            rep_match_price + get_short_rep_price(coder, (*coder).state, pos_state) as u32;
         if short_rep_price < (*coder).opts[1].price {
             (*coder).opts[1].price = short_rep_price;
             make_short_rep(
@@ -376,11 +373,7 @@ unsafe extern "C" fn helper1(
             );
         }
     }
-    let len_end: u32 = if len_main > rep_lens[rep_max_index as usize] {
-        len_main
-    } else {
-        rep_lens[rep_max_index as usize]
-    };
+    let len_end: u32 = core::cmp::max(len_main, rep_lens[rep_max_index as usize]);
     if len_end < 2 {
         *back_res = (*coder).opts[1].back_prev;
         *len_res = 1;
@@ -404,18 +397,15 @@ unsafe extern "C" fn helper1(
     while i_1 < REPS {
         let mut rep_len: u32 = rep_lens[i_1 as usize];
         if rep_len >= 2 {
-            let price: u32 = rep_match_price.wrapping_add(get_pure_rep_price(
-                coder,
-                i_1,
-                (*coder).state,
-                pos_state,
-            ) as u32);
+            let price: u32 =
+                rep_match_price + get_pure_rep_price(coder, i_1, (*coder).state, pos_state) as u32;
             loop {
-                let cur_and_len_price: u32 = price.wrapping_add(get_len_price(
-                    ::core::ptr::addr_of_mut!((*coder).rep_len_encoder),
-                    rep_len,
-                    pos_state,
-                ) as u32);
+                let cur_and_len_price: u32 = price
+                    + get_len_price(
+                        ::core::ptr::addr_of_mut!((*coder).rep_len_encoder),
+                        rep_len,
+                        pos_state,
+                    ) as u32;
                 if cur_and_len_price < (*coder).opts[rep_len as usize].price {
                     (*coder).opts[rep_len as usize].price = cur_and_len_price;
                     (*coder).opts[rep_len as usize].pos_prev = 0;
@@ -431,12 +421,8 @@ unsafe extern "C" fn helper1(
         i_1 += 1;
     }
     let normal_match_price: u32 =
-        match_price.wrapping_add(rc_bit_0_price((*coder).is_rep[(*coder).state as usize]) as u32);
-    len = if rep_lens[0] >= 2 {
-        rep_lens[0].wrapping_add(1)
-    } else {
-        2
-    };
+        match_price + rc_bit_0_price((*coder).is_rep[(*coder).state as usize]) as u32;
+    len = if rep_lens[0] >= 2 { rep_lens[0] + 1 } else { 2 };
     if len <= len_main {
         let mut i_2: u32 = 0;
         while len > (*coder).matches[i_2 as usize].len {
@@ -444,12 +430,12 @@ unsafe extern "C" fn helper1(
         }
         loop {
             let dist: u32 = (*coder).matches[i_2 as usize].dist;
-            let cur_and_len_price_0: u32 = normal_match_price
-                .wrapping_add(get_dist_len_price(coder, dist, len, pos_state) as u32);
+            let cur_and_len_price_0: u32 =
+                normal_match_price + get_dist_len_price(coder, dist, len, pos_state) as u32;
             if cur_and_len_price_0 < (*coder).opts[len as usize].price {
                 (*coder).opts[len as usize].price = cur_and_len_price_0;
                 (*coder).opts[len as usize].pos_prev = 0;
-                (*coder).opts[len as usize].back_prev = dist.wrapping_add(REPS);
+                (*coder).opts[len as usize].back_prev = dist + REPS;
                 (*coder).opts[len as usize].prev_1_is_literal = false;
             }
             if len == (*coder).matches[i_2 as usize].len {
