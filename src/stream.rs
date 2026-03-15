@@ -490,7 +490,7 @@ impl Stream {
     /// This is only supported if the underlying stream supports a memlimit.
     #[inline]
     pub fn memlimit(&self) -> u64 {
-        liblzma_sys::lzma_memlimit_get(&self.raw)
+        unsafe { liblzma_sys::lzma_memlimit_get(&self.raw) }
     }
 
     /// Set the current memory usage limit.
