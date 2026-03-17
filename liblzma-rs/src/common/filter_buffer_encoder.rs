@@ -27,9 +27,13 @@ pub unsafe extern "C" fn lzma_raw_buffer_encode(
     if ret_ != LZMA_OK {
         return ret_;
     }
+    let Some(code) = next.code else {
+        lzma_next_end(::core::ptr::addr_of_mut!(next), allocator);
+        return LZMA_PROG_ERROR;
+    };
     let out_start: size_t = *out_pos;
     let mut in_pos: size_t = 0;
-    let mut ret: lzma_ret = next.code.unwrap()(
+    let mut ret: lzma_ret = code(
         next.coder,
         allocator,
         in_0,

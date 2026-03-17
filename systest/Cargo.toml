@@ -16,6 +16,6 @@ ctest2 = "0.4"
 
 [features]
 default = ["c-sys"]
-c-sys = ["dep:liblzma-c-sys"]
-rs-sys = ["dep:liblzma-rs-sys"]
+c-sys = ["liblzma-c-sys"]
+rs-sys = ["liblzma-rs-sys"]
 bindgen = ["c-sys", "liblzma-c-sys/bindgen"]

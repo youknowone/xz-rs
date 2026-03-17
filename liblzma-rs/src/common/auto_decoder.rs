@@ -70,7 +70,10 @@ unsafe extern "C" fn auto_decode(
     }
     match current_block_28 {
         13935781298497728377 => {
-            let ret: lzma_ret = (*coder).next.code.unwrap()(
+            let Some(code) = (*coder).next.code else {
+                return LZMA_PROG_ERROR;
+            };
+            let ret: lzma_ret = code(
                 (*coder).next.coder,
                 allocator,
                 in_0,

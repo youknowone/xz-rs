@@ -36,17 +36,21 @@ pub extern "C" fn lzma_check_size(type_0: lzma_check) -> u32 {
     check_sizes[type_0 as usize] as u32
 }
 pub unsafe extern "C" fn lzma_check_init(check: *mut lzma_check_state, type_0: lzma_check) {
+    if check.is_null() {
+        return;
+    }
+
     match type_0 {
-        1 => {
+        LZMA_CHECK_CRC32 => {
             (*check).state.crc32 = 0;
         }
-        4 => {
+        LZMA_CHECK_CRC64 => {
             (*check).state.crc64 = 0;
         }
-        10 => {
+        LZMA_CHECK_SHA256 => {
             lzma_sha256_init(check);
         }
-        0 | _ => {}
+        LZMA_CHECK_NONE | _ => {}
     };
 }
 pub unsafe extern "C" fn lzma_check_update(
@@ -55,28 +59,36 @@ pub unsafe extern "C" fn lzma_check_update(
     buf: *const u8,
     size: size_t,
 ) {
+    if check.is_null() {
+        return;
+    }
+
     match type_0 {
-        1 => {
+        LZMA_CHECK_CRC32 => {
             (*check).state.crc32 = lzma_crc32(buf, size, (*check).state.crc32);
         }
-        4 => {
+        LZMA_CHECK_CRC64 => {
             (*check).state.crc64 = lzma_crc64(buf, size, (*check).state.crc64);
         }
-        10 => {
+        LZMA_CHECK_SHA256 => {
             lzma_sha256_update(buf, size, check);
         }
         _ => {}
     };
 }
 pub unsafe extern "C" fn lzma_check_finish(check: *mut lzma_check_state, type_0: lzma_check) {
+    if check.is_null() {
+        return;
+    }
+
     match type_0 {
-        1 => {
+        LZMA_CHECK_CRC32 => {
             (*check).buffer.u32_0[0] = (*check).state.crc32;
         }
-        4 => {
+        LZMA_CHECK_CRC64 => {
             (*check).buffer.u64_0[0] = (*check).state.crc64;
         }
-        10 => {
+        LZMA_CHECK_SHA256 => {
             lzma_sha256_finish(check);
         }
         _ => {}

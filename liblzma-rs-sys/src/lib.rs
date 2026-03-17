@@ -149,7 +149,7 @@ pub unsafe extern "C" fn lzma_end(strm: *mut lzma_stream) {
 }
 
 #[no_mangle]
-pub extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
+pub unsafe extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
     liblzma_rs::common::common::lzma_memlimit_get(strm.cast())
 }
 

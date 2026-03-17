@@ -20,7 +20,13 @@ unsafe extern "C" fn microlzma_encode(
     let out_start: size_t = *out_pos;
     let in_start: size_t = *in_pos;
     let mut uncomp_size: u64 = 0;
-    if (*coder).lzma.set_out_limit.unwrap()(
+    let Some(set_out_limit) = (*coder).lzma.set_out_limit else {
+        return LZMA_PROG_ERROR;
+    };
+    let Some(code) = (*coder).lzma.code else {
+        return LZMA_PROG_ERROR;
+    };
+    if set_out_limit(
         (*coder).lzma.coder,
         ::core::ptr::addr_of_mut!(uncomp_size),
         out_size.wrapping_sub(*out_pos) as u64,
@@ -28,7 +34,7 @@ unsafe extern "C" fn microlzma_encode(
     {
         return LZMA_PROG_ERROR;
     }
-    let ret: lzma_ret = (*coder).lzma.code.unwrap()(
+    let ret: lzma_ret = code(
         (*coder).lzma.coder,
         allocator,
         in_0,

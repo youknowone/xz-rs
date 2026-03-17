@@ -476,7 +476,10 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         preset_dict: core::ptr::null(),
         preset_dict_size: 0,
     };
-    let ret_: lzma_ret = lz_init.unwrap()(
+    let Some(lz_init) = lz_init else {
+        return LZMA_PROG_ERROR;
+    };
+    let ret_: lzma_ret = lz_init(
         ::core::ptr::addr_of_mut!((*coder).lz),
         allocator,
         (*filters).id,
@@ -485,6 +488,9 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
     );
     if ret_ != LZMA_OK {
         return ret_;
+    }
+    if (*coder).lz.code.is_none() {
+        return LZMA_PROG_ERROR;
     }
     if lz_encoder_prepare(
         ::core::ptr::addr_of_mut!((*coder).mf),

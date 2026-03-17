@@ -33,9 +33,13 @@ pub unsafe extern "C" fn lzma_block_buffer_decode(
     let mut ret: lzma_ret =
         lzma_block_decoder_init(::core::ptr::addr_of_mut!(block_decoder), allocator, block);
     if ret == LZMA_OK {
+        let Some(code) = block_decoder.code else {
+            lzma_next_end(::core::ptr::addr_of_mut!(block_decoder), allocator);
+            return LZMA_PROG_ERROR;
+        };
         let in_start: size_t = *in_pos;
         let out_start: size_t = *out_pos;
-        ret = block_decoder.code.unwrap()(
+        ret = code(
             block_decoder.coder,
             allocator,
             in_0,

@@ -597,9 +597,7 @@ unsafe fn helper2(
         .wrapping_add(rc_bit_1_price((*coder).is_match[state as usize][pos_state as usize]) as u32);
     let rep_match_price: u32 =
         match_price.wrapping_add(rc_bit_1_price((*coder).is_rep[state as usize]) as u32);
-    if match_byte == current_byte
-        && !(next_opt.pos_prev < cur && next_opt.back_prev == 0)
-    {
+    if match_byte == current_byte && !(next_opt.pos_prev < cur && next_opt.back_prev == 0) {
         let short_rep_price: u32 =
             rep_match_price.wrapping_add(get_short_rep_price(coder, state, pos_state) as u32);
         if short_rep_price <= next_opt.price {
@@ -625,7 +623,7 @@ unsafe fn helper2(
             nice_len.wrapping_add(1)
         };
         let len_test: u32 = (lzma_memcmplen(buf, buf_back, 1, limit) as u32).wrapping_sub(1);
-            if len_test >= 2 {
+        if len_test >= 2 {
             let state_2: lzma_lzma_state = update_literal_state(state);
             let pos_state_next: u32 = position.wrapping_add(1) & (*coder).pos_mask;
             let next_rep_match_price: u32 = cur_and_1_price

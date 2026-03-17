@@ -8,7 +8,7 @@ pub struct filter_features {
     pub last_ok: bool,
     pub changes_size: bool,
 }
-static mut features: [filter_features; 13] = [
+static FEATURES: [filter_features; 13] = [
     filter_features {
         id: LZMA_FILTER_LZMA1,
         options_size: core::mem::size_of::<lzma_options_lzma>(),
@@ -133,8 +133,8 @@ pub unsafe extern "C" fn lzma_filters_copy(
             } else {
                 let mut j: size_t = 0;
                 j = 0;
-                while (*src.offset(i as isize)).id != features[j as usize].id {
-                    if features[j as usize].id == LZMA_VLI_UNKNOWN {
+                while (*src.offset(i as isize)).id != FEATURES[j as usize].id {
+                    if FEATURES[j as usize].id == LZMA_VLI_UNKNOWN {
                         ret = LZMA_OPTIONS_ERROR;
                         current_block = 6392083060350426025;
                         break 's_15;
@@ -142,7 +142,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
                         j += 1;
                     }
                 }
-                dest[i as usize].options = lzma_alloc(features[j as usize].options_size, allocator);
+                dest[i as usize].options = lzma_alloc(FEATURES[j as usize].options_size, allocator);
                 if dest[i as usize].options.is_null() {
                     ret = LZMA_MEM_ERROR;
                     current_block = 6392083060350426025;
@@ -151,7 +151,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
                     core::ptr::copy_nonoverlapping(
                         (*src.offset(i as isize)).options as *const u8,
                         dest[i as usize].options as *mut u8,
-                        features[j as usize].options_size,
+                        FEATURES[j as usize].options_size,
                     );
                 }
             }
@@ -211,8 +211,8 @@ pub unsafe extern "C" fn lzma_validate_chain(
     loop {
         let mut j: size_t = 0;
         j = 0;
-        while (*filters.offset(i as isize)).id != features[j as usize].id {
-            if features[j as usize].id == LZMA_VLI_UNKNOWN {
+        while (*filters.offset(i as isize)).id != FEATURES[j as usize].id {
+            if FEATURES[j as usize].id == LZMA_VLI_UNKNOWN {
                 return LZMA_OPTIONS_ERROR;
             }
             j += 1;
@@ -220,10 +220,10 @@ pub unsafe extern "C" fn lzma_validate_chain(
         if !non_last_ok {
             return LZMA_OPTIONS_ERROR;
         }
-        non_last_ok = features[j as usize].non_last_ok;
-        last_ok = features[j as usize].last_ok;
+        non_last_ok = FEATURES[j as usize].non_last_ok;
+        last_ok = FEATURES[j as usize].last_ok;
         changes_size_count =
-            changes_size_count.wrapping_add(features[j as usize].changes_size as size_t);
+            changes_size_count.wrapping_add(FEATURES[j as usize].changes_size as size_t);
         i += 1;
         if (*filters.offset(i as isize)).id == LZMA_VLI_UNKNOWN {
             break;

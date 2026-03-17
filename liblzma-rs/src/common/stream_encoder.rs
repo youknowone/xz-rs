@@ -106,7 +106,7 @@ unsafe extern "C" fn stream_encode(
                 }
             }
             3 => {
-                static mut convert: [lzma_action; 5] = [
+                static CONVERT: [lzma_action; 5] = [
                     LZMA_RUN,
                     LZMA_SYNC_FLUSH,
                     LZMA_FINISH,
@@ -122,7 +122,7 @@ unsafe extern "C" fn stream_encode(
                     out,
                     out_pos,
                     out_size,
-                    convert[action as usize],
+                    CONVERT[action as usize],
                 );
                 if ret != LZMA_STREAM_END || action == LZMA_SYNC_FLUSH {
                     return ret;
@@ -214,11 +214,7 @@ unsafe extern "C" fn stream_encoder_update(
     }; 5];
     let temp_ptr = ::core::ptr::addr_of_mut!(temp) as *mut lzma_filter;
     let filters_ptr = ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter;
-    let ret_: lzma_ret = lzma_filters_copy(
-        filters,
-        temp_ptr,
-        allocator,
-    );
+    let ret_: lzma_ret = lzma_filters_copy(filters, temp_ptr, allocator);
     if ret_ != LZMA_OK {
         return ret_;
     }

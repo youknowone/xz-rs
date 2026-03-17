@@ -127,6 +127,10 @@ pub unsafe extern "C" fn lzma_bufcpy(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> size_t {
+    if *in_pos > in_size || *out_pos > out_size {
+        return 0;
+    }
+
     let in_avail: size_t = in_size.wrapping_sub(*in_pos);
     let out_avail: size_t = out_size.wrapping_sub(*out_pos);
     let copy_size: size_t = if in_avail < out_avail {
@@ -172,7 +176,10 @@ pub unsafe extern "C" fn lzma_next_filter_update(
     if (*reversed_filters).id == LZMA_VLI_UNKNOWN {
         return LZMA_OK;
     }
-    (*next).update.unwrap()(
+    let Some(update) = (*next).update else {
+        return LZMA_PROG_ERROR;
+    };
+    update(
         (*next).coder,
         allocator,
         core::ptr::null(),
@@ -232,6 +239,7 @@ pub unsafe extern "C" fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
     );
     (*(*strm).internal).sequence = ISEQ_RUN;
     (*(*strm).internal).allow_buf_error = false;
+    (*(*strm).internal).avail_in = 0;
     (*strm).total_in = 0;
     (*strm).total_out = 0;
     LZMA_OK
@@ -389,6 +397,16 @@ pub unsafe extern "C" fn lzma_get_progress(
     progress_in: *mut u64,
     progress_out: *mut u64,
 ) {
+    if strm.is_null() || (*strm).internal.is_null() {
+        if !progress_in.is_null() {
+            *progress_in = 0;
+        }
+        if !progress_out.is_null() {
+            *progress_out = 0;
+        }
+        return;
+    }
+
     if (*(*strm).internal).next.get_progress.is_some() {
         (*(*strm).internal).next.get_progress.unwrap()(
             (*(*strm).internal).next.coder,
@@ -402,6 +420,9 @@ pub unsafe extern "C" fn lzma_get_progress(
 }
 pub extern "C" fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
     return unsafe {
+        if strm.is_null() || (*strm).internal.is_null() {
+            return LZMA_CHECK_NONE;
+        }
         if (*(*strm).internal).next.get_check.is_none() {
             return LZMA_CHECK_NONE;
         }

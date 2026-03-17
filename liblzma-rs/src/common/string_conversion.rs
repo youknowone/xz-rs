@@ -107,7 +107,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
     if v == 0 {
         str_append_str(str, crate::c_str!("0"));
     } else {
-        static mut suffixes: [[c_char; 4]; 4] = unsafe {
+        static SUFFIXES: [[c_char; 4]; 4] = unsafe {
             [
                 core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"\0\0\0\0"),
                 core::mem::transmute::<[u8; 4], [c_char; 4]>(*b"KiB\0"),
@@ -142,12 +142,7 @@ unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suf
             str,
             (::core::ptr::addr_of_mut!(buf) as *mut c_char).offset(pos as isize),
         );
-        str_append_str(
-            str,
-            ::core::ptr::addr_of!(
-                *(::core::ptr::addr_of!(suffixes) as *const [c_char; 4]).offset(suf as isize)
-            ) as *const c_char,
-        );
+        str_append_str(str, SUFFIXES[suf as usize].as_ptr());
     };
 }
 pub const NAME_LEN_MAX: u32 = 11;
