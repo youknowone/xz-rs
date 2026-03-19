@@ -321,28 +321,27 @@ unsafe fn bt_find_func(
     let mut len0: u32 = 0;
     let mut len1: u32 = 0;
     loop {
-        let delta: u32 = pos.wrapping_sub(cur_match);
-        let old_depth = depth;
-        depth = depth.wrapping_sub(1);
-        if old_depth == 0 || delta >= cyclic_size {
+        let delta: u32 = pos - cur_match;
+        if depth == 0 || delta >= cyclic_size {
             *ptr0 = EMPTY_HASH_VALUE;
             *ptr1 = EMPTY_HASH_VALUE;
             return matches;
         }
-        let pair: *mut u32 = son.offset(
-            (cyclic_pos
-                .wrapping_sub(delta)
-                .wrapping_add(if delta > cyclic_pos { cyclic_size } else { 0 })
-                << 1) as isize,
-        );
+        depth -= 1;
+        let pair_index = if delta > cyclic_pos {
+            cyclic_pos + cyclic_size - delta
+        } else {
+            cyclic_pos - delta
+        };
+        let pair: *mut u32 = son.offset((pair_index << 1) as isize);
         let pb: *const u8 = cur.offset(-(delta as isize));
         let mut len: u32 = if len0 < len1 { len0 } else { len1 };
         if *pb.offset(len as isize) == *cur.offset(len as isize) {
-            len = lzma_memcmplen(pb, cur, len.wrapping_add(1), len_limit);
+            len = lzma_memcmplen(pb, cur, len + 1, len_limit);
             if len_best < len {
                 len_best = len;
                 (*matches).len = len;
-                (*matches).dist = delta.wrapping_sub(1);
+                (*matches).dist = delta - 1;
                 matches = matches.offset(1);
                 if len == len_limit {
                     *ptr1 = *pair;
@@ -380,24 +379,23 @@ unsafe fn bt_skip_func(
     let mut len0: u32 = 0;
     let mut len1: u32 = 0;
     loop {
-        let delta: u32 = pos.wrapping_sub(cur_match);
-        let old_depth = depth;
-        depth = depth.wrapping_sub(1);
-        if old_depth == 0 || delta >= cyclic_size {
+        let delta: u32 = pos - cur_match;
+        if depth == 0 || delta >= cyclic_size {
             *ptr0 = EMPTY_HASH_VALUE;
             *ptr1 = EMPTY_HASH_VALUE;
             return;
         }
-        let pair: *mut u32 = son.offset(
-            (cyclic_pos
-                .wrapping_sub(delta)
-                .wrapping_add(if delta > cyclic_pos { cyclic_size } else { 0 })
-                << 1) as isize,
-        );
+        depth -= 1;
+        let pair_index = if delta > cyclic_pos {
+            cyclic_pos + cyclic_size - delta
+        } else {
+            cyclic_pos - delta
+        };
+        let pair: *mut u32 = son.offset((pair_index << 1) as isize);
         let pb: *const u8 = cur.offset(-(delta as isize));
         let mut len: u32 = if len0 < len1 { len0 } else { len1 };
         if *pb.offset(len as isize) == *cur.offset(len as isize) {
-            len = lzma_memcmplen(pb, cur, len.wrapping_add(1), len_limit);
+            len = lzma_memcmplen(pb, cur, len + 1, len_limit);
             if len == len_limit {
                 *ptr1 = *pair;
                 *ptr0 = *pair.offset(1);
