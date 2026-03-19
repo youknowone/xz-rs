@@ -1034,7 +1034,7 @@ pub static mut lzma_crc64_table: [[u64; 256]; 4] = [
     ],
 ];
 #[inline]
-unsafe extern "C" fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
+unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
     crc = !crc;
     if size > 4 {
         while buf as uintptr_t & 3 as uintptr_t != 0 {

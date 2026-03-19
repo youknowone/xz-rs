@@ -74,7 +74,7 @@ pub struct lzma_length_decoder {
     pub high: [probability; 256],
 }
 #[inline]
-unsafe extern "C" fn dict_get(dict: *const lzma_dict, distance: u32) -> u8 {
+unsafe fn dict_get(dict: *const lzma_dict, distance: u32) -> u8 {
     *(*dict).buf.offset(
         (*dict)
             .pos
@@ -88,15 +88,15 @@ unsafe extern "C" fn dict_get(dict: *const lzma_dict, distance: u32) -> u8 {
     )
 }
 #[inline]
-unsafe extern "C" fn dict_get0(dict: *const lzma_dict) -> u8 {
+unsafe fn dict_get0(dict: *const lzma_dict) -> u8 {
     *(*dict).buf.offset((*dict).pos.wrapping_sub(1) as isize)
 }
 #[inline]
-unsafe extern "C" fn dict_is_distance_valid(dict: *const lzma_dict, distance: size_t) -> bool {
+unsafe fn dict_is_distance_valid(dict: *const lzma_dict, distance: size_t) -> bool {
     (*dict).full > distance
 }
 #[inline]
-unsafe extern "C" fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> bool {
+unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> bool {
     let dict_avail: size_t = (*dict).limit.wrapping_sub((*dict).pos);
     let mut left: u32 = (if dict_avail < *len as size_t {
         dict_avail
@@ -132,7 +132,7 @@ unsafe extern "C" fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut 
     *len != 0
 }
 #[inline]
-unsafe extern "C" fn dict_put(dict: *mut lzma_dict, byte: u8) {
+unsafe fn dict_put(dict: *mut lzma_dict, byte: u8) {
     *(*dict).buf.offset((*dict).pos as isize) = byte;
     (*dict).pos = (*dict).pos.wrapping_add(1);
     if !(*dict).has_wrapped {
@@ -140,7 +140,7 @@ unsafe extern "C" fn dict_put(dict: *mut lzma_dict, byte: u8) {
     }
 }
 #[inline]
-unsafe extern "C" fn dict_put_safe(dict: *mut lzma_dict, byte: u8) -> bool {
+unsafe fn dict_put_safe(dict: *mut lzma_dict, byte: u8) -> bool {
     if (*dict).pos == (*dict).limit {
         return true;
     }
@@ -149,7 +149,7 @@ unsafe extern "C" fn dict_put_safe(dict: *mut lzma_dict, byte: u8) -> bool {
 }
 pub const DIST_SLOTS: u32 = 1 << DIST_SLOT_BITS;
 #[inline]
-unsafe extern "C" fn rc_read_init(
+unsafe fn rc_read_init(
     rc: *mut lzma_range_decoder,
     in_0: *const u8,
     in_pos: *mut size_t,

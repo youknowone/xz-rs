@@ -13,7 +13,7 @@ static mut SHA256_K: [u32; 64] = [
     0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
     0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208, 0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2,
 ];
-unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
+unsafe fn transform(state: *mut u32, data: *const u32) {
     let mut W: [u32; 16] = [0; 16];
     let mut T: [u32; 8] = [0; 8];
     core::ptr::copy_nonoverlapping(
@@ -525,7 +525,7 @@ unsafe extern "C" fn transform(state: *mut u32, data: *const u32) {
         *state.offset(i as isize) = (*state.offset(i as isize)).wrapping_add(T[i]);
     }
 }
-unsafe extern "C" fn process(check: *mut lzma_check_state) {
+unsafe fn process(check: *mut lzma_check_state) {
     transform(
         ::core::ptr::addr_of_mut!((*check).state.sha256.state) as *mut u32,
         ::core::ptr::addr_of_mut!((*check).buffer.u32_0) as *const u32,

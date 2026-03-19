@@ -88,7 +88,7 @@ pub fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
         )
     }
 }
-unsafe extern "C" fn hash_append(
+unsafe fn hash_append(
     info: *mut lzma_index_hash_info,
     unpadded_size: lzma_vli,
     uncompressed_size: lzma_vli,

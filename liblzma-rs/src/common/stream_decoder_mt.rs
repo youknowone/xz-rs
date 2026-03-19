@@ -251,7 +251,7 @@ unsafe extern "C" fn worker_decoder(thr_ptr: *mut c_void) -> *mut c_void {
         }
     }
 }
-unsafe extern "C" fn threads_end(coder: *mut lzma_stream_coder, allocator: *const lzma_allocator) {
+unsafe fn threads_end(coder: *mut lzma_stream_coder, allocator: *const lzma_allocator) {
     let mut i: u32 = 0;
     while i < (*coder).threads_initialized {
         let mut mythread_i_502: c_uint = 0;
@@ -291,7 +291,7 @@ unsafe extern "C" fn threads_end(coder: *mut lzma_stream_coder, allocator: *cons
     (*coder).mem_in_use = 0;
     (*coder).mem_cached = 0;
 }
-unsafe extern "C" fn threads_stop(coder: *mut lzma_stream_coder) {
+unsafe fn threads_stop(coder: *mut lzma_stream_coder) {
     let mut i: u32 = 0;
     while i < (*coder).threads_initialized {
         let mut mythread_i_538: c_uint = 0;
@@ -317,7 +317,7 @@ unsafe extern "C" fn threads_stop(coder: *mut lzma_stream_coder) {
         i += 1;
     }
 }
-unsafe extern "C" fn initialize_new_thread(
+unsafe fn initialize_new_thread(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {
@@ -372,7 +372,7 @@ unsafe extern "C" fn initialize_new_thread(
     }
     LZMA_MEM_ERROR
 }
-unsafe extern "C" fn get_thread(
+unsafe fn get_thread(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {
@@ -413,7 +413,7 @@ unsafe extern "C" fn get_thread(
     (*(*coder).thr).partial_update_started = false;
     LZMA_OK
 }
-unsafe extern "C" fn read_output_and_wait(
+unsafe fn read_output_and_wait(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
     out: *mut u8,
@@ -540,7 +540,7 @@ unsafe extern "C" fn read_output_and_wait(
     }
     ret
 }
-unsafe extern "C" fn decode_block_header(
+unsafe fn decode_block_header(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
     in_0: *const u8,
@@ -594,7 +594,7 @@ extern "C" fn comp_blk_size(coder: *const lzma_stream_coder) -> size_t {
 extern "C" fn is_direct_mode_needed(size: lzma_vli) -> bool {
     size == LZMA_VLI_UNKNOWN || size > SIZE_MAX.wrapping_div(3 as c_ulong) as lzma_vli
 }
-unsafe extern "C" fn stream_decoder_reset(
+unsafe fn stream_decoder_reset(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {

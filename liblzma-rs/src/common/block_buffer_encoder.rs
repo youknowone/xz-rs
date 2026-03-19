@@ -28,7 +28,7 @@ pub fn lzma_block_buffer_bound(uncompressed_size: size_t) -> size_t {
     let ret: u64 = lzma_block_buffer_bound64(uncompressed_size as u64);
     ret as size_t
 }
-unsafe extern "C" fn block_encode_uncompressed(
+unsafe fn block_encode_uncompressed(
     block: *mut lzma_block,
     in_0: *const u8,
     in_size: size_t,
@@ -114,7 +114,7 @@ unsafe extern "C" fn block_encode_uncompressed(
     *out_pos += 1;
     LZMA_OK
 }
-unsafe extern "C" fn block_encode_normal(
+unsafe fn block_encode_normal(
     block: *mut lzma_block,
     allocator: *const lzma_allocator,
     in_0: *const u8,
@@ -183,7 +183,7 @@ unsafe extern "C" fn block_encode_normal(
     }
     ret
 }
-unsafe extern "C" fn block_buffer_encode(
+unsafe fn block_buffer_encode(
     block: *mut lzma_block,
     allocator: *const lzma_allocator,
     in_0: *const u8,

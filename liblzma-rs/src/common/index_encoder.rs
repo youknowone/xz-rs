@@ -142,7 +142,7 @@ unsafe extern "C" fn index_encode(
 unsafe extern "C" fn index_encoder_end(coder: *mut c_void, allocator: *const lzma_allocator) {
     crate::alloc::internal_free(coder, allocator);
 }
-unsafe extern "C" fn index_encoder_reset(coder: *mut lzma_index_coder, i: *const lzma_index) {
+unsafe fn index_encoder_reset(coder: *mut lzma_index_coder, i: *const lzma_index) {
     lzma_index_iter_init(::core::ptr::addr_of_mut!((*coder).iter), i);
     (*coder).sequence = SEQ_INDICATOR;
     (*coder).index = i;

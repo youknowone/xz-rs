@@ -1,5 +1,5 @@
 use crate::types::*;
-unsafe extern "C" fn copy_and_encode(
+unsafe fn copy_and_encode(
     coder: *mut lzma_delta_coder,
     in_0: *const u8,
     out: *mut u8,
@@ -16,7 +16,7 @@ unsafe extern "C" fn copy_and_encode(
         i += 1;
     }
 }
-unsafe extern "C" fn encode_in_place(coder: *mut lzma_delta_coder, buffer: *mut u8, size: size_t) {
+unsafe fn encode_in_place(coder: *mut lzma_delta_coder, buffer: *mut u8, size: size_t) {
     let distance: size_t = (*coder).distance;
     let mut i: size_t = 0;
     while i < size {

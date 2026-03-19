@@ -64,7 +64,7 @@ pub const LZMA_LCLP_MIN: u32 = 0;
 pub const LZMA_PB_MIN: u32 = 0;
 pub const LZMA_PRESET_DEFAULT: c_uint = 6;
 pub const STR_ALLOC_SIZE: u32 = 800;
-unsafe extern "C" fn str_init(str: *mut lzma_str, allocator: *const lzma_allocator) -> lzma_ret {
+unsafe fn str_init(str: *mut lzma_str, allocator: *const lzma_allocator) -> lzma_ret {
     (*str).buf = lzma_alloc(STR_ALLOC_SIZE as size_t, allocator) as *mut c_char;
     if (*str).buf.is_null() {
         return LZMA_MEM_ERROR;
@@ -72,13 +72,13 @@ unsafe extern "C" fn str_init(str: *mut lzma_str, allocator: *const lzma_allocat
     (*str).pos = 0;
     LZMA_OK
 }
-unsafe extern "C" fn str_free(str: *mut lzma_str, allocator: *const lzma_allocator) {
+unsafe fn str_free(str: *mut lzma_str, allocator: *const lzma_allocator) {
     lzma_free((*str).buf as *mut c_void, allocator);
 }
-unsafe extern "C" fn str_is_full(str: *const lzma_str) -> bool {
+unsafe fn str_is_full(str: *const lzma_str) -> bool {
     (*str).pos == (STR_ALLOC_SIZE - 1) as size_t
 }
-unsafe extern "C" fn str_finish(
+unsafe fn str_finish(
     dest: *mut *mut c_char,
     str: *mut lzma_str,
     allocator: *const lzma_allocator,
@@ -92,7 +92,7 @@ unsafe extern "C" fn str_finish(
     *dest = (*str).buf;
     LZMA_OK
 }
-unsafe extern "C" fn str_append_str(str: *mut lzma_str, s: *const c_char) {
+unsafe fn str_append_str(str: *mut lzma_str, s: *const c_char) {
     let len: size_t = strlen(s) as size_t;
     let limit: size_t = ((STR_ALLOC_SIZE - 1) as size_t).wrapping_sub((*str).pos);
     let copy_size: size_t = if len < limit { len } else { limit };
@@ -103,7 +103,7 @@ unsafe extern "C" fn str_append_str(str: *mut lzma_str, s: *const c_char) {
     );
     (*str).pos = (*str).pos.wrapping_add(copy_size);
 }
-unsafe extern "C" fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suffix: bool) {
+unsafe fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suffix: bool) {
     if v == 0 {
         str_append_str(str, crate::c_str!("0"));
     } else {
@@ -214,7 +214,7 @@ extern "C" fn parse_delta(
 }
 pub const LZMA12_PRESET_STR: [c_char; 7] =
     unsafe { core::mem::transmute::<[u8; 7], [c_char; 7]>(*b"0-9[e]\0") };
-unsafe extern "C" fn parse_lzma12_preset(
+unsafe fn parse_lzma12_preset(
     str: *mut *const c_char,
     str_end: *const c_char,
     preset: *mut u32,
@@ -239,7 +239,7 @@ unsafe extern "C" fn parse_lzma12_preset(
     }
     core::ptr::null()
 }
-unsafe extern "C" fn set_lzma12_preset(
+unsafe fn set_lzma12_preset(
     str: *mut *const c_char,
     str_end: *const c_char,
     filter_options: *mut c_void,
@@ -522,7 +522,7 @@ static mut filter_name_map: [filter_codec_def; 11] = unsafe {
         },
     ]
 };
-unsafe extern "C" fn parse_options(
+unsafe fn parse_options(
     str: *mut *const c_char,
     str_end: *const c_char,
     filter_options: *mut c_void,
@@ -693,7 +693,7 @@ unsafe extern "C" fn parse_options(
     }
     core::ptr::null()
 }
-unsafe extern "C" fn parse_filter(
+unsafe fn parse_filter(
     str: *mut *const c_char,
     str_end: *const c_char,
     filter: *mut lzma_filter,
@@ -756,7 +756,7 @@ unsafe extern "C" fn parse_filter(
     }
     crate::c_str!("Unknown filter name")
 }
-unsafe extern "C" fn str_to_filters(
+unsafe fn str_to_filters(
     str: *mut *const c_char,
     filters: *mut lzma_filter,
     flags: u32,
@@ -941,7 +941,7 @@ pub unsafe fn lzma_str_to_filters(
     }
     errmsg
 }
-unsafe extern "C" fn strfy_filter(
+unsafe fn strfy_filter(
     dest: *mut lzma_str,
     mut delimiter: *const c_char,
     optmap: *const option_map,

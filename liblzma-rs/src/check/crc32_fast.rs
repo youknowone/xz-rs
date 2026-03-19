@@ -313,7 +313,7 @@ pub static lzma_crc32_table: [[u32; 256]; 8] = [
         0x646e019b, 0xeae10678, 0x264b06e6,
     ],
 ];
-unsafe extern "C" fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mut crc: u32) -> u32 {
+unsafe fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mut crc: u32) -> u32 {
     crc = !crc;
     if size > 8 {
         while buf as uintptr_t & 7 as uintptr_t != 0 {

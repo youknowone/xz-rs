@@ -9,7 +9,7 @@ pub fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64 {
     ((2u32).wrapping_mul(threads) as u64)
         .wrapping_mul(lzma_outq_outbuf_memusage(buf_size_max as size_t))
 }
-unsafe extern "C" fn move_head_to_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator) {
+unsafe fn move_head_to_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator) {
     let buf: *mut lzma_outbuf = (*outq).head;
     (*outq).head = (*buf).next;
     if (*outq).head.is_null() {
@@ -25,7 +25,7 @@ unsafe extern "C" fn move_head_to_cache(outq: *mut lzma_outq, allocator: *const 
         .mem_in_use
         .wrapping_sub(lzma_outq_outbuf_memusage((*buf).allocated));
 }
-unsafe extern "C" fn free_one_cached_buffer(
+unsafe fn free_one_cached_buffer(
     outq: *mut lzma_outq,
     allocator: *const lzma_allocator,
 ) {

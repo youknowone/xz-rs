@@ -87,13 +87,13 @@ pub const INDEX_GROUP_SIZE: u32 = 512;
 pub const PREALLOC_MAX: usize = (SIZE_MAX as usize)
     .wrapping_sub(core::mem::size_of::<index_group>())
     .wrapping_div(core::mem::size_of::<index_record>());
-unsafe extern "C" fn index_tree_init(tree: *mut index_tree) {
+unsafe fn index_tree_init(tree: *mut index_tree) {
     (*tree).root = core::ptr::null_mut();
     (*tree).leftmost = core::ptr::null_mut();
     (*tree).rightmost = core::ptr::null_mut();
     (*tree).count = 0;
 }
-unsafe extern "C" fn index_tree_node_end(
+unsafe fn index_tree_node_end(
     node: *mut index_tree_node,
     allocator: *const lzma_allocator,
     free_func: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
@@ -106,7 +106,7 @@ unsafe extern "C" fn index_tree_node_end(
     }
     free_func.unwrap()(node as *mut c_void, allocator);
 }
-unsafe extern "C" fn index_tree_end(
+unsafe fn index_tree_end(
     tree: *mut index_tree,
     allocator: *const lzma_allocator,
     free_func: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
@@ -115,7 +115,7 @@ unsafe extern "C" fn index_tree_end(
         index_tree_node_end((*tree).root, allocator, free_func);
     }
 }
-unsafe extern "C" fn index_tree_append(tree: *mut index_tree, mut node: *mut index_tree_node) {
+unsafe fn index_tree_append(tree: *mut index_tree, mut node: *mut index_tree_node) {
     (*node).parent = (*tree).rightmost;
     (*node).left = core::ptr::null_mut();
     (*node).right = core::ptr::null_mut();
@@ -153,7 +153,7 @@ unsafe extern "C" fn index_tree_append(tree: *mut index_tree, mut node: *mut ind
         (*node).parent = pivot;
     }
 }
-unsafe extern "C" fn index_tree_next(mut node: *const index_tree_node) -> *mut c_void {
+unsafe fn index_tree_next(mut node: *const index_tree_node) -> *mut c_void {
     if !(*node).right.is_null() {
         node = (*node).right;
         while !(*node).left.is_null() {
@@ -166,7 +166,7 @@ unsafe extern "C" fn index_tree_next(mut node: *const index_tree_node) -> *mut c
     }
     (*node).parent as *mut c_void
 }
-unsafe extern "C" fn index_tree_locate(tree: *const index_tree, target: lzma_vli) -> *mut c_void {
+unsafe fn index_tree_locate(tree: *const index_tree, target: lzma_vli) -> *mut c_void {
     let mut result: *const index_tree_node = core::ptr::null();
     let mut node: *const index_tree_node = (*tree).root;
     while !node.is_null() {
@@ -179,7 +179,7 @@ unsafe extern "C" fn index_tree_locate(tree: *const index_tree, target: lzma_vli
     }
     result as *mut c_void
 }
-unsafe extern "C" fn index_stream_init(
+unsafe fn index_stream_init(
     compressed_base: lzma_vli,
     uncompressed_base: lzma_vli,
     stream_number: u32,
@@ -214,7 +214,7 @@ unsafe extern "C" fn index_stream_end(node: *mut c_void, allocator: *const lzma_
     );
     lzma_free(s as *mut c_void, allocator);
 }
-unsafe extern "C" fn index_init_plain(allocator: *const lzma_allocator) -> *mut lzma_index {
+unsafe fn index_init_plain(allocator: *const lzma_allocator) -> *mut lzma_index {
     let i: *mut lzma_index =
         lzma_alloc(core::mem::size_of::<lzma_index>(), allocator) as *mut lzma_index;
     if !i.is_null() {
@@ -317,7 +317,7 @@ pub fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
             .wrapping_add(LZMA_STREAM_HEADER_SIZE as lzma_vli)
     }
 }
-unsafe extern "C" fn index_file_size(
+unsafe fn index_file_size(
     compressed_base: lzma_vli,
     unpadded_sum: lzma_vli,
     record_count: lzma_vli,
@@ -497,7 +497,7 @@ pub unsafe fn lzma_index_append(
         .wrapping_add(index_list_size_add as lzma_vli);
     LZMA_OK
 }
-unsafe extern "C" fn index_cat_helper(info: *const index_cat_info, this: *mut index_stream) {
+unsafe fn index_cat_helper(info: *const index_cat_info, this: *mut index_stream) {
     let left: *mut index_stream = (*this).node.left as *mut index_stream;
     let right: *mut index_stream = (*this).node.right as *mut index_stream;
     if !left.is_null() {
@@ -598,7 +598,7 @@ pub unsafe fn lzma_index_cat(
     lzma_free(src as *mut c_void, allocator);
     LZMA_OK
 }
-unsafe extern "C" fn index_dup_stream(
+unsafe fn index_dup_stream(
     src: *const index_stream,
     allocator: *const lzma_allocator,
 ) -> *mut index_stream {
@@ -694,7 +694,7 @@ pub unsafe fn lzma_index_dup(
     }
     dest
 }
-unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
+unsafe fn iter_set_info(iter: *mut lzma_index_iter) {
     let i: *const lzma_index = (*iter).internal[ITER_INDEX as usize].p as *const lzma_index;
     let stream: *const index_stream =
         (*iter).internal[ITER_STREAM as usize].p as *const index_stream;

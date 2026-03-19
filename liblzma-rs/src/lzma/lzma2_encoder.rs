@@ -24,14 +24,14 @@ pub const SEQ_LZMA_COPY: lzma2_encoder_seq = 2;
 pub const SEQ_LZMA_ENCODE: lzma2_encoder_seq = 1;
 pub const SEQ_INIT: lzma2_encoder_seq = 0;
 #[inline]
-unsafe extern "C" fn mf_unencoded(mf: *const lzma_mf) -> u32 {
+unsafe fn mf_unencoded(mf: *const lzma_mf) -> u32 {
     (*mf)
         .write_pos
         .wrapping_sub((*mf).read_pos)
         .wrapping_add((*mf).read_ahead)
 }
 #[inline]
-unsafe extern "C" fn mf_read(
+unsafe fn mf_read(
     mf: *mut lzma_mf,
     out: *mut u8,
     out_pos: *mut size_t,
@@ -53,7 +53,7 @@ unsafe extern "C" fn mf_read(
 }
 pub const LZMA2_UNCOMPRESSED_MAX: c_uint = 1u32 << 21;
 pub const LZMA2_HEADER_MAX: u32 = 6;
-unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
+unsafe fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
     let mut pos: size_t = 0;
     if (*coder).need_properties {
         pos = 0;
@@ -97,7 +97,7 @@ unsafe extern "C" fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
         .compressed_size
         .wrapping_add(LZMA2_HEADER_MAX as size_t);
 }
-unsafe extern "C" fn lzma2_header_uncompressed(coder: *mut lzma_lzma2_coder) {
+unsafe fn lzma2_header_uncompressed(coder: *mut lzma_lzma2_coder) {
     if (*coder).need_dictionary_reset {
         (*coder).buf[0] = 1;
     } else {

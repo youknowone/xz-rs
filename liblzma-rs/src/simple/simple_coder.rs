@@ -1,5 +1,5 @@
 use crate::types::*;
-unsafe extern "C" fn copy_or_code(
+unsafe fn copy_or_code(
     coder: *mut lzma_simple_coder,
     allocator: *const lzma_allocator,
     in_0: *const u8,
@@ -35,7 +35,7 @@ unsafe extern "C" fn copy_or_code(
     }
     LZMA_OK
 }
-unsafe extern "C" fn call_filter(
+unsafe fn call_filter(
     coder: *mut lzma_simple_coder,
     buffer: *mut u8,
     size: size_t,

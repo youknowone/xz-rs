@@ -30,7 +30,7 @@ pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
     end: None,
 };
 #[inline]
-unsafe extern "C" fn dict_write(
+unsafe fn dict_write(
     dict: *mut lzma_dict,
     in_0: *const u8,
     in_pos: *mut size_t,
@@ -53,7 +53,7 @@ unsafe extern "C" fn dict_write(
     }
 }
 #[inline]
-unsafe extern "C" fn dict_reset(dict: *mut lzma_dict) {
+unsafe fn dict_reset(dict: *mut lzma_dict) {
     (*dict).need_reset = true;
 }
 unsafe extern "C" fn lzma2_decode(

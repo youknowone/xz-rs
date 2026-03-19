@@ -1,5 +1,5 @@
 use crate::types::*;
-unsafe extern "C" fn decode_buffer(coder: *mut lzma_delta_coder, buffer: *mut u8, size: size_t) {
+unsafe fn decode_buffer(coder: *mut lzma_delta_coder, buffer: *mut u8, size: size_t) {
     let distance: size_t = (*coder).distance;
     let mut i: size_t = 0;
     while i < size {

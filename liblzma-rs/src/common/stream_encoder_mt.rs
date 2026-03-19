@@ -58,7 +58,7 @@ pub const THR_EXIT: worker_state = 4;
 pub const THR_STOP: worker_state = 3;
 pub const THR_FINISH: worker_state = 2;
 pub const BLOCK_SIZE_MAX: c_ulonglong = UINT64_MAX.wrapping_div(LZMA_THREADS_MAX as u64);
-unsafe extern "C" fn worker_error(thr: *mut worker_thread, ret: lzma_ret) {
+unsafe fn worker_error(thr: *mut worker_thread, ret: lzma_ret) {
     let mut mythread_i_207: c_uint = 0;
     while if mythread_i_207 != 0 {
         mythread_mutex_unlock(::core::ptr::addr_of_mut!((*(*thr).coder).mutex));
@@ -79,7 +79,7 @@ unsafe extern "C" fn worker_error(thr: *mut worker_thread, ret: lzma_ret) {
         mythread_i_207 = 1;
     }
 }
-unsafe extern "C" fn worker_encode(
+unsafe fn worker_encode(
     thr: *mut worker_thread,
     out_pos: *mut size_t,
     mut state: worker_state,
@@ -353,7 +353,7 @@ unsafe extern "C" fn worker_start(thr_ptr: *mut c_void) -> *mut c_void {
     crate::alloc::internal_free((*thr).in_0 as *mut c_void, (*thr).allocator);
     MYTHREAD_RET_VALUE
 }
-unsafe extern "C" fn threads_stop(coder: *mut lzma_stream_coder, wait_for_threads: bool) {
+unsafe fn threads_stop(coder: *mut lzma_stream_coder, wait_for_threads: bool) {
     let mut i: u32 = 0;
     while i < (*coder).threads_initialized {
         let mut mythread_i_449: c_uint = 0;
@@ -414,7 +414,7 @@ unsafe extern "C" fn threads_stop(coder: *mut lzma_stream_coder, wait_for_thread
         i_0 += 1;
     }
 }
-unsafe extern "C" fn threads_end(coder: *mut lzma_stream_coder, allocator: *const lzma_allocator) {
+unsafe fn threads_end(coder: *mut lzma_stream_coder, allocator: *const lzma_allocator) {
     let mut i: u32 = 0;
     while i < (*coder).threads_initialized {
         let mut mythread_i_477: c_uint = 0;
@@ -449,7 +449,7 @@ unsafe extern "C" fn threads_end(coder: *mut lzma_stream_coder, allocator: *cons
     }
     crate::alloc::internal_free((*coder).threads as *mut c_void, allocator);
 }
-unsafe extern "C" fn initialize_new_thread(
+unsafe fn initialize_new_thread(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {
@@ -499,7 +499,7 @@ unsafe extern "C" fn initialize_new_thread(
     crate::alloc::internal_free((*thr).in_0 as *mut c_void, allocator);
     LZMA_MEM_ERROR
 }
-unsafe extern "C" fn get_thread(
+unsafe fn get_thread(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
 ) -> lzma_ret {
@@ -586,7 +586,7 @@ unsafe extern "C" fn get_thread(
     }
     LZMA_OK
 }
-unsafe extern "C" fn stream_encode_in(
+unsafe fn stream_encode_in(
     coder: *mut lzma_stream_coder,
     allocator: *const lzma_allocator,
     in_0: *const u8,
@@ -663,7 +663,7 @@ unsafe extern "C" fn stream_encode_in(
     }
     LZMA_OK
 }
-unsafe extern "C" fn wait_for_work(
+unsafe fn wait_for_work(
     coder: *mut lzma_stream_coder,
     wait_abs: *mut mythread_condtime,
     has_blocked: *mut bool,
@@ -953,7 +953,7 @@ unsafe extern "C" fn stream_encoder_mt_update(
     );
     LZMA_OK
 }
-unsafe extern "C" fn get_options(
+unsafe fn get_options(
     options: *const lzma_mt,
     opt_easy: *mut lzma_options_easy,
     filters: *mut *const lzma_filter,

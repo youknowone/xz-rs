@@ -205,7 +205,7 @@ unsafe extern "C" fn index_decoder_memconfig(
     }
     LZMA_OK
 }
-unsafe extern "C" fn index_decoder_reset(
+unsafe fn index_decoder_reset(
     coder: *mut lzma_index_coder,
     allocator: *const lzma_allocator,
     i: *mut *mut lzma_index,

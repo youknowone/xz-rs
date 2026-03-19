@@ -35,7 +35,7 @@ pub const SEQ_FOOTER: file_info_seq = 3;
 pub const SEQ_PADDING_DECODE: file_info_seq = 2;
 pub const SEQ_PADDING_SEEK: file_info_seq = 1;
 pub const SEQ_MAGIC_BYTES: file_info_seq = 0;
-unsafe extern "C" fn fill_temp(
+unsafe fn fill_temp(
     coder: *mut lzma_file_info_coder,
     in_0: *const u8,
     in_pos: *mut size_t,
@@ -51,7 +51,7 @@ unsafe extern "C" fn fill_temp(
     ) as u64);
     (*coder).temp_pos < (*coder).temp_size
 }
-unsafe extern "C" fn seek_to_pos(
+unsafe fn seek_to_pos(
     coder: *mut lzma_file_info_coder,
     target_pos: u64,
     in_start: size_t,
@@ -76,7 +76,7 @@ unsafe extern "C" fn seek_to_pos(
     (*coder).file_cur_pos = target_pos;
     external_seek_needed
 }
-unsafe extern "C" fn reverse_seek(
+unsafe fn reverse_seek(
     coder: *mut lzma_file_info_coder,
     in_start: size_t,
     in_pos: *mut size_t,
@@ -110,7 +110,7 @@ unsafe extern "C" fn reverse_seek(
     }
     LZMA_OK
 }
-unsafe extern "C" fn get_padding_size(buf: *const u8, mut buf_size: size_t) -> size_t {
+unsafe fn get_padding_size(buf: *const u8, mut buf_size: size_t) -> size_t {
     let mut padding: size_t = 0;
     while buf_size > 0 && {
         buf_size -= 1;
@@ -126,7 +126,7 @@ extern "C" fn hide_format_error(mut ret: lzma_ret) -> lzma_ret {
     }
     ret
 }
-unsafe extern "C" fn decode_index(
+unsafe fn decode_index(
     coder: *mut lzma_file_info_coder,
     allocator: *const lzma_allocator,
     in_0: *const u8,
