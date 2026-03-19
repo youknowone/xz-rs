@@ -40,7 +40,7 @@ extern "C" fn index_stream_size(
         .wrapping_add(index_size(count, index_list_size))
         .wrapping_add(LZMA_STREAM_HEADER_SIZE as lzma_vli)
 }
-pub unsafe extern "C" fn lzma_index_hash_init(
+pub unsafe fn lzma_index_hash_init(
     mut index_hash: *mut lzma_index_hash,
     allocator: *const lzma_allocator,
 ) -> *mut lzma_index_hash {
@@ -74,13 +74,13 @@ pub unsafe extern "C" fn lzma_index_hash_init(
     );
     index_hash
 }
-pub unsafe extern "C" fn lzma_index_hash_end(
+pub unsafe fn lzma_index_hash_end(
     index_hash: *mut lzma_index_hash,
     allocator: *const lzma_allocator,
 ) {
     lzma_free(index_hash as *mut c_void, allocator);
 }
-pub extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
+pub fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
     unsafe {
         index_size(
             (*index_hash).blocks.count,
@@ -107,7 +107,7 @@ unsafe extern "C" fn hash_append(
         core::mem::size_of::<[lzma_vli; 2]>(),
     );
 }
-pub unsafe extern "C" fn lzma_index_hash_append(
+pub unsafe fn lzma_index_hash_append(
     index_hash: *mut lzma_index_hash,
     unpadded_size: lzma_vli,
     uncompressed_size: lzma_vli,
@@ -141,7 +141,7 @@ pub unsafe extern "C" fn lzma_index_hash_append(
     }
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_index_hash_decode(
+pub unsafe fn lzma_index_hash_decode(
     index_hash: *mut lzma_index_hash,
     in_0: *const u8,
     in_pos: *mut size_t,

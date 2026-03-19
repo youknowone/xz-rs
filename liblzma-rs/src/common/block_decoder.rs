@@ -288,7 +288,7 @@ pub unsafe extern "C" fn lzma_block_decoder_init(
         (*block).filters,
     )
 }
-pub unsafe extern "C" fn lzma_block_decoder(
+pub unsafe fn lzma_block_decoder(
     strm: *mut lzma_stream,
     block: *mut lzma_block,
 ) -> lzma_ret {

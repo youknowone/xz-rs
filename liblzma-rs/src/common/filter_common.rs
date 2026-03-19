@@ -101,7 +101,7 @@ static FEATURES: [filter_features; 13] = [
         changes_size: false,
     },
 ];
-pub unsafe extern "C" fn lzma_filters_copy(
+pub unsafe fn lzma_filters_copy(
     src: *const lzma_filter,
     real_dest: *mut lzma_filter,
     allocator: *const lzma_allocator,
@@ -179,7 +179,7 @@ pub unsafe extern "C" fn lzma_filters_copy(
         }
     };
 }
-pub unsafe extern "C" fn lzma_filters_free(
+pub unsafe fn lzma_filters_free(
     filters: *mut lzma_filter,
     allocator: *const lzma_allocator,
 ) {
@@ -197,7 +197,7 @@ pub unsafe extern "C" fn lzma_filters_free(
         i += 1;
     }
 }
-pub unsafe extern "C" fn lzma_validate_chain(
+pub unsafe fn lzma_validate_chain(
     filters: *const lzma_filter,
     count: *mut size_t,
 ) -> lzma_ret {
@@ -235,7 +235,7 @@ pub unsafe extern "C" fn lzma_validate_chain(
     *count = i;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_raw_coder_init(
+pub unsafe fn lzma_raw_coder_init(
     next: *mut lzma_next_coder,
     allocator: *const lzma_allocator,
     options: *const lzma_filter,
@@ -292,7 +292,7 @@ pub unsafe extern "C" fn lzma_raw_coder_init(
     }
     ret
 }
-pub unsafe extern "C" fn lzma_raw_coder_memusage(
+pub unsafe fn lzma_raw_coder_memusage(
     coder_find: lzma_filter_find,
     filters: *const lzma_filter,
 ) -> u64 {

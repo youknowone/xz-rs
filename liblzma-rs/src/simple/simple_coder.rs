@@ -186,7 +186,7 @@ unsafe extern "C" fn simple_coder_update(
         reversed_filters.offset(1),
     )
 }
-pub unsafe extern "C" fn lzma_simple_coder_init(
+pub unsafe fn lzma_simple_coder_init(
     next: *mut lzma_next_coder,
     allocator: *const lzma_allocator,
     filters: *const lzma_filter_info,

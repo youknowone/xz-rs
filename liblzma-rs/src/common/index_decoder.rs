@@ -308,7 +308,7 @@ pub unsafe extern "C" fn lzma_index_decoder_init(
     }
     index_decoder_reset(coder, allocator, i, memlimit)
 }
-pub unsafe extern "C" fn lzma_index_decoder(
+pub unsafe fn lzma_index_decoder(
     strm: *mut lzma_stream,
     i: *mut *mut lzma_index,
     memlimit: u64,
@@ -334,7 +334,7 @@ pub unsafe extern "C" fn lzma_index_decoder(
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_index_buffer_decode(
+pub unsafe fn lzma_index_buffer_decode(
     i: *mut *mut lzma_index,
     memlimit: *mut u64,
     allocator: *const lzma_allocator,

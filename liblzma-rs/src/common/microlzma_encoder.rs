@@ -170,7 +170,7 @@ unsafe extern "C" fn microlzma_encoder_init(
         ::core::ptr::addr_of!(filters) as *const lzma_filter_info,
     )
 }
-pub unsafe extern "C" fn lzma_microlzma_encoder(
+pub unsafe fn lzma_microlzma_encoder(
     strm: *mut lzma_stream,
     options: *const lzma_options_lzma,
 ) -> lzma_ret {

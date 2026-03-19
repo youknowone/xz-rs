@@ -73,13 +73,13 @@ pub const LZMA_VERSION: c_uint = (LZMA_VERSION_MAJOR)
     .wrapping_add((LZMA_VERSION_PATCH).wrapping_mul(10))
     .wrapping_add(LZMA_VERSION_STABILITY);
 pub const LZMA_TIMED_OUT: c_uint = 101;
-pub extern "C" fn lzma_version_number() -> u32 {
+pub fn lzma_version_number() -> u32 {
     LZMA_VERSION as u32
 }
-pub extern "C" fn lzma_version_string() -> *const c_char {
+pub fn lzma_version_string() -> *const c_char {
     crate::c_str!("5.8.2")
 }
-pub unsafe extern "C" fn lzma_alloc(
+pub unsafe fn lzma_alloc(
     mut size: size_t,
     allocator: *const lzma_allocator,
 ) -> *mut c_void {
@@ -94,7 +94,7 @@ pub unsafe extern "C" fn lzma_alloc(
     }
     ptr
 }
-pub unsafe extern "C" fn lzma_alloc_zero(
+pub unsafe fn lzma_alloc_zero(
     mut size: size_t,
     allocator: *const lzma_allocator,
 ) -> *mut c_void {
@@ -119,7 +119,7 @@ pub unsafe extern "C" fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allo
         free(ptr);
     };
 }
-pub unsafe extern "C" fn lzma_bufcpy(
+pub unsafe fn lzma_bufcpy(
     in_0: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
@@ -149,7 +149,7 @@ pub unsafe extern "C" fn lzma_bufcpy(
     *out_pos = (*out_pos).wrapping_add(copy_size);
     copy_size
 }
-pub unsafe extern "C" fn lzma_next_filter_init(
+pub unsafe fn lzma_next_filter_init(
     next: *mut lzma_next_coder,
     allocator: *const lzma_allocator,
     filters: *const lzma_filter_info,
@@ -165,7 +165,7 @@ pub unsafe extern "C" fn lzma_next_filter_init(
         (*filters).init.unwrap()(next, allocator, filters)
     }
 }
-pub unsafe extern "C" fn lzma_next_filter_update(
+pub unsafe fn lzma_next_filter_update(
     next: *mut lzma_next_coder,
     allocator: *const lzma_allocator,
     reversed_filters: *const lzma_filter,
@@ -186,7 +186,7 @@ pub unsafe extern "C" fn lzma_next_filter_update(
         reversed_filters,
     )
 }
-pub unsafe extern "C" fn lzma_next_end(
+pub unsafe fn lzma_next_end(
     next: *mut lzma_next_coder,
     allocator: *const lzma_allocator,
 ) {
@@ -210,7 +210,7 @@ pub unsafe extern "C" fn lzma_next_end(
         };
     }
 }
-pub unsafe extern "C" fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
+pub unsafe fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
     if strm.is_null() {
         return LZMA_PROG_ERROR;
     }
@@ -244,7 +244,7 @@ pub unsafe extern "C" fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
     (*strm).total_out = 0;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret {
+pub unsafe fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret {
     if (*strm).next_in.is_null() && (*strm).avail_in != 0
         || (*strm).next_out.is_null() && (*strm).avail_out != 0
         || (*strm).internal.is_null()
@@ -382,7 +382,7 @@ pub unsafe extern "C" fn lzma_code(strm: *mut lzma_stream, action: lzma_action) 
     }
     ret
 }
-pub unsafe extern "C" fn lzma_end(strm: *mut lzma_stream) {
+pub unsafe fn lzma_end(strm: *mut lzma_stream) {
     if !strm.is_null() && !(*strm).internal.is_null() {
         lzma_next_end(
             ::core::ptr::addr_of_mut!((*(*strm).internal).next),
@@ -392,7 +392,7 @@ pub unsafe extern "C" fn lzma_end(strm: *mut lzma_stream) {
         (*strm).internal = core::ptr::null_mut();
     }
 }
-pub unsafe extern "C" fn lzma_get_progress(
+pub unsafe fn lzma_get_progress(
     strm: *mut lzma_stream,
     progress_in: *mut u64,
     progress_out: *mut u64,
@@ -418,7 +418,7 @@ pub unsafe extern "C" fn lzma_get_progress(
         *progress_out = (*strm).total_out;
     };
 }
-pub extern "C" fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
+pub fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
     return unsafe {
         if strm.is_null() || (*strm).internal.is_null() {
             return LZMA_CHECK_NONE;
@@ -429,7 +429,7 @@ pub extern "C" fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
         (*(*strm).internal).next.get_check.unwrap()((*(*strm).internal).next.coder)
     };
 }
-pub extern "C" fn lzma_memusage(strm: *const lzma_stream) -> u64 {
+pub fn lzma_memusage(strm: *const lzma_stream) -> u64 {
     return unsafe {
         let mut memusage: u64 = 0;
         let mut old_memlimit: u64 = 0;
@@ -448,7 +448,7 @@ pub extern "C" fn lzma_memusage(strm: *const lzma_stream) -> u64 {
         memusage
     };
 }
-pub extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
+pub fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
     return unsafe {
         let mut old_memlimit: u64 = 0;
         let mut memusage: u64 = 0;
@@ -467,7 +467,7 @@ pub extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
         old_memlimit
     };
 }
-pub unsafe extern "C" fn lzma_memlimit_set(
+pub unsafe fn lzma_memlimit_set(
     strm: *mut lzma_stream,
     mut new_memlimit: u64,
 ) -> lzma_ret {

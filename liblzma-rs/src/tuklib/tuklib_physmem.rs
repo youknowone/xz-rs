@@ -1,4 +1,4 @@
-pub extern "C" fn tuklib_physmem() -> u64 {
+pub fn tuklib_physmem() -> u64 {
     #[cfg(target_os = "macos")]
     {
         let mut memsize: u64 = 0;

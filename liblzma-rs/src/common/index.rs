@@ -228,7 +228,7 @@ unsafe extern "C" fn index_init_plain(allocator: *const lzma_allocator) -> *mut 
     }
     i
 }
-pub unsafe extern "C" fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index {
+pub unsafe fn lzma_index_init(allocator: *const lzma_allocator) -> *mut lzma_index {
     let i: *mut lzma_index = index_init_plain(allocator);
     if i.is_null() {
         return core::ptr::null_mut();
@@ -244,7 +244,7 @@ pub unsafe extern "C" fn lzma_index_init(allocator: *const lzma_allocator) -> *m
     );
     i
 }
-pub unsafe extern "C" fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator) {
+pub unsafe fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocator) {
     if !i.is_null() {
         index_tree_end(
             ::core::ptr::addr_of_mut!((*i).streams),
@@ -256,13 +256,13 @@ pub unsafe extern "C" fn lzma_index_end(i: *mut lzma_index, allocator: *const lz
         lzma_free(i as *mut c_void, allocator);
     }
 }
-pub unsafe extern "C" fn lzma_index_prealloc(i: *mut lzma_index, mut records: lzma_vli) {
+pub unsafe fn lzma_index_prealloc(i: *mut lzma_index, mut records: lzma_vli) {
     if records > PREALLOC_MAX as lzma_vli {
         records = PREALLOC_MAX as lzma_vli;
     }
     (*i).prealloc = records as size_t;
 }
-pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u64 {
+pub fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u64 {
     let alloc_overhead: size_t = (4_usize).wrapping_mul(core::mem::size_of::<*mut c_void>());
     let stream_base: size_t = (core::mem::size_of::<index_stream>())
         .wrapping_add(core::mem::size_of::<index_group>())
@@ -294,22 +294,22 @@ pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u6
         .wrapping_add(streams_mem)
         .wrapping_add(groups_mem)
 }
-pub extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
+pub fn lzma_index_memused(i: *const lzma_index) -> u64 {
     unsafe { lzma_index_memusage((*i).streams.count as lzma_vli, (*i).record_count) }
 }
-pub extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
+pub fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
     unsafe { (*i).record_count }
 }
-pub extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
+pub fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
     unsafe { (*i).streams.count as lzma_vli }
 }
-pub extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
+pub fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
     unsafe { index_size((*i).record_count, (*i).index_list_size) }
 }
-pub extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
+pub fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
     unsafe { (*i).total_size }
 }
-pub extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
+pub fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
     unsafe {
         (LZMA_STREAM_HEADER_SIZE as lzma_vli)
             .wrapping_add((*i).total_size)
@@ -337,7 +337,7 @@ unsafe extern "C" fn index_file_size(
     }
     file_size
 }
-pub unsafe extern "C" fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli {
+pub unsafe fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli {
     let s: *const index_stream = (*i).streams.rightmost as *const index_stream;
     let g: *const index_group = (*s).groups.rightmost as *const index_group;
     index_file_size(
@@ -354,10 +354,10 @@ pub unsafe extern "C" fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli 
         (*s).stream_padding,
     )
 }
-pub unsafe extern "C" fn lzma_index_uncompressed_size(i: *const lzma_index) -> lzma_vli {
+pub unsafe fn lzma_index_uncompressed_size(i: *const lzma_index) -> lzma_vli {
     (*i).uncompressed_size
 }
-pub unsafe extern "C" fn lzma_index_checks(i: *const lzma_index) -> u32 {
+pub unsafe fn lzma_index_checks(i: *const lzma_index) -> u32 {
     let mut checks: u32 = (*i).checks;
     let s: *const index_stream = (*i).streams.rightmost as *const index_stream;
     if (*s).stream_flags.version != UINT32_MAX {
@@ -365,10 +365,10 @@ pub unsafe extern "C" fn lzma_index_checks(i: *const lzma_index) -> u32 {
     }
     checks
 }
-pub unsafe extern "C" fn lzma_index_padding_size(i: *const lzma_index) -> u32 {
+pub unsafe fn lzma_index_padding_size(i: *const lzma_index) -> u32 {
     ((4_u64).wrapping_sub(index_size_unpadded((*i).record_count, (*i).index_list_size)) & 3) as u32
 }
-pub unsafe extern "C" fn lzma_index_stream_flags(
+pub unsafe fn lzma_index_stream_flags(
     i: *mut lzma_index,
     stream_flags: *const lzma_stream_flags,
 ) -> lzma_ret {
@@ -383,7 +383,7 @@ pub unsafe extern "C" fn lzma_index_stream_flags(
     (*s).stream_flags = *stream_flags;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_index_stream_padding(
+pub unsafe fn lzma_index_stream_padding(
     i: *mut lzma_index,
     stream_padding: lzma_vli,
 ) -> lzma_ret {
@@ -400,7 +400,7 @@ pub unsafe extern "C" fn lzma_index_stream_padding(
     (*s).stream_padding = stream_padding;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_index_append(
+pub unsafe fn lzma_index_append(
     i: *mut lzma_index,
     allocator: *const lzma_allocator,
     unpadded_size: lzma_vli,
@@ -517,7 +517,7 @@ unsafe extern "C" fn index_cat_helper(info: *const index_cat_info, this: *mut in
         index_cat_helper(info, right);
     }
 }
-pub unsafe extern "C" fn lzma_index_cat(
+pub unsafe fn lzma_index_cat(
     dest: *mut lzma_index,
     src: *mut lzma_index,
     allocator: *const lzma_allocator,
@@ -663,7 +663,7 @@ unsafe extern "C" fn index_dup_stream(
     );
     dest
 }
-pub unsafe extern "C" fn lzma_index_dup(
+pub unsafe fn lzma_index_dup(
     src: *const lzma_index,
     allocator: *const lzma_allocator,
 ) -> *mut lzma_index {
@@ -795,17 +795,17 @@ unsafe extern "C" fn iter_set_info(iter: *mut lzma_index_iter) {
             .wrapping_add((*iter).stream.uncompressed_offset);
     }
 }
-pub unsafe extern "C" fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *const lzma_index) {
+pub unsafe fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *const lzma_index) {
     (*iter).internal[ITER_INDEX as usize].p = i as *const c_void;
     lzma_index_iter_rewind(iter);
 }
-pub unsafe extern "C" fn lzma_index_iter_rewind(iter: *mut lzma_index_iter) {
+pub unsafe fn lzma_index_iter_rewind(iter: *mut lzma_index_iter) {
     (*iter).internal[ITER_STREAM as usize].p = core::ptr::null();
     (*iter).internal[ITER_GROUP as usize].p = core::ptr::null();
     (*iter).internal[ITER_RECORD as usize].s = 0;
     (*iter).internal[ITER_METHOD as usize].s = ITER_METHOD_NORMAL as size_t;
 }
-pub unsafe extern "C" fn lzma_index_iter_next(
+pub unsafe fn lzma_index_iter_next(
     iter: *mut lzma_index_iter,
     mode: lzma_index_iter_mode,
 ) -> lzma_bool {
@@ -894,7 +894,7 @@ pub unsafe extern "C" fn lzma_index_iter_next(
     iter_set_info(iter);
     false as lzma_bool
 }
-pub unsafe extern "C" fn lzma_index_iter_locate(
+pub unsafe fn lzma_index_iter_locate(
     iter: *mut lzma_index_iter,
     mut target: lzma_vli,
 ) -> lzma_bool {

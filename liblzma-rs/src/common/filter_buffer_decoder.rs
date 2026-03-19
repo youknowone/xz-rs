@@ -1,5 +1,5 @@
 use crate::types::*;
-pub unsafe extern "C" fn lzma_raw_buffer_decode(
+pub unsafe fn lzma_raw_buffer_decode(
     filters: *const lzma_filter,
     allocator: *const lzma_allocator,
     in_0: *const u8,

@@ -608,7 +608,7 @@ pub struct lzma_lzma1_encoder_s {
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
 #[inline]
-pub extern "C" fn read32le(buf: *const u8) -> u32 {
+pub fn read32le(buf: *const u8) -> u32 {
     return unsafe {
         let mut num: u32 = *buf as u32;
         num |= (*buf.offset(1) as u32) << 8;
@@ -618,7 +618,7 @@ pub extern "C" fn read32le(buf: *const u8) -> u32 {
     };
 }
 #[inline]
-pub extern "C" fn write32le(buf: *mut u8, num: u32) {
+pub fn write32le(buf: *mut u8, num: u32) {
     unsafe {
         *buf = num as u8;
         *buf.offset(1) = (num >> 8) as u8;
@@ -712,12 +712,12 @@ pub struct mythread_cond {
 }
 pub type mythread_condtime = timespec;
 #[inline]
-pub extern "C" fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
+pub fn mythread_sigmask(how: c_int, set: *const sigset_t, oset: *mut sigset_t) {
     let _ret: c_int =
         unsafe { pthread_sigmask(how, set as *const sigset_t, oset as *mut sigset_t) };
 }
 #[inline]
-pub extern "C" fn mythread_create(
+pub fn mythread_create(
     thread: *mut mythread,
     func: Option<unsafe extern "C" fn(*mut c_void) -> *mut c_void>,
     arg: *mut c_void,
@@ -746,42 +746,42 @@ pub extern "C" fn mythread_create(
     ret
 }
 #[inline]
-pub extern "C" fn mythread_join(thread: mythread) -> c_int {
+pub fn mythread_join(thread: mythread) -> c_int {
     unsafe { pthread_join(thread as pthread_t, core::ptr::null_mut()) }
 }
 #[inline]
-pub extern "C" fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
+pub fn mythread_mutex_init(mutex: *mut mythread_mutex) -> c_int {
     unsafe { pthread_mutex_init(mutex as *mut pthread_mutex_t, core::ptr::null()) }
 }
 #[inline]
-pub extern "C" fn mythread_mutex_destroy(mutex: *mut mythread_mutex) {
+pub fn mythread_mutex_destroy(mutex: *mut mythread_mutex) {
     let _ret: c_int = unsafe { pthread_mutex_destroy(mutex as *mut pthread_mutex_t) };
 }
 #[inline]
-pub extern "C" fn mythread_mutex_lock(mutex: *mut mythread_mutex) {
+pub fn mythread_mutex_lock(mutex: *mut mythread_mutex) {
     let _ret: c_int = unsafe { pthread_mutex_lock(mutex as *mut pthread_mutex_t) };
 }
 #[inline]
-pub extern "C" fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
+pub fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
     let _ret: c_int = unsafe { pthread_mutex_unlock(mutex as *mut pthread_mutex_t) };
 }
 #[inline]
-pub extern "C" fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
+pub fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
     return unsafe {
         (*mycond).clk_id = _CLOCK_REALTIME;
         pthread_cond_init(::core::ptr::addr_of_mut!((*mycond).cond), core::ptr::null())
     };
 }
 #[inline]
-pub extern "C" fn mythread_cond_destroy(cond: *mut mythread_cond) {
+pub fn mythread_cond_destroy(cond: *mut mythread_cond) {
     let _ret: c_int = unsafe { pthread_cond_destroy(::core::ptr::addr_of_mut!((*cond).cond)) };
 }
 #[inline]
-pub extern "C" fn mythread_cond_signal(cond: *mut mythread_cond) {
+pub fn mythread_cond_signal(cond: *mut mythread_cond) {
     let _ret: c_int = unsafe { pthread_cond_signal(::core::ptr::addr_of_mut!((*cond).cond)) };
 }
 #[inline]
-pub extern "C" fn mythread_cond_wait(cond: *mut mythread_cond, mutex: *mut mythread_mutex) {
+pub fn mythread_cond_wait(cond: *mut mythread_cond, mutex: *mut mythread_mutex) {
     let _ret: c_int = unsafe {
         pthread_cond_wait(
             ::core::ptr::addr_of_mut!((*cond).cond),
@@ -790,7 +790,7 @@ pub extern "C" fn mythread_cond_wait(cond: *mut mythread_cond, mutex: *mut mythr
     };
 }
 #[inline]
-pub extern "C" fn mythread_cond_timedwait(
+pub fn mythread_cond_timedwait(
     cond: *mut mythread_cond,
     mutex: *mut mythread_mutex,
     condtime: *const mythread_condtime,
@@ -805,7 +805,7 @@ pub extern "C" fn mythread_cond_timedwait(
     ret
 }
 #[inline]
-pub extern "C" fn mythread_condtime_set(
+pub fn mythread_condtime_set(
     condtime: *mut mythread_condtime,
     cond: *const mythread_cond,
     timeout_ms: u32,
@@ -827,40 +827,40 @@ pub extern "C" fn mythread_condtime_set(
     }
 }
 #[inline]
-pub extern "C" fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
+pub fn vli_ceil4(vli: lzma_vli) -> lzma_vli {
     vli.wrapping_add(3) & !(3)
 }
 #[inline]
-pub extern "C" fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
-    (1u32.wrapping_add(unsafe { lzma_vli_size(count) }) as lzma_vli)
+pub fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
+    (1u32.wrapping_add(lzma_vli_size(count)) as lzma_vli)
         .wrapping_add(index_list_size)
         .wrapping_add(4)
 }
 #[inline]
-pub extern "C" fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
+pub fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
     unsafe { (*outq).bufs_in_use < (*outq).bufs_limit }
 }
 #[inline]
-pub extern "C" fn lzma_outq_is_empty(outq: *const lzma_outq) -> bool {
+pub fn lzma_outq_is_empty(outq: *const lzma_outq) -> bool {
     unsafe { (*outq).bufs_in_use == 0 }
 }
 #[inline]
-pub unsafe extern "C" fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
+pub unsafe fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
     (*mf).buffer.offset((*mf).read_pos as isize)
 }
 #[inline]
-pub unsafe extern "C" fn mf_avail(mf: *const lzma_mf) -> u32 {
+pub unsafe fn mf_avail(mf: *const lzma_mf) -> u32 {
     (*mf).write_pos.wrapping_sub((*mf).read_pos)
 }
 #[inline]
-pub unsafe extern "C" fn mf_skip(mf: *mut lzma_mf, amount: u32) {
+pub unsafe fn mf_skip(mf: *mut lzma_mf, amount: u32) {
     if amount != 0 {
         (*mf).skip.unwrap()(mf, amount);
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
 }
 #[inline(always)]
-pub unsafe extern "C" fn lzma_memcmplen(
+pub unsafe fn lzma_memcmplen(
     buf1: *const u8,
     buf2: *const u8,
     mut len: u32,
@@ -889,7 +889,7 @@ pub unsafe extern "C" fn lzma_memcmplen(
     len
 }
 #[inline]
-pub unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
+pub unsafe fn get_dist_slot(dist: u32) -> u32 {
     if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
         return lzma_fastpos[dist as usize] as u32;
     }
@@ -901,7 +901,7 @@ pub unsafe extern "C" fn get_dist_slot(dist: u32) -> u32 {
         .wrapping_add((2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32)
 }
 #[inline]
-pub extern "C" fn rc_bit_price(prob: probability, bit: u32) -> u32 {
+pub fn rc_bit_price(prob: probability, bit: u32) -> u32 {
     unsafe {
         lzma_rc_prices[((prob as u32
             ^ 0u32.wrapping_sub(bit) & (RC_BIT_MODEL_TOTAL as u32).wrapping_sub(1))
@@ -909,11 +909,11 @@ pub extern "C" fn rc_bit_price(prob: probability, bit: u32) -> u32 {
     }
 }
 #[inline]
-pub extern "C" fn rc_bit_0_price(prob: probability) -> u32 {
+pub fn rc_bit_0_price(prob: probability) -> u32 {
     unsafe { lzma_rc_prices[(prob >> RC_MOVE_REDUCING_BITS) as usize] as u32 }
 }
 #[inline]
-pub extern "C" fn rc_bit_1_price(prob: probability) -> u32 {
+pub fn rc_bit_1_price(prob: probability) -> u32 {
     unsafe {
         lzma_rc_prices
             [((prob as u32 ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1)) >> RC_MOVE_REDUCING_BITS) as usize]
@@ -921,7 +921,7 @@ pub extern "C" fn rc_bit_1_price(prob: probability) -> u32 {
     }
 }
 #[inline]
-pub unsafe extern "C" fn rc_bittree_price(
+pub unsafe fn rc_bittree_price(
     probs: *const probability,
     bit_levels: u32,
     mut symbol: u32,
@@ -939,18 +939,18 @@ pub unsafe extern "C" fn rc_bittree_price(
     price
 }
 #[inline]
-pub extern "C" fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
+pub fn mf_get_hash_bytes(match_finder: lzma_match_finder) -> u32 {
     match_finder as u32 & 0xf
 }
 #[inline]
-pub unsafe extern "C" fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
+pub unsafe fn is_lclppb_valid(options: *const lzma_options_lzma) -> bool {
     (*options).lc <= LZMA_LCLP_MAX
         && (*options).lp <= LZMA_LCLP_MAX
         && (*options).lc.wrapping_add((*options).lp) <= LZMA_LCLP_MAX
         && (*options).pb <= LZMA_PB_MAX
 }
 #[inline]
-pub unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
+pub unsafe fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
     let coders: size_t = (LITERAL_CODER_SIZE << lc.wrapping_add(lp)) as size_t;
     let mut i: size_t = 0;
     while i < coders {
@@ -958,7 +958,7 @@ pub unsafe extern "C" fn literal_init(probs: *mut probability, lc: u32, lp: u32)
         i += 1;
     }
 }
-pub extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
+pub fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
     unsafe {
         (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
             && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX
@@ -966,14 +966,14 @@ pub extern "C" fn is_backward_size_valid(options: *const lzma_stream_flags) -> b
     }
 }
 #[inline]
-pub extern "C" fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
+pub fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     vli_ceil4(index_size_unpadded(count, index_list_size))
 }
-pub extern "C" fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
+pub fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
     (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
 }
 #[inline]
-pub unsafe extern "C" fn aligned_read32ne(buf: *const u8) -> u32 {
+pub unsafe fn aligned_read32ne(buf: *const u8) -> u32 {
     *(buf as *const u32)
 }
 pub type rc_symbol = c_uint;

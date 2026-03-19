@@ -673,7 +673,7 @@ unsafe extern "C" fn encode_eopm(coder: *mut lzma_lzma1_encoder, position: u32) 
     match_0(coder, pos_state, UINT32_MAX, MATCH_LEN_MIN);
 }
 pub const LOOP_INPUT_MAX: u32 = OPTS + 1;
-pub unsafe extern "C" fn lzma_lzma_encode(
+pub unsafe fn lzma_lzma_encode(
     coder: *mut lzma_lzma1_encoder,
     mf: *mut lzma_mf,
     out: *mut u8,
@@ -856,7 +856,7 @@ unsafe extern "C" fn length_encoder_reset(
         }
     }
 }
-pub unsafe extern "C" fn lzma_lzma_encoder_reset(
+pub unsafe fn lzma_lzma_encoder_reset(
     coder: *mut lzma_lzma1_encoder,
     options: *const lzma_options_lzma,
 ) -> lzma_ret {
@@ -929,7 +929,7 @@ pub unsafe extern "C" fn lzma_lzma_encoder_reset(
     (*coder).opts_current_index = 0;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_lzma_encoder_create(
+pub unsafe fn lzma_lzma_encoder_create(
     coder_ptr: *mut *mut c_void,
     allocator: *const lzma_allocator,
     id: lzma_vli,
@@ -1057,13 +1057,13 @@ pub extern "C" fn lzma_lzma_encoder_memusage(options: *const c_void) -> u64 {
         options as *const lzma_options_lzma,
     );
     let lz_memusage: u64 =
-        unsafe { lzma_lz_encoder_memusage(::core::ptr::addr_of_mut!(lz_options)) } as u64;
+        lzma_lz_encoder_memusage(::core::ptr::addr_of_mut!(lz_options)) as u64;
     if lz_memusage == UINT64_MAX {
         return UINT64_MAX;
     }
     (core::mem::size_of::<lzma_lzma1_encoder>() as u64).wrapping_add(lz_memusage)
 }
-pub unsafe extern "C" fn lzma_lzma_lclppb_encode(
+pub unsafe fn lzma_lzma_lclppb_encode(
     options: *const lzma_options_lzma,
     byte: *mut u8,
 ) -> bool {
@@ -1089,6 +1089,6 @@ pub unsafe extern "C" fn lzma_lzma_props_encode(options: *const c_void, out: *mu
     write32le(out.offset(1), (*opt).dict_size);
     LZMA_OK
 }
-pub extern "C" fn lzma_mode_is_supported(mode: lzma_mode) -> lzma_bool {
+pub fn lzma_mode_is_supported(mode: lzma_mode) -> lzma_bool {
     (mode == LZMA_MODE_FAST || mode == LZMA_MODE_NORMAL) as lzma_bool
 }

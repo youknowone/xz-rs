@@ -69,7 +69,7 @@ pub unsafe extern "C" fn lzma_simple_arm64_encoder_init(
 ) -> lzma_ret {
     arm64_coder_init(next, allocator, filters, true)
 }
-pub unsafe extern "C" fn lzma_bcj_arm64_encode(
+pub unsafe fn lzma_bcj_arm64_encode(
     mut start_offset: u32,
     buf: *mut u8,
     size: size_t,
@@ -84,7 +84,7 @@ pub unsafe extern "C" fn lzma_simple_arm64_decoder_init(
 ) -> lzma_ret {
     arm64_coder_init(next, allocator, filters, false)
 }
-pub unsafe extern "C" fn lzma_bcj_arm64_decode(
+pub unsafe fn lzma_bcj_arm64_decode(
     mut start_offset: u32,
     buf: *mut u8,
     size: size_t,

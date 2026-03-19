@@ -1,6 +1,6 @@
 use crate::types::*;
 pub const LZMA_BLOCK_HEADER_SIZE_MIN: u32 = 8;
-pub unsafe extern "C" fn lzma_block_compressed_size(
+pub unsafe fn lzma_block_compressed_size(
     block: *mut lzma_block,
     unpadded_size: lzma_vli,
 ) -> lzma_ret {
@@ -20,7 +20,7 @@ pub unsafe extern "C" fn lzma_block_compressed_size(
     (*block).compressed_size = compressed_size;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli {
+pub unsafe fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli {
     if block.is_null()
         || (*block).version > 1
         || (*block).header_size < LZMA_BLOCK_HEADER_SIZE_MIN
@@ -45,7 +45,7 @@ pub unsafe extern "C" fn lzma_block_unpadded_size(block: *const lzma_block) -> l
     }
     unpadded_size
 }
-pub unsafe extern "C" fn lzma_block_total_size(block: *const lzma_block) -> lzma_vli {
+pub unsafe fn lzma_block_total_size(block: *const lzma_block) -> lzma_vli {
     let mut unpadded_size: lzma_vli = lzma_block_unpadded_size(block);
     if unpadded_size != LZMA_VLI_UNKNOWN {
         unpadded_size = vli_ceil4(unpadded_size);

@@ -1,5 +1,5 @@
 use crate::types::*;
-pub unsafe extern "C" fn lzma_easy_preset(opt_easy: *mut lzma_options_easy, preset: u32) -> bool {
+pub unsafe fn lzma_easy_preset(opt_easy: *mut lzma_options_easy, preset: u32) -> bool {
     if lzma_lzma_preset(::core::ptr::addr_of_mut!((*opt_easy).opt_lzma), preset) != 0 {
         return true;
     }

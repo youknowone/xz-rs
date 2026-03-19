@@ -221,7 +221,7 @@ pub unsafe extern "C" fn lzma_index_encoder_init(
     index_encoder_reset((*next).coder as *mut lzma_index_coder, i);
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_index_encoder(
+pub unsafe fn lzma_index_encoder(
     strm: *mut lzma_stream,
     i: *const lzma_index,
 ) -> lzma_ret {
@@ -242,7 +242,7 @@ pub unsafe extern "C" fn lzma_index_encoder(
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_index_buffer_encode(
+pub unsafe fn lzma_index_buffer_encode(
     i: *const lzma_index,
     out: *mut u8,
     out_pos: *mut size_t,

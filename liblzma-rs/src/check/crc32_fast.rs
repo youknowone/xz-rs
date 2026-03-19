@@ -350,6 +350,6 @@ unsafe extern "C" fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mu
     }
     !crc
 }
-pub unsafe extern "C" fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
+pub unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
     lzma_crc32_generic(buf, size, crc)
 }

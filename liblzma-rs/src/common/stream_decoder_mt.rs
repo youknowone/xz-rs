@@ -1578,7 +1578,7 @@ unsafe extern "C" fn stream_decoder_mt_init(
     }
     stream_decoder_reset(coder, allocator)
 }
-pub unsafe extern "C" fn lzma_stream_decoder_mt(
+pub unsafe fn lzma_stream_decoder_mt(
     strm: *mut lzma_stream,
     options: *const lzma_mt,
 ) -> lzma_ret {

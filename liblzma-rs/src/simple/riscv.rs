@@ -113,7 +113,7 @@ pub unsafe extern "C" fn lzma_simple_riscv_encoder_init(
         true,
     )
 }
-pub unsafe extern "C" fn lzma_bcj_riscv_encode(
+pub unsafe fn lzma_bcj_riscv_encode(
     mut start_offset: u32,
     buf: *mut u8,
     size: size_t,
@@ -213,7 +213,7 @@ pub unsafe extern "C" fn lzma_simple_riscv_decoder_init(
         false,
     )
 }
-pub unsafe extern "C" fn lzma_bcj_riscv_decode(
+pub unsafe fn lzma_bcj_riscv_decode(
     mut start_offset: u32,
     buf: *mut u8,
     size: size_t,

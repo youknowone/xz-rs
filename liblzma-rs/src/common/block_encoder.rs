@@ -244,7 +244,7 @@ pub unsafe extern "C" fn lzma_block_encoder_init(
         (*block).filters,
     )
 }
-pub unsafe extern "C" fn lzma_block_encoder(
+pub unsafe fn lzma_block_encoder(
     strm: *mut lzma_stream,
     block: *mut lzma_block,
 ) -> lzma_ret {

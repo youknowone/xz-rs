@@ -3360,7 +3360,7 @@ unsafe extern "C" fn lzma_decoder_reset(coder_ptr: *mut c_void, opt: *const c_vo
     (*coder).offset = 0;
     (*coder).len = 0;
 }
-pub unsafe extern "C" fn lzma_lzma_decoder_create(
+pub unsafe fn lzma_lzma_decoder_create(
     lz: *mut lzma_lz_decoder,
     allocator: *const lzma_allocator,
     options: *const lzma_options_lzma,
@@ -3449,7 +3449,7 @@ pub unsafe extern "C" fn lzma_lzma_decoder_init(
         ),
     )
 }
-pub unsafe extern "C" fn lzma_lzma_lclppb_decode(
+pub unsafe fn lzma_lzma_lclppb_decode(
     options: *mut lzma_options_lzma,
     mut byte: u8,
 ) -> bool {

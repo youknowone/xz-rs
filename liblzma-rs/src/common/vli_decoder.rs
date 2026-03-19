@@ -1,5 +1,5 @@
 use crate::types::*;
-pub unsafe extern "C" fn lzma_vli_decode(
+pub unsafe fn lzma_vli_decode(
     vli: *mut lzma_vli,
     mut vli_pos: *mut size_t,
     in_0: *const u8,

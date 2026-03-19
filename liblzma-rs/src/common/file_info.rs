@@ -661,7 +661,7 @@ unsafe extern "C" fn lzma_file_info_decoder_init(
     (*coder).temp_size = LZMA_STREAM_HEADER_SIZE as size_t;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_file_info_decoder(
+pub unsafe fn lzma_file_info_decoder(
     strm: *mut lzma_stream,
     dest_index: *mut *mut lzma_index,
     memlimit: u64,

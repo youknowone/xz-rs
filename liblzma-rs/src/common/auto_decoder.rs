@@ -231,7 +231,7 @@ unsafe extern "C" fn auto_decoder_init(
     (*coder).sequence = SEQ_INIT;
     LZMA_OK
 }
-pub unsafe extern "C" fn lzma_auto_decoder(
+pub unsafe fn lzma_auto_decoder(
     strm: *mut lzma_stream,
     memlimit: u64,
     flags: u32,

@@ -1,5 +1,5 @@
 use crate::types::*;
-pub extern "C" fn lzma_easy_encoder_memusage(preset: u32) -> u64 {
+pub fn lzma_easy_encoder_memusage(preset: u32) -> u64 {
     let mut opt_easy: lzma_options_easy = lzma_options_easy {
         filters: [lzma_filter {
             id: 0,

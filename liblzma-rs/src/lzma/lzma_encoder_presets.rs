@@ -3,7 +3,7 @@ pub const LZMA_LC_DEFAULT: u32 = 3;
 pub const LZMA_LP_DEFAULT: u32 = 0;
 pub const LZMA_PB_DEFAULT: u32 = 2;
 pub const LZMA_PRESET_LEVEL_MASK: c_uint = 0x1f;
-pub unsafe extern "C" fn lzma_lzma_preset(
+pub unsafe fn lzma_lzma_preset(
     options: *mut lzma_options_lzma,
     preset: u32,
 ) -> lzma_bool {

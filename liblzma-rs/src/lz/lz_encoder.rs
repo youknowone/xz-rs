@@ -314,7 +314,7 @@ unsafe fn lz_encoder_init(
     (*mf).action = LZMA_RUN;
     false
 }
-pub extern "C" fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64 {
+pub fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64 {
     let mut mf: lzma_mf = lzma_mf_s {
         buffer: core::ptr::null_mut(),
         size: 0,
@@ -391,7 +391,7 @@ unsafe extern "C" fn lz_encoder_set_out_limit(
     }
     LZMA_OPTIONS_ERROR
 }
-pub unsafe extern "C" fn lzma_lz_encoder_init(
+pub unsafe fn lzma_lz_encoder_init(
     next: *mut lzma_next_coder,
     allocator: *const lzma_allocator,
     filters: *const lzma_filter_info,
@@ -512,7 +512,7 @@ pub unsafe extern "C" fn lzma_lz_encoder_init(
         filters.offset(1),
     )
 }
-pub extern "C" fn lzma_mf_is_supported(mf: lzma_match_finder) -> lzma_bool {
+pub fn lzma_mf_is_supported(mf: lzma_match_finder) -> lzma_bool {
     match mf {
         3 => return true as lzma_bool,
         4 => return true as lzma_bool,

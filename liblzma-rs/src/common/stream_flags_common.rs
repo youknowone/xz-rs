@@ -3,7 +3,7 @@ pub static mut lzma_header_magic: [u8; 6] = [
     0xfd as u8, 0x37 as u8, 0x7a as u8, 0x58 as u8, 0x5a as u8, 0,
 ];
 pub static mut lzma_footer_magic: [u8; 2] = [0x59 as u8, 0x5a as u8];
-pub unsafe extern "C" fn lzma_stream_flags_compare(
+pub unsafe fn lzma_stream_flags_compare(
     a: *const lzma_stream_flags,
     b: *const lzma_stream_flags,
 ) -> lzma_ret {

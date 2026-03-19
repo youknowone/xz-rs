@@ -5,7 +5,7 @@ pub const HASH_3_MASK: c_uint = HASH_3_SIZE.wrapping_sub(1);
 pub const FIX_3_HASH_SIZE: c_uint = 1u32 << 10;
 pub const FIX_4_HASH_SIZE: c_uint = HASH_2_SIZE.wrapping_add(HASH_3_SIZE);
 #[inline]
-pub unsafe extern "C" fn lzma_mf_find(
+pub unsafe fn lzma_mf_find(
     mf: *mut lzma_mf,
     count_ptr: *mut u32,
     matches: *mut lzma_match,

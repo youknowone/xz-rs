@@ -124,7 +124,7 @@ pub unsafe extern "C" fn lzma_simple_x86_encoder_init(
 ) -> lzma_ret {
     x86_coder_init(next, allocator, filters, true)
 }
-pub unsafe extern "C" fn lzma_bcj_x86_encode(
+pub unsafe fn lzma_bcj_x86_encode(
     start_offset: u32,
     buf: *mut u8,
     size: size_t,
@@ -148,7 +148,7 @@ pub unsafe extern "C" fn lzma_simple_x86_decoder_init(
 ) -> lzma_ret {
     x86_coder_init(next, allocator, filters, false)
 }
-pub unsafe extern "C" fn lzma_bcj_x86_decode(
+pub unsafe fn lzma_bcj_x86_decode(
     start_offset: u32,
     buf: *mut u8,
     size: size_t,

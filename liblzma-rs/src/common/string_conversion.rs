@@ -910,7 +910,7 @@ unsafe extern "C" fn str_to_filters(
     }
     errmsg
 }
-pub unsafe extern "C" fn lzma_str_to_filters(
+pub unsafe fn lzma_str_to_filters(
     str: *const c_char,
     error_pos: *mut c_int,
     filters: *mut lzma_filter,
@@ -1004,7 +1004,7 @@ unsafe extern "C" fn strfy_filter(
         i += 1;
     }
 }
-pub unsafe extern "C" fn lzma_str_from_filters(
+pub unsafe fn lzma_str_from_filters(
     output_str: *mut *mut c_char,
     filters: *const lzma_filter,
     flags: u32,
@@ -1104,7 +1104,7 @@ pub unsafe extern "C" fn lzma_str_from_filters(
     }
     str_finish(output_str, ::core::ptr::addr_of_mut!(dest), allocator)
 }
-pub unsafe extern "C" fn lzma_str_list_filters(
+pub unsafe fn lzma_str_list_filters(
     output_str: *mut *mut c_char,
     filter_id: lzma_vli,
     flags: u32,
