@@ -6,7 +6,17 @@ pub const FIX_3_HASH_SIZE: c_uint = 1u32 << 10;
 pub const FIX_4_HASH_SIZE: c_uint = HASH_2_SIZE.wrapping_add(HASH_3_SIZE);
 #[inline]
 pub unsafe fn lzma_mf_find(mf: *mut lzma_mf, count_ptr: *mut u32, matches: *mut lzma_match) -> u32 {
-    let count: u32 = (*mf).find.unwrap()(mf, matches) as u32;
+    lzma_mf_find_raw(mf, count_ptr, matches, (*mf).find.unwrap())
+}
+
+#[inline(always)]
+pub unsafe fn lzma_mf_find_raw(
+    mf: *mut lzma_mf,
+    count_ptr: *mut u32,
+    matches: *mut lzma_match,
+    find: unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32,
+) -> u32 {
+    let count: u32 = find(mf, matches) as u32;
     let mut len_best: u32 = 0;
     if count > 0 {
         len_best = (*matches.offset((count - 1) as isize)).len;

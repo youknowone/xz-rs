@@ -854,8 +854,17 @@ pub unsafe fn mf_avail(mf: *const lzma_mf) -> u32 {
 }
 #[inline]
 pub unsafe fn mf_skip(mf: *mut lzma_mf, amount: u32) {
+    mf_skip_raw(mf, amount, (*mf).skip.unwrap());
+}
+
+#[inline(always)]
+pub unsafe fn mf_skip_raw(
+    mf: *mut lzma_mf,
+    amount: u32,
+    skip: unsafe extern "C" fn(*mut lzma_mf, u32) -> (),
+) {
     if amount != 0 {
-        (*mf).skip.unwrap()(mf, amount);
+        skip(mf, amount);
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
 }
@@ -1129,7 +1138,7 @@ pub use crate::common::vli_decoder::lzma_vli_decode;
 pub use crate::common::vli_encoder::lzma_vli_encode;
 pub use crate::common::vli_size::lzma_vli_size;
 pub use crate::delta::delta_common::{lzma_delta_coder_init, lzma_delta_coder_memusage};
-pub use crate::lz::lz_encoder_mf::lzma_mf_find;
+pub use crate::lz::lz_encoder_mf::{lzma_mf_find, lzma_mf_find_raw};
 pub use crate::lzma::fastpos_table::lzma_fastpos;
 pub use crate::lzma::lzma_decoder::{
     lzma_lzma_decoder_init, lzma_lzma_decoder_memusage_nocheck, lzma_lzma_lclppb_decode,

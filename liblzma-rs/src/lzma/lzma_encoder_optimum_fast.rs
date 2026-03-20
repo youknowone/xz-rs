@@ -17,20 +17,43 @@ unsafe fn coder_match(coder: *const lzma_lzma1_encoder, index: u32) -> *const lz
     (::core::ptr::addr_of!((*coder).matches) as *const lzma_match).add(index as usize)
 }
 
+#[inline(always)]
+unsafe fn mf_find_callback(
+    mf: *const lzma_mf,
+) -> unsafe extern "C" fn(*mut lzma_mf, *mut lzma_match) -> u32 {
+    debug_assert!((*mf).find.is_some());
+    match (*mf).find {
+        Some(find) => find,
+        None => core::hint::unreachable_unchecked(),
+    }
+}
+
+#[inline(always)]
+unsafe fn mf_skip_callback(mf: *const lzma_mf) -> unsafe extern "C" fn(*mut lzma_mf, u32) -> () {
+    debug_assert!((*mf).skip.is_some());
+    match (*mf).skip {
+        Some(skip) => skip,
+        None => core::hint::unreachable_unchecked(),
+    }
+}
+
 pub unsafe fn lzma_lzma_optimum_fast(
     coder: *mut lzma_lzma1_encoder,
     mf: *mut lzma_mf,
     back_res: *mut u32,
     len_res: *mut u32,
 ) {
+    let mf_find = mf_find_callback(mf);
+    let mf_skip = mf_skip_callback(mf);
     let nice_len: u32 = (*mf).nice_len;
     let mut len_main: u32 = 0;
     let mut matches_count: u32 = 0;
     if (*mf).read_ahead == 0 {
-        len_main = lzma_mf_find(
+        len_main = lzma_mf_find_raw(
             mf,
             ::core::ptr::addr_of_mut!(matches_count),
             ::core::ptr::addr_of_mut!((*coder).matches) as *mut lzma_match,
+            mf_find,
         );
     } else {
         debug_assert!((*mf).read_ahead == 1);
@@ -57,7 +80,7 @@ pub unsafe fn lzma_lzma_optimum_fast(
         if len >= nice_len {
             *back_res = i;
             *len_res = len;
-            mf_skip(mf, len - 1);
+            mf_skip_raw(mf, len - 1, mf_skip);
             return;
         }
         if len > rep_len {
@@ -69,7 +92,7 @@ pub unsafe fn lzma_lzma_optimum_fast(
     if len_main >= nice_len {
         *back_res = (*coder_match(coder, matches_count - 1)).dist + REPS;
         *len_res = len_main;
-        mf_skip(mf, len_main - 1);
+        mf_skip_raw(mf, len_main - 1, mf_skip);
         return;
     }
     let mut back_main: u32 = 0;
@@ -94,7 +117,7 @@ pub unsafe fn lzma_lzma_optimum_fast(
         {
             *back_res = rep_index;
             *len_res = rep_len;
-            mf_skip(mf, rep_len - 1);
+            mf_skip_raw(mf, rep_len - 1, mf_skip);
             return;
         }
     }
@@ -103,10 +126,11 @@ pub unsafe fn lzma_lzma_optimum_fast(
         *len_res = 1;
         return;
     }
-    (*coder).longest_match_length = lzma_mf_find(
+    (*coder).longest_match_length = lzma_mf_find_raw(
         mf,
         ::core::ptr::addr_of_mut!((*coder).matches_count),
         ::core::ptr::addr_of_mut!((*coder).matches) as *mut lzma_match,
+        mf_find,
     );
     if (*coder).longest_match_length >= 2 {
         let new_dist: u32 = (*coder_match(coder, (*coder).matches_count - 1)).dist;
@@ -141,5 +165,5 @@ pub unsafe fn lzma_lzma_optimum_fast(
     }
     *back_res = back_main + REPS;
     *len_res = len_main;
-    mf_skip(mf, len_main - 2);
+    mf_skip_raw(mf, len_main - 2, mf_skip);
 }
