@@ -868,20 +868,34 @@ pub unsafe fn lzma_memcmplen(buf1: *const u8, buf2: *const u8, mut len: u32, lim
         target_endian = "little",
         any(target_arch = "aarch64", target_arch = "x86_64")
     ))]
-    while len + 8 <= limit {
-        let lhs = core::ptr::read_unaligned(buf1.add(len as usize) as *const u64);
-        let rhs = core::ptr::read_unaligned(buf2.add(len as usize) as *const u64);
-        let diff = lhs.wrapping_sub(rhs);
-        if diff != 0 {
-            return core::cmp::min(len + (diff.trailing_zeros() >> 3), limit);
+    {
+        while len < limit {
+            let lhs = core::ptr::read_unaligned(buf1.add(len as usize) as *const u64);
+            let rhs = core::ptr::read_unaligned(buf2.add(len as usize) as *const u64);
+            let diff = lhs.wrapping_sub(rhs);
+            if diff != 0 {
+                return core::cmp::min(len + (diff.trailing_zeros() >> 3), limit);
+            }
+            len += 8;
         }
-        len += 8;
+        limit
     }
 
+    #[cfg(not(all(
+        target_endian = "little",
+        any(target_arch = "aarch64", target_arch = "x86_64")
+    )))]
     while len < limit && *buf1.offset(len as isize) == *buf2.offset(len as isize) {
         len += 1;
     }
-    len
+
+    #[cfg(not(all(
+        target_endian = "little",
+        any(target_arch = "aarch64", target_arch = "x86_64")
+    )))]
+    {
+        len
+    }
 }
 #[inline]
 pub unsafe fn get_dist_slot(dist: u32) -> u32 {
