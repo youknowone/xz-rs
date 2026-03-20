@@ -10,6 +10,13 @@ unsafe fn not_equal_16(a: *const u8, b: *const u8) -> bool {
 fn change_pair(small_dist: u32, big_dist: u32) -> bool {
     (big_dist >> 7) > small_dist
 }
+
+#[inline(always)]
+unsafe fn coder_match(coder: *const lzma_lzma1_encoder, index: u32) -> *const lzma_match {
+    debug_assert!((index as usize) < (*coder).matches.len());
+    (::core::ptr::addr_of!((*coder).matches) as *const lzma_match).add(index as usize)
+}
+
 pub unsafe fn lzma_lzma_optimum_fast(
     coder: *mut lzma_lzma1_encoder,
     mf: *mut lzma_mf,
@@ -60,23 +67,21 @@ pub unsafe fn lzma_lzma_optimum_fast(
         i += 1;
     }
     if len_main >= nice_len {
-        *back_res = (*coder).matches[(matches_count - 1) as usize]
-            .dist
-            + REPS;
+        *back_res = (*coder_match(coder, matches_count - 1)).dist + REPS;
         *len_res = len_main;
         mf_skip(mf, len_main - 1);
         return;
     }
     let mut back_main: u32 = 0;
     if len_main >= 2 {
-        back_main = (*coder).matches[(matches_count - 1) as usize].dist;
-        while matches_count > 1 && len_main == (*coder).matches[(matches_count - 2) as usize].len + 1 {
-            if !change_pair((*coder).matches[(matches_count - 2) as usize].dist, back_main) {
+        back_main = (*coder_match(coder, matches_count - 1)).dist;
+        while matches_count > 1 && len_main == (*coder_match(coder, matches_count - 2)).len + 1 {
+            if !change_pair((*coder_match(coder, matches_count - 2)).dist, back_main) {
                 break;
             }
             matches_count -= 1;
-            len_main = (*coder).matches[(matches_count - 1) as usize].len;
-            back_main = (*coder).matches[(matches_count - 1) as usize].dist;
+            len_main = (*coder_match(coder, matches_count - 1)).len;
+            back_main = (*coder_match(coder, matches_count - 1)).dist;
         }
         if len_main == 2 && back_main >= 0x80 {
             len_main = 1;
@@ -104,7 +109,7 @@ pub unsafe fn lzma_lzma_optimum_fast(
         ::core::ptr::addr_of_mut!((*coder).matches) as *mut lzma_match,
     );
     if (*coder).longest_match_length >= 2 {
-        let new_dist: u32 = (*coder).matches[((*coder).matches_count - 1) as usize].dist;
+        let new_dist: u32 = (*coder_match(coder, (*coder).matches_count - 1)).dist;
         if (*coder).longest_match_length >= len_main && new_dist < back_main
             || (*coder).longest_match_length == len_main + 1 && !change_pair(back_main, new_dist)
             || (*coder).longest_match_length > len_main + 1
