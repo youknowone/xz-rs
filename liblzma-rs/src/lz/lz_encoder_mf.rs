@@ -613,38 +613,30 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(mf: *mut lzma_mf, matches: *mut lzma_m
     let hash_value: u32 =
         (temp ^ (*cur.offset(2) as u32) << 8 ^ lzma_crc32_table[0][*cur.offset(3) as usize] << 5)
             & (*mf).hash_mask;
-    let mut delta2: u32 = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
-    let delta3: u32 = pos.wrapping_sub(
-        *(*mf)
-            .hash
-            .offset((FIX_3_HASH_SIZE as u32).wrapping_add(hash_3_value) as isize),
-    );
-    let cur_match: u32 = *(*mf)
-        .hash
-        .offset((FIX_4_HASH_SIZE as u32).wrapping_add(hash_value) as isize);
+    let hash_3_index = FIX_3_HASH_SIZE as u32 + hash_3_value;
+    let hash_4_index = FIX_4_HASH_SIZE as u32 + hash_value;
+    let mut delta2: u32 = pos - *(*mf).hash.offset(hash_2_value as isize);
+    let delta3: u32 = pos - *(*mf).hash.offset(hash_3_index as isize);
+    let cur_match: u32 = *(*mf).hash.offset(hash_4_index as isize);
     *(*mf).hash.offset(hash_2_value as isize) = pos;
-    *(*mf)
-        .hash
-        .offset((FIX_3_HASH_SIZE as u32).wrapping_add(hash_3_value) as isize) = pos;
-    *(*mf)
-        .hash
-        .offset((FIX_4_HASH_SIZE as u32).wrapping_add(hash_value) as isize) = pos;
+    *(*mf).hash.offset(hash_3_index as isize) = pos;
+    *(*mf).hash.offset(hash_4_index as isize) = pos;
     let mut len_best: u32 = 1;
     if delta2 < (*mf).cyclic_size && *cur.offset(-(delta2 as isize)) == *cur {
         len_best = 2;
         (*matches).len = 2;
-        (*matches).dist = delta2.wrapping_sub(1);
+        (*matches).dist = delta2 - 1;
         matches_count = 1;
     }
     if delta2 != delta3 && delta3 < (*mf).cyclic_size && *cur.offset(-(delta3 as isize)) == *cur {
         len_best = 3;
-        (*matches.offset(matches_count as isize)).dist = delta3.wrapping_sub(1);
+        (*matches.offset(matches_count as isize)).dist = delta3 - 1;
         matches_count += 1;
         delta2 = delta3;
     }
     if matches_count != 0 {
         len_best = lzma_memcmplen(cur, cur.offset(-(delta2 as isize)), len_best, len_limit);
-        (*matches.offset(matches_count.wrapping_sub(1) as isize)).len = len_best;
+        (*matches.offset((matches_count - 1) as isize)).len = len_best;
         if len_best == len_limit {
             bt_skip_func(
                 len_limit,
