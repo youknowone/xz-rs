@@ -168,6 +168,34 @@ unsafe fn rc_read_init(
     }
     LZMA_STREAM_END
 }
+#[inline(never)]
+fn resume_block_for_sequence(sequence: lzma_decoder_seq) -> u64 {
+    match sequence {
+        0 | 1 => 5979571030476392895,
+        2 => 13844743919235296534,
+        3 => 18125716024132132232,
+        4 => 10535798129821001304,
+        5 => 3469750012682708893,
+        6 => 1138292997408115650,
+        7 => 13912927785247575907,
+        8 => 592696588731961849,
+        9 => 4174862988780014241,
+        10 => 617447976488552541,
+        11 => 15418612220330286504,
+        12 => 10510472849010538284,
+        13 => 7073645523065812117,
+        14 => 4420799852307653083,
+        16 => 1698084742280242340,
+        15 => 5341942013764523046,
+        17 => 11808118301119257848,
+        18 => 3996983927318648760,
+        19 => 12043352250568755004,
+        20 => 6834592846991627977,
+        21 => 2467942631393454738,
+        22 => 17340485688450593529,
+        _ => 4609795085482299213,
+    }
+}
 unsafe extern "C" fn lzma_decode(
     coder_ptr: *mut c_void,
     dictptr: *mut lzma_dict,
@@ -220,77 +248,7 @@ unsafe extern "C" fn lzma_decode(
         dict.limit = dict.pos.wrapping_add((*coder).uncompressed_size as size_t);
         might_finish_without_eopm = true;
     }
-    match (*coder).sequence {
-        0 | 1 => {
-            current_block = 5979571030476392895;
-        }
-        2 => {
-            current_block = 13844743919235296534;
-        }
-        3 => {
-            current_block = 18125716024132132232;
-        }
-        4 => {
-            current_block = 10535798129821001304;
-        }
-        5 => {
-            current_block = 3469750012682708893;
-        }
-        6 => {
-            current_block = 1138292997408115650;
-        }
-        7 => {
-            current_block = 13912927785247575907;
-        }
-        8 => {
-            current_block = 592696588731961849;
-        }
-        9 => {
-            current_block = 4174862988780014241;
-        }
-        10 => {
-            current_block = 617447976488552541;
-        }
-        11 => {
-            current_block = 15418612220330286504;
-        }
-        12 => {
-            current_block = 10510472849010538284;
-        }
-        13 => {
-            current_block = 7073645523065812117;
-        }
-        14 => {
-            current_block = 4420799852307653083;
-        }
-        16 => {
-            current_block = 1698084742280242340;
-        }
-        15 => {
-            current_block = 5341942013764523046;
-        }
-        17 => {
-            current_block = 11808118301119257848;
-        }
-        18 => {
-            current_block = 3996983927318648760;
-        }
-        19 => {
-            current_block = 12043352250568755004;
-        }
-        20 => {
-            current_block = 6834592846991627977;
-        }
-        21 => {
-            current_block = 2467942631393454738;
-        }
-        22 => {
-            current_block = 17340485688450593529;
-        }
-        _ => {
-            current_block = 4609795085482299213;
-        }
-    }
+    current_block = resume_block_for_sequence((*coder).sequence);
     'c_9380: loop {
         match current_block {
             4609795085482299213 => {
