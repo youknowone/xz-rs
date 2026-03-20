@@ -668,6 +668,16 @@ unsafe fn finish_lzma_stream(
     }
     LZMA_STREAM_END
 }
+#[cold]
+#[inline(never)]
+unsafe fn out_limit_reached(coder: *mut lzma_lzma1_encoder) -> bool {
+    let rc = ::core::ptr::addr_of_mut!((*coder).rc);
+    if (*coder).out_limit == 0 || !rc_encode_dummy(rc, (*coder).out_limit) {
+        return false;
+    }
+    rc_forget(rc);
+    true
+}
 pub unsafe fn lzma_lzma_encode(
     coder: *mut lzma_lzma1_encoder,
     mf: *mut lzma_mf,
@@ -720,8 +730,7 @@ pub unsafe fn lzma_lzma_encode(
             );
         }
         encode_symbol(coder, mf, back, len, (*coder).uncomp_size as u32);
-        if (*coder).out_limit != 0 && rc_encode_dummy(rc, (*coder).out_limit) {
-            rc_forget(rc);
+        if out_limit_reached(coder) {
             break;
         }
         (*coder).uncomp_size += len as u64;
