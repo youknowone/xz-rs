@@ -201,6 +201,39 @@ unsafe extern "C" fn stream_encoder_end(coder_ptr: *mut c_void, allocator: *cons
     );
     crate::alloc::internal_free(coder as *mut c_void, allocator);
 }
+#[inline(never)]
+unsafe fn stream_encoder_update_before_block(
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
+    temp_ptr: *mut lzma_filter,
+    filters_ptr: *mut lzma_filter,
+) -> lzma_ret {
+    (*coder).block_encoder_is_initialized = false;
+    (*coder).block_options.filters = temp_ptr;
+    let ret = block_encoder_init(coder, allocator);
+    (*coder).block_options.filters = filters_ptr;
+    if ret != LZMA_OK {
+        return ret;
+    }
+    (*coder).block_encoder_is_initialized = true;
+    LZMA_OK
+}
+
+#[inline(never)]
+unsafe fn stream_encoder_update_mid_block(
+    coder: *mut lzma_stream_coder,
+    allocator: *const lzma_allocator,
+    filters: *const lzma_filter,
+    reversed_filters: *const lzma_filter,
+) -> lzma_ret {
+    (*coder).block_encoder.update.unwrap()(
+        (*coder).block_encoder.coder,
+        allocator,
+        filters,
+        reversed_filters,
+    )
+}
+
 unsafe extern "C" fn stream_encoder_update(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
@@ -218,30 +251,16 @@ unsafe extern "C" fn stream_encoder_update(
     if ret_ != LZMA_OK {
         return ret_;
     }
-    if (*coder).sequence <= SEQ_BLOCK_INIT {
-        (*coder).block_encoder_is_initialized = false;
-        (*coder).block_options.filters = temp_ptr;
-        let ret = block_encoder_init(coder, allocator);
-        (*coder).block_options.filters = filters_ptr;
-        if ret != LZMA_OK {
-            lzma_filters_free(temp_ptr, allocator);
-            return ret;
-        }
-        (*coder).block_encoder_is_initialized = true;
+    let ret = if (*coder).sequence <= SEQ_BLOCK_INIT {
+        stream_encoder_update_before_block(coder, allocator, temp_ptr, filters_ptr)
     } else if (*coder).sequence <= SEQ_BLOCK_ENCODE {
-        let ret = (*coder).block_encoder.update.unwrap()(
-            (*coder).block_encoder.coder,
-            allocator,
-            filters,
-            reversed_filters,
-        );
-        if ret != LZMA_OK {
-            lzma_filters_free(temp_ptr, allocator);
-            return ret;
-        }
+        stream_encoder_update_mid_block(coder, allocator, filters, reversed_filters)
     } else {
+        LZMA_PROG_ERROR
+    };
+    if ret != LZMA_OK {
         lzma_filters_free(temp_ptr, allocator);
-        return LZMA_PROG_ERROR;
+        return ret;
     }
 
     lzma_filters_free(filters_ptr, allocator);
