@@ -218,22 +218,19 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(mf: *mut lzma_mf, matches: *mut lzma_m
     let hash_value: u32 =
         (temp ^ (*cur.offset(2) as u32) << 8 ^ lzma_crc32_table[0][*cur.offset(3) as usize] << 5)
             & (*mf).hash_mask;
-    let mut delta2: u32 = pos.wrapping_sub(*(*mf).hash.offset(hash_2_value as isize));
-    let delta3: u32 = pos.wrapping_sub(
-        *(*mf)
-            .hash
-            .offset((FIX_3_HASH_SIZE as u32 + hash_3_value) as isize),
-    );
-    let cur_match: u32 = *(*mf)
-        .hash
-        .offset((FIX_4_HASH_SIZE as u32 + hash_value) as isize);
-    *(*mf).hash.offset(hash_2_value as isize) = pos;
-    *(*mf)
-        .hash
-        .offset((FIX_3_HASH_SIZE as u32 + hash_3_value) as isize) = pos;
-    *(*mf)
-        .hash
-        .offset((FIX_4_HASH_SIZE as u32 + hash_value) as isize) = pos;
+    let hash = (*mf).hash;
+    let son = (*mf).son;
+    let cyclic_pos = (*mf).cyclic_pos;
+    let depth = (*mf).depth;
+    let cyclic_size = (*mf).cyclic_size;
+    let hash_3_index = FIX_3_HASH_SIZE as u32 + hash_3_value;
+    let hash_4_index = FIX_4_HASH_SIZE as u32 + hash_value;
+    let mut delta2: u32 = pos.wrapping_sub(*hash.offset(hash_2_value as isize));
+    let delta3: u32 = pos.wrapping_sub(*hash.offset(hash_3_index as isize));
+    let cur_match: u32 = *hash.offset(hash_4_index as isize);
+    *hash.offset(hash_2_value as isize) = pos;
+    *hash.offset(hash_3_index as isize) = pos;
+    *hash.offset(hash_4_index as isize) = pos;
     let mut len_best: u32 = 1;
     if delta2 < (*mf).cyclic_size && *cur.offset(-(delta2 as isize)) == *cur {
         len_best = 2;
@@ -251,7 +248,7 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(mf: *mut lzma_mf, matches: *mut lzma_m
         len_best = lzma_memcmplen(cur.offset(-(delta2 as isize)), cur, len_best, len_limit);
         (*matches.offset((matches_count - 1) as isize)).len = len_best;
         if len_best == len_limit {
-            *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
+            *son.offset(cyclic_pos as isize) = cur_match;
             move_pos(mf);
             return matches_count;
         }
@@ -264,10 +261,10 @@ pub unsafe extern "C" fn lzma_mf_hc4_find(mf: *mut lzma_mf, matches: *mut lzma_m
         pos,
         cur,
         cur_match,
-        (*mf).depth,
-        (*mf).son,
-        (*mf).cyclic_pos,
-        (*mf).cyclic_size,
+        depth,
+        son,
+        cyclic_pos,
+        cyclic_size,
         matches.offset(matches_count as isize),
         len_best,
     )
@@ -290,16 +287,13 @@ pub unsafe extern "C" fn lzma_mf_hc4_skip(mf: *mut lzma_mf, mut amount: u32) {
                 ^ (*cur.offset(2) as u32) << 8
                 ^ lzma_crc32_table[0][*cur.offset(3) as usize] << 5)
                 & (*mf).hash_mask;
-            let cur_match: u32 = *(*mf)
-                .hash
-                .offset((FIX_4_HASH_SIZE as u32 + hash_value) as isize);
-            *(*mf).hash.offset(hash_2_value as isize) = pos;
-            *(*mf)
-                .hash
-                .offset((FIX_3_HASH_SIZE as u32 + hash_3_value) as isize) = pos;
-            *(*mf)
-                .hash
-                .offset((FIX_4_HASH_SIZE as u32 + hash_value) as isize) = pos;
+            let hash = (*mf).hash;
+            let hash_3_index = FIX_3_HASH_SIZE as u32 + hash_3_value;
+            let hash_4_index = FIX_4_HASH_SIZE as u32 + hash_value;
+            let cur_match: u32 = *hash.offset(hash_4_index as isize);
+            *hash.offset(hash_2_value as isize) = pos;
+            *hash.offset(hash_3_index as isize) = pos;
+            *hash.offset(hash_4_index as isize) = pos;
             *(*mf).son.offset((*mf).cyclic_pos as isize) = cur_match;
             move_pos(mf);
         }
