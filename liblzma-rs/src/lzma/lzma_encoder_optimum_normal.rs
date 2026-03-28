@@ -661,10 +661,8 @@ unsafe fn helper2(
         make_literal(next_opt);
         next_is_literal = true;
     }
-    let match_price: u32 =
-        cur_price + rc_bit_1_price(match_prob(coder, state, pos_state)) as u32;
-    let rep_match_price: u32 =
-        match_price + rc_bit_1_price(is_rep_prob(coder, state)) as u32;
+    let match_price: u32 = cur_price + rc_bit_1_price(match_prob(coder, state, pos_state)) as u32;
+    let rep_match_price: u32 = match_price + rc_bit_1_price(is_rep_prob(coder, state)) as u32;
     if match_byte == current_byte && !(next_opt.pos_prev < cur && next_opt.back_prev == 0) {
         let short_rep_price: u32 =
             rep_match_price + get_short_rep_price(coder, state, pos_state) as u32;
@@ -702,13 +700,8 @@ unsafe fn helper2(
                 len_end += 1;
                 (*opts.add(len_end as usize)).price = RC_INFINITY_PRICE as u32;
             }
-            let cur_and_len_price: u32 = next_rep_match_price + get_rep_price(
-                coder,
-                0,
-                len_test,
-                state_2,
-                pos_state_next,
-            ) as u32;
+            let cur_and_len_price: u32 = next_rep_match_price
+                + get_rep_price(coder, 0, len_test, state_2, pos_state_next) as u32;
             let opt = opts.add(offset as usize);
             if cur_and_len_price < (*opt).price {
                 (*opt).price = cur_and_len_price;
@@ -732,14 +725,15 @@ unsafe fn helper2(
                 (*opts.add(len_end as usize)).price = RC_INFINITY_PRICE as u32;
             }
             let len_test_temp: u32 = len_test_0;
-            let price: u32 = rep_match_price
-                + get_pure_rep_price(coder, rep_index, state, pos_state) as u32;
+            let price: u32 =
+                rep_match_price + get_pure_rep_price(coder, rep_index, state, pos_state) as u32;
             loop {
-                let cur_and_len_price_0: u32 = price + get_len_price(
-                    ::core::ptr::addr_of_mut!((*coder).rep_len_encoder),
-                    len_test_0,
-                    pos_state,
-                ) as u32;
+                let cur_and_len_price_0: u32 = price
+                    + get_len_price(
+                        ::core::ptr::addr_of_mut!((*coder).rep_len_encoder),
+                        len_test_0,
+                        pos_state,
+                    ) as u32;
                 let opt = opts.add((cur + len_test_0) as usize);
                 if cur_and_len_price_0 < (*opt).price {
                     (*opt).price = cur_and_len_price_0;
@@ -809,8 +803,8 @@ unsafe fn helper2(
         let mut len_test_1: u32 = start_len;
         loop {
             let cur_back: u32 = (*matches.add(i_2 as usize)).dist;
-            let cur_and_len_price_2: u32 = normal_match_price
-                + get_dist_len_price(coder, cur_back, len_test_1, pos_state);
+            let cur_and_len_price_2: u32 =
+                normal_match_price + get_dist_len_price(coder, cur_back, len_test_1, pos_state);
             let opt = opts.add((cur + len_test_1) as usize);
             if cur_and_len_price_2 < (*opt).price {
                 (*opt).price = cur_and_len_price_2;
@@ -901,13 +895,8 @@ unsafe fn consider_literal_after_rep(
         *len_end += 1;
         (*opts.add(*len_end as usize)).price = RC_INFINITY_PRICE as u32;
     }
-    let cur_and_len_price: u32 = next_rep_match_price + get_rep_price(
-        coder,
-        0,
-        len_test_2,
-        state_2,
-        pos_state_next,
-    ) as u32;
+    let cur_and_len_price: u32 =
+        next_rep_match_price + get_rep_price(coder, 0, len_test_2, state_2, pos_state_next) as u32;
     let opt = opts.add(offset as usize);
     if cur_and_len_price < (*opt).price {
         (*opt).price = cur_and_len_price;
@@ -958,13 +947,8 @@ unsafe fn consider_literal_after_match(
         *len_end += 1;
         (*opts.add(*len_end as usize)).price = RC_INFINITY_PRICE as u32;
     }
-    let cur_and_len_price = next_rep_match_price + get_rep_price(
-        coder,
-        0,
-        len_test_2,
-        state_2,
-        pos_state_next,
-    );
+    let cur_and_len_price =
+        next_rep_match_price + get_rep_price(coder, 0, len_test_2, state_2, pos_state_next);
     let opt = opts.add(offset as usize);
     if cur_and_len_price < (*opt).price {
         (*opt).price = cur_and_len_price;

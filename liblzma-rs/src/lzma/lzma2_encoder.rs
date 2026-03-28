@@ -69,8 +69,7 @@ unsafe fn lzma2_header_lzma(coder: *mut lzma_lzma2_coder) {
     }
     (*coder).buf_pos = pos;
     let mut size: size_t = (*coder).uncompressed_size - 1;
-    (*coder).buf[pos as usize] =
-        ((*coder).buf[pos as usize] as size_t + (size >> 16)) as u8;
+    (*coder).buf[pos as usize] = ((*coder).buf[pos as usize] as size_t + (size >> 16)) as u8;
     pos += 1;
     (*coder).buf[pos as usize] = (size >> 8 & 0xff) as u8;
     pos += 1;
@@ -385,9 +384,7 @@ pub unsafe extern "C" fn lzma_lzma2_props_encode(options: *const c_void, out: *m
 }
 pub unsafe extern "C" fn lzma_lzma2_block_size(options: *const c_void) -> u64 {
     let opt: *const lzma_options_lzma = options as *const lzma_options_lzma;
-    if (*opt).dict_size < LZMA_DICT_SIZE_MIN as u32
-        || (*opt).dict_size > (1u32 << 30) + (1 << 29)
-    {
+    if (*opt).dict_size < LZMA_DICT_SIZE_MIN as u32 || (*opt).dict_size > (1u32 << 30) + (1 << 29) {
         return UINT64_MAX;
     }
     if ((*opt).dict_size as u64) * 3 > 1 << 20 {

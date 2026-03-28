@@ -30,10 +30,7 @@ unsafe fn rc_symbol_slot_mut(rc: *mut lzma_range_encoder, index: size_t) -> *mut
 }
 
 #[inline(always)]
-unsafe fn rc_prob_slot_mut(
-    rc: *mut lzma_range_encoder,
-    index: size_t,
-) -> *mut *mut probability {
+unsafe fn rc_prob_slot_mut(rc: *mut lzma_range_encoder, index: size_t) -> *mut *mut probability {
     debug_assert!(index < 53);
     (::core::ptr::addr_of_mut!((*rc).probs) as *mut *mut probability).add(index)
 }
@@ -92,8 +89,8 @@ unsafe fn rc_bittree_reverse(
 unsafe fn rc_direct(rc: *mut lzma_range_encoder, value: u32, mut bit_count: u32) {
     loop {
         bit_count -= 1;
-        *rc_symbol_slot_mut(rc, (*rc).count) = ((RC_DIRECT_0 as u32) + (value >> bit_count & 1))
-            as rc_symbol;
+        *rc_symbol_slot_mut(rc, (*rc).count) =
+            ((RC_DIRECT_0 as u32) + (value >> bit_count & 1)) as rc_symbol;
         (*rc).count += 1;
         if bit_count == 0 {
             break;
@@ -350,9 +347,9 @@ unsafe fn literal(coder: *mut lzma_lzma1_encoder, mf: *mut lzma_mf, position: u3
         } else {
             (*coder).state as u32 - 6
         }) as lzma_lzma_state;
-        let match_byte: u8 = *(*mf)
-            .buffer
-            .offset(((*mf).read_pos - *coder_rep_slot_mut(coder, 0) - 1 - (*mf).read_ahead) as isize);
+        let match_byte: u8 = *(*mf).buffer.offset(
+            ((*mf).read_pos - *coder_rep_slot_mut(coder, 0) - 1 - (*mf).read_ahead) as isize,
+        );
         literal_matched(
             ::core::ptr::addr_of_mut!((*coder).rc),
             subcoder,
@@ -967,10 +964,8 @@ pub unsafe fn lzma_lzma_encoder_create(
             } else {
                 (*options).nice_len
             };
-            (*coder).match_len_encoder.table_size =
-                nice_len + 1 - MATCH_LEN_MIN;
-            (*coder).rep_len_encoder.table_size =
-                nice_len + 1 - MATCH_LEN_MIN;
+            (*coder).match_len_encoder.table_size = nice_len + 1 - MATCH_LEN_MIN;
+            (*coder).rep_len_encoder.table_size = nice_len + 1 - MATCH_LEN_MIN;
         }
         _ => return LZMA_OPTIONS_ERROR,
     }

@@ -3407,10 +3407,7 @@ pub unsafe extern "C" fn lzma_lzma_decoder_init(
         ),
     )
 }
-pub unsafe fn lzma_lzma_lclppb_decode(
-    options: *mut lzma_options_lzma,
-    mut byte: u8,
-) -> bool {
+pub unsafe fn lzma_lzma_lclppb_decode(options: *mut lzma_options_lzma, mut byte: u8) -> bool {
     if byte > (4 * 5 + 4) * 9 + 8 {
         return true;
     }

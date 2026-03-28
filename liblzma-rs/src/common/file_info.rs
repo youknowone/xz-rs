@@ -298,8 +298,8 @@ unsafe extern "C" fn file_info_decode(
                     }
                     _ => return ret,
                 }
-                let seek_amount: u64 =
-                    lzma_index_total_size((*coder).this_index) as u64 + LZMA_STREAM_HEADER_SIZE as u64;
+                let seek_amount: u64 = lzma_index_total_size((*coder).this_index) as u64
+                    + LZMA_STREAM_HEADER_SIZE as u64;
                 if (*coder).file_target_pos < seek_amount {
                     return LZMA_DATA_ERROR;
                 }

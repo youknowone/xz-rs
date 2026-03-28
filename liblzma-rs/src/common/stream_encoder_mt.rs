@@ -887,15 +887,7 @@ unsafe extern "C" fn stream_encode_mt(
     }
     if (*coder).sequence == SEQ_BLOCK {
         let ret: lzma_ret = stream_encode_mt_blocks(
-            coder,
-            allocator,
-            in_0,
-            in_pos,
-            in_size,
-            out,
-            out_pos,
-            out_size,
-            action,
+            coder, allocator, in_0, in_pos, in_size, out, out_pos, out_size, action,
         );
         if ret != LZMA_STREAM_END {
             return ret;
