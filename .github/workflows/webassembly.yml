@@ -49,7 +49,7 @@ jobs:
         name: Run test
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-          cargo binstall -y --force wasm-bindgen-cli@0.2.114
+          cargo binstall -y --force wasm-bindgen-cli@0.2.115
           cargo test --locked --target ${{ matrix.target }} --features wasm --release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For ease GitHub API rate limits
