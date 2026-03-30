@@ -161,7 +161,9 @@ pub unsafe fn lzma_outq_enable_partial_output(
     outq: *mut lzma_outq,
     enable_partial_output: Option<unsafe extern "C" fn(*mut c_void) -> ()>,
 ) {
-    let Some(enable_partial_output) = enable_partial_output else {
+    let enable_partial_output = if let Some(enable_partial_output) = enable_partial_output {
+        enable_partial_output
+    } else {
         return;
     };
 

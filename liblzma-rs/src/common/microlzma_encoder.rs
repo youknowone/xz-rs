@@ -20,10 +20,14 @@ unsafe extern "C" fn microlzma_encode(
     let out_start: size_t = *out_pos;
     let in_start: size_t = *in_pos;
     let mut uncomp_size: u64 = 0;
-    let Some(set_out_limit) = (*coder).lzma.set_out_limit else {
+    let set_out_limit = if let Some(set_out_limit) = (*coder).lzma.set_out_limit {
+        set_out_limit
+    } else {
         return LZMA_PROG_ERROR;
     };
-    let Some(code) = (*coder).lzma.code else {
+    let code = if let Some(code) = (*coder).lzma.code {
+        code
+    } else {
         return LZMA_PROG_ERROR;
     };
     if set_out_limit(

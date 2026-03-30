@@ -230,7 +230,9 @@ pub unsafe fn lzma_lz_decoder_init(
         preset_dict: core::ptr::null(),
         preset_dict_size: 0,
     };
-    let Some(lz_init) = lz_init else {
+    let lz_init = if let Some(lz_init) = lz_init {
+        lz_init
+    } else {
         return LZMA_PROG_ERROR;
     };
     let ret_: lzma_ret = lz_init(

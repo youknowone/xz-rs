@@ -43,7 +43,7 @@ unsafe fn call_filter(coder: *mut lzma_simple_coder, buffer: *mut u8, size: size
         buffer,
         size,
     ) as size_t;
-    (*coder).now_pos = ((*coder).now_pos as size_t + filtered) as u32;
+    (*coder).now_pos = (*coder).now_pos.wrapping_add(filtered as u32);
     filtered
 }
 unsafe extern "C" fn simple_code(

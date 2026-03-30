@@ -41,7 +41,9 @@ pub unsafe fn lzma_stream_buffer_decode(
         flags,
     );
     if ret == LZMA_OK {
-        let Some(code) = stream_decoder.code else {
+        let code = if let Some(code) = stream_decoder.code {
+            code
+        } else {
             lzma_next_end(::core::ptr::addr_of_mut!(stream_decoder), allocator);
             return LZMA_PROG_ERROR;
         };
@@ -71,7 +73,9 @@ pub unsafe fn lzma_stream_buffer_decode(
                 }
             } else if ret == LZMA_MEMLIMIT_ERROR {
                 let mut memusage: u64 = 0;
-                let Some(memconfig) = stream_decoder.memconfig else {
+                let memconfig = if let Some(memconfig) = stream_decoder.memconfig {
+                    memconfig
+                } else {
                     lzma_next_end(::core::ptr::addr_of_mut!(stream_decoder), allocator);
                     return LZMA_PROG_ERROR;
                 };

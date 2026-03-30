@@ -34,7 +34,9 @@ pub unsafe fn lzma_raw_buffer_decode(
     if ret_ != LZMA_OK {
         return ret_;
     }
-    let Some(code) = next.code else {
+    let code = if let Some(code) = next.code {
+        code
+    } else {
         lzma_next_end(::core::ptr::addr_of_mut!(next), allocator);
         return LZMA_PROG_ERROR;
     };
