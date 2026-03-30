@@ -10,7 +10,7 @@ unsafe extern "C" fn arm64_code(
     let mut i: size_t = 0;
     i = 0;
     while i < size {
-        let mut pc: u32 = (now_pos as size_t + i) as u32;
+        let mut pc: u32 = now_pos.wrapping_add(i as u32);
         let mut instr: u32 = read32le(buffer.offset(i as isize));
         if instr >> 26 == 0x25 {
             let src: u32 = instr;

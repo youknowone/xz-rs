@@ -431,6 +431,7 @@ name = "liblzma-rs"
 version = "0.1.0"
 dependencies = [
  "libc",
+ "memchr",
 ]
 
 [[package]]
