@@ -45,17 +45,17 @@ jobs:
         name: Run test
         run: |
           cargo test --locked --target ${{ matrix.target }} --features wasm
-      - if: ${{ endsWith(matrix.target, 'unknown') }}
+      - if: ${{ matrix.target == 'wasm32-unknown-unknown' }}
         name: Run test
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-          cargo binstall -y --force wasm-bindgen-cli
+          cargo binstall -y --force wasm-bindgen-cli@0.2.115
           cargo test --locked --target ${{ matrix.target }} --features wasm --release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # For ease GitHub API rate limits
       - name: Run test
         if: ${{ startsWith(matrix.target, 'wasm32-unknown-emscripten') }}
         run: |
-          cargo test --locked --target ${{ matrix.target }} --features wasm -- --skip standard_files
+          cargo test --locked --target ${{ matrix.target }} --lib --tests --features wasm -- --skip standard_files
         env:
           RUSTFLAGS: "-C link-args=-sINITIAL_MEMORY=128MB"

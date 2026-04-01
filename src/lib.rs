@@ -52,6 +52,14 @@
 #![doc(html_root_url = "https://docs.rs/liblzma/0.4.6")]
 #![deny(missing_docs)]
 
+#[cfg(not(any(feature = "rust-backend", feature = "c-backend")))]
+compile_error!("Either `rust-backend` or `c-backend` feature must be enabled");
+
+// When c-backend is active (without rust-backend), alias liblzma_c_sys
+// so that internal `liblzma_sys::` references resolve to the C library.
+#[cfg(all(feature = "c-backend", not(feature = "rust-backend")))]
+extern crate liblzma_c_sys as liblzma_sys;
+
 use std::io::{self, prelude::*};
 
 pub mod stream;
@@ -103,7 +111,7 @@ pub fn copy_decode<R: Read, W: Write>(source: R, mut destination: W) -> io::Resu
 }
 
 /// Find the size in bytes of uncompressed data from xz file.
-#[cfg(feature = "bindgen")]
+#[cfg(any(feature = "rust-backend", feature = "bindgen"))]
 pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
     use std::mem::MaybeUninit;
     let mut footer = [0u8; liblzma_sys::LZMA_STREAM_HEADER_SIZE as usize];
@@ -171,13 +179,13 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
     Ok(uncompressed_size)
 }
 
-#[cfg(test)]
+#[cfg(all(test, not(target_family = "wasm")))]
 mod tests {
     use super::*;
+    #[cfg(not(target_family = "wasm"))]
     use quickcheck::quickcheck;
-    #[cfg(all(target_family = "wasm", target_os = "unknown"))]
-    use wasm_bindgen_test::wasm_bindgen_test as test;
 
+    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn all() {
         quickcheck(test as fn(_) -> _);
@@ -189,6 +197,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn copy() {
         quickcheck(test as fn(_) -> _);
@@ -202,8 +211,9 @@ mod tests {
         }
     }
 
+    #[cfg(not(target_family = "wasm"))]
     #[test]
-    #[cfg(feature = "bindgen")]
+    #[cfg(any(feature = "rust-backend", feature = "bindgen"))]
     fn size() {
         quickcheck(test as fn(_) -> _);
 

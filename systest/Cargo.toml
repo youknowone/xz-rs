@@ -7,11 +7,15 @@ edition = "2021"
 publish = false
 
 [dependencies]
-liblzma-sys = { path = "../liblzma-sys" }
+liblzma-c-sys = { package = "liblzma-sys", path = "../liblzma-sys", optional = true }
+liblzma-rs-sys = { path = "../liblzma-rs-sys", optional = true }
 libc = "0.2"
 
 [build-dependencies]
 ctest2 = "0.4"
 
 [features]
-bindgen = ["liblzma-sys/bindgen"]
+default = ["c-sys"]
+c-sys = ["liblzma-c-sys"]
+rs-sys = ["liblzma-rs-sys"]
+bindgen = ["c-sys", "liblzma-c-sys/bindgen"]

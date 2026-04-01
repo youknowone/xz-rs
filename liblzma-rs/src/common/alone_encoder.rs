@@ -1,0 +1,220 @@
+use crate::types::*;
+#[derive(Copy, Clone)]
+#[repr(C)]
+pub struct lzma_alone_coder {
+    pub next: lzma_next_coder,
+    pub sequence: alone_encoder_seq,
+    pub header_pos: size_t,
+    pub header: [u8; 13],
+}
+pub type alone_encoder_seq = c_uint;
+pub const SEQ_CODE: alone_encoder_seq = 1;
+pub const SEQ_HEADER: alone_encoder_seq = 0;
+pub const ALONE_HEADER_SIZE: u32 = 1 + 4 + 8;
+unsafe extern "C" fn alone_encode(
+    coder_ptr: *mut c_void,
+    allocator: *const lzma_allocator,
+    in_0: *const u8,
+    in_pos: *mut size_t,
+    in_size: size_t,
+    out: *mut u8,
+    out_pos: *mut size_t,
+    out_size: size_t,
+    action: lzma_action,
+) -> lzma_ret {
+    let coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
+    while *out_pos < out_size {
+        match (*coder).sequence {
+            0 => {
+                lzma_bufcpy(
+                    ::core::ptr::addr_of_mut!((*coder).header) as *mut u8,
+                    ::core::ptr::addr_of_mut!((*coder).header_pos),
+                    ALONE_HEADER_SIZE as size_t,
+                    out,
+                    out_pos,
+                    out_size,
+                );
+                if (*coder).header_pos < ALONE_HEADER_SIZE as size_t {
+                    return LZMA_OK;
+                }
+                (*coder).sequence = SEQ_CODE;
+            }
+            1 => {
+                return (*coder).next.code.unwrap()(
+                    (*coder).next.coder,
+                    allocator,
+                    in_0,
+                    in_pos,
+                    in_size,
+                    out,
+                    out_pos,
+                    out_size,
+                    action,
+                );
+            }
+            _ => return LZMA_PROG_ERROR,
+        }
+    }
+    LZMA_OK
+}
+unsafe extern "C" fn alone_encoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    let coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
+    lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
+    crate::alloc::internal_free(coder as *mut c_void, allocator);
+}
+unsafe extern "C" fn alone_encoder_init(
+    next: *mut lzma_next_coder,
+    allocator: *const lzma_allocator,
+    options: *const lzma_options_lzma,
+) -> lzma_ret {
+    if core::mem::transmute::<
+        Option<
+            unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                *const lzma_options_lzma,
+            ) -> lzma_ret,
+        >,
+        uintptr_t,
+    >(Some(
+        alone_encoder_init
+            as unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                *const lzma_options_lzma,
+            ) -> lzma_ret,
+    )) != (*next).init
+    {
+        lzma_next_end(next, allocator);
+    }
+    (*next).init = core::mem::transmute::<
+        Option<
+            unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                *const lzma_options_lzma,
+            ) -> lzma_ret,
+        >,
+        uintptr_t,
+    >(Some(
+        alone_encoder_init
+            as unsafe extern "C" fn(
+                *mut lzma_next_coder,
+                *const lzma_allocator,
+                *const lzma_options_lzma,
+            ) -> lzma_ret,
+    ));
+    let mut coder: *mut lzma_alone_coder = (*next).coder as *mut lzma_alone_coder;
+    if coder.is_null() {
+        coder = crate::alloc::internal_alloc_object::<lzma_alone_coder>(allocator);
+        if coder.is_null() {
+            return LZMA_MEM_ERROR;
+        }
+        (*next).coder = coder as *mut c_void;
+        (*next).code = Some(
+            alone_encode
+                as unsafe extern "C" fn(
+                    *mut c_void,
+                    *const lzma_allocator,
+                    *const u8,
+                    *mut size_t,
+                    size_t,
+                    *mut u8,
+                    *mut size_t,
+                    size_t,
+                    lzma_action,
+                ) -> lzma_ret,
+        );
+        (*next).end = Some(
+            alone_encoder_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
+        );
+        (*coder).next = lzma_next_coder_s {
+            coder: core::ptr::null_mut(),
+            id: LZMA_VLI_UNKNOWN,
+            init: 0,
+            code: None,
+            end: None,
+            get_progress: None,
+            get_check: None,
+            memconfig: None,
+            update: None,
+            set_out_limit: None,
+        };
+    }
+    (*coder).sequence = SEQ_HEADER;
+    (*coder).header_pos = 0;
+    if lzma_lzma_lclppb_encode(
+        options,
+        ::core::ptr::addr_of_mut!((*coder).header) as *mut u8,
+    ) {
+        return LZMA_OPTIONS_ERROR;
+    }
+    if (*options).dict_size < LZMA_DICT_SIZE_MIN as u32 {
+        return LZMA_OPTIONS_ERROR;
+    }
+    let mut d: u32 = (*options).dict_size - 1;
+    d |= d >> 2;
+    d |= d >> 3;
+    d |= d >> 4;
+    d |= d >> 8;
+    d |= d >> 16;
+    if d != UINT32_MAX {
+        d += 1;
+    }
+    write32le(
+        (::core::ptr::addr_of_mut!((*coder).header) as *mut u8).offset(1),
+        d,
+    );
+    core::ptr::write_bytes(
+        (::core::ptr::addr_of_mut!((*coder).header) as *mut u8)
+            .offset(1)
+            .offset(4) as *mut u8,
+        0xff as u8,
+        8,
+    );
+    let filters: [lzma_filter_info; 2] = [
+        lzma_filter_info_s {
+            id: LZMA_FILTER_LZMA1,
+            init: Some(
+                lzma_lzma_encoder_init
+                    as unsafe extern "C" fn(
+                        *mut lzma_next_coder,
+                        *const lzma_allocator,
+                        *const lzma_filter_info,
+                    ) -> lzma_ret,
+            ),
+            options: options as *mut c_void,
+        },
+        lzma_filter_info_s {
+            id: 0,
+            init: None,
+            options: core::ptr::null_mut(),
+        },
+    ];
+    lzma_next_filter_init(
+        ::core::ptr::addr_of_mut!((*coder).next),
+        allocator,
+        ::core::ptr::addr_of!(filters) as *const lzma_filter_info,
+    )
+}
+pub unsafe fn lzma_alone_encoder(
+    strm: *mut lzma_stream,
+    options: *const lzma_options_lzma,
+) -> lzma_ret {
+    let ret_: lzma_ret = lzma_strm_init(strm);
+    if ret_ != LZMA_OK {
+        return ret_;
+    }
+    let ret__0: lzma_ret = alone_encoder_init(
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
+        (*strm).allocator,
+        options,
+    );
+    if ret__0 != LZMA_OK {
+        lzma_end(strm);
+        return ret__0;
+    }
+    (*(*strm).internal).supported_actions[LZMA_RUN as usize] = true;
+    (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
+    LZMA_OK
+}

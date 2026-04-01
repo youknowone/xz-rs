@@ -382,7 +382,10 @@ impl<W: Write> Drop for XzDecoder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::stream::{LzmaOptions, PRESET_EXTREME};
+    #[cfg(not(target_family = "wasm"))]
+    use crate::stream::LzmaOptions;
+    use crate::stream::PRESET_EXTREME;
+    #[cfg(not(target_family = "wasm"))]
     use quickcheck::quickcheck;
     use std::iter::repeat;
     #[cfg(all(target_family = "wasm", target_os = "unknown"))]
@@ -420,6 +423,7 @@ mod tests {
         assert_eq!(data, input);
     }
 
+    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn qc_lzma1() {
         quickcheck(test as fn(_) -> _);
@@ -435,6 +439,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn qc() {
         quickcheck(test as fn(_) -> _);
@@ -447,6 +452,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(target_family = "wasm"))]
     #[cfg(feature = "parallel")]
     #[test]
     fn qc_parallel_encode() {
@@ -460,6 +466,7 @@ mod tests {
         }
     }
 
+    #[cfg(not(target_family = "wasm"))]
     #[cfg(feature = "parallel")]
     #[test]
     fn qc_parallel_decode() {
