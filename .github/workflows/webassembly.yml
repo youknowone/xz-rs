@@ -45,7 +45,7 @@ jobs:
         name: Run test
         run: |
           cargo test --locked --target ${{ matrix.target }} --features wasm
-      - if: ${{ endsWith(matrix.target, 'unknown') }}
+      - if: ${{ matrix.target == 'wasm32-unknown-unknown' }}
         name: Run test
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
