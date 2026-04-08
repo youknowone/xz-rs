@@ -726,9 +726,15 @@ unsafe fn stream_encode_mt_blocks(
     let mut uncompressed_size: lzma_vli = 0;
     let mut ret: lzma_ret = LZMA_OK;
     let mut has_blocked: bool = false;
-    let mut wait_abs: mythread_condtime = timespec {
+    let mut wait_abs: mythread_condtime = mythread_condtime {
+        #[cfg(not(windows))]
         tv_sec: 0 as __darwin_time_t,
+        #[cfg(not(windows))]
         tv_nsec: 0,
+        #[cfg(windows)]
+        start: 0,
+        #[cfg(windows)]
+        timeout: 0,
     };
     loop {
         let mut mythread_i_747: c_uint = 0;
