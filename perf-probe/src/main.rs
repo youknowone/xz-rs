@@ -1,0 +1,551 @@
+#![cfg(not(target_family = "wasm"))]
+
+#[cfg(all(feature = "c-sys", feature = "rs-sys"))]
+compile_error!("Enable exactly one backend feature: c-sys or rs-sys");
+#[cfg(not(any(feature = "c-sys", feature = "rs-sys")))]
+compile_error!("Enable one backend feature: c-sys or rs-sys");
+
+use std::env;
+use std::fs;
+use std::hint::black_box;
+use std::path::PathBuf;
+use std::ptr;
+use std::time::{Duration, Instant};
+
+#[cfg(feature = "c-sys")]
+use liblzma_c_sys as backend_sys;
+#[cfg(feature = "rs-sys")]
+use liblzma_rs_sys as backend_sys;
+
+#[cfg(feature = "c-sys")]
+const BACKEND_NAME: &str = "c";
+#[cfg(feature = "rs-sys")]
+const BACKEND_NAME: &str = "rust";
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum Workload {
+    Encode,
+    Decode,
+    Size,
+    Crc32,
+    Crc64,
+}
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum InputKind {
+    Random,
+    Text,
+}
+
+#[derive(Debug)]
+struct Config {
+    workload: Workload,
+    input_kind: InputKind,
+    input_path: Option<PathBuf>,
+    compressed_input_path: Option<PathBuf>,
+    save_output_path: Option<PathBuf>,
+    size: usize,
+    chunk_size: Option<usize>,
+    expected_size: Option<usize>,
+    preset: u32,
+    iters: usize,
+    warmup: usize,
+}
+
+#[derive(Debug)]
+struct Measurement {
+    elapsed: Duration,
+    throughput_mib_s: f64,
+    digest: u64,
+}
+
+fn main() {
+    let config = Config::parse(env::args().skip(1)).unwrap_or_else(|message| {
+        eprintln!("{message}");
+        std::process::exit(2);
+    });
+
+    println!(
+        "config: backend={} workload={:?} input={:?} size={} preset={} iters={} warmup={}",
+        BACKEND_NAME,
+        config.workload,
+        config.input_kind,
+        config.size,
+        config.preset,
+        config.iters,
+        config.warmup
+    );
+    if let Some(path) = &config.input_path {
+        println!("input_path: {}", path.display());
+    }
+    if let Some(path) = &config.compressed_input_path {
+        println!("compressed_input_path: {}", path.display());
+    }
+    if let Some(path) = &config.save_output_path {
+        println!("save_output_path: {}", path.display());
+    }
+
+    match config.workload {
+        Workload::Encode => run_encode(&config),
+        Workload::Decode => run_decode(&config),
+        Workload::Size => run_size(&config),
+        Workload::Crc32 => run_crc32(&config),
+        Workload::Crc64 => run_crc64(&config),
+    }
+}
+
+impl Config {
+    fn parse<I>(mut args: I) -> Result<Self, String>
+    where
+        I: Iterator<Item = String>,
+    {
+        let mut config = Self {
+            workload: Workload::Encode,
+            input_kind: InputKind::Text,
+            input_path: None,
+            compressed_input_path: None,
+            save_output_path: None,
+            size: 1024 * 1024,
+            chunk_size: None,
+            expected_size: None,
+            preset: 6,
+            iters: 200,
+            warmup: 20,
+        };
+
+        while let Some(arg) = args.next() {
+            match arg.as_str() {
+                "--workload" => {
+                    config.workload = parse_workload(next_arg(&mut args, "--workload")?)?;
+                }
+                "--input-kind" => {
+                    config.input_kind = parse_input_kind(next_arg(&mut args, "--input-kind")?)?;
+                }
+                "--input" => {
+                    config.input_path = Some(PathBuf::from(next_arg(&mut args, "--input")?));
+                }
+                "--compressed-input" => {
+                    config.compressed_input_path =
+                        Some(PathBuf::from(next_arg(&mut args, "--compressed-input")?));
+                }
+                "--save-output" => {
+                    config.save_output_path =
+                        Some(PathBuf::from(next_arg(&mut args, "--save-output")?));
+                }
+                "--size" => {
+                    config.size = parse_usize(next_arg(&mut args, "--size")?, "--size")?;
+                }
+                "--chunk-size" => {
+                    config.chunk_size = Some(parse_usize(
+                        next_arg(&mut args, "--chunk-size")?,
+                        "--chunk-size",
+                    )?);
+                }
+                "--expected-size" => {
+                    config.expected_size = Some(parse_usize(
+                        next_arg(&mut args, "--expected-size")?,
+                        "--expected-size",
+                    )?);
+                }
+                "--preset" => {
+                    config.preset = parse_u32(next_arg(&mut args, "--preset")?, "--preset")?;
+                }
+                "--iters" => {
+                    config.iters = parse_usize(next_arg(&mut args, "--iters")?, "--iters")?;
+                }
+                "--warmup" => {
+                    config.warmup = parse_usize(next_arg(&mut args, "--warmup")?, "--warmup")?;
+                }
+                "--help" | "-h" => return Err(usage()),
+                unknown => return Err(format!("unknown argument `{unknown}`\n\n{}", usage())),
+            }
+        }
+
+        if config.iters == 0 {
+            return Err("`--iters` must be greater than zero".to_owned());
+        }
+
+        if matches!(config.chunk_size, Some(0)) {
+            return Err("`--chunk-size` must be greater than zero".to_owned());
+        }
+
+        if matches!(config.workload, Workload::Decode | Workload::Size)
+            && config.compressed_input_path.is_some()
+            && config.expected_size.is_none()
+        {
+            return Err(
+                "`decode`/`size` with `--compressed-input` also requires `--expected-size`"
+                    .to_owned(),
+            );
+        }
+
+        if config.chunk_size.is_some()
+            && !matches!(config.workload, Workload::Crc32 | Workload::Crc64)
+        {
+            return Err("`--chunk-size` is only supported with crc32/crc64 workloads".to_owned());
+        }
+
+        Ok(config)
+    }
+}
+
+fn usage() -> String {
+    let mut message = String::new();
+    message.push_str("Usage:\n");
+    message.push_str(
+        "  cargo run -p perf-probe --release --no-default-features --features <c-sys|rs-sys> -- \\\n",
+    );
+    message.push_str("    --workload <encode|decode|size|crc32|crc64> [options]\n\n");
+    message.push_str("Options:\n");
+    message.push_str("  --input <path>              Read raw workload bytes from a file\n");
+    message.push_str("  --compressed-input <path>   Read compressed bytes for decode\n");
+    message.push_str("  --save-output <path>        Save encode/decode output bytes\n");
+    message.push_str("  --input-kind <text|random>\n");
+    message
+        .push_str("  --size <bytes>              Synthetic input size when --input is omitted\n");
+    message.push_str(
+        "  --chunk-size <bytes>        Split crc32/crc64 input into incremental chunks\n",
+    );
+    message.push_str(
+        "  --expected-size <bytes>     Required for decode when --compressed-input is used\n",
+    );
+    message.push_str("  --preset <0-9>              LZMA preset used by encode/decode prep\n");
+    message.push_str("  --iters <n>                 Timed iterations\n");
+    message.push_str("  --warmup <n>                Untimed warmup iterations\n");
+    message
+}
+
+fn next_arg<I>(args: &mut I, flag: &str) -> Result<String, String>
+where
+    I: Iterator<Item = String>,
+{
+    args.next()
+        .ok_or_else(|| format!("missing value for `{flag}`\n\n{}", usage()))
+}
+
+fn parse_workload(value: String) -> Result<Workload, String> {
+    match value.as_str() {
+        "encode" => Ok(Workload::Encode),
+        "decode" => Ok(Workload::Decode),
+        "size" => Ok(Workload::Size),
+        "crc32" => Ok(Workload::Crc32),
+        "crc64" => Ok(Workload::Crc64),
+        _ => Err(format!("unsupported workload `{value}`")),
+    }
+}
+
+fn parse_input_kind(value: String) -> Result<InputKind, String> {
+    match value.as_str() {
+        "random" => Ok(InputKind::Random),
+        "text" => Ok(InputKind::Text),
+        _ => Err(format!("unsupported input kind `{value}`")),
+    }
+}
+
+fn parse_usize(value: String, flag: &str) -> Result<usize, String> {
+    value
+        .parse()
+        .map_err(|_| format!("failed to parse `{flag}` as usize: `{value}`"))
+}
+
+fn parse_u32(value: String, flag: &str) -> Result<u32, String> {
+    value
+        .parse()
+        .map_err(|_| format!("failed to parse `{flag}` as u32: `{value}`"))
+}
+
+fn load_raw_input(config: &Config) -> Result<Vec<u8>, std::io::Error> {
+    match &config.input_path {
+        Some(path) => fs::read(path),
+        None => Ok(match config.input_kind {
+            InputKind::Random => make_random_payload(config.size),
+            InputKind::Text => make_text_payload(config.size),
+        }),
+    }
+}
+
+fn load_compressed_input(config: &Config) -> Result<(Vec<u8>, usize), std::io::Error> {
+    match &config.compressed_input_path {
+        Some(path) => Ok((
+            fs::read(path)?,
+            config
+                .expected_size
+                .expect("expected_size checked during argument parsing"),
+        )),
+        None => {
+            let raw = load_raw_input(config)?;
+            let compressed = unsafe { backend_encode(&raw, config.preset) };
+            Ok((compressed, raw.len()))
+        }
+    }
+}
+
+fn make_random_payload(size: usize) -> Vec<u8> {
+    let mut x: u64 = 0x9E3779B97F4A7C15;
+    let mut out = Vec::with_capacity(size);
+    for _ in 0..size {
+        x ^= x >> 12;
+        x ^= x << 25;
+        x ^= x >> 27;
+        out.push((x.wrapping_mul(0x2545F4914F6CDD1D) >> 56) as u8);
+    }
+    out
+}
+
+fn make_text_payload(size: usize) -> Vec<u8> {
+    let chunk = b"Portable Network Archive keeps long-tail formats maintainable by replacing risky C dependency paths with inspectable Rust implementations. ";
+    let mut out = Vec::with_capacity(size);
+    while out.len() < size {
+        let remaining = size - out.len();
+        out.extend_from_slice(&chunk[..remaining.min(chunk.len())]);
+    }
+    out
+}
+
+fn run_encode(config: &Config) {
+    let input = load_raw_input(config).unwrap_or_else(|err| {
+        eprintln!("failed to load input: {err}");
+        std::process::exit(1);
+    });
+
+    let first = unsafe { backend_encode(&input, config.preset) };
+    if let Some(path) = &config.save_output_path {
+        fs::write(path, &first).unwrap_or_else(|err| {
+            eprintln!("failed to write encoded output: {err}");
+            std::process::exit(1);
+        });
+    }
+
+    let measurement = measure(input.len(), config.iters, config.warmup, || unsafe {
+        let output = backend_encode(&input, config.preset);
+        fold_bytes(output.len(), &output)
+    });
+    print_measurement(&measurement, config.iters);
+}
+
+fn run_decode(config: &Config) {
+    let (compressed, expected_size) = load_compressed_input(config).unwrap_or_else(|err| {
+        eprintln!("failed to load compressed input: {err}");
+        std::process::exit(1);
+    });
+
+    let first = unsafe { backend_decode(&compressed, expected_size) };
+    if let Some(path) = &config.save_output_path {
+        fs::write(path, &first).unwrap_or_else(|err| {
+            eprintln!("failed to write decoded output: {err}");
+            std::process::exit(1);
+        });
+    }
+    println!(
+        "decode_input: compressed_size={} original_size={}",
+        compressed.len(),
+        expected_size
+    );
+
+    let measurement = measure(expected_size, config.iters, config.warmup, || unsafe {
+        let output = backend_decode(&compressed, expected_size);
+        fold_bytes(output.len(), &output)
+    });
+    print_measurement(&measurement, config.iters);
+}
+
+fn run_size(config: &Config) {
+    let (compressed, expected_size) = load_compressed_input(config).unwrap_or_else(|err| {
+        eprintln!("failed to load compressed input: {err}");
+        std::process::exit(1);
+    });
+    println!(
+        "size_input: compressed_size={} original_size={}",
+        compressed.len(),
+        expected_size
+    );
+
+    let first = unsafe { backend_uncompressed_size(&compressed) };
+    assert_eq!(
+        first, expected_size as u64,
+        "{BACKEND_NAME} size failed: expected {} got {}",
+        expected_size, first
+    );
+
+    let measurement = measure(compressed.len(), config.iters, config.warmup, || unsafe {
+        backend_uncompressed_size(&compressed)
+    });
+    print_measurement(&measurement, config.iters);
+}
+
+fn run_crc32(config: &Config) {
+    let input = load_raw_input(config).unwrap_or_else(|err| {
+        eprintln!("failed to load input: {err}");
+        std::process::exit(1);
+    });
+    let measurement = measure(input.len(), config.iters, config.warmup, || unsafe {
+        let slice = black_box(input.as_slice());
+        let mut crc = 0u32;
+        if let Some(chunk_size) = config.chunk_size {
+            for chunk in slice.chunks(chunk_size) {
+                crc = backend_sys::lzma_crc32(chunk.as_ptr(), chunk.len(), crc);
+            }
+        } else {
+            crc = backend_sys::lzma_crc32(slice.as_ptr(), slice.len(), crc);
+        }
+        crc as u64
+    });
+    print_measurement(&measurement, config.iters);
+}
+
+fn run_crc64(config: &Config) {
+    let input = load_raw_input(config).unwrap_or_else(|err| {
+        eprintln!("failed to load input: {err}");
+        std::process::exit(1);
+    });
+    let measurement = measure(input.len(), config.iters, config.warmup, || unsafe {
+        let slice = black_box(input.as_slice());
+        let mut crc = 0u64;
+        if let Some(chunk_size) = config.chunk_size {
+            for chunk in slice.chunks(chunk_size) {
+                crc = backend_sys::lzma_crc64(chunk.as_ptr(), chunk.len(), crc);
+            }
+        } else {
+            crc = backend_sys::lzma_crc64(slice.as_ptr(), slice.len(), crc);
+        }
+        crc
+    });
+    print_measurement(&measurement, config.iters);
+}
+
+fn measure<F>(bytes_per_iter: usize, iters: usize, warmup: usize, mut work: F) -> Measurement
+where
+    F: FnMut() -> u64,
+{
+    let mut digest = 0u64;
+    for _ in 0..warmup {
+        digest ^= black_box(work());
+    }
+
+    let start = Instant::now();
+    for _ in 0..iters {
+        digest ^= black_box(work());
+    }
+    let elapsed = start.elapsed();
+    let mib = (bytes_per_iter as f64 * iters as f64) / (1024.0 * 1024.0);
+
+    Measurement {
+        elapsed,
+        throughput_mib_s: mib / elapsed.as_secs_f64(),
+        digest,
+    }
+}
+
+fn print_measurement(measurement: &Measurement, iters: usize) {
+    println!(
+        "{}: total={:.3?} ns_per_iter={:.0} throughput_mib_s={:.2} digest={:#x}",
+        BACKEND_NAME,
+        measurement.elapsed,
+        measurement.elapsed.as_nanos() as f64 / iters as f64,
+        measurement.throughput_mib_s,
+        measurement.digest
+    );
+}
+
+fn fold_bytes(len: usize, data: &[u8]) -> u64 {
+    let mut acc = len as u64;
+    for &byte in data.iter().take(32) {
+        acc = acc.rotate_left(5) ^ u64::from(byte);
+    }
+    acc
+}
+
+unsafe fn backend_encode(input: &[u8], preset: u32) -> Vec<u8> {
+    let bound = backend_sys::lzma_stream_buffer_bound(input.len());
+    let mut out = vec![0u8; bound];
+    let mut out_pos: usize = 0;
+    let ret = unsafe {
+        backend_sys::lzma_easy_buffer_encode(
+            preset,
+            backend_sys::LZMA_CHECK_CRC64,
+            ptr::null(),
+            input.as_ptr(),
+            input.len(),
+            out.as_mut_ptr(),
+            &mut out_pos,
+            out.len(),
+        )
+    };
+    assert_eq!(
+        ret,
+        backend_sys::LZMA_OK,
+        "{BACKEND_NAME} encode failed with {ret}"
+    );
+    out.truncate(out_pos);
+    out
+}
+
+unsafe fn backend_decode(compressed: &[u8], out_size: usize) -> Vec<u8> {
+    let mut out = vec![0u8; out_size];
+    let mut memlimit = u64::MAX;
+    let mut in_pos = 0usize;
+    let mut out_pos = 0usize;
+    let ret = unsafe {
+        backend_sys::lzma_stream_buffer_decode(
+            &mut memlimit,
+            0,
+            ptr::null(),
+            compressed.as_ptr(),
+            &mut in_pos,
+            compressed.len(),
+            out.as_mut_ptr(),
+            &mut out_pos,
+            out.len(),
+        )
+    };
+    assert_eq!(
+        ret,
+        backend_sys::LZMA_OK,
+        "{BACKEND_NAME} decode failed with {ret}"
+    );
+    out.truncate(out_pos);
+    out
+}
+
+unsafe fn backend_uncompressed_size(compressed: &[u8]) -> u64 {
+    let footer_len = backend_sys::LZMA_STREAM_HEADER_SIZE as usize;
+    let footer_offset = compressed
+        .len()
+        .checked_sub(footer_len)
+        .expect("compressed payload must contain at least a footer");
+    let footer = compressed[footer_offset..].as_ptr();
+
+    let mut footer_flags = std::mem::MaybeUninit::<backend_sys::lzma_stream_flags>::uninit();
+    let footer_ret = unsafe { backend_sys::lzma_stream_footer_decode(footer_flags.as_mut_ptr(), footer) };
+    assert_eq!(
+        footer_ret,
+        backend_sys::LZMA_OK,
+        "{BACKEND_NAME} stream_footer_decode failed with {footer_ret}"
+    );
+    let footer_flags = unsafe { footer_flags.assume_init() };
+
+    let index_plus_footer = footer_len + footer_flags.backward_size as usize;
+    let mut index_pos = 0usize;
+    let mut memlimit = u64::MAX;
+    let mut index = std::mem::MaybeUninit::<*mut backend_sys::lzma_index>::uninit();
+    let index_bytes = &compressed[compressed.len() - index_plus_footer..];
+    let index_ret = unsafe {
+        backend_sys::lzma_index_buffer_decode(
+            index.as_mut_ptr(),
+            &mut memlimit,
+            ptr::null(),
+            index_bytes.as_ptr(),
+            &mut index_pos,
+            index_bytes.len(),
+        )
+    };
+    assert_eq!(
+        index_ret,
+        backend_sys::LZMA_OK,
+        "{BACKEND_NAME} index_buffer_decode failed with {index_ret}"
+    );
+    let index = unsafe { index.assume_init() };
+    let size = unsafe { backend_sys::lzma_index_uncompressed_size(index) };
+    unsafe { backend_sys::lzma_index_end(index, ptr::null()) };
+    size
+}

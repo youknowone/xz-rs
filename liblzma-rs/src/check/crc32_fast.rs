@@ -1,4 +1,7 @@
 use crate::types::*;
+
+#[cfg(target_arch = "aarch64")]
+use core::arch::aarch64::{__crc32b, __crc32d, __crc32h, __crc32w};
 pub static lzma_crc32_table: [[u32; 256]; 8] = [
     [
         0, 0x77073096, 0xee0e612c, 0x990951ba, 0x76dc419, 0x706af48f, 0xe963a535, 0x9e6495a3,
@@ -350,6 +353,83 @@ unsafe fn lzma_crc32_generic(mut buf: *const u8, mut size: size_t, mut crc: u32)
     }
     !crc
 }
+
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+unsafe fn aligned_read16le(buf: *const u8) -> u16 {
+    core::ptr::read_unaligned(buf as *const u16)
+}
+
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+unsafe fn aligned_read32le(buf: *const u8) -> u32 {
+    core::ptr::read_unaligned(buf as *const u32)
+}
+
+#[cfg(target_arch = "aarch64")]
+#[inline(always)]
+unsafe fn aligned_read64le(buf: *const u8) -> u64 {
+    core::ptr::read_unaligned(buf as *const u64)
+}
+
+#[cfg(target_arch = "aarch64")]
+#[target_feature(enable = "crc")]
+unsafe fn lzma_crc32_arm64(mut buf: *const u8, mut size: size_t, mut crc: u32) -> u32 {
+    crc = !crc;
+
+    if size >= 8 {
+        let align = (0usize.wrapping_sub(buf as usize)) & 7;
+
+        if align & 1 != 0 {
+            crc = __crc32b(crc, *buf);
+            buf = buf.add(1);
+        }
+
+        if align & 2 != 0 {
+            crc = __crc32h(crc, aligned_read16le(buf));
+            buf = buf.add(2);
+        }
+
+        if align & 4 != 0 {
+            crc = __crc32w(crc, aligned_read32le(buf));
+            buf = buf.add(4);
+        }
+
+        size -= align;
+
+        let limit = buf.add(size & !7);
+        while buf < limit {
+            crc = __crc32d(crc, aligned_read64le(buf));
+            buf = buf.add(8);
+        }
+
+        size &= 7;
+    }
+
+    if size & 4 != 0 {
+        crc = __crc32w(crc, aligned_read32le(buf));
+        buf = buf.add(4);
+    }
+
+    if size & 2 != 0 {
+        crc = __crc32h(crc, aligned_read16le(buf));
+        buf = buf.add(2);
+    }
+
+    if size & 1 != 0 {
+        crc = __crc32b(crc, *buf);
+    }
+
+    !crc
+}
+
 pub unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
+    #[cfg(target_arch = "aarch64")]
+    {
+        if std::arch::is_aarch64_feature_detected!("crc") {
+            return lzma_crc32_arm64(buf, size, crc);
+        }
+    }
+
     lzma_crc32_generic(buf, size, crc)
 }

@@ -1,4 +1,5 @@
 use crate::types::*;
+use core::mem::MaybeUninit;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_stream_coder {
@@ -172,27 +173,9 @@ unsafe extern "C" fn stream_decode(
                     return LZMA_OK;
                 }
                 (*coder).pos = 0;
-                let mut footer_flags: lzma_stream_flags = lzma_stream_flags {
-                    version: 0,
-                    backward_size: 0,
-                    check: LZMA_CHECK_NONE,
-                    reserved_enum1: LZMA_RESERVED_ENUM,
-                    reserved_enum2: LZMA_RESERVED_ENUM,
-                    reserved_enum3: LZMA_RESERVED_ENUM,
-                    reserved_enum4: LZMA_RESERVED_ENUM,
-                    reserved_bool1: 0,
-                    reserved_bool2: 0,
-                    reserved_bool3: 0,
-                    reserved_bool4: 0,
-                    reserved_bool5: 0,
-                    reserved_bool6: 0,
-                    reserved_bool7: 0,
-                    reserved_bool8: 0,
-                    reserved_int1: 0,
-                    reserved_int2: 0,
-                };
+                let mut footer_flags = MaybeUninit::<lzma_stream_flags>::uninit();
                 let ret_3: lzma_ret = lzma_stream_footer_decode(
-                    ::core::ptr::addr_of_mut!(footer_flags),
+                    footer_flags.as_mut_ptr(),
                     ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
                 );
                 if ret_3 != LZMA_OK {
@@ -202,6 +185,7 @@ unsafe extern "C" fn stream_decode(
                         ret_3
                     };
                 }
+                let mut footer_flags = footer_flags.assume_init();
                 if lzma_index_hash_size((*coder).index_hash) != footer_flags.backward_size {
                     return LZMA_DATA_ERROR;
                 }
@@ -251,12 +235,9 @@ unsafe extern "C" fn stream_decode(
             }
             3500765272169221397 => {
                 (*coder).block_options.version = 1;
-                let mut filters: [lzma_filter; 5] = [lzma_filter {
-                    id: 0,
-                    options: core::ptr::null_mut(),
-                }; 5];
-                (*coder).block_options.filters =
-                    ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter;
+                let mut filters = MaybeUninit::<[lzma_filter; 5]>::uninit();
+                let filters_ptr = filters.as_mut_ptr() as *mut lzma_filter;
+                (*coder).block_options.filters = filters_ptr;
                 let ret_: lzma_ret = lzma_block_header_decode(
                     ::core::ptr::addr_of_mut!((*coder).block_options),
                     allocator,
@@ -266,9 +247,7 @@ unsafe extern "C" fn stream_decode(
                     return ret_;
                 }
                 (*coder).block_options.ignore_check = (*coder).ignore_check as lzma_bool;
-                let memusage: u64 = lzma_raw_decoder_memusage(
-                    ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter
-                ) as u64;
+                let memusage: u64 = lzma_raw_decoder_memusage(filters_ptr) as u64;
                 let mut ret_0: lzma_ret = LZMA_OK;
                 if memusage == UINT64_MAX {
                     ret_0 = LZMA_OPTIONS_ERROR;
@@ -284,10 +263,7 @@ unsafe extern "C" fn stream_decode(
                         );
                     }
                 }
-                lzma_filters_free(
-                    ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter,
-                    allocator,
-                );
+                lzma_filters_free(filters_ptr, allocator);
                 (*coder).block_options.filters = core::ptr::null_mut();
                 if ret_0 != LZMA_OK {
                     return ret_0;

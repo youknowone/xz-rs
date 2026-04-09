@@ -1,4 +1,5 @@
 use crate::types::*;
+
 unsafe fn copy_or_code(
     coder: *mut lzma_simple_coder,
     allocator: *const lzma_allocator,

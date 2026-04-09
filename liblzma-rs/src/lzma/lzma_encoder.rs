@@ -106,31 +106,34 @@ unsafe fn rc_flush(rc: *mut lzma_range_encoder) {
         i += 1;
     }
 }
-#[inline]
-unsafe fn rc_shift_low(
-    rc: *mut lzma_range_encoder,
+#[inline(always)]
+unsafe fn rc_shift_low_raw(
+    low: &mut u64,
+    cache_size: &mut u64,
+    cache: &mut u8,
+    out_total: &mut u64,
     out: *mut u8,
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> bool {
-    if ((*rc).low as u32) < 0xff000000 || ((*rc).low >> 32) as u32 != 0 {
+    if (*low as u32) < 0xff000000 || (*low >> 32) as u32 != 0 {
         loop {
             if *out_pos == out_size {
                 return true;
             }
-            *out.offset(*out_pos as isize) = (*rc).cache.wrapping_add(((*rc).low >> 32) as u8);
+            *out.add(*out_pos) = cache.wrapping_add((*low >> 32) as u8);
             *out_pos += 1;
-            (*rc).out_total += 1;
-            (*rc).cache = 0xff;
-            (*rc).cache_size -= 1;
-            if (*rc).cache_size == 0 {
+            *out_total += 1;
+            *cache = 0xff;
+            *cache_size -= 1;
+            if *cache_size == 0 {
                 break;
             }
         }
-        (*rc).cache = ((*rc).low >> 24 & 0xff as u64) as u8;
+        *cache = ((*low >> 24) & 0xff) as u8;
     }
-    (*rc).cache_size += 1;
-    (*rc).low = ((*rc).low & 0xffffff as u64) << RC_SHIFT_BITS;
+    *cache_size += 1;
+    *low = (*low & 0x00ff_ffff) << RC_SHIFT_BITS;
     false
 }
 #[inline]
@@ -166,46 +169,85 @@ unsafe fn rc_encode(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> bool {
-    while (*rc).pos < (*rc).count {
-        if (*rc).range < RC_TOP_VALUE as u32 {
-            if rc_shift_low(rc, out, out_pos, out_size) {
+    let symbols = ::core::ptr::addr_of_mut!((*rc).symbols) as *mut rc_symbol;
+    let probs = ::core::ptr::addr_of_mut!((*rc).probs) as *mut *mut probability;
+    let mut low = (*rc).low;
+    let mut cache_size = (*rc).cache_size;
+    let mut range = (*rc).range;
+    let mut cache = (*rc).cache;
+    let mut out_total = (*rc).out_total;
+    let count = (*rc).count;
+    let mut pos = (*rc).pos;
+
+    while pos < count {
+        if range < RC_TOP_VALUE as u32 {
+            if rc_shift_low_raw(
+                &mut low,
+                &mut cache_size,
+                &mut cache,
+                &mut out_total,
+                out,
+                out_pos,
+                out_size,
+            ) {
+                (*rc).low = low;
+                (*rc).cache_size = cache_size;
+                (*rc).range = range;
+                (*rc).cache = cache;
+                (*rc).out_total = out_total;
+                (*rc).pos = pos;
                 return true;
             }
-            (*rc).range <<= RC_SHIFT_BITS;
+            range <<= RC_SHIFT_BITS;
         }
-        match *rc_symbol_slot_mut(rc, (*rc).pos) {
+        match *symbols.add(pos) {
             0 => {
-                let mut prob: probability = **rc_prob_slot_mut(rc, (*rc).pos);
-                (*rc).range = ((*rc).range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(prob as u32);
+                let prob_ptr = *probs.add(pos);
+                let mut prob: probability = *prob_ptr;
+                range = (range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(prob as u32);
                 prob = (prob as u32)
                     .wrapping_add(RC_BIT_MODEL_TOTAL.wrapping_sub(prob as u32) >> RC_MOVE_BITS)
                     as probability;
-                **rc_prob_slot_mut(rc, (*rc).pos) = prob;
+                *prob_ptr = prob;
             }
             1 => {
-                let mut prob_0: probability = **rc_prob_slot_mut(rc, (*rc).pos);
-                let bound: u32 =
-                    (prob_0 as u32).wrapping_mul((*rc).range >> RC_BIT_MODEL_TOTAL_BITS);
-                (*rc).low = (*rc).low.wrapping_add(bound as u64);
-                (*rc).range = (*rc).range.wrapping_sub(bound);
+                let prob_ptr = *probs.add(pos);
+                let mut prob_0: probability = *prob_ptr;
+                let bound: u32 = (prob_0 as u32).wrapping_mul(range >> RC_BIT_MODEL_TOTAL_BITS);
+                low = low.wrapping_add(bound as u64);
+                range = range.wrapping_sub(bound);
                 prob_0 -= prob_0 >> RC_MOVE_BITS;
-                **rc_prob_slot_mut(rc, (*rc).pos) = prob_0;
+                *prob_ptr = prob_0;
             }
             2 => {
-                (*rc).range >>= 1;
+                range >>= 1;
             }
             3 => {
-                (*rc).range >>= 1;
-                (*rc).low = (*rc).low.wrapping_add((*rc).range as u64);
+                range >>= 1;
+                low = low.wrapping_add(range as u64);
             }
             4 => {
-                (*rc).range = UINT32_MAX;
+                range = UINT32_MAX;
                 loop {
-                    if rc_shift_low(rc, out, out_pos, out_size) {
+                    if rc_shift_low_raw(
+                        &mut low,
+                        &mut cache_size,
+                        &mut cache,
+                        &mut out_total,
+                        out,
+                        out_pos,
+                        out_size,
+                    ) {
+                        (*rc).low = low;
+                        (*rc).cache_size = cache_size;
+                        (*rc).range = range;
+                        (*rc).cache = cache;
+                        (*rc).out_total = out_total;
+                        (*rc).pos = pos;
                         return true;
                     }
-                    (*rc).pos += 1;
-                    if (*rc).pos >= (*rc).count {
+                    pos += 1;
+                    if pos >= count {
                         break;
                     }
                 }
@@ -214,8 +256,13 @@ unsafe fn rc_encode(
             }
             _ => {}
         }
-        (*rc).pos += 1;
+        pos += 1;
     }
+    (*rc).low = low;
+    (*rc).cache_size = cache_size;
+    (*rc).range = range;
+    (*rc).cache = cache;
+    (*rc).out_total = out_total;
     (*rc).count = 0;
     (*rc).pos = 0;
     false

@@ -1,0 +1,15 @@
+[package]
+name = "perf-probe"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[features]
+default = []
+c-sys = ["dep:liblzma-c-sys"]
+rs-sys = ["dep:liblzma-rs-sys"]
+
+[dependencies]
+liblzma-c-sys = { package = "liblzma-sys", path = "../liblzma-sys", optional = true }
+liblzma-rs-sys = { path = "../liblzma-rs-sys", optional = true }
+

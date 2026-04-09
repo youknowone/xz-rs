@@ -1,15 +1,19 @@
 use crate::types::*;
 unsafe fn decode_buffer(coder: *mut lzma_delta_coder, buffer: *mut u8, size: size_t) {
     let distance: size_t = (*coder).distance;
+    let history = (*coder).history.as_mut_ptr();
+    let mut pos = (*coder).pos;
     let mut i: size_t = 0;
     while i < size {
-        *buffer.offset(i as isize) = (*buffer.offset(i as isize)).wrapping_add(
-            (*coder).history[(distance.wrapping_add((*coder).pos as size_t) & 0xff) as usize],
-        );
-        (*coder).history[((*coder).pos & 0xff) as usize] = *buffer.offset(i as isize);
-        (*coder).pos = (*coder).pos.wrapping_sub(1);
+        let byte_ptr = buffer.add(i);
+        let byte = (*byte_ptr)
+            .wrapping_add(*history.add((distance.wrapping_add(pos as size_t) & 0xff) as usize));
+        *byte_ptr = byte;
+        *history.add((pos & 0xff) as usize) = byte;
+        pos = pos.wrapping_sub(1);
         i += 1;
     }
+    (*coder).pos = pos;
 }
 unsafe extern "C" fn delta_decode(
     coder_ptr: *mut c_void,

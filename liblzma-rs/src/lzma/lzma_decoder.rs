@@ -236,6 +236,10 @@ unsafe extern "C" fn lzma_decode(
     let mut limit: u32 = (*coder).limit;
     let mut offset: u32 = (*coder).offset;
     let mut len: u32 = (*coder).len;
+    let literal_probs: *mut probability =
+        ::core::ptr::addr_of_mut!((*coder).literal) as *mut probability;
+    let is_match_probs: *mut [probability; 16] =
+        ::core::ptr::addr_of_mut!((*coder).is_match) as *mut [probability; 16];
     let literal_mask: u32 = (*coder).literal_mask;
     let literal_context_bits: u32 = (*coder).literal_context_bits;
     let mut pos_state: u32 = (dict.pos & pos_mask as size_t) as u32;
@@ -903,29 +907,24 @@ unsafe extern "C" fn lzma_decode(
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
-                rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                    .wrapping_mul((*coder).is_match[state as usize][pos_state as usize] as u32);
+                let is_match_prob = ::core::ptr::addr_of_mut!(
+                    (*is_match_probs.add(state as usize))[pos_state as usize]
+                );
+                rc_bound =
+                    (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(*is_match_prob as u32);
                 if rc.code < rc_bound {
                     rc.range = rc_bound;
-                    (*coder).is_match[state as usize][pos_state as usize] = ((*coder).is_match
-                        [state as usize][pos_state as usize]
-                        as u32)
-                        .wrapping_add(
-                            RC_BIT_MODEL_TOTAL.wrapping_sub(
-                                (*coder).is_match[state as usize][pos_state as usize] as u32,
-                            ) >> RC_MOVE_BITS,
-                        )
-                        as probability
-                        as probability;
-                    probs = (::core::ptr::addr_of_mut!((*coder).literal) as *mut probability)
-                        .offset(
-                            (3_usize).wrapping_mul(
-                                ((dict.pos << 8).wrapping_add(
-                                    dict_get0(::core::ptr::addr_of_mut!(dict)) as size_t,
-                                ) & literal_mask as size_t)
-                                    << literal_context_bits,
-                            ) as isize,
-                        );
+                    *is_match_prob = (*is_match_prob as u32).wrapping_add(
+                        RC_BIT_MODEL_TOTAL.wrapping_sub(*is_match_prob as u32) >> RC_MOVE_BITS,
+                    ) as probability;
+                    probs = literal_probs.offset(
+                        (3_usize).wrapping_mul(
+                            ((dict.pos << 8)
+                                .wrapping_add(dict_get0(::core::ptr::addr_of_mut!(dict)) as size_t)
+                                & literal_mask as size_t)
+                                << literal_context_bits,
+                        ) as isize,
+                    );
                     symbol = 1;
                     if state < LIT_STATES {
                         state = if state <= STATE_SHORTREP_LIT_LIT {
@@ -949,9 +948,7 @@ unsafe extern "C" fn lzma_decode(
                 } else {
                     rc.range = rc.range.wrapping_sub(rc_bound);
                     rc.code = rc.code.wrapping_sub(rc_bound);
-                    (*coder).is_match[state as usize][pos_state as usize] = (*coder).is_match
-                        [state as usize][pos_state as usize]
-                        - ((*coder).is_match[state as usize][pos_state as usize] >> RC_MOVE_BITS);
+                    *is_match_prob = *is_match_prob - (*is_match_prob >> RC_MOVE_BITS);
                     current_block = 3469750012682708893;
                     continue;
                 }
@@ -1107,29 +1104,24 @@ unsafe extern "C" fn lzma_decode(
                     rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
                     rc_in_ptr = rc_in_ptr.offset(1);
                 }
-                rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                    .wrapping_mul((*coder).is_match[state as usize][pos_state as usize] as u32);
+                let is_match_prob = ::core::ptr::addr_of_mut!(
+                    (*is_match_probs.add(state as usize))[pos_state as usize]
+                );
+                rc_bound =
+                    (rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(*is_match_prob as u32);
                 if rc.code < rc_bound {
                     rc.range = rc_bound;
-                    (*coder).is_match[state as usize][pos_state as usize] = ((*coder).is_match
-                        [state as usize][pos_state as usize]
-                        as u32)
-                        .wrapping_add(
-                            RC_BIT_MODEL_TOTAL.wrapping_sub(
-                                (*coder).is_match[state as usize][pos_state as usize] as u32,
-                            ) >> RC_MOVE_BITS,
-                        )
-                        as probability
-                        as probability;
-                    probs = (::core::ptr::addr_of_mut!((*coder).literal) as *mut probability)
-                        .offset(
-                            (3_usize).wrapping_mul(
-                                ((dict.pos << 8).wrapping_add(
-                                    dict_get0(::core::ptr::addr_of_mut!(dict)) as size_t,
-                                ) & literal_mask as size_t)
-                                    << literal_context_bits,
-                            ) as isize,
-                        );
+                    *is_match_prob = (*is_match_prob as u32).wrapping_add(
+                        RC_BIT_MODEL_TOTAL.wrapping_sub(*is_match_prob as u32) >> RC_MOVE_BITS,
+                    ) as probability;
+                    probs = literal_probs.offset(
+                        (3_usize).wrapping_mul(
+                            ((dict.pos << 8)
+                                .wrapping_add(dict_get0(::core::ptr::addr_of_mut!(dict)) as size_t)
+                                & literal_mask as size_t)
+                                << literal_context_bits,
+                        ) as isize,
+                    );
                     if state < LIT_STATES {
                         state = if state <= STATE_SHORTREP_LIT_LIT {
                             STATE_LIT_LIT
@@ -1562,9 +1554,7 @@ unsafe extern "C" fn lzma_decode(
                 } else {
                     rc.range = rc.range.wrapping_sub(rc_bound);
                     rc.code = rc.code.wrapping_sub(rc_bound);
-                    (*coder).is_match[state as usize][pos_state as usize] = (*coder).is_match
-                        [state as usize][pos_state as usize]
-                        - ((*coder).is_match[state as usize][pos_state as usize] >> RC_MOVE_BITS);
+                    *is_match_prob = *is_match_prob - (*is_match_prob >> RC_MOVE_BITS);
                     if rc.range < RC_TOP_VALUE as u32 {
                         rc.range <<= RC_SHIFT_BITS;
                         rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;

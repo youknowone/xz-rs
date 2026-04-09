@@ -1,5 +1,5 @@
 use crate::types::*;
-pub static mut lzma_crc64_table: [[u64; 256]; 4] = [
+pub static lzma_crc64_table: [[u64; 256]; 4] = [
     [
         0,
         0xb32e4cbe03a75f6f,
@@ -1035,10 +1035,14 @@ pub static mut lzma_crc64_table: [[u64; 256]; 4] = [
 ];
 #[inline]
 unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
+    let table0 = lzma_crc64_table[0].as_ptr();
+    let table1 = lzma_crc64_table[1].as_ptr();
+    let table2 = lzma_crc64_table[2].as_ptr();
+    let table3 = lzma_crc64_table[3].as_ptr();
     crc = !crc;
     if size > 4 {
         while buf as uintptr_t & 3 as uintptr_t != 0 {
-            crc = lzma_crc64_table[0][(*buf as u64 ^ crc & 0xff as u64) as usize] ^ crc >> 8;
+            crc = *table0.add((*buf as u64 ^ crc & 0xff as u64) as usize) ^ crc >> 8;
             buf = buf.offset(1);
             size -= 1;
         }
@@ -1047,17 +1051,21 @@ unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64)
         while buf < limit {
             let tmp: u32 = crc as u32 ^ aligned_read32ne(buf) as u32;
             buf = buf.offset(4);
-            crc = lzma_crc64_table[3][(tmp & 0xff) as usize]
-                ^ lzma_crc64_table[2][(tmp >> 8 & 0xff) as usize]
+            crc = *table3.add((tmp & 0xff) as usize)
+                ^ *table2.add((tmp >> 8 & 0xff) as usize)
                 ^ crc >> 32
-                ^ lzma_crc64_table[1][(tmp >> 16 & 0xff) as usize]
-                ^ lzma_crc64_table[0][(tmp >> 24) as usize];
+                ^ *table1.add((tmp >> 16 & 0xff) as usize)
+                ^ *table0.add((tmp >> 24) as usize);
         }
     }
-    while size > 0 {
-        crc = lzma_crc64_table[0][(*buf as u64 ^ crc & 0xff as u64) as usize] ^ crc >> 8;
+    loop {
+        let old_size = size;
+        size = size.wrapping_sub(1);
+        if old_size == 0 {
+            break;
+        }
+        crc = *table0.add((*buf as u64 ^ crc & 0xff as u64) as usize) ^ crc >> 8;
         buf = buf.offset(1);
-        size -= 1;
     }
     !crc
 }

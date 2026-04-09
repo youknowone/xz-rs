@@ -120,9 +120,10 @@ pub unsafe fn lzma_bufcpy(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> size_t {
-    if *in_pos > in_size || *out_pos > out_size {
-        return 0;
-    }
+    debug_assert!(!in_0.is_null() || *in_pos == in_size);
+    debug_assert!(!out.is_null() || *out_pos == out_size);
+    debug_assert!(*in_pos <= in_size);
+    debug_assert!(*out_pos <= out_size);
 
     let in_avail: size_t = in_size - *in_pos;
     let out_avail: size_t = out_size - *out_pos;

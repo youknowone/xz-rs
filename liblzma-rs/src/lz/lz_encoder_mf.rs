@@ -613,22 +613,27 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(mf: *mut lzma_mf, matches: *mut lzma_m
     let hash_value: u32 =
         (temp ^ (*cur.offset(2) as u32) << 8 ^ lzma_crc32_table[0][*cur.offset(3) as usize] << 5)
             & (*mf).hash_mask;
+    let hash = (*mf).hash;
+    let son = (*mf).son;
+    let cyclic_pos = (*mf).cyclic_pos;
+    let cyclic_size = (*mf).cyclic_size;
+    let depth = (*mf).depth;
     let hash_3_index = FIX_3_HASH_SIZE as u32 + hash_3_value;
     let hash_4_index = FIX_4_HASH_SIZE as u32 + hash_value;
-    let mut delta2: u32 = pos - *(*mf).hash.offset(hash_2_value as isize);
-    let delta3: u32 = pos - *(*mf).hash.offset(hash_3_index as isize);
-    let cur_match: u32 = *(*mf).hash.offset(hash_4_index as isize);
-    *(*mf).hash.offset(hash_2_value as isize) = pos;
-    *(*mf).hash.offset(hash_3_index as isize) = pos;
-    *(*mf).hash.offset(hash_4_index as isize) = pos;
+    let mut delta2: u32 = pos - *hash.offset(hash_2_value as isize);
+    let delta3: u32 = pos - *hash.offset(hash_3_index as isize);
+    let cur_match: u32 = *hash.offset(hash_4_index as isize);
+    *hash.offset(hash_2_value as isize) = pos;
+    *hash.offset(hash_3_index as isize) = pos;
+    *hash.offset(hash_4_index as isize) = pos;
     let mut len_best: u32 = 1;
-    if delta2 < (*mf).cyclic_size && *cur.offset(-(delta2 as isize)) == *cur {
+    if delta2 < cyclic_size && *cur.offset(-(delta2 as isize)) == *cur {
         len_best = 2;
         (*matches).len = 2;
         (*matches).dist = delta2 - 1;
         matches_count = 1;
     }
-    if delta2 != delta3 && delta3 < (*mf).cyclic_size && *cur.offset(-(delta3 as isize)) == *cur {
+    if delta2 != delta3 && delta3 < cyclic_size && *cur.offset(-(delta3 as isize)) == *cur {
         len_best = 3;
         (*matches.offset(matches_count as isize)).dist = delta3 - 1;
         matches_count += 1;
@@ -643,10 +648,10 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(mf: *mut lzma_mf, matches: *mut lzma_m
                 pos,
                 cur,
                 cur_match,
-                (*mf).depth,
-                (*mf).son,
-                (*mf).cyclic_pos,
-                (*mf).cyclic_size,
+                depth,
+                son,
+                cyclic_pos,
+                cyclic_size,
             );
             move_pos(mf);
             return matches_count;
@@ -660,10 +665,10 @@ pub unsafe extern "C" fn lzma_mf_bt4_find(mf: *mut lzma_mf, matches: *mut lzma_m
         pos,
         cur,
         cur_match,
-        (*mf).depth,
-        (*mf).son,
-        (*mf).cyclic_pos,
-        (*mf).cyclic_size,
+        depth,
+        son,
+        cyclic_pos,
+        cyclic_size,
         matches.offset(matches_count as isize),
         len_best,
     )
@@ -696,23 +701,28 @@ pub unsafe extern "C" fn lzma_mf_bt4_skip(mf: *mut lzma_mf, mut amount: u32) {
             ^ (*cur.offset(2) as u32) << 8
             ^ lzma_crc32_table[0][*cur.offset(3) as usize] << 5)
             & (*mf).hash_mask;
+        let hash = (*mf).hash;
+        let son = (*mf).son;
+        let cyclic_pos = (*mf).cyclic_pos;
+        let cyclic_size = (*mf).cyclic_size;
+        let depth = (*mf).depth;
         let hash_3_index = FIX_3_HASH_SIZE as u32 + hash_3_value;
         let hash_4_index = FIX_4_HASH_SIZE as u32 + hash_value;
-        let cur_match: u32 = *(*mf).hash.offset(hash_4_index as isize);
+        let cur_match: u32 = *hash.offset(hash_4_index as isize);
 
-        *(*mf).hash.offset(hash_2_value as isize) = pos;
-        *(*mf).hash.offset(hash_3_index as isize) = pos;
-        *(*mf).hash.offset(hash_4_index as isize) = pos;
+        *hash.offset(hash_2_value as isize) = pos;
+        *hash.offset(hash_3_index as isize) = pos;
+        *hash.offset(hash_4_index as isize) = pos;
 
         bt_skip_func(
             len_limit,
             pos,
             cur,
             cur_match,
-            (*mf).depth,
-            (*mf).son,
-            (*mf).cyclic_pos,
-            (*mf).cyclic_size,
+            depth,
+            son,
+            cyclic_pos,
+            cyclic_size,
         );
         move_pos(mf);
 

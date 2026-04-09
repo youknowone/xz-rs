@@ -1,4 +1,5 @@
 use crate::types::*;
+use core::mem::MaybeUninit;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_stream_coder {
@@ -156,27 +157,13 @@ unsafe extern "C" fn stream_encode(
                 if ret_0 != LZMA_STREAM_END {
                     return ret_0;
                 }
-                let stream_flags: lzma_stream_flags = lzma_stream_flags {
-                    version: 0,
-                    backward_size: lzma_index_size((*coder).index),
-                    check: (*coder).block_options.check,
-                    reserved_enum1: LZMA_RESERVED_ENUM,
-                    reserved_enum2: LZMA_RESERVED_ENUM,
-                    reserved_enum3: LZMA_RESERVED_ENUM,
-                    reserved_enum4: LZMA_RESERVED_ENUM,
-                    reserved_bool1: 0,
-                    reserved_bool2: 0,
-                    reserved_bool3: 0,
-                    reserved_bool4: 0,
-                    reserved_bool5: 0,
-                    reserved_bool6: 0,
-                    reserved_bool7: 0,
-                    reserved_bool8: 0,
-                    reserved_int1: 0,
-                    reserved_int2: 0,
-                };
+                let mut stream_flags = MaybeUninit::<lzma_stream_flags>::uninit();
+                let stream_flags = stream_flags.as_mut_ptr();
+                (*stream_flags).version = 0;
+                (*stream_flags).backward_size = lzma_index_size((*coder).index);
+                (*stream_flags).check = (*coder).block_options.check;
                 if lzma_stream_footer_encode(
-                    ::core::ptr::addr_of!(stream_flags),
+                    stream_flags,
                     ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
                 ) != LZMA_OK
                 {
@@ -385,27 +372,12 @@ unsafe extern "C" fn stream_encoder_init(
     if (*coder).index.is_null() {
         return LZMA_MEM_ERROR;
     }
-    let mut stream_flags: lzma_stream_flags = lzma_stream_flags {
-        version: 0,
-        backward_size: 0,
-        check: check,
-        reserved_enum1: LZMA_RESERVED_ENUM,
-        reserved_enum2: LZMA_RESERVED_ENUM,
-        reserved_enum3: LZMA_RESERVED_ENUM,
-        reserved_enum4: LZMA_RESERVED_ENUM,
-        reserved_bool1: 0,
-        reserved_bool2: 0,
-        reserved_bool3: 0,
-        reserved_bool4: 0,
-        reserved_bool5: 0,
-        reserved_bool6: 0,
-        reserved_bool7: 0,
-        reserved_bool8: 0,
-        reserved_int1: 0,
-        reserved_int2: 0,
-    };
+    let mut stream_flags = MaybeUninit::<lzma_stream_flags>::uninit();
+    let stream_flags = stream_flags.as_mut_ptr();
+    (*stream_flags).version = 0;
+    (*stream_flags).check = check;
     let ret_: lzma_ret = lzma_stream_header_encode(
-        ::core::ptr::addr_of_mut!(stream_flags),
+        stream_flags,
         ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
     );
     if ret_ != LZMA_OK {
