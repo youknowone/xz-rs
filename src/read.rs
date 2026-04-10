@@ -226,10 +226,7 @@ impl<W: Write + Read> Write for XzDecoder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    #[cfg(not(target_family = "wasm"))]
-    use crate::stream::LzmaOptions;
-    use crate::stream::PRESET_EXTREME;
-    #[cfg(not(target_family = "wasm"))]
+    use crate::stream::{LzmaOptions, PRESET_EXTREME};
     use quickcheck::quickcheck;
     use rand::{thread_rng, Rng};
     use std::iter;
@@ -329,7 +326,6 @@ mod tests {
         assert_eq!(data, m);
     }
 
-    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn qc_lzma1() {
         quickcheck(test as fn(_) -> _);
@@ -345,7 +341,6 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn qc() {
         quickcheck(test as fn(_) -> _);
@@ -359,7 +354,6 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_family = "wasm"))]
     #[cfg(feature = "parallel")]
     #[test]
     fn qc_parallel_encode() {
@@ -385,7 +379,6 @@ mod tests {
         assert_eq!(data, m);
     }
 
-    #[cfg(not(target_family = "wasm"))]
     #[cfg(feature = "parallel")]
     #[test]
     fn qc_parallel_decode() {

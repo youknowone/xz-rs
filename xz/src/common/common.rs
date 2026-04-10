@@ -105,7 +105,7 @@ pub unsafe fn lzma_alloc_zero(mut size: size_t, allocator: *const lzma_allocator
     }
     ptr
 }
-pub(crate) unsafe extern "C" fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator) {
+pub unsafe extern "C" fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator) {
     if !allocator.is_null() && (*allocator).free.is_some() {
         (*allocator).free.unwrap()((*allocator).opaque, ptr);
     } else {

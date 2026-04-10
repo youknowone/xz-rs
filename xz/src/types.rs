@@ -1324,10 +1324,9 @@ pub(crate) use crate::common::block_encoder::lzma_block_encoder_init;
 pub use crate::common::block_header_decoder::lzma_block_header_decode;
 pub use crate::common::block_header_encoder::{lzma_block_header_encode, lzma_block_header_size};
 pub use crate::common::block_util::lzma_block_unpadded_size;
-pub(crate) use crate::common::common::lzma_free;
 pub use crate::common::common::{
-    lzma_alloc, lzma_alloc_zero, lzma_bufcpy, lzma_end, lzma_next_end, lzma_next_filter_init,
-    lzma_next_filter_update, lzma_strm_init,
+    lzma_alloc, lzma_alloc_zero, lzma_bufcpy, lzma_end, lzma_free, lzma_next_end,
+    lzma_next_filter_init, lzma_next_filter_update, lzma_strm_init,
 };
 pub use crate::common::easy_preset::lzma_easy_preset;
 pub use crate::common::filter_common::{

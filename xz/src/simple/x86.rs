@@ -88,33 +88,29 @@ unsafe extern "C" fn x86_code(
     (*simple).prev_pos = prev_pos;
     buffer_pos
 }
-extern "C" fn x86_coder_init(
+unsafe fn x86_coder_init(
     next: *mut lzma_next_coder,
     allocator: *const lzma_allocator,
     filters: *const lzma_filter_info,
     is_encoder: bool,
 ) -> lzma_ret {
-    return unsafe {
-        let ret: lzma_ret = lzma_simple_coder_init(
-            next,
-            allocator,
-            filters,
-            Some(
-                x86_code as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t,
-            ),
-            core::mem::size_of::<lzma_simple_x86>(),
-            5,
-            1,
-            is_encoder,
-        );
-        if ret == LZMA_OK {
-            let coder: *mut lzma_simple_coder = (*next).coder as *mut lzma_simple_coder;
-            let simple: *mut lzma_simple_x86 = (*coder).simple as *mut lzma_simple_x86;
-            (*simple).prev_mask = 0;
-            (*simple).prev_pos = (-5_i32) as u32;
-        }
-        ret
-    };
+    let ret: lzma_ret = lzma_simple_coder_init(
+        next,
+        allocator,
+        filters,
+        Some(x86_code as unsafe extern "C" fn(*mut c_void, u32, bool, *mut u8, size_t) -> size_t),
+        core::mem::size_of::<lzma_simple_x86>(),
+        5,
+        1,
+        is_encoder,
+    );
+    if ret == LZMA_OK {
+        let coder: *mut lzma_simple_coder = (*next).coder as *mut lzma_simple_coder;
+        let simple: *mut lzma_simple_x86 = (*coder).simple as *mut lzma_simple_x86;
+        (*simple).prev_mask = 0;
+        (*simple).prev_pos = (-5_i32) as u32;
+    }
+    ret
 }
 pub(crate) unsafe extern "C" fn lzma_simple_x86_encoder_init(
     next: *mut lzma_next_coder,

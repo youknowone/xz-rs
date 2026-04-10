@@ -1,6 +1,5 @@
 use std::env;
 use std::fs::{self, File};
-use std::hint::black_box;
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
@@ -53,6 +52,12 @@ struct Measurement {
     elapsed: Duration,
     throughput_mib_s: f64,
     digest: u64,
+}
+
+#[inline(always)]
+fn black_box<T>(value: T) -> T {
+    let value = std::mem::ManuallyDrop::new(value);
+    unsafe { std::ptr::read_volatile(&*value) }
 }
 
 fn main() {

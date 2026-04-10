@@ -52,8 +52,6 @@
 #![doc(html_root_url = "https://docs.rs/liblzma/0.4.6")]
 #![deny(missing_docs)]
 
-use cfg_if::cfg_if;
-
 #[cfg(any(
     all(feature = "xz", feature = "xz-sys"),
     all(feature = "xz", feature = "liblzma-sys"),
@@ -64,49 +62,45 @@ compile_error!("Enable exactly one of `xz`, `xz-sys`, or `liblzma-sys`");
 #[cfg(not(any(feature = "xz", feature = "xz-sys", feature = "liblzma-sys")))]
 compile_error!("Enable `xz`, `xz-sys`, or `liblzma-sys`");
 
-cfg_if! {
-    if #[cfg(feature = "xz")] {
-        pub(crate) mod sys {
-            pub(crate) use xz::check::check::lzma_check_is_supported;
-            pub(crate) use xz::common::{
-                alone_decoder::lzma_alone_decoder,
-                alone_encoder::lzma_alone_encoder,
-                auto_decoder::lzma_auto_decoder,
-                common::{lzma_code, lzma_end, lzma_memlimit_get, lzma_memlimit_set},
-                easy_encoder::lzma_easy_encoder,
-                filter_decoder::{lzma_properties_decode, lzma_raw_decoder},
-                filter_encoder::lzma_raw_encoder,
-                index::{lzma_index_end, lzma_index_uncompressed_size},
-                index_decoder::lzma_index_buffer_decode,
-                lzip_decoder::lzma_lzip_decoder,
-                stream_decoder::lzma_stream_decoder,
-                stream_encoder::lzma_stream_encoder,
-                stream_flags_decoder::lzma_stream_footer_decode,
-                string_conversion::LZMA_PRESET_DEFAULT,
-            };
-            #[cfg(feature = "parallel")]
-            pub(crate) use xz::common::{
-                filter_encoder::lzma_mt_block_size,
-                stream_mt::{
-                    lzma_stream_decoder_mt, lzma_stream_encoder_mt,
-                    lzma_stream_encoder_mt_memusage,
-                },
-            };
-            pub(crate) use xz::lz::lz_encoder::lzma_mf_is_supported;
-            pub(crate) use xz::lzma::lzma_encoder_presets::{
-                lzma_lzma_preset, LZMA_PRESET_LEVEL_MASK,
-            };
-            pub(crate) use xz::types::*;
-        }
-    } else if #[cfg(feature = "xz-sys")] {
-        pub(crate) mod sys {
-            pub(crate) use xz_sys::*;
-        }
-    } else if #[cfg(feature = "liblzma-sys")] {
-        pub(crate) mod sys {
-            pub(crate) use liblzma_sys::*;
-        }
-    }
+#[cfg(feature = "xz")]
+pub(crate) mod sys {
+    pub(crate) use xz::check::check::lzma_check_is_supported;
+    pub(crate) use xz::common::{
+        alone_decoder::lzma_alone_decoder,
+        alone_encoder::lzma_alone_encoder,
+        auto_decoder::lzma_auto_decoder,
+        common::{lzma_code, lzma_end, lzma_memlimit_get, lzma_memlimit_set},
+        easy_encoder::lzma_easy_encoder,
+        filter_decoder::{lzma_properties_decode, lzma_raw_decoder},
+        filter_encoder::lzma_raw_encoder,
+        index::{lzma_index_end, lzma_index_uncompressed_size},
+        index_decoder::lzma_index_buffer_decode,
+        lzip_decoder::lzma_lzip_decoder,
+        stream_decoder::lzma_stream_decoder,
+        stream_encoder::lzma_stream_encoder,
+        stream_flags_decoder::lzma_stream_footer_decode,
+        string_conversion::LZMA_PRESET_DEFAULT,
+    };
+    #[cfg(feature = "parallel")]
+    pub(crate) use xz::common::{
+        filter_encoder::lzma_mt_block_size,
+        stream_mt::{
+            lzma_stream_decoder_mt, lzma_stream_encoder_mt, lzma_stream_encoder_mt_memusage,
+        },
+    };
+    pub(crate) use xz::lz::lz_encoder::lzma_mf_is_supported;
+    pub(crate) use xz::lzma::lzma_encoder_presets::{lzma_lzma_preset, LZMA_PRESET_LEVEL_MASK};
+    pub(crate) use xz::types::*;
+}
+
+#[cfg(feature = "xz-sys")]
+pub(crate) mod sys {
+    pub(crate) use xz_sys::*;
+}
+
+#[cfg(feature = "liblzma-sys")]
+pub(crate) mod sys {
+    pub(crate) use liblzma_sys::*;
 }
 
 use crate::sys as liblzma_sys;
@@ -161,7 +155,6 @@ pub fn copy_decode<R: Read, W: Write>(source: R, mut destination: W) -> io::Resu
 }
 
 /// Find the size in bytes of uncompressed data from xz file.
-#[cfg(any(feature = "xz", feature = "xz-sys", feature = "liblzma-sys"))]
 pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
     use std::mem::MaybeUninit;
     let mut footer = [0u8; liblzma_sys::LZMA_STREAM_HEADER_SIZE as usize];
@@ -229,13 +222,13 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
     Ok(uncompressed_size)
 }
 
-#[cfg(all(test, not(target_family = "wasm")))]
+#[cfg(test)]
 mod tests {
     use super::*;
-    #[cfg(not(target_family = "wasm"))]
     use quickcheck::quickcheck;
+    #[cfg(all(target_family = "wasm", target_os = "unknown"))]
+    use wasm_bindgen_test::wasm_bindgen_test as test;
 
-    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn all() {
         quickcheck(test as fn(_) -> _);
@@ -247,7 +240,6 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_family = "wasm"))]
     #[test]
     fn copy() {
         quickcheck(test as fn(_) -> _);
@@ -261,9 +253,7 @@ mod tests {
         }
     }
 
-    #[cfg(not(target_family = "wasm"))]
     #[test]
-    #[cfg(any(feature = "xz", feature = "xz-sys", feature = "liblzma-sys"))]
     fn size() {
         quickcheck(test as fn(_) -> _);
 

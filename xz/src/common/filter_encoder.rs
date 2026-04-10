@@ -259,7 +259,7 @@ static encoders: [lzma_filter_encoder; 12] = [
         ),
     },
 ];
-extern "C" fn encoder_find(id: lzma_vli) -> *const lzma_filter_encoder {
+fn encoder_find(id: lzma_vli) -> *const lzma_filter_encoder {
     let mut i: size_t = 0;
     while i < core::mem::size_of::<[lzma_filter_encoder; 12]>()
         / core::mem::size_of::<lzma_filter_encoder>()
@@ -271,7 +271,7 @@ extern "C" fn encoder_find(id: lzma_vli) -> *const lzma_filter_encoder {
     }
     core::ptr::null()
 }
-extern "C" fn coder_find(id: lzma_vli) -> *const lzma_filter_coder {
+unsafe extern "C" fn coder_find(id: lzma_vli) -> *const lzma_filter_coder {
     encoder_find(id) as *const lzma_filter_coder
 }
 pub fn lzma_filter_encoder_is_supported(id: lzma_vli) -> lzma_bool {

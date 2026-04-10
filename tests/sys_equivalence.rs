@@ -2,6 +2,7 @@
 
 use std::collections::BTreeMap;
 use std::fs;
+use std::mem;
 use std::path::Path;
 use std::ptr;
 
@@ -101,6 +102,67 @@ fn rs_sys_uses_libc_size_t() {
 }
 
 #[test]
+fn rs_sys_exports_required_public_wrappers() {
+    let src = include_str!("../xz-sys/src/lib.rs");
+
+    for name in [
+        "lzma_alloc",
+        "lzma_alloc_zero",
+        "lzma_free",
+        "lzma_bcj_arm64_encode",
+        "lzma_bcj_arm64_decode",
+        "lzma_bcj_riscv_encode",
+        "lzma_bcj_riscv_decode",
+        "lzma_bcj_x86_encode",
+        "lzma_bcj_x86_decode",
+    ] {
+        assert!(
+            src.contains(&format!("fn {name}(")),
+            "xz-sys must export wrapper for {name}",
+        );
+    }
+}
+
+#[test]
+fn rs_sys_exports_all_c_backend_functions() {
+    let c_bindgen = include_str!("../liblzma-sys/src/bindgen.rs");
+    let c_manual = include_str!("../liblzma-sys/src/manual.rs");
+    let rs_sys = include_str!("../xz-sys/src/lib.rs");
+
+    let c_api: std::collections::BTreeSet<_> = c_bindgen
+        .lines()
+        .chain(c_manual.lines())
+        .filter_map(|line| line.trim().strip_prefix("pub fn "))
+        .filter_map(|line| line.split_once('(').map(|(name, _)| name.trim()))
+        .filter(|name| name.starts_with("lzma_"))
+        .collect();
+
+    let rs_api: std::collections::BTreeSet<_> = rs_sys
+        .lines()
+        .filter_map(|line| {
+            let line = line.trim();
+            line.strip_prefix("pub unsafe extern \"C\" fn ")
+                .or_else(|| line.strip_prefix("pub extern \"C\" fn "))
+        })
+        .filter_map(|line| line.split_once('(').map(|(name, _)| name.trim()))
+        .filter(|name| name.starts_with("lzma_"))
+        .collect();
+
+    let missing: Vec<_> = c_api.difference(&rs_api).copied().collect();
+    assert!(
+        missing.is_empty(),
+        "xz-sys is missing public functions from liblzma-sys: {missing:?}",
+    );
+
+    let extras: Vec<_> = rs_api.difference(&c_api).copied().collect();
+    assert_eq!(
+        extras,
+        vec!["lzma_alloc", "lzma_alloc_zero", "lzma_free"],
+        "unexpected extra public functions in xz-sys: {extras:?}",
+    );
+}
+
+#[test]
 fn cargo_features_match_c_backend() {
     let c_sys_features = parse_feature_table(include_str!("../liblzma-sys/Cargo.toml"));
     let rs_sys_features = parse_feature_table(include_str!("../xz-sys/Cargo.toml"));
@@ -127,6 +189,9 @@ fn api_constants_match_c_backend() {
     }
 
     assert_const_eq!(
+        LZMA_VERSION_MAJOR,
+        LZMA_VERSION_MINOR,
+        LZMA_VERSION_PATCH,
         LZMA_OK,
         LZMA_STREAM_END,
         LZMA_NO_CHECK,
@@ -178,6 +243,11 @@ fn api_constants_match_c_backend() {
         LZMA_VLI_MAX,
         LZMA_VLI_UNKNOWN,
         LZMA_VLI_BYTES_MAX,
+        LZMA_CHECK_ID_MAX,
+        LZMA_CHECK_SIZE_MAX,
+        LZMA_FILTERS_MAX,
+        LZMA_DELTA_DIST_MIN,
+        LZMA_DELTA_DIST_MAX,
         LZMA_FILTER_X86,
         LZMA_FILTER_POWERPC,
         LZMA_FILTER_IA64,
@@ -190,6 +260,14 @@ fn api_constants_match_c_backend() {
         LZMA_FILTER_LZMA1,
         LZMA_FILTER_LZMA2,
         LZMA_STREAM_HEADER_SIZE,
+        LZMA_BLOCK_HEADER_SIZE_MIN,
+        LZMA_BLOCK_HEADER_SIZE_MAX,
+    );
+
+    assert_eq!(
+        xz_sys::LZMA_DELTA_TYPE_BYTE as u128,
+        liblzma_sys::lzma_delta_type_LZMA_DELTA_TYPE_BYTE as u128,
+        "constant mismatch: LZMA_DELTA_TYPE_BYTE",
     );
 }
 
@@ -206,6 +284,9 @@ fn api_constant_types_match_c_backend() {
     }
 
     assert_const_type_eq!(
+        LZMA_VERSION_MAJOR,
+        LZMA_VERSION_MINOR,
+        LZMA_VERSION_PATCH,
         LZMA_OK,
         LZMA_STREAM_END,
         LZMA_NO_CHECK,
@@ -257,6 +338,11 @@ fn api_constant_types_match_c_backend() {
         LZMA_VLI_MAX,
         LZMA_VLI_UNKNOWN,
         LZMA_VLI_BYTES_MAX,
+        LZMA_CHECK_ID_MAX,
+        LZMA_CHECK_SIZE_MAX,
+        LZMA_FILTERS_MAX,
+        LZMA_DELTA_DIST_MIN,
+        LZMA_DELTA_DIST_MAX,
         LZMA_FILTER_X86,
         LZMA_FILTER_POWERPC,
         LZMA_FILTER_IA64,
@@ -269,6 +355,13 @@ fn api_constant_types_match_c_backend() {
         LZMA_FILTER_LZMA1,
         LZMA_FILTER_LZMA2,
         LZMA_STREAM_HEADER_SIZE,
+        LZMA_BLOCK_HEADER_SIZE_MIN,
+        LZMA_BLOCK_HEADER_SIZE_MAX,
+    );
+
+    assert_same_type(
+        liblzma_sys::lzma_delta_type_LZMA_DELTA_TYPE_BYTE,
+        xz_sys::LZMA_DELTA_TYPE_BYTE,
     );
 }
 
@@ -296,12 +389,14 @@ fn api_type_layout_matches_c_backend() {
     assert_layout_eq!(lzma_action);
     assert_layout_eq!(lzma_check);
     assert_layout_eq!(lzma_vli);
+    assert_layout_eq!(lzma_delta_type);
     assert_layout_eq!(lzma_mode);
     assert_layout_eq!(lzma_match_finder);
     assert_layout_eq!(lzma_allocator);
     assert_layout_eq!(lzma_stream);
     assert_layout_eq!(lzma_filter);
     assert_layout_eq!(lzma_options_lzma);
+    assert_layout_eq!(lzma_options_delta);
     assert_layout_eq!(lzma_stream_flags);
     assert_layout_eq!(lzma_options_bcj);
 
@@ -412,34 +507,51 @@ macro_rules! encode_easy_impl {
     }};
 }
 
-macro_rules! decode_stream_buffer_impl {
+macro_rules! decode_stream_impl {
     ($sys:ident, $input:expr, $expected_size_hint:expr) => {{
-        let mut cap = $expected_size_hint.max($input.len() * 6 + 128).max(256);
-        let max_cap = 64 * 1024 * 1024;
-
-        loop {
-            let mut out = vec![0u8; cap];
-            let mut memlimit = u64::MAX;
-            let mut in_pos = 0usize;
-            let mut out_pos = 0usize;
-            let ret = $sys::lzma_stream_buffer_decode(
-                &mut memlimit,
-                0,
-                ptr::null(),
-                $input.as_ptr(),
-                &mut in_pos,
-                $input.len(),
-                out.as_mut_ptr(),
-                &mut out_pos,
-                out.len(),
-            );
-            if ret as u32 == $sys::LZMA_BUF_ERROR as u32 && cap < max_cap {
-                cap = (cap * 2).min(max_cap);
-                continue;
-            }
-            out.truncate(out_pos);
+        let mut out = Vec::with_capacity($expected_size_hint.max(256));
+        let mut stream: $sys::lzma_stream = unsafe { mem::zeroed() };
+        let mut ret = $sys::lzma_stream_decoder(&mut stream, u64::MAX, 0);
+        if ret as u32 != $sys::LZMA_OK as u32 {
             return (ret as u32, out);
         }
+
+        loop {
+            if out.spare_capacity_mut().is_empty() {
+                let additional = out.capacity().max(256);
+                out.reserve(additional);
+            }
+
+            let spare = out.spare_capacity_mut();
+            stream.next_in = $input.as_ptr();
+            stream.avail_in = $input.len() - stream.total_in as usize;
+            stream.next_out = spare.as_ptr() as *mut u8;
+            stream.avail_out = spare.len();
+
+            ret = $sys::lzma_code(&mut stream, $sys::LZMA_FINISH);
+
+            let written = spare.len() - stream.avail_out;
+            unsafe {
+                out.set_len(out.len() + written);
+            }
+
+            if ret as u32 == $sys::LZMA_STREAM_END as u32 {
+                ret = $sys::LZMA_OK;
+                break;
+            }
+
+            if ret as u32 != $sys::LZMA_OK as u32 {
+                break;
+            }
+
+            if stream.avail_out != 0 {
+                ret = $sys::LZMA_BUF_ERROR;
+                break;
+            }
+        }
+
+        $sys::lzma_end(&mut stream);
+        (ret as u32, out)
     }};
 }
 
@@ -455,12 +567,12 @@ unsafe fn rs_encode_easy(input: &[u8]) -> (u32, Vec<u8>) {
 
 #[inline]
 unsafe fn c_decode_stream_buffer(input: &[u8], expected_size_hint: usize) -> (u32, Vec<u8>) {
-    decode_stream_buffer_impl!(liblzma_sys, input, expected_size_hint)
+    decode_stream_impl!(liblzma_sys, input, expected_size_hint)
 }
 
 #[inline]
 unsafe fn rs_decode_stream_buffer(input: &[u8], expected_size_hint: usize) -> (u32, Vec<u8>) {
-    decode_stream_buffer_impl!(xz_sys, input, expected_size_hint)
+    decode_stream_impl!(xz_sys, input, expected_size_hint)
 }
 
 fn deterministic_payload(case: usize) -> Vec<u8> {

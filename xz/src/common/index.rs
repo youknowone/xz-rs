@@ -96,7 +96,7 @@ unsafe fn index_tree_init(tree: *mut index_tree) {
 unsafe fn index_tree_node_end(
     node: *mut index_tree_node,
     allocator: *const lzma_allocator,
-    free_func: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
+    free_func: Option<unsafe fn(*mut c_void, *const lzma_allocator) -> ()>,
 ) {
     if !(*node).left.is_null() {
         index_tree_node_end((*node).left, allocator, free_func);
@@ -109,11 +109,14 @@ unsafe fn index_tree_node_end(
 unsafe fn index_tree_end(
     tree: *mut index_tree,
     allocator: *const lzma_allocator,
-    free_func: Option<unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()>,
+    free_func: Option<unsafe fn(*mut c_void, *const lzma_allocator) -> ()>,
 ) {
     if !(*tree).root.is_null() {
         index_tree_node_end((*tree).root, allocator, free_func);
     }
+}
+unsafe fn index_node_free(node: *mut c_void, allocator: *const lzma_allocator) {
+    lzma_free(node, allocator);
 }
 unsafe fn index_tree_append(tree: *mut index_tree, mut node: *mut index_tree_node) {
     (*node).parent = (*tree).rightmost;
@@ -205,12 +208,12 @@ unsafe fn index_stream_init(
     (*s).stream_padding = 0;
     s
 }
-unsafe extern "C" fn index_stream_end(node: *mut c_void, allocator: *const lzma_allocator) {
+unsafe fn index_stream_end(node: *mut c_void, allocator: *const lzma_allocator) {
     let s: *mut index_stream = node as *mut index_stream;
     index_tree_end(
         ::core::ptr::addr_of_mut!((*s).groups),
         allocator,
-        Some(lzma_free as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> ()),
+        Some(index_node_free as unsafe fn(*mut c_void, *const lzma_allocator) -> ()),
     );
     lzma_free(s as *mut c_void, allocator);
 }
@@ -249,9 +252,7 @@ pub unsafe fn lzma_index_end(i: *mut lzma_index, allocator: *const lzma_allocato
         index_tree_end(
             ::core::ptr::addr_of_mut!((*i).streams),
             allocator,
-            Some(
-                index_stream_end as unsafe extern "C" fn(*mut c_void, *const lzma_allocator) -> (),
-            ),
+            Some(index_stream_end as unsafe fn(*mut c_void, *const lzma_allocator) -> ()),
         );
         lzma_free(i as *mut c_void, allocator);
     }

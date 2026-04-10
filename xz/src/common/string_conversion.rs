@@ -896,12 +896,8 @@ unsafe fn str_to_filters(
         }
         _ => {}
     }
-    loop {
-        let old_i = i_0;
+    while i_0 > 0 {
         i_0 -= 1;
-        if old_i == 0 {
-            break;
-        }
         lzma_free(temp_filters[i_0 as usize].options, allocator);
     }
     errmsg

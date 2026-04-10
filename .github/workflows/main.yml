@@ -81,10 +81,12 @@ jobs:
         cargo clean -p liblzma -p liblzma-sys
       if: ${{ !startsWith(matrix.os, 'ubuntu') }}
     - run: |
-        cargo run --manifest-path systest/Cargo.toml
+        cargo run --manifest-path systest/Cargo.toml --no-default-features --features xz-sys
+        cargo clean -p xz-sys
+        cargo run --manifest-path systest/Cargo.toml --no-default-features --features liblzma-sys
         cargo clean -p liblzma -p liblzma-sys
       if: matrix.static == 'yes'
-    - run: cargo run --manifest-path systest/Cargo.toml --features bindgen
+    - run: cargo run --manifest-path systest/Cargo.toml --no-default-features --features liblzma-sys,bindgen
       if: matrix.static == 'yes'
 
 
