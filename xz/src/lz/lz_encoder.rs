@@ -43,7 +43,7 @@ unsafe fn move_window(mf: *mut lzma_mf) {
 unsafe fn fill_window(
     coder: *mut lzma_coder,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     action: lzma_action,
@@ -55,7 +55,7 @@ unsafe fn fill_window(
     let mut write_pos: size_t = (*coder).mf.write_pos as size_t;
     let mut ret = if (*coder).next.code.is_none() {
         lzma_bufcpy(
-            in_0,
+            input,
             in_pos,
             in_size,
             (*coder).mf.buffer,
@@ -71,7 +71,7 @@ unsafe fn fill_window(
         (*coder).next.code.unwrap()(
             (*coder).next.coder,
             allocator,
-            in_0,
+            input,
             in_pos,
             in_size,
             (*coder).mf.buffer,
@@ -105,7 +105,7 @@ unsafe fn fill_window(
 unsafe fn lz_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -116,7 +116,7 @@ unsafe fn lz_encode(
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
     while *out_pos < out_size && (*in_pos < in_size || action != LZMA_RUN) {
         if (*coder).mf.action == LZMA_RUN && (*coder).mf.read_pos >= (*coder).mf.read_limit {
-            let ret_: lzma_ret = fill_window(coder, allocator, in_0, in_pos, in_size, action);
+            let ret_: lzma_ret = fill_window(coder, allocator, input, in_pos, in_size, action);
             if ret_ != LZMA_OK {
                 return ret_;
             }

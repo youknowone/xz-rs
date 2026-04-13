@@ -113,7 +113,7 @@ pub unsafe fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator) {
     };
 }
 pub unsafe fn lzma_bufcpy(
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -123,10 +123,10 @@ pub unsafe fn lzma_bufcpy(
     if *in_pos > in_size || *out_pos > out_size {
         return 0;
     }
-    if (in_0.is_null() && *in_pos != in_size) || (out.is_null() && *out_pos != out_size) {
+    if (input.is_null() && *in_pos != in_size) || (out.is_null() && *out_pos != out_size) {
         return 0;
     }
-    debug_assert!(!in_0.is_null() || *in_pos == in_size);
+    debug_assert!(!input.is_null() || *in_pos == in_size);
     debug_assert!(!out.is_null() || *out_pos == out_size);
     debug_assert!(*in_pos <= in_size);
     debug_assert!(*out_pos <= out_size);
@@ -140,7 +140,7 @@ pub unsafe fn lzma_bufcpy(
     };
     if copy_size > 0 {
         core::ptr::copy_nonoverlapping(
-            in_0.offset(*in_pos as isize) as *const u8,
+            input.offset(*in_pos as isize) as *const u8,
             out.offset(*out_pos as isize) as *mut u8,
             copy_size,
         );

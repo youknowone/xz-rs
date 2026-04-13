@@ -12,7 +12,7 @@ pub struct lzma_microlzma_coder {
 unsafe fn microlzma_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     mut in_size: size_t,
     out: *mut u8,
@@ -65,7 +65,7 @@ unsafe fn microlzma_decode(
         }
         if lzma_lzma_lclppb_decode(
             ::core::ptr::addr_of_mut!(options),
-            !*in_0.offset(*in_pos as isize),
+            !*input.offset(*in_pos as isize),
         ) {
             return LZMA_OPTIONS_ERROR;
         }
@@ -118,7 +118,7 @@ unsafe fn microlzma_decode(
     let mut ret: lzma_ret = (*coder).lzma.code.unwrap()(
         (*coder).lzma.coder,
         allocator,
-        in_0,
+        input,
         in_pos,
         in_size,
         out,

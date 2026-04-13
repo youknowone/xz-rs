@@ -24,7 +24,7 @@ fn is_size_valid(size: lzma_vli, reference: lzma_vli) -> bool {
 unsafe fn block_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -56,7 +56,7 @@ unsafe fn block_decode(
             let ret: lzma_ret = (*coder).next.code.unwrap()(
                 (*coder).next.coder,
                 allocator,
-                in_0,
+                input,
                 in_pos,
                 in_stop,
                 out,
@@ -116,7 +116,7 @@ unsafe fn block_decode(
                 return LZMA_OK;
             }
             (*coder).compressed_size += 1;
-            let byte = *in_0.offset(*in_pos as isize);
+            let byte = *input.offset(*in_pos as isize);
             *in_pos += 1;
             if byte != 0 {
                 return LZMA_DATA_ERROR;
@@ -135,7 +135,7 @@ unsafe fn block_decode(
     }
     let check_size: size_t = lzma_check_size((*(*coder).block).check) as size_t;
     lzma_bufcpy(
-        in_0,
+        input,
         in_pos,
         in_size,
         ::core::ptr::addr_of_mut!((*(*coder).block).raw_check) as *mut u8,

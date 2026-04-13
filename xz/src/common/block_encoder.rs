@@ -17,7 +17,7 @@ pub const SEQ_CODE: block_encoder_seq = 0;
 unsafe fn block_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -38,7 +38,7 @@ unsafe fn block_encode(
             let ret: lzma_ret = (*coder).next.code.unwrap()(
                 (*coder).next.coder,
                 allocator,
-                in_0,
+                input,
                 in_pos,
                 in_size,
                 out,
@@ -57,7 +57,7 @@ unsafe fn block_encode(
                 lzma_check_update(
                     ::core::ptr::addr_of_mut!((*coder).check),
                     (*(*coder).block).check,
-                    in_0.offset(in_start as isize),
+                    input.offset(in_start as isize),
                     in_used,
                 );
             }

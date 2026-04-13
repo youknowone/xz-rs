@@ -15,7 +15,7 @@ pub struct lzma_auto_coder {
 unsafe fn auto_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -31,7 +31,7 @@ unsafe fn auto_decode(
                 return LZMA_OK;
             }
             (*coder).sequence = SEQ_CODE;
-            if *in_0.offset(*in_pos as isize) == 0xfd {
+            if *input.offset(*in_pos as isize) == 0xfd {
                 let ret_: lzma_ret = lzma_stream_decoder_init(
                     ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
@@ -78,7 +78,7 @@ unsafe fn auto_decode(
             let ret: lzma_ret = code(
                 (*coder).next.coder,
                 allocator,
-                in_0,
+                input,
                 in_pos,
                 in_size,
                 out,

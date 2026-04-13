@@ -27,7 +27,7 @@ fn encode_in_place(coder: &mut lzma_delta_coder, buffer: &mut [u8]) {
 unsafe fn delta_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -50,7 +50,7 @@ unsafe fn delta_encode(
         if size > 0 {
             copy_and_encode(
                 coder,
-                core::slice::from_raw_parts(in_0.add(*in_pos), size),
+                core::slice::from_raw_parts(input.add(*in_pos), size),
                 core::slice::from_raw_parts_mut(out.add(*out_pos), size),
             );
         }
@@ -66,7 +66,7 @@ unsafe fn delta_encode(
         ret = coder.next.code.unwrap()(
             coder.next.coder,
             allocator,
-            in_0,
+            input,
             in_pos,
             in_size,
             out,

@@ -2,14 +2,14 @@ use crate::types::*;
 pub unsafe fn lzma_raw_buffer_decode(
     filters: *const lzma_filter,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> lzma_ret {
-    if in_0.is_null()
+    if input.is_null()
         || in_pos.is_null()
         || *in_pos > in_size
         || out.is_null()
@@ -45,7 +45,7 @@ pub unsafe fn lzma_raw_buffer_decode(
     let mut ret: lzma_ret = code(
         next.coder,
         allocator,
-        in_0,
+        input,
         in_pos,
         in_size,
         out,
@@ -67,7 +67,7 @@ pub unsafe fn lzma_raw_buffer_decode(
                 code(
                     next.coder,
                     allocator,
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     ::core::ptr::addr_of_mut!(tmp) as *mut u8,

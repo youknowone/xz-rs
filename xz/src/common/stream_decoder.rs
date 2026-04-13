@@ -42,7 +42,7 @@ unsafe fn stream_decoder_reset(
 unsafe fn stream_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -56,7 +56,7 @@ unsafe fn stream_decode(
         match (*coder).sequence {
             0 => {
                 lzma_bufcpy(
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
@@ -108,7 +108,7 @@ unsafe fn stream_decode(
                     return LZMA_OK;
                 }
                 let ret_2: lzma_ret =
-                    lzma_index_hash_decode((*coder).index_hash, in_0, in_pos, in_size);
+                    lzma_index_hash_decode((*coder).index_hash, input, in_pos, in_size);
                 if ret_2 != LZMA_STREAM_END {
                     return ret_2;
                 }
@@ -129,12 +129,12 @@ unsafe fn stream_decode(
                     return LZMA_OK;
                 }
                 if (*coder).pos == 0 {
-                    if *in_0.offset(*in_pos as isize) == INDEX_INDICATOR {
+                    if *input.offset(*in_pos as isize) == INDEX_INDICATOR {
                         (*coder).sequence = SEQ_INDEX;
                         current_block_100 = 16789764818708874114;
                     } else {
                         (*coder).block_options.header_size =
-                            ((*in_0.offset(*in_pos as isize) as u32) + 1) * 4;
+                            ((*input.offset(*in_pos as isize) as u32) + 1) * 4;
                         current_block_100 = 13242334135786603907;
                     }
                 } else {
@@ -144,7 +144,7 @@ unsafe fn stream_decode(
                     16789764818708874114 => {}
                     _ => {
                         lzma_bufcpy(
-                            in_0,
+                            input,
                             in_pos,
                             in_size,
                             ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
@@ -162,7 +162,7 @@ unsafe fn stream_decode(
             }
             17861496924281778896 => {
                 lzma_bufcpy(
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
@@ -217,7 +217,7 @@ unsafe fn stream_decode(
                             LZMA_DATA_ERROR
                         };
                     }
-                    if *in_0.offset(*in_pos as isize) != 0 {
+                    if *input.offset(*in_pos as isize) != 0 {
                         break;
                     }
                     *in_pos += 1;
@@ -280,7 +280,7 @@ unsafe fn stream_decode(
                 let ret_1: lzma_ret = (*coder).block_decoder.code.unwrap()(
                     (*coder).block_decoder.coder,
                     allocator,
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     out,

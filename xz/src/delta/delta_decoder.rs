@@ -20,7 +20,7 @@ fn decode_buffer(coder: &mut lzma_delta_coder, buffer: &mut [u8]) {
 unsafe fn delta_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -33,7 +33,7 @@ unsafe fn delta_decode(
     let ret: lzma_ret = coder.next.code.unwrap()(
         coder.next.coder,
         allocator,
-        in_0,
+        input,
         in_pos,
         in_size,
         out,
@@ -87,7 +87,7 @@ pub(crate) unsafe fn lzma_delta_props_decode(
     if opt.is_null() {
         return LZMA_MEM_ERROR;
     }
-    (*opt).type_0 = LZMA_DELTA_TYPE_BYTE;
+    (*opt).type_ = LZMA_DELTA_TYPE_BYTE;
     (*opt).dist = u32::from(*props) + 1;
     *options = opt as *mut c_void;
     LZMA_OK

@@ -461,7 +461,7 @@ pub struct lzma_check_state {
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_options_delta {
-    pub type_0: lzma_delta_type,
+    pub type_: lzma_delta_type,
     pub dist: u32,
     pub reserved_int1: u32,
     pub reserved_int2: u32,

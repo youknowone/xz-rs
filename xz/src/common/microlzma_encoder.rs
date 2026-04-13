@@ -8,7 +8,7 @@ pub struct lzma_microlzma_coder {
 unsafe fn microlzma_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -41,7 +41,7 @@ unsafe fn microlzma_encode(
     let ret: lzma_ret = code(
         (*coder).lzma.coder,
         allocator,
-        in_0,
+        input,
         in_pos,
         in_size,
         out,

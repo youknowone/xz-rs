@@ -3,7 +3,7 @@ use crate::types::*;
 pub unsafe fn lzma_filter_flags_decode(
     filter: *mut lzma_filter,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
@@ -11,7 +11,7 @@ pub unsafe fn lzma_filter_flags_decode(
     let ret_: lzma_ret = lzma_vli_decode(
         ::core::ptr::addr_of_mut!((*filter).id),
         core::ptr::null_mut(),
-        in_0,
+        input,
         in_pos,
         in_size,
     );
@@ -25,7 +25,7 @@ pub unsafe fn lzma_filter_flags_decode(
     let ret__0: lzma_ret = lzma_vli_decode(
         ::core::ptr::addr_of_mut!(props_size),
         core::ptr::null_mut(),
-        in_0,
+        input,
         in_pos,
         in_size,
     );
@@ -38,7 +38,7 @@ pub unsafe fn lzma_filter_flags_decode(
     let ret: lzma_ret = lzma_properties_decode(
         filter,
         allocator,
-        in_0.offset(*in_pos as isize),
+        input.offset(*in_pos as isize),
         props_size as size_t,
     );
     *in_pos = (*in_pos as lzma_vli + props_size) as size_t;

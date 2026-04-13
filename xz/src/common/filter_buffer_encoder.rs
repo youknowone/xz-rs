@@ -2,13 +2,14 @@ use crate::types::*;
 pub unsafe fn lzma_raw_buffer_encode(
     filters: *const lzma_filter,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_size: size_t,
     out: *mut u8,
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> lzma_ret {
-    if in_0.is_null() && in_size != 0 || out.is_null() || out_pos.is_null() || *out_pos > out_size {
+    if input.is_null() && in_size != 0 || out.is_null() || out_pos.is_null() || *out_pos > out_size
+    {
         return LZMA_PROG_ERROR;
     }
     let mut next: lzma_next_coder = lzma_next_coder_s {
@@ -38,7 +39,7 @@ pub unsafe fn lzma_raw_buffer_encode(
     let mut ret: lzma_ret = code(
         next.coder,
         allocator,
-        in_0,
+        input,
         ::core::ptr::addr_of_mut!(in_pos),
         in_size,
         out,

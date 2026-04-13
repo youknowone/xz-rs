@@ -30,7 +30,7 @@ pub fn lzma_block_buffer_bound(uncompressed_size: size_t) -> size_t {
 }
 unsafe fn block_encode_uncompressed(
     block: *mut lzma_block,
-    in_0: *const u8,
+    input: *const u8,
     in_size: size_t,
     out: *mut u8,
     out_pos: *mut size_t,
@@ -103,7 +103,7 @@ unsafe fn block_encode_uncompressed(
         *out.offset(*out_pos as isize) = ((copy_size - 1) & 0xff) as u8;
         *out_pos += 1;
         core::ptr::copy_nonoverlapping(
-            in_0.offset(in_pos as isize) as *const u8,
+            input.offset(in_pos as isize) as *const u8,
             out.offset(*out_pos as isize) as *mut u8,
             copy_size,
         );
@@ -117,7 +117,7 @@ unsafe fn block_encode_uncompressed(
 unsafe fn block_encode_normal(
     block: *mut lzma_block,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_size: size_t,
     out: *mut u8,
     out_pos: *mut size_t,
@@ -157,7 +157,7 @@ unsafe fn block_encode_normal(
         ret = raw_encoder.code.unwrap()(
             raw_encoder.coder,
             allocator,
-            in_0,
+            input,
             ::core::ptr::addr_of_mut!(in_pos),
             in_size,
             out,
@@ -185,7 +185,7 @@ unsafe fn block_encode_normal(
 unsafe fn block_buffer_encode(
     block: *mut lzma_block,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_size: size_t,
     out: *mut u8,
     out_pos: *mut size_t,
@@ -193,7 +193,7 @@ unsafe fn block_buffer_encode(
     try_to_compress: bool,
 ) -> lzma_ret {
     if block.is_null()
-        || in_0.is_null() && in_size != 0
+        || input.is_null() && in_size != 0
         || out.is_null()
         || out_pos.is_null()
         || *out_pos > out_size
@@ -222,14 +222,14 @@ unsafe fn block_buffer_encode(
     }
     let mut ret: lzma_ret = LZMA_BUF_ERROR;
     if try_to_compress {
-        ret = block_encode_normal(block, allocator, in_0, in_size, out, out_pos, out_size);
+        ret = block_encode_normal(block, allocator, input, in_size, out, out_pos, out_size);
     }
     if ret != LZMA_OK {
         if ret != LZMA_BUF_ERROR {
             return ret;
         }
         let ret_: lzma_ret =
-            block_encode_uncompressed(block, in_0, in_size, out, out_pos, out_size);
+            block_encode_uncompressed(block, input, in_size, out, out_pos, out_size);
         if ret_ != LZMA_OK {
             return ret_;
         }
@@ -249,7 +249,7 @@ unsafe fn block_buffer_encode(
         lzma_check_update(
             ::core::ptr::addr_of_mut!(check),
             (*block).check,
-            in_0,
+            input,
             in_size,
         );
         lzma_check_finish(::core::ptr::addr_of_mut!(check), (*block).check);
@@ -270,19 +270,19 @@ unsafe fn block_buffer_encode(
 pub unsafe fn lzma_block_buffer_encode(
     block: *mut lzma_block,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_size: size_t,
     out: *mut u8,
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> lzma_ret {
     block_buffer_encode(
-        block, allocator, in_0, in_size, out, out_pos, out_size, true,
+        block, allocator, input, in_size, out, out_pos, out_size, true,
     )
 }
 pub unsafe fn lzma_block_uncomp_encode(
     block: *mut lzma_block,
-    in_0: *const u8,
+    input: *const u8,
     in_size: size_t,
     out: *mut u8,
     out_pos: *mut size_t,
@@ -291,7 +291,7 @@ pub unsafe fn lzma_block_uncomp_encode(
     block_buffer_encode(
         block,
         core::ptr::null(),
-        in_0,
+        input,
         in_size,
         out,
         out_pos,

@@ -20,7 +20,7 @@ pub const SEQ_PROPERTIES: alone_decoder_seq = 0;
 unsafe fn alone_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -35,7 +35,7 @@ unsafe fn alone_decode(
             0 => {
                 if lzma_lzma_lclppb_decode(
                     ::core::ptr::addr_of_mut!((*coder).options),
-                    *in_0.offset(*in_pos as isize),
+                    *input.offset(*in_pos as isize),
                 ) {
                     return LZMA_FORMAT_ERROR;
                 }
@@ -45,7 +45,7 @@ unsafe fn alone_decode(
             }
             1 => {
                 (*coder).options.dict_size = ((*coder).options.dict_size as size_t
-                    | (*in_0.offset(*in_pos as isize) as size_t) << ((*coder).pos * 8))
+                    | (*input.offset(*in_pos as isize) as size_t) << ((*coder).pos * 8))
                     as u32;
                 (*coder).pos += 1;
                 if (*coder).pos == 4 {
@@ -69,7 +69,7 @@ unsafe fn alone_decode(
             }
             2 => {
                 (*coder).uncompressed_size |=
-                    (*in_0.offset(*in_pos as isize) as lzma_vli) << ((*coder).pos * 8);
+                    (*input.offset(*in_pos as isize) as lzma_vli) << ((*coder).pos * 8);
                 *in_pos += 1;
                 (*coder).pos += 1;
                 if (*coder).pos < 8 {
@@ -100,7 +100,7 @@ unsafe fn alone_decode(
                 return (*coder).next.code.unwrap()(
                     (*coder).next.coder,
                     allocator,
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     out,

@@ -25,7 +25,7 @@ pub const SEQ_INDICATOR: index_decoder_seq = 0;
 unsafe fn index_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     _out: *mut u8,
@@ -40,7 +40,7 @@ unsafe fn index_decode(
     while *in_pos < in_size {
         match (*coder).sequence {
             0 => {
-                let byte = *in_0.offset(*in_pos as isize);
+                let byte = *input.offset(*in_pos as isize);
                 *in_pos += 1;
                 if byte != INDEX_INDICATOR {
                     return LZMA_DATA_ERROR;
@@ -52,7 +52,7 @@ unsafe fn index_decode(
                 ret = lzma_vli_decode(
                     ::core::ptr::addr_of_mut!((*coder).count),
                     ::core::ptr::addr_of_mut!((*coder).pos),
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                 );
@@ -75,7 +75,7 @@ unsafe fn index_decode(
                 ret = lzma_vli_decode(
                     size,
                     ::core::ptr::addr_of_mut!((*coder).pos),
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                 );
@@ -127,7 +127,7 @@ unsafe fn index_decode(
             8340016495055110192 => {
                 if (*coder).pos > 0 {
                     (*coder).pos -= 1;
-                    let byte = *in_0.offset(*in_pos as isize);
+                    let byte = *input.offset(*in_pos as isize);
                     *in_pos += 1;
                     if byte != 0 {
                         return LZMA_DATA_ERROR;
@@ -135,7 +135,7 @@ unsafe fn index_decode(
                     continue;
                 } else {
                     (*coder).crc32 = lzma_crc32(
-                        in_0.offset(in_start as isize),
+                        input.offset(in_start as isize),
                         *in_pos - in_start,
                         (*coder).crc32,
                     );
@@ -163,7 +163,7 @@ unsafe fn index_decode(
             if *in_pos == in_size {
                 return LZMA_OK;
             }
-            let val = *in_0.offset(*in_pos as isize);
+            let val = *input.offset(*in_pos as isize);
             *in_pos += 1;
             if (*coder).crc32 >> ((*coder).pos * 8) & 0xff != val as u32 {
                 return LZMA_DATA_ERROR;
@@ -179,7 +179,7 @@ unsafe fn index_decode(
     }
     let in_used: size_t = *in_pos - in_start;
     if in_used > 0 {
-        (*coder).crc32 = lzma_crc32(in_0.offset(in_start as isize), in_used, (*coder).crc32);
+        (*coder).crc32 = lzma_crc32(input.offset(in_start as isize), in_used, (*coder).crc32);
     }
     ret
 }
@@ -336,14 +336,14 @@ pub unsafe fn lzma_index_buffer_decode(
     i: *mut *mut lzma_index,
     memlimit: *mut u64,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
     if !i.is_null() {
         *i = core::ptr::null_mut();
     }
-    if i.is_null() || memlimit.is_null() || in_0.is_null() || in_pos.is_null() || *in_pos > in_size
+    if i.is_null() || memlimit.is_null() || input.is_null() || in_pos.is_null() || *in_pos > in_size
     {
         return LZMA_PROG_ERROR;
     }
@@ -367,7 +367,7 @@ pub unsafe fn lzma_index_buffer_decode(
     let mut ret: lzma_ret = index_decode(
         ::core::ptr::addr_of_mut!(coder) as *mut c_void,
         allocator,
-        in_0,
+        input,
         in_pos,
         in_size,
         core::ptr::null_mut(),

@@ -45,7 +45,7 @@ pub const LZIP_PB: u32 = 2;
 unsafe fn lzip_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -67,7 +67,7 @@ unsafe fn lzip_decode(
                             LZMA_OK
                         };
                     }
-                    if *in_0.offset(*in_pos as isize) != lzip_id_string[(*coder).pos as usize] {
+                    if *input.offset(*in_pos as isize) != lzip_id_string[(*coder).pos as usize] {
                         return if !(*coder).first_member {
                             LZMA_STREAM_END
                         } else {
@@ -106,7 +106,7 @@ unsafe fn lzip_decode(
                 if *in_pos >= in_size {
                     return LZMA_OK;
                 }
-                (*coder).version = *in_0.offset(*in_pos as isize) as u32;
+                (*coder).version = *input.offset(*in_pos as isize) as u32;
                 *in_pos += 1;
                 if (*coder).version > 1 {
                     return LZMA_OPTIONS_ERROR;
@@ -125,7 +125,7 @@ unsafe fn lzip_decode(
                 if *in_pos >= in_size {
                     return LZMA_OK;
                 }
-                let ds: u32 = *in_0.offset(*in_pos as isize) as u32;
+                let ds: u32 = *input.offset(*in_pos as isize) as u32;
                 *in_pos += 1;
                 (*coder).member_size += 1;
                 let b2log: u32 = ds & 0x1f;
@@ -193,7 +193,7 @@ unsafe fn lzip_decode(
                 let ret: lzma_ret = (*coder).lzma_decoder.code.unwrap()(
                     (*coder).lzma_decoder.coder,
                     allocator,
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     out,
@@ -221,7 +221,7 @@ unsafe fn lzip_decode(
             LZIP_V1_FOOTER_SIZE
         }) as size_t;
         lzma_bufcpy(
-            in_0,
+            input,
             in_pos,
             in_size,
             ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,

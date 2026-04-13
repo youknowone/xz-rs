@@ -40,7 +40,7 @@ unsafe fn block_encoder_init(
 unsafe fn stream_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -117,7 +117,7 @@ unsafe fn stream_encode(
                 let ret: lzma_ret = (*coder).block_encoder.code.unwrap()(
                     (*coder).block_encoder.coder,
                     allocator,
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     out,

@@ -3,7 +3,7 @@ use crate::types::*;
 unsafe fn copy_or_code(
     coder: *mut lzma_simple_coder,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -12,7 +12,7 @@ unsafe fn copy_or_code(
     action: lzma_action,
 ) -> lzma_ret {
     if (*coder).next.code.is_none() {
-        lzma_bufcpy(in_0, in_pos, in_size, out, out_pos, out_size);
+        lzma_bufcpy(input, in_pos, in_size, out, out_pos, out_size);
         if (*coder).is_encoder && action == LZMA_FINISH && *in_pos == in_size {
             (*coder).end_was_reached = true;
         }
@@ -20,7 +20,7 @@ unsafe fn copy_or_code(
         let ret: lzma_ret = (*coder).next.code.unwrap()(
             (*coder).next.coder,
             allocator,
-            in_0,
+            input,
             in_pos,
             in_size,
             out,
@@ -50,7 +50,7 @@ unsafe fn call_filter(coder: *mut lzma_simple_coder, buffer: &mut [u8]) -> size_
 unsafe fn simple_code(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -93,7 +93,7 @@ unsafe fn simple_code(
         }
         *out_pos += buf_avail;
         let ret: lzma_ret = copy_or_code(
-            coder, allocator, in_0, in_pos, in_size, out, out_pos, out_size, action,
+            coder, allocator, input, in_pos, in_size, out, out_pos, out_size, action,
         );
         if ret != LZMA_OK {
             return ret;
@@ -134,7 +134,7 @@ unsafe fn simple_code(
         let ret_0: lzma_ret = copy_or_code(
             coder,
             allocator,
-            in_0,
+            input,
             in_pos,
             in_size,
             ::core::ptr::addr_of_mut!(coder.buffer) as *mut u8,

@@ -18,7 +18,7 @@ pub unsafe fn lzma_stream_buffer_encode(
     filters: *mut lzma_filter,
     check: lzma_check,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_size: size_t,
     out: *mut u8,
     out_pos_ptr: *mut size_t,
@@ -26,7 +26,7 @@ pub unsafe fn lzma_stream_buffer_encode(
 ) -> lzma_ret {
     if filters.is_null()
         || check > LZMA_CHECK_ID_MAX
-        || in_0.is_null() && in_size != 0
+        || input.is_null() && in_size != 0
         || out.is_null()
         || out_pos_ptr.is_null()
         || *out_pos_ptr > out_size
@@ -104,7 +104,7 @@ pub unsafe fn lzma_stream_buffer_encode(
         let ret_: lzma_ret = lzma_block_buffer_encode(
             ::core::ptr::addr_of_mut!(block),
             allocator,
-            in_0,
+            input,
             in_size,
             out,
             ::core::ptr::addr_of_mut!(out_pos),

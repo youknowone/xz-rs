@@ -37,12 +37,12 @@ pub const SEQ_PADDING_SEEK: file_info_seq = 1;
 pub const SEQ_MAGIC_BYTES: file_info_seq = 0;
 unsafe fn fill_temp(
     coder: *mut lzma_file_info_coder,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> bool {
     (*coder).file_cur_pos += lzma_bufcpy(
-        in_0,
+        input,
         in_pos,
         in_size,
         ::core::ptr::addr_of_mut!((*coder).temp) as *mut u8,
@@ -120,7 +120,7 @@ fn hide_format_error(mut ret: lzma_ret) -> lzma_ret {
 unsafe fn decode_index(
     coder: *mut lzma_file_info_coder,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     update_file_cur_pos: bool,
@@ -129,7 +129,7 @@ unsafe fn decode_index(
     let ret: lzma_ret = (*coder).index_decoder.code.unwrap()(
         (*coder).index_decoder.coder,
         allocator,
-        in_0,
+        input,
         in_pos,
         in_size,
         core::ptr::null_mut(),
@@ -146,7 +146,7 @@ unsafe fn decode_index(
 unsafe fn file_info_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     mut in_size: size_t,
     _out: *mut u8,
@@ -165,7 +165,7 @@ unsafe fn file_info_decode(
                 if (*coder).file_size < LZMA_STREAM_HEADER_SIZE as u64 {
                     return LZMA_FORMAT_ERROR;
                 }
-                if fill_temp(coder, in_0, in_pos, in_size) {
+                if fill_temp(coder, input, in_pos, in_size) {
                     return LZMA_OK;
                 }
                 let ret: lzma_ret = lzma_stream_header_decode(
@@ -189,7 +189,7 @@ unsafe fn file_info_decode(
                 }
             }
             SEQ_PADDING_DECODE => {
-                if fill_temp(coder, in_0, in_pos, in_size) {
+                if fill_temp(coder, input, in_pos, in_size) {
                     return LZMA_OK;
                 }
                 let new_padding: size_t = get_padding_size(&(&(*coder).temp)[..(*coder).temp_size]);
@@ -213,7 +213,7 @@ unsafe fn file_info_decode(
                 }
             }
             SEQ_FOOTER => {
-                if fill_temp(coder, in_0, in_pos, in_size) {
+                if fill_temp(coder, input, in_pos, in_size) {
                     return LZMA_OK;
                 }
                 (*coder).file_target_pos -= LZMA_STREAM_HEADER_SIZE as u64;
@@ -280,7 +280,7 @@ unsafe fn file_info_decode(
                     if (in_size - *in_pos) as lzma_vli > (*coder).index_remaining {
                         in_stop = *in_pos + (*coder).index_remaining as size_t;
                     }
-                    decode_index(coder, allocator, in_0, in_pos, in_stop, true)
+                    decode_index(coder, allocator, input, in_pos, in_stop, true)
                 };
                 match ret {
                     LZMA_OK => {
@@ -327,7 +327,7 @@ unsafe fn file_info_decode(
                 }
             }
             SEQ_HEADER_DECODE => {
-                if fill_temp(coder, in_0, in_pos, in_size) {
+                if fill_temp(coder, input, in_pos, in_size) {
                     return LZMA_OK;
                 }
                 (*coder).file_target_pos -= LZMA_STREAM_HEADER_SIZE as u64;

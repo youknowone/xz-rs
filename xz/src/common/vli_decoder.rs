@@ -2,7 +2,7 @@ use crate::types::*;
 pub unsafe fn lzma_vli_decode(
     vli: *mut lzma_vli,
     mut vli_pos: *mut size_t,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
@@ -25,7 +25,7 @@ pub unsafe fn lzma_vli_decode(
         }
     }
     loop {
-        let byte: u8 = *in_0.offset(*in_pos as isize);
+        let byte: u8 = *input.offset(*in_pos as isize);
         *in_pos += 1;
         *vli += ((byte & 0x7f) as lzma_vli) << (*vli_pos * 7);
         *vli_pos += 1;

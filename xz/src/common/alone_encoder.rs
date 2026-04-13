@@ -14,7 +14,7 @@ pub const ALONE_HEADER_SIZE: u32 = 1 + 4 + 8;
 unsafe fn alone_encode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -43,7 +43,7 @@ unsafe fn alone_encode(
                 return (*coder).next.code.unwrap()(
                     (*coder).next.coder,
                     allocator,
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     out,

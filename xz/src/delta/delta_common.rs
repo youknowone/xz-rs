@@ -50,7 +50,7 @@ pub unsafe fn lzma_delta_coder_init(
 pub(crate) unsafe fn lzma_delta_coder_memusage(options: *const c_void) -> u64 {
     let opt: *const lzma_options_delta = options as *const lzma_options_delta;
     if opt.is_null()
-        || (*opt).type_0 != LZMA_DELTA_TYPE_BYTE
+        || (*opt).type_ != LZMA_DELTA_TYPE_BYTE
         || (*opt).dist < LZMA_DELTA_DIST_MIN
         || (*opt).dist > LZMA_DELTA_DIST_MAX
     {
