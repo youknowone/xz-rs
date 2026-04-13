@@ -39,6 +39,10 @@ pub struct name_value_map {
     pub name: [c_char; 12],
     pub value: u32,
 }
+#[inline]
+const fn array_size<T, const N: usize>(_: *const [T; N]) -> usize {
+    N
+}
 pub const OPTMAP_TYPE_LZMA_MATCH_FINDER: option_type = 2;
 pub const OPTMAP_TYPE_LZMA_MODE: option_type = 1;
 pub const OPTMAP_TYPE_LZMA_PRESET: option_type = 3;
@@ -115,11 +119,7 @@ unsafe fn str_append_u32(str: *mut lzma_str, mut v: u32, use_byte_suffix: bool) 
         };
         let mut suf: size_t = 0;
         if use_byte_suffix {
-            while v & 1023 == 0
-                && suf
-                    < core::mem::size_of::<[[c_char; 4]; 4]>() / core::mem::size_of::<[c_char; 4]>()
-                        - 1
-            {
+            while v & 1023 == 0 && suf < array_size(::core::ptr::addr_of!(SUFFIXES)) - 1 {
                 v >>= 10;
                 suf += 1;
             }
@@ -165,15 +165,15 @@ fn parse_bcj(
     str_end: *const c_char,
     filter_options: *mut c_void,
 ) -> *const c_char {
-    return unsafe {
+    unsafe {
         parse_options(
             str,
             str_end,
             filter_options,
             ::core::ptr::addr_of!(bcj_optmap) as *const option_map,
-            core::mem::size_of::<[option_map; 1]>() / core::mem::size_of::<option_map>(),
+            array_size(::core::ptr::addr_of!(bcj_optmap)),
         )
-    };
+    }
 }
 static mut delta_optmap: [option_map; 1] = unsafe {
     [option_map {
@@ -194,7 +194,7 @@ fn parse_delta(
     str_end: *const c_char,
     filter_options: *mut c_void,
 ) -> *const c_char {
-    return unsafe {
+    unsafe {
         let opts: *mut lzma_options_delta = filter_options as *mut lzma_options_delta;
         (*opts).type_0 = LZMA_DELTA_TYPE_BYTE;
         (*opts).dist = LZMA_DELTA_DIST_MIN;
@@ -203,10 +203,9 @@ fn parse_delta(
             str_end,
             filter_options,
             ::core::ptr::addr_of!(delta_optmap) as *const option_map,
-            (core::mem::size_of::<[option_map; 1]>())
-                .wrapping_div(core::mem::size_of::<option_map>()),
+            array_size(::core::ptr::addr_of!(delta_optmap)),
         )
-    };
+    }
 }
 pub const LZMA12_PRESET_STR: [c_char; 7] =
     unsafe { core::mem::transmute::<[u8; 7], [c_char; 7]>(*b"0-9[e]\0") };
@@ -317,7 +316,7 @@ unsafe fn parse_lzma12(
         str_end,
         filter_options,
         ::core::ptr::addr_of!(lzma12_optmap) as *const option_map,
-        core::mem::size_of::<[option_map; 9]>() / core::mem::size_of::<option_map>(),
+        array_size(::core::ptr::addr_of!(lzma12_optmap)),
     );
     if !errmsg.is_null() {
         return errmsg;

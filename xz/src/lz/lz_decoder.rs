@@ -41,7 +41,7 @@ unsafe fn lz_decoder_reset(coder: *mut lzma_coder) {
 }
 unsafe fn decode_buffer(
     coder: *mut lzma_coder,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -74,7 +74,7 @@ unsafe fn decode_buffer(
         let ret: lzma_ret = (*coder).lz.code.unwrap()(
             (*coder).lz.coder,
             ::core::ptr::addr_of_mut!((*coder).dict),
-            in_0,
+            input,
             in_pos,
             in_size,
         );
@@ -100,7 +100,7 @@ unsafe fn decode_buffer(
 unsafe fn lz_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
     out: *mut u8,
@@ -110,7 +110,7 @@ unsafe fn lz_decode(
 ) -> lzma_ret {
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
     if (*coder).next.code.is_none() {
-        return decode_buffer(coder, in_0, in_pos, in_size, out, out_pos, out_size);
+        return decode_buffer(coder, input, in_pos, in_size, out, out_pos, out_size);
     }
     while *out_pos < out_size {
         if !(*coder).next_finished && (*coder).temp.pos == (*coder).temp.size {
@@ -119,7 +119,7 @@ unsafe fn lz_decode(
             let ret: lzma_ret = (*coder).next.code.unwrap()(
                 (*coder).next.coder,
                 allocator,
-                in_0,
+                input,
                 in_pos,
                 in_size,
                 ::core::ptr::addr_of_mut!((*coder).temp.buffer) as *mut u8,

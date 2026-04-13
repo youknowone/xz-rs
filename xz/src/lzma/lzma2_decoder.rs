@@ -32,7 +32,7 @@ pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
 #[inline]
 unsafe fn dict_write(
     dict: *mut lzma_dict,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     mut in_size: size_t,
     left: *mut size_t,
@@ -41,7 +41,7 @@ unsafe fn dict_write(
         in_size = (*in_pos).wrapping_add(*left);
     }
     *left = (*left).wrapping_sub(lzma_bufcpy(
-        in_0,
+        input,
         in_pos,
         in_size,
         (*dict).buf,
@@ -59,7 +59,7 @@ unsafe fn dict_reset(dict: *mut lzma_dict) {
 unsafe fn lzma2_decode(
     coder_ptr: *mut c_void,
     dict: *mut lzma_dict,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
@@ -67,7 +67,7 @@ unsafe fn lzma2_decode(
     while *in_pos < in_size || (*coder).sequence == SEQ_LZMA {
         match (*coder).sequence {
             0 => {
-                let control: u32 = *in_0.offset(*in_pos as isize) as u32;
+                let control: u32 = *input.offset(*in_pos as isize) as u32;
                 *in_pos = (*in_pos).wrapping_add(1);
                 if control == 0 {
                     return LZMA_STREAM_END;
@@ -111,13 +111,13 @@ unsafe fn lzma2_decode(
             1 => {
                 (*coder).uncompressed_size = (*coder)
                     .uncompressed_size
-                    .wrapping_add(((*in_0.offset(*in_pos as isize) as u32) << 8) as size_t);
+                    .wrapping_add(((*input.offset(*in_pos as isize) as u32) << 8) as size_t);
                 *in_pos += 1;
                 (*coder).sequence = SEQ_UNCOMPRESSED_2;
             }
             2 => {
                 (*coder).uncompressed_size = (*coder).uncompressed_size.wrapping_add(
-                    u32::from(*in_0.offset(*in_pos as isize)).wrapping_add(1) as size_t,
+                    u32::from(*input.offset(*in_pos as isize)).wrapping_add(1) as size_t,
                 );
                 *in_pos += 1;
                 (*coder).sequence = SEQ_COMPRESSED_0;
@@ -128,19 +128,20 @@ unsafe fn lzma2_decode(
                 );
             }
             3 => {
-                (*coder).compressed_size = ((*in_0.offset(*in_pos as isize) as u32) << 8) as size_t;
+                (*coder).compressed_size =
+                    ((*input.offset(*in_pos as isize) as u32) << 8) as size_t;
                 *in_pos += 1;
                 (*coder).sequence = SEQ_COMPRESSED_1;
             }
             4 => {
                 (*coder).compressed_size = (*coder).compressed_size.wrapping_add(
-                    u32::from(*in_0.offset(*in_pos as isize)).wrapping_add(1) as size_t,
+                    u32::from(*input.offset(*in_pos as isize)).wrapping_add(1) as size_t,
                 );
                 *in_pos += 1;
                 (*coder).sequence = (*coder).next_sequence as sequence;
             }
             5 => {
-                let prop_byte = *in_0.offset(*in_pos as isize);
+                let prop_byte = *input.offset(*in_pos as isize);
                 *in_pos += 1;
                 if lzma_lzma_lclppb_decode(::core::ptr::addr_of_mut!((*coder).options), prop_byte) {
                     return LZMA_DATA_ERROR;
@@ -154,7 +155,7 @@ unsafe fn lzma2_decode(
             6 => {
                 let in_start: size_t = *in_pos;
                 let ret: lzma_ret =
-                    (*coder).lzma.code.unwrap()((*coder).lzma.coder, dict, in_0, in_pos, in_size);
+                    (*coder).lzma.code.unwrap()((*coder).lzma.coder, dict, input, in_pos, in_size);
                 let in_used: size_t = (*in_pos).wrapping_sub(in_start);
                 if in_used > (*coder).compressed_size {
                     return LZMA_DATA_ERROR;
@@ -171,7 +172,7 @@ unsafe fn lzma2_decode(
             7 => {
                 dict_write(
                     dict,
-                    in_0,
+                    input,
                     in_pos,
                     in_size,
                     ::core::ptr::addr_of_mut!((*coder).compressed_size),
