@@ -168,10 +168,10 @@ unsafe fn worker_encode(
         } else {
             LZMA_RUN
         }) as lzma_action;
-        static mut in_chunk_max: size_t = 16384;
+        const IN_CHUNK_MAX: size_t = 16384;
         let mut in_limit: size_t = in_size;
-        if in_size - in_pos > in_chunk_max {
-            in_limit = in_pos + in_chunk_max;
+        if in_size - in_pos > IN_CHUNK_MAX {
+            in_limit = in_pos + IN_CHUNK_MAX;
             action = LZMA_RUN;
         }
         ret = (*thr).block_encoder.code.unwrap()(

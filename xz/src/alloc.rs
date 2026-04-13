@@ -15,7 +15,7 @@ const fn round_up(value: usize, align: usize) -> usize {
     (value + (align - 1)) & !(align - 1)
 }
 
-unsafe fn rust_alloc_impl(size: usize, align: usize, zeroed: bool) -> *mut c_void {
+fn rust_alloc_impl(size: usize, align: usize, zeroed: bool) -> *mut c_void {
     let size = if size == 0 { 1 } else { size };
     let align = align
         .max(RUST_ALLOC_ALIGN)
@@ -33,21 +33,25 @@ unsafe fn rust_alloc_impl(size: usize, align: usize, zeroed: bool) -> *mut c_voi
         Ok(layout) => layout,
         Err(_) => return core::ptr::null_mut(),
     };
-    let base = if zeroed {
-        alloc_zeroed(layout)
-    } else {
-        alloc(layout)
+    let base = unsafe {
+        if zeroed {
+            alloc_zeroed(layout)
+        } else {
+            alloc(layout)
+        }
     };
     if base.is_null() {
         return core::ptr::null_mut();
     }
-    let user_ptr = base.add(offset);
-    let header_ptr = user_ptr.sub(header_size) as *mut RustAllocHeader;
-    header_ptr.write(RustAllocHeader {
-        total_size,
-        align,
-        offset,
-    });
+    let user_ptr = unsafe { base.add(offset) };
+    let header_ptr = unsafe { user_ptr.sub(header_size) as *mut RustAllocHeader };
+    unsafe {
+        header_ptr.write(RustAllocHeader {
+            total_size,
+            align,
+            offset,
+        });
+    }
     user_ptr as *mut c_void
 }
 

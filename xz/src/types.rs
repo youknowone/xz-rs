@@ -1123,7 +1123,7 @@ pub unsafe fn lzma_memcmplen(buf1: *const u8, buf2: *const u8, len: u32, limit: 
     )
 }
 #[inline]
-pub unsafe fn get_dist_slot(dist: u32) -> u32 {
+pub fn get_dist_slot(dist: u32) -> u32 {
     if dist < 1 << FASTPOS_BITS + (0 + 0 * (FASTPOS_BITS - 1)) {
         return lzma_fastpos[dist as usize] as u32;
     }
@@ -1135,30 +1135,26 @@ pub unsafe fn get_dist_slot(dist: u32) -> u32 {
         .wrapping_add((2 * (0 + 2 * (FASTPOS_BITS - 1))) as u32)
 }
 #[inline]
-unsafe fn rc_price_at(index: u32) -> u32 {
+fn rc_price_at(index: u32) -> u32 {
     debug_assert!((index as usize) < 128);
-    *(::core::ptr::addr_of!(lzma_rc_prices) as *const u8).add(index as usize) as u32
+    lzma_rc_prices[index as usize] as u32
 }
 #[inline]
 pub fn rc_bit_price(prob: probability, bit: u32) -> u32 {
-    unsafe {
-        rc_price_at(
-            ((prob as u32 ^ 0u32.wrapping_sub(bit) & (RC_BIT_MODEL_TOTAL as u32).wrapping_sub(1))
-                >> RC_MOVE_REDUCING_BITS) as u32,
-        )
-    }
+    rc_price_at(
+        ((prob as u32 ^ 0u32.wrapping_sub(bit) & (RC_BIT_MODEL_TOTAL as u32).wrapping_sub(1))
+            >> RC_MOVE_REDUCING_BITS) as u32,
+    )
 }
 #[inline]
 pub fn rc_bit_0_price(prob: probability) -> u32 {
-    unsafe { rc_price_at((prob >> RC_MOVE_REDUCING_BITS) as u32) }
+    rc_price_at((prob >> RC_MOVE_REDUCING_BITS) as u32)
 }
 #[inline]
 pub fn rc_bit_1_price(prob: probability) -> u32 {
-    unsafe {
-        rc_price_at(
-            ((prob as u32 ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1)) >> RC_MOVE_REDUCING_BITS) as u32,
-        )
-    }
+    rc_price_at(
+        ((prob as u32 ^ RC_BIT_MODEL_TOTAL.wrapping_sub(1)) >> RC_MOVE_REDUCING_BITS) as u32,
+    )
 }
 #[inline]
 pub unsafe fn rc_bittree_price(probs: *const probability, bit_levels: u32, mut symbol: u32) -> u32 {
