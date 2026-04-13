@@ -3,11 +3,10 @@ set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
   cat <<'EOF' >&2
-Usage: scripts/profile_backend.sh <c|liblzma-sys|xz|rust|xz-sys|both> <encode|decode|size|crc32|crc64> [backend_probe args...]
+Usage: scripts/profile_backend.sh <c|liblzma-sys|xz|rust|xz-sys> <encode|decode|size|crc32|crc64> [backend_probe args...]
 
 Examples:
   scripts/profile_backend.sh xz decode --size 1048576 --iters 500 --warmup 50
-  scripts/profile_backend.sh both encode --input-kind random --size 8388608
   scripts/profile_backend.sh xz size --input-kind random --size 1048576 --iters 800 --warmup 80
 
 Environment:
@@ -39,10 +38,6 @@ case "$BACKEND" in
     FEATURE="xz-sys"
     TARGET_DIR="target/profile-bench-xz-sys"
     BACKEND_ENV=()
-    ;;
-  both)
-    echo "profile_backend.sh profiles one backend at a time; use xz, xz-sys, or liblzma-sys" >&2
-    exit 2
     ;;
   *)
     echo "unknown backend: $BACKEND" >&2

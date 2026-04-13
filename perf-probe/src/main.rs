@@ -225,7 +225,7 @@ fn usage() -> String {
     let mut message = String::new();
     message.push_str("Usage:\n");
     message.push_str(
-        "  cargo run -p perf-probe --release --no-default-features --features <liblzma-sys|xz-sys> -- \\\n",
+        "  cargo run -p perf-probe --release --no-default-features --features <xz|xz-sys|liblzma-sys> -- \\\n",
     );
     message.push_str("    --workload <encode|decode|size|crc32|crc64> [options]\n\n");
     message.push_str("Options:\n");
@@ -527,6 +527,16 @@ unsafe fn backend_decode(compressed: &[u8], out_size: usize) -> Vec<u8> {
         )
     };
     assert_eq!(ret, LZMA_OK, "{BACKEND_NAME} decode failed with {ret}");
+    assert_eq!(
+        in_pos,
+        compressed.len(),
+        "{BACKEND_NAME} decode left trailing input: consumed {in_pos} of {} bytes",
+        compressed.len()
+    );
+    assert_eq!(
+        out_pos, out_size,
+        "{BACKEND_NAME} decode produced {out_pos} bytes, expected {out_size}"
+    );
     out.truncate(out_pos);
     out
 }

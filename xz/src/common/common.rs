@@ -64,7 +64,7 @@ unsafe fn free(ptr: *mut c_void) {
 }
 pub const LZMA_VERSION_MAJOR: u32 = 5;
 pub const LZMA_VERSION_MINOR: u32 = 8;
-pub const LZMA_VERSION_PATCH: u32 = 2;
+pub const LZMA_VERSION_PATCH: u32 = 3;
 pub const LZMA_VERSION_STABILITY: u32 = LZMA_VERSION_STABILITY_STABLE;
 pub const LZMA_VERSION_STABILITY_STABLE: u32 = 2;
 pub const LZMA_VERSION: c_uint = LZMA_VERSION_MAJOR * 10000000
@@ -76,7 +76,7 @@ pub fn lzma_version_number() -> u32 {
     LZMA_VERSION as u32
 }
 pub fn lzma_version_string() -> *const c_char {
-    crate::c_str!("5.8.2")
+    crate::c_str!("5.8.3")
 }
 pub unsafe fn lzma_alloc(mut size: size_t, allocator: *const lzma_allocator) -> *mut c_void {
     if size == 0 {
@@ -120,6 +120,12 @@ pub unsafe fn lzma_bufcpy(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> size_t {
+    if *in_pos > in_size || *out_pos > out_size {
+        return 0;
+    }
+    if (in_0.is_null() && *in_pos != in_size) || (out.is_null() && *out_pos != out_size) {
+        return 0;
+    }
     debug_assert!(!in_0.is_null() || *in_pos == in_size);
     debug_assert!(!out.is_null() || *out_pos == out_size);
     debug_assert!(*in_pos <= in_size);
