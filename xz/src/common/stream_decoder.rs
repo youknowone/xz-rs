@@ -312,10 +312,8 @@ unsafe fn stream_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allo
     crate::alloc::internal_free(coder as *mut c_void, allocator);
 }
 unsafe fn stream_decoder_get_check(coder_ptr: *const c_void) -> lzma_check {
-    return unsafe {
-        let coder: *const lzma_stream_coder = coder_ptr as *const lzma_stream_coder;
-        (*coder).stream_flags.check
-    };
+    let coder: *const lzma_stream_coder = coder_ptr as *const lzma_stream_coder;
+    (*coder).stream_flags.check
 }
 unsafe fn stream_decoder_memconfig(
     coder_ptr: *mut c_void,

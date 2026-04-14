@@ -205,14 +205,14 @@ unsafe fn lzma_decode(
 ) -> lzma_ret {
     let mut current_block: u64;
     let coder: *mut lzma_lzma1_decoder = coder_ptr as *mut lzma_lzma1_decoder;
-    let ret: lzma_ret = rc_read_init(
+    let init_ret: lzma_ret = rc_read_init(
         ::core::ptr::addr_of_mut!((*coder).rc),
         input,
         in_pos,
         in_size,
     );
-    if ret != LZMA_STREAM_END {
-        return ret;
+    if init_ret != LZMA_STREAM_END {
+        return init_ret;
     }
     let mut dict: lzma_dict = *dictptr;
     let dict_start: size_t = dict.pos;
@@ -243,7 +243,7 @@ unsafe fn lzma_decode(
     let literal_mask: u32 = (*coder).literal_mask;
     let literal_context_bits: u32 = (*coder).literal_context_bits;
     let mut pos_state: u32 = (dict.pos & pos_mask as size_t) as u32;
-    let mut ret_0: lzma_ret = LZMA_OK;
+    let mut ret: lzma_ret = LZMA_OK;
     let mut eopm_is_valid: bool = (*coder).uncompressed_size == LZMA_VLI_UNKNOWN;
     let mut might_finish_without_eopm: bool = false;
     if (*coder).uncompressed_size != LZMA_VLI_UNKNOWN
@@ -498,7 +498,7 @@ unsafe fn lzma_decode(
                         current_block = 4420799852307653083;
                         continue;
                     }
-                    ret_0 = LZMA_DATA_ERROR;
+                    ret = LZMA_DATA_ERROR;
                     current_block = 4609795085482299213;
                     continue;
                 }
@@ -515,7 +515,7 @@ unsafe fn lzma_decode(
                         rc_in_ptr = rc_in_ptr.offset(1);
                     }
                 }
-                ret_0 = if rc.code == 0 {
+                ret = if rc.code == 0 {
                     LZMA_STREAM_END
                 } else {
                     LZMA_DATA_ERROR
@@ -885,11 +885,11 @@ unsafe fn lzma_decode(
                         }
                     }
                     if rc.code == 0 {
-                        ret_0 = LZMA_STREAM_END;
+                        ret = LZMA_STREAM_END;
                         current_block = 4609795085482299213;
                         continue;
                     } else if !(*coder).allow_eopm {
-                        ret_0 = LZMA_DATA_ERROR;
+                        ret = LZMA_DATA_ERROR;
                         current_block = 4609795085482299213;
                         continue;
                     } else {
@@ -1089,7 +1089,7 @@ unsafe fn lzma_decode(
                     current_block = 17340485688450593529;
                     continue;
                 }
-                ret_0 = LZMA_DATA_ERROR;
+                ret = LZMA_DATA_ERROR;
                 current_block = 4609795085482299213;
                 continue;
             }
@@ -2440,7 +2440,7 @@ unsafe fn lzma_decode(
                         }
                         if !dict_is_distance_valid(::core::ptr::addr_of_mut!(dict), rep0 as size_t)
                         {
-                            ret_0 = LZMA_DATA_ERROR;
+                            ret = LZMA_DATA_ERROR;
                             current_block = 4609795085482299213;
                             continue 'c_9380;
                         }
@@ -2450,7 +2450,7 @@ unsafe fn lzma_decode(
                         (*coder).is_rep[state as usize] = (*coder).is_rep[state as usize]
                             - ((*coder).is_rep[state as usize] >> RC_MOVE_BITS);
                         if !dict_is_distance_valid(::core::ptr::addr_of_mut!(dict), 0) {
-                            ret_0 = LZMA_DATA_ERROR;
+                            ret = LZMA_DATA_ERROR;
                             current_block = 4609795085482299213;
                             continue 'c_9380;
                         } else {
@@ -3157,7 +3157,7 @@ unsafe fn lzma_decode(
             current_block = 7073645523065812117;
             continue;
         }
-        ret_0 = LZMA_DATA_ERROR;
+        ret = LZMA_DATA_ERROR;
         current_block = 4609795085482299213;
     }
     (*dictptr).full = dict.full;
@@ -3178,21 +3178,21 @@ unsafe fn lzma_decode(
             .uncompressed_size
             .wrapping_sub(dict.pos.wrapping_sub(dict_start) as lzma_vli);
         if (*coder).uncompressed_size == 0
-            && ret_0 == LZMA_OK
+            && ret == LZMA_OK
             && ((*coder).sequence == SEQ_LITERAL_WRITE
                 || (*coder).sequence == SEQ_SHORTREP
                 || (*coder).sequence == SEQ_COPY)
         {
-            ret_0 = LZMA_DATA_ERROR;
+            ret = LZMA_DATA_ERROR;
         }
     }
-    if ret_0 == LZMA_STREAM_END {
+    if ret == LZMA_STREAM_END {
         (*coder).rc.range = UINT32_MAX;
         (*coder).rc.code = 0;
         (*coder).rc.init_bytes_left = 5;
         (*coder).sequence = SEQ_IS_MATCH;
     }
-    ret_0
+    ret
 }
 unsafe fn lzma_decoder_uncompressed(
     coder_ptr: *mut c_void,
@@ -3219,7 +3219,6 @@ unsafe fn lzma_decoder_reset(coder_ptr: *mut c_void, opt: *const c_void) {
     (*coder).rep1 = 0;
     (*coder).rep2 = 0;
     (*coder).rep3 = 0;
-    (*coder).pos_mask = (1u32 << (*options).pb).wrapping_sub(1) as u32;
     (*coder).rc.range = UINT32_MAX;
     (*coder).rc.code = 0;
     (*coder).rc.init_bytes_left = 5;
@@ -3238,20 +3237,20 @@ unsafe fn lzma_decoder_reset(coder_ptr: *mut c_void, opt: *const c_void) {
         (*coder).is_rep2[i as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         i += 1;
     }
-    let mut i_0: u32 = 0;
-    while i_0 < DIST_STATES {
+    let mut dist_state: u32 = 0;
+    while dist_state < DIST_STATES {
         let mut bt_i: u32 = 0;
         while bt_i < (1 << 6) as u32 {
-            (*coder).dist_slot[i_0 as usize][bt_i as usize] =
+            (*coder).dist_slot[dist_state as usize][bt_i as usize] =
                 (RC_BIT_MODEL_TOTAL >> 1) as probability;
             bt_i += 1;
         }
-        i_0 += 1;
+        dist_state += 1;
     }
-    let mut i_1: u32 = 0;
-    while i_1 < (FULL_DISTANCES - DIST_MODEL_END) as u32 {
-        (*coder).pos_special[i_1 as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
-        i_1 += 1;
+    let mut special_distance: u32 = 0;
+    while special_distance < (FULL_DISTANCES - DIST_MODEL_END) as u32 {
+        (*coder).pos_special[special_distance as usize] = (RC_BIT_MODEL_TOTAL >> 1) as probability;
+        special_distance += 1;
     }
     let mut bt_i_0: u32 = 0;
     while bt_i_0 < (1 << 4) as u32 {
@@ -3361,14 +3360,14 @@ unsafe fn lzma_decoder_init(
         allow_eopm = (*opt).ext_flags & LZMA_LZMA1EXT_ALLOW_EOPM as u32 != 0
             || uncomp_size == LZMA_VLI_UNKNOWN;
     }
-    let ret_: lzma_ret = lzma_lzma_decoder_create(
+    let ret: lzma_ret = lzma_lzma_decoder_create(
         lz,
         allocator,
         options as *const lzma_options_lzma,
         lz_options,
     );
-    if ret_ != LZMA_OK {
-        return ret_;
+    if ret != LZMA_OK {
+        return ret;
     }
     lzma_decoder_reset((*lz).coder, options);
     lzma_decoder_uncompressed((*lz).coder, uncomp_size, allow_eopm);

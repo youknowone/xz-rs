@@ -100,7 +100,7 @@ fn get_pure_rep_price(
     state: lzma_lzma_state,
     pos_state: u32,
 ) -> u32 {
-    return unsafe {
+    unsafe {
         let mut price: u32 = 0;
         if rep_index == 0 {
             price = rc_bit_0_price(rep0_prob(coder, state));
@@ -116,7 +116,7 @@ fn get_pure_rep_price(
             }
         }
         price
-    };
+    }
 }
 #[inline]
 fn get_rep_price(
@@ -141,7 +141,7 @@ fn get_dist_len_price(
     len: u32,
     pos_state: u32,
 ) -> u32 {
-    return unsafe {
+    unsafe {
         let dist_state: u32 = if len < (DIST_STATES + MATCH_LEN_MIN) as u32 {
             debug_assert!(len >= MATCH_LEN_MIN);
             len - MATCH_LEN_MIN
@@ -162,7 +162,7 @@ fn get_dist_len_price(
             pos_state,
         );
         price
-    };
+    }
 }
 #[inline]
 fn is_literal_state(state: lzma_lzma_state) -> bool {

@@ -235,9 +235,9 @@ pub unsafe fn lzma_raw_coder_init(
     is_encoder: bool,
 ) -> lzma_ret {
     let mut count: size_t = 0;
-    let ret_: lzma_ret = lzma_validate_chain(options, ::core::ptr::addr_of_mut!(count));
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = lzma_validate_chain(options, ::core::ptr::addr_of_mut!(count));
+    if ret != LZMA_OK {
+        return ret;
     }
     let mut filters: [lzma_filter_info; 5] = [lzma_filter_info_s {
         id: 0,

@@ -202,18 +202,18 @@ pub unsafe fn lzma_alone_encoder(
     strm: *mut lzma_stream,
     options: *const lzma_options_lzma,
 ) -> lzma_ret {
-    let ret_: lzma_ret = lzma_strm_init(strm);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = lzma_strm_init(strm);
+    if ret != LZMA_OK {
+        return ret;
     }
-    let ret__0: lzma_ret = alone_encoder_init(
+    let ret: lzma_ret = alone_encoder_init(
         ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         options,
     );
-    if ret__0 != LZMA_OK {
+    if ret != LZMA_OK {
         lzma_end(strm);
-        return ret__0;
+        return ret;
     }
     (*(*strm).internal).supported_actions[LZMA_RUN as usize] = true;
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;

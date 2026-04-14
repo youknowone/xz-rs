@@ -315,20 +315,20 @@ pub unsafe fn lzma_raw_encoder_init(
     )
 }
 pub unsafe fn lzma_raw_encoder(strm: *mut lzma_stream, filters: *const lzma_filter) -> lzma_ret {
-    let ret_: lzma_ret = lzma_strm_init(strm);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = lzma_strm_init(strm);
+    if ret != LZMA_OK {
+        return ret;
     }
-    let ret__0: lzma_ret = lzma_raw_coder_init(
+    let ret: lzma_ret = lzma_raw_coder_init(
         ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         filters,
         Some(coder_find as unsafe fn(lzma_vli) -> *const lzma_filter_coder),
         true,
     );
-    if ret__0 != LZMA_OK {
+    if ret != LZMA_OK {
         lzma_end(strm);
-        return ret__0;
+        return ret;
     }
     (*(*strm).internal).supported_actions[LZMA_RUN as usize] = true;
     (*(*strm).internal).supported_actions[LZMA_SYNC_FLUSH as usize] = true;

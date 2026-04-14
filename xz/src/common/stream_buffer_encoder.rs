@@ -101,7 +101,7 @@ pub unsafe fn lzma_stream_buffer_encode(
         reserved_bool8: 0,
     };
     if in_size > 0 {
-        let ret_: lzma_ret = lzma_block_buffer_encode(
+        let ret: lzma_ret = lzma_block_buffer_encode(
             ::core::ptr::addr_of_mut!(block),
             allocator,
             input,
@@ -110,8 +110,8 @@ pub unsafe fn lzma_stream_buffer_encode(
             ::core::ptr::addr_of_mut!(out_pos),
             out_size,
         );
-        if ret_ != LZMA_OK {
-            return ret_;
+        if ret != LZMA_OK {
+            return ret;
         }
     }
     let i: *mut lzma_index = lzma_index_init(allocator);

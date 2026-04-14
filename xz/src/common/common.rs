@@ -422,7 +422,7 @@ pub unsafe fn lzma_get_progress(
     };
 }
 pub fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
-    return unsafe {
+    unsafe {
         if strm.is_null() || (*strm).internal.is_null() {
             return LZMA_CHECK_NONE;
         }
@@ -430,10 +430,10 @@ pub fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
             return LZMA_CHECK_NONE;
         }
         (*(*strm).internal).next.get_check.unwrap()((*(*strm).internal).next.coder)
-    };
+    }
 }
 pub fn lzma_memusage(strm: *const lzma_stream) -> u64 {
-    return unsafe {
+    unsafe {
         let mut memusage: u64 = 0;
         let mut old_memlimit: u64 = 0;
         if strm.is_null()
@@ -449,10 +449,10 @@ pub fn lzma_memusage(strm: *const lzma_stream) -> u64 {
             return 0;
         }
         memusage
-    };
+    }
 }
 pub fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
-    return unsafe {
+    unsafe {
         let mut old_memlimit: u64 = 0;
         let mut memusage: u64 = 0;
         if strm.is_null()
@@ -468,7 +468,7 @@ pub fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
             return 0;
         }
         old_memlimit
-    };
+    }
 }
 pub unsafe fn lzma_memlimit_set(strm: *mut lzma_stream, mut new_memlimit: u64) -> lzma_ret {
     let mut old_memlimit: u64 = 0;

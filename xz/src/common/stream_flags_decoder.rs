@@ -1,14 +1,14 @@
 use crate::common::stream_flags_common::{lzma_footer_magic, lzma_header_magic};
 use crate::types::*;
 fn stream_flags_decode(options: *mut lzma_stream_flags, input: &[u8; 2]) -> bool {
-    return unsafe {
+    unsafe {
         if input[0] != 0 || input[1] & 0xf0 != 0 {
             return true;
         }
         (*options).version = 0;
         (*options).check = (input[1] & 0xf) as lzma_check;
         false
-    };
+    }
 }
 pub unsafe fn lzma_stream_header_decode(
     options: *mut lzma_stream_flags,

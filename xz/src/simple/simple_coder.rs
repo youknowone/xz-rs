@@ -131,7 +131,7 @@ unsafe fn simple_code(
         coder.pos = 0;
     }
     if coder.size > 0 {
-        let ret_0: lzma_ret = copy_or_code(
+        let ret: lzma_ret = copy_or_code(
             coder,
             allocator,
             input,
@@ -142,8 +142,8 @@ unsafe fn simple_code(
             coder.allocated,
             action,
         );
-        if ret_0 != LZMA_OK {
-            return ret_0;
+        if ret != LZMA_OK {
+            return ret;
         }
         coder.filtered = call_filter(
             coder as *mut lzma_simple_coder,

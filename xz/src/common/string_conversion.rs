@@ -964,9 +964,9 @@ pub unsafe fn lzma_str_from_filters(
         buf: core::ptr::null_mut(),
         pos: 0,
     };
-    let ret_: lzma_ret = str_init(::core::ptr::addr_of_mut!(dest), allocator);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = str_init(::core::ptr::addr_of_mut!(dest), allocator);
+    if ret != LZMA_OK {
+        return ret;
     }
     let show_opts: bool = flags & (LZMA_STR_ENCODER as u32 | LZMA_STR_DECODER as u32) != 0;
     let opt_delim: *const c_char = if flags & LZMA_STR_GETOPT_LONG as u32 != 0 {
@@ -1058,9 +1058,9 @@ pub unsafe fn lzma_str_list_filters(
         buf: core::ptr::null_mut(),
         pos: 0,
     };
-    let ret_: lzma_ret = str_init(::core::ptr::addr_of_mut!(dest), allocator);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = str_init(::core::ptr::addr_of_mut!(dest), allocator);
+    if ret != LZMA_OK {
+        return ret;
     }
     let show_opts: bool = flags & (LZMA_STR_ENCODER as u32 | LZMA_STR_DECODER as u32) != 0;
     let filter_delim: *const c_char = if show_opts {

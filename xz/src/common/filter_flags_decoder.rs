@@ -8,29 +8,29 @@ pub unsafe fn lzma_filter_flags_decode(
     in_size: size_t,
 ) -> lzma_ret {
     (*filter).options = core::ptr::null_mut();
-    let ret_: lzma_ret = lzma_vli_decode(
+    let ret: lzma_ret = lzma_vli_decode(
         ::core::ptr::addr_of_mut!((*filter).id),
         core::ptr::null_mut(),
         input,
         in_pos,
         in_size,
     );
-    if ret_ != LZMA_OK {
-        return ret_;
+    if ret != LZMA_OK {
+        return ret;
     }
     if (*filter).id >= LZMA_FILTER_RESERVED_START {
         return LZMA_DATA_ERROR;
     }
     let mut props_size: lzma_vli = 0;
-    let ret__0: lzma_ret = lzma_vli_decode(
+    let ret: lzma_ret = lzma_vli_decode(
         ::core::ptr::addr_of_mut!(props_size),
         core::ptr::null_mut(),
         input,
         in_pos,
         in_size,
     );
-    if ret__0 != LZMA_OK {
-        return ret__0;
+    if ret != LZMA_OK {
+        return ret;
     }
     if ((in_size - *in_pos) as lzma_vli) < props_size {
         return LZMA_DATA_ERROR;

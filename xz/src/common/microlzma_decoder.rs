@@ -89,13 +89,13 @@ unsafe fn microlzma_decode(
                 options: core::ptr::null_mut(),
             },
         ];
-        let ret_: lzma_ret = lzma_next_filter_init(
+        let ret: lzma_ret = lzma_next_filter_init(
             ::core::ptr::addr_of_mut!((*coder).lzma),
             allocator,
             ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter_info,
         );
-        if ret_ != LZMA_OK {
-            return ret_;
+        if ret != LZMA_OK {
+            return ret;
         }
         let dummy_in: u8 = 0;
         let mut dummy_in_pos: size_t = 0;
@@ -242,11 +242,11 @@ pub unsafe fn lzma_microlzma_decoder(
     uncomp_size_is_exact: lzma_bool,
     dict_size: u32,
 ) -> lzma_ret {
-    let ret_: lzma_ret = lzma_strm_init(strm);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = lzma_strm_init(strm);
+    if ret != LZMA_OK {
+        return ret;
     }
-    let ret__0: lzma_ret = microlzma_decoder_init(
+    let ret: lzma_ret = microlzma_decoder_init(
         ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         comp_size,
@@ -254,9 +254,9 @@ pub unsafe fn lzma_microlzma_decoder(
         uncomp_size_is_exact != 0,
         dict_size,
     );
-    if ret__0 != LZMA_OK {
+    if ret != LZMA_OK {
         lzma_end(strm);
-        return ret__0;
+        return ret;
     }
     (*(*strm).internal).supported_actions[LZMA_RUN as usize] = true;
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;

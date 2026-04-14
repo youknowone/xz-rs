@@ -30,15 +30,15 @@ pub unsafe fn lzma_block_header_decode(
     }
     let mut in_pos: size_t = 2;
     if *input.offset(1) & 0x40 != 0 {
-        let ret_: lzma_ret = lzma_vli_decode(
+        let ret: lzma_ret = lzma_vli_decode(
             ::core::ptr::addr_of_mut!((*block).compressed_size),
             core::ptr::null_mut(),
             input,
             ::core::ptr::addr_of_mut!(in_pos),
             in_size,
         );
-        if ret_ != LZMA_OK {
-            return ret_;
+        if ret != LZMA_OK {
+            return ret;
         }
         if lzma_block_unpadded_size(block) == 0 {
             return LZMA_DATA_ERROR;
@@ -47,15 +47,15 @@ pub unsafe fn lzma_block_header_decode(
         (*block).compressed_size = LZMA_VLI_UNKNOWN;
     }
     if *input.offset(1) & 0x80 != 0 {
-        let ret__0: lzma_ret = lzma_vli_decode(
+        let ret: lzma_ret = lzma_vli_decode(
             ::core::ptr::addr_of_mut!((*block).uncompressed_size),
             core::ptr::null_mut(),
             input,
             ::core::ptr::addr_of_mut!(in_pos),
             in_size,
         );
-        if ret__0 != LZMA_OK {
-            return ret__0;
+        if ret != LZMA_OK {
+            return ret;
         }
     } else {
         (*block).uncompressed_size = LZMA_VLI_UNKNOWN;

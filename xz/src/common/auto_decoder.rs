@@ -32,24 +32,24 @@ unsafe fn auto_decode(
             }
             (*coder).sequence = SEQ_CODE;
             if *input.offset(*in_pos as isize) == 0xfd {
-                let ret_: lzma_ret = lzma_stream_decoder_init(
+                let ret: lzma_ret = lzma_stream_decoder_init(
                     ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
                     (*coder).memlimit,
                     (*coder).flags,
                 );
-                if ret_ != LZMA_OK {
-                    return ret_;
+                if ret != LZMA_OK {
+                    return ret;
                 }
             } else {
-                let ret__0: lzma_ret = lzma_alone_decoder_init(
+                let ret: lzma_ret = lzma_alone_decoder_init(
                     ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
                     (*coder).memlimit,
                     true,
                 );
-                if ret__0 != LZMA_OK {
-                    return ret__0;
+                if ret != LZMA_OK {
+                    return ret;
                 }
                 if (*coder).flags & LZMA_TELL_NO_CHECK as u32 != 0 {
                     return LZMA_NO_CHECK;
@@ -108,14 +108,31 @@ unsafe fn auto_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_alloca
     crate::alloc::internal_free(coder as *mut c_void, allocator);
 }
 unsafe fn auto_decoder_get_check(coder_ptr: *const c_void) -> lzma_check {
-    return unsafe {
-        let coder: *const lzma_auto_coder = coder_ptr as *const lzma_auto_coder;
-        (if (*coder).next.get_check.is_none() {
-            LZMA_CHECK_NONE
-        } else {
-            (*coder).next.get_check.unwrap()((*coder).next.coder)
-        }) as lzma_check
-    };
+    let coder: *const lzma_auto_coder = coder_ptr as *const lzma_auto_coder;
+    if (*coder).next.get_check.is_none() {
+        LZMA_CHECK_NONE
+    } else {
+        (*coder).next.get_check.unwrap()((*coder).next.coder)
+    }
+}
+pub unsafe fn lzma_auto_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret {
+    let ret: lzma_ret = lzma_strm_init(strm);
+    if ret != LZMA_OK {
+        return ret;
+    }
+    let ret: lzma_ret = auto_decoder_init(
+        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
+        (*strm).allocator,
+        memlimit,
+        flags,
+    );
+    if ret != LZMA_OK {
+        lzma_end(strm);
+        return ret;
+    }
+    (*(*strm).internal).supported_actions[LZMA_RUN as usize] = true;
+    (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
+    LZMA_OK
 }
 unsafe fn auto_decoder_memconfig(
     coder_ptr: *mut c_void,
@@ -213,24 +230,5 @@ unsafe fn auto_decoder_init(
     (*coder).memlimit = if 1 > memlimit { 1 } else { memlimit };
     (*coder).flags = flags;
     (*coder).sequence = SEQ_INIT;
-    LZMA_OK
-}
-pub unsafe fn lzma_auto_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret {
-    let ret_: lzma_ret = lzma_strm_init(strm);
-    if ret_ != LZMA_OK {
-        return ret_;
-    }
-    let ret__0: lzma_ret = auto_decoder_init(
-        ::core::ptr::addr_of_mut!((*(*strm).internal).next),
-        (*strm).allocator,
-        memlimit,
-        flags,
-    );
-    if ret__0 != LZMA_OK {
-        lzma_end(strm);
-        return ret__0;
-    }
-    (*(*strm).internal).supported_actions[LZMA_RUN as usize] = true;
-    (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;
     LZMA_OK
 }

@@ -376,9 +376,9 @@ pub unsafe fn lzma_index_stream_flags(
     if i.is_null() || stream_flags.is_null() {
         return LZMA_PROG_ERROR;
     }
-    let ret_: lzma_ret = lzma_stream_flags_compare(stream_flags, stream_flags);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = lzma_stream_flags_compare(stream_flags, stream_flags);
+    if ret != LZMA_OK {
+        return ret;
     }
     let s: *mut index_stream = (*i).streams.rightmost as *mut index_stream;
     (*s).stream_flags = *stream_flags;

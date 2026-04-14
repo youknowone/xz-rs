@@ -915,10 +915,10 @@ pub fn mythread_mutex_unlock(mutex: *mut mythread_mutex) {
 #[cfg(not(windows))]
 #[inline]
 pub fn mythread_cond_init(mycond: *mut mythread_cond) -> c_int {
-    return unsafe {
+    unsafe {
         (*mycond).clk_id = _CLOCK_REALTIME;
         pthread_cond_init(::core::ptr::addr_of_mut!((*mycond).cond), core::ptr::null())
-    };
+    }
 }
 #[cfg(windows)]
 #[inline]

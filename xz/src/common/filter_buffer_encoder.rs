@@ -24,9 +24,9 @@ pub unsafe fn lzma_raw_buffer_encode(
         update: None,
         set_out_limit: None,
     };
-    let ret_: lzma_ret = lzma_raw_encoder_init(::core::ptr::addr_of_mut!(next), allocator, filters);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = lzma_raw_encoder_init(::core::ptr::addr_of_mut!(next), allocator, filters);
+    if ret != LZMA_OK {
+        return ret;
     }
     let code = if let Some(code) = next.code {
         code

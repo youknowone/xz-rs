@@ -213,18 +213,18 @@ pub(crate) unsafe fn lzma_index_encoder_init(
     LZMA_OK
 }
 pub unsafe fn lzma_index_encoder(strm: *mut lzma_stream, i: *const lzma_index) -> lzma_ret {
-    let ret_: lzma_ret = lzma_strm_init(strm);
-    if ret_ != LZMA_OK {
-        return ret_;
+    let ret: lzma_ret = lzma_strm_init(strm);
+    if ret != LZMA_OK {
+        return ret;
     }
-    let ret__0: lzma_ret = lzma_index_encoder_init(
+    let ret: lzma_ret = lzma_index_encoder_init(
         ::core::ptr::addr_of_mut!((*(*strm).internal).next),
         (*strm).allocator,
         i,
     );
-    if ret__0 != LZMA_OK {
+    if ret != LZMA_OK {
         lzma_end(strm);
-        return ret__0;
+        return ret;
     }
     (*(*strm).internal).supported_actions[LZMA_RUN as usize] = true;
     (*(*strm).internal).supported_actions[LZMA_FINISH as usize] = true;

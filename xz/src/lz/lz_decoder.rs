@@ -142,7 +142,7 @@ unsafe fn lz_decode(
             }
             return LZMA_OK;
         }
-        let ret_0: lzma_ret = decode_buffer(
+        let ret: lzma_ret = decode_buffer(
             coder,
             ::core::ptr::addr_of_mut!((*coder).temp.buffer) as *mut u8,
             ::core::ptr::addr_of_mut!((*coder).temp.pos),
@@ -151,10 +151,10 @@ unsafe fn lz_decode(
             out_pos,
             out_size,
         );
-        if ret_0 == LZMA_STREAM_END {
+        if ret == LZMA_STREAM_END {
             (*coder).this_finished = true;
-        } else if ret_0 != LZMA_OK {
-            return ret_0;
+        } else if ret != LZMA_OK {
+            return ret;
         } else if (*coder).next_finished && *out_pos < out_size {
             return LZMA_DATA_ERROR;
         }
@@ -234,15 +234,15 @@ pub unsafe fn lzma_lz_decoder_init(
     } else {
         return LZMA_PROG_ERROR;
     };
-    let ret_: lzma_ret = lz_init(
+    let ret: lzma_ret = lz_init(
         ::core::ptr::addr_of_mut!((*coder).lz),
         allocator,
         (*filters).id,
         (*filters).options,
         ::core::ptr::addr_of_mut!(lz_options),
     );
-    if ret_ != LZMA_OK {
-        return ret_;
+    if ret != LZMA_OK {
+        return ret;
     }
     if (*coder).lz.code.is_none() {
         return LZMA_PROG_ERROR;
