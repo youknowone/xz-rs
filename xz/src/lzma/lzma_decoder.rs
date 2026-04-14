@@ -151,7 +151,7 @@ pub const DIST_SLOTS: u32 = 1 << DIST_SLOT_BITS;
 #[inline]
 unsafe fn rc_read_init(
     rc: *mut lzma_range_decoder,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
@@ -159,10 +159,10 @@ unsafe fn rc_read_init(
         if *in_pos == in_size {
             return LZMA_OK;
         }
-        if (*rc).init_bytes_left == 5 && *in_0.offset(*in_pos as isize) != 0 {
+        if (*rc).init_bytes_left == 5 && *input.offset(*in_pos as isize) != 0 {
             return LZMA_DATA_ERROR;
         }
-        (*rc).code = (*rc).code << 8 | *in_0.offset(*in_pos as isize) as u32;
+        (*rc).code = (*rc).code << 8 | *input.offset(*in_pos as isize) as u32;
         *in_pos = (*in_pos).wrapping_add(1);
         (*rc).init_bytes_left = (*rc).init_bytes_left.wrapping_sub(1);
     }
@@ -199,7 +199,7 @@ fn resume_block_for_sequence(sequence: lzma_decoder_seq) -> u64 {
 unsafe fn lzma_decode(
     coder_ptr: *mut c_void,
     dictptr: *mut lzma_dict,
-    in_0: *const u8,
+    input: *const u8,
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
@@ -207,7 +207,7 @@ unsafe fn lzma_decode(
     let coder: *mut lzma_lzma1_decoder = coder_ptr as *mut lzma_lzma1_decoder;
     let ret: lzma_ret = rc_read_init(
         ::core::ptr::addr_of_mut!((*coder).rc),
-        in_0,
+        input,
         in_pos,
         in_size,
     );
@@ -217,8 +217,8 @@ unsafe fn lzma_decode(
     let mut dict: lzma_dict = *dictptr;
     let dict_start: size_t = dict.pos;
     let mut rc: lzma_range_decoder = (*coder).rc;
-    let mut rc_in_ptr: *const u8 = in_0.offset(*in_pos as isize);
-    let rc_in_end: *const u8 = in_0.offset(in_size as isize);
+    let mut rc_in_ptr: *const u8 = input.offset(*in_pos as isize);
+    let rc_in_end: *const u8 = input.offset(in_size as isize);
     let rc_in_fast_end: *const u8 = if rc_in_end.offset_from(rc_in_ptr) <= 20 {
         rc_in_ptr
     } else {
@@ -3162,7 +3162,7 @@ unsafe fn lzma_decode(
     }
     (*dictptr).full = dict.full;
     (*coder).rc = rc;
-    *in_pos = rc_in_ptr.offset_from(in_0) as size_t;
+    *in_pos = rc_in_ptr.offset_from(input) as size_t;
     (*coder).state = state as lzma_lzma_state;
     (*coder).rep0 = rep0;
     (*coder).rep1 = rep1;
