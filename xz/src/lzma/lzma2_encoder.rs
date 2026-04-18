@@ -111,7 +111,6 @@ unsafe fn lzma2_encode(
 ) -> lzma_ret {
     let coder: *mut lzma_lzma2_coder = coder_ptr as *mut lzma_lzma2_coder;
     while *out_pos < out_size {
-        let mut current_block_45: u64;
         match (*coder).sequence {
             0 => {
                 if mf_unencoded(mf) == 0 {
@@ -137,14 +136,8 @@ unsafe fn lzma2_encode(
                 (*coder).uncompressed_size = 0;
                 (*coder).compressed_size = 0;
                 (*coder).sequence = SEQ_LZMA_ENCODE;
-                current_block_45 = 2979737022853876585;
             }
-            1 => {
-                current_block_45 = 2979737022853876585;
-            }
-            2 => {
-                current_block_45 = 13410404938545238636;
-            }
+            1 | 2 => {}
             3 => {
                 lzma_bufcpy(
                     ::core::ptr::addr_of_mut!((*coder).buf) as *mut u8,
@@ -158,85 +151,71 @@ unsafe fn lzma2_encode(
                     return LZMA_OK;
                 }
                 (*coder).sequence = SEQ_UNCOMPRESSED_COPY;
-                current_block_45 = 10903800704467975402;
             }
-            4 => {
-                current_block_45 = 10903800704467975402;
-            }
-            _ => {
-                current_block_45 = 11743904203796629665;
-            }
+            4 | 5 => {}
+            _ => return LZMA_PROG_ERROR,
         }
-        match current_block_45 {
-            10903800704467975402 => {
-                mf_read(
-                    mf,
-                    out,
-                    out_pos,
-                    out_size,
-                    ::core::ptr::addr_of_mut!((*coder).uncompressed_size),
-                );
-                if (*coder).uncompressed_size != 0 {
-                    return LZMA_OK;
-                }
-                (*coder).sequence = SEQ_INIT;
-                current_block_45 = 11743904203796629665;
+        if (*coder).sequence == SEQ_UNCOMPRESSED_COPY {
+            mf_read(
+                mf,
+                out,
+                out_pos,
+                out_size,
+                ::core::ptr::addr_of_mut!((*coder).uncompressed_size),
+            );
+            if (*coder).uncompressed_size != 0 {
+                return LZMA_OK;
             }
-            2979737022853876585 => {
-                let left: u32 =
-                    ((LZMA2_UNCOMPRESSED_MAX as size_t) - (*coder).uncompressed_size) as u32;
-                let mut limit: u32 = 0;
-                if left < (*mf).match_len_max {
-                    limit = 0;
-                } else {
-                    limit = (*mf).read_pos - (*mf).read_ahead + left - (*mf).match_len_max;
-                }
-                let read_start: u32 = (*mf).read_pos - (*mf).read_ahead;
-                let ret: lzma_ret = lzma_lzma_encode(
-                    (*coder).lzma as *mut lzma_lzma1_encoder,
-                    mf,
-                    (::core::ptr::addr_of_mut!((*coder).buf) as *mut u8)
-                        .offset(LZMA2_HEADER_MAX as isize),
-                    ::core::ptr::addr_of_mut!((*coder).compressed_size),
-                    LZMA2_CHUNK_MAX as size_t,
-                    limit,
-                );
-                (*coder).uncompressed_size +=
-                    ((*mf).read_pos - (*mf).read_ahead - read_start) as size_t;
-                if ret != LZMA_STREAM_END {
-                    return LZMA_OK;
-                }
-                if (*coder).compressed_size >= (*coder).uncompressed_size {
-                    (*coder).uncompressed_size += (*mf).read_ahead as size_t;
-                    (*mf).read_ahead = 0;
-                    lzma2_header_uncompressed(coder);
-                    (*coder).need_state_reset = true;
-                    (*coder).sequence = SEQ_UNCOMPRESSED_HEADER;
-                    current_block_45 = 11743904203796629665;
-                } else {
-                    lzma2_header_lzma(coder);
-                    (*coder).sequence = SEQ_LZMA_COPY;
-                    current_block_45 = 13410404938545238636;
-                }
-            }
-            _ => {}
+            (*coder).sequence = SEQ_INIT;
+            continue;
         }
-        match current_block_45 {
-            13410404938545238636 => {
-                lzma_bufcpy(
-                    ::core::ptr::addr_of_mut!((*coder).buf) as *mut u8,
-                    ::core::ptr::addr_of_mut!((*coder).buf_pos),
-                    (*coder).compressed_size,
-                    out,
-                    out_pos,
-                    out_size,
-                );
-                if (*coder).buf_pos != (*coder).compressed_size {
-                    return LZMA_OK;
-                }
-                (*coder).sequence = SEQ_INIT;
+        if (*coder).sequence == SEQ_LZMA_ENCODE {
+            let left: u32 =
+                ((LZMA2_UNCOMPRESSED_MAX as size_t) - (*coder).uncompressed_size) as u32;
+            let limit: u32 = if left < (*mf).match_len_max {
+                0
+            } else {
+                (*mf).read_pos - (*mf).read_ahead + left - (*mf).match_len_max
+            };
+            let read_start: u32 = (*mf).read_pos - (*mf).read_ahead;
+            let ret: lzma_ret = lzma_lzma_encode(
+                (*coder).lzma as *mut lzma_lzma1_encoder,
+                mf,
+                (::core::ptr::addr_of_mut!((*coder).buf) as *mut u8)
+                    .offset(LZMA2_HEADER_MAX as isize),
+                ::core::ptr::addr_of_mut!((*coder).compressed_size),
+                LZMA2_CHUNK_MAX as size_t,
+                limit,
+            );
+            (*coder).uncompressed_size +=
+                ((*mf).read_pos - (*mf).read_ahead - read_start) as size_t;
+            if ret != LZMA_STREAM_END {
+                return LZMA_OK;
             }
-            _ => {}
+            if (*coder).compressed_size >= (*coder).uncompressed_size {
+                (*coder).uncompressed_size += (*mf).read_ahead as size_t;
+                (*mf).read_ahead = 0;
+                lzma2_header_uncompressed(coder);
+                (*coder).need_state_reset = true;
+                (*coder).sequence = SEQ_UNCOMPRESSED_HEADER;
+                continue;
+            }
+            lzma2_header_lzma(coder);
+            (*coder).sequence = SEQ_LZMA_COPY;
+        }
+        if (*coder).sequence == SEQ_LZMA_COPY {
+            lzma_bufcpy(
+                ::core::ptr::addr_of_mut!((*coder).buf) as *mut u8,
+                ::core::ptr::addr_of_mut!((*coder).buf_pos),
+                (*coder).compressed_size,
+                out,
+                out_pos,
+                out_size,
+            );
+            if (*coder).buf_pos != (*coder).compressed_size {
+                return LZMA_OK;
+            }
+            (*coder).sequence = SEQ_INIT;
         }
     }
     LZMA_OK

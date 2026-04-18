@@ -448,38 +448,29 @@ pub(crate) unsafe fn lzma_mf_bt2_find(mf: *mut lzma_mf, matches: *mut lzma_match
 }
 #[inline]
 pub(crate) unsafe fn lzma_mf_bt2_skip(mf: *mut lzma_mf, mut amount: u32) {
-    let mut current_block_8: u64;
     loop {
         let mut len_limit: u32 = mf_avail(mf);
         if (*mf).nice_len <= len_limit {
             len_limit = (*mf).nice_len;
-            current_block_8 = 11875828834189669668;
         } else if len_limit < 2 || true && (*mf).action == LZMA_SYNC_FLUSH {
             move_pending(mf);
-            current_block_8 = 18088007599891946824;
         } else {
-            current_block_8 = 11875828834189669668;
-        }
-        match current_block_8 {
-            11875828834189669668 => {
-                let cur: *const u8 = mf_ptr(mf);
-                let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
-                let hash_value: u32 = *cur as u32 | (*cur.offset(1) as u32) << 8;
-                let cur_match: u32 = *(*mf).hash.offset(hash_value as isize);
-                *(*mf).hash.offset(hash_value as isize) = pos;
-                bt_skip_func(
-                    len_limit,
-                    pos,
-                    cur,
-                    cur_match,
-                    (*mf).depth,
-                    (*mf).son,
-                    (*mf).cyclic_pos,
-                    (*mf).cyclic_size,
-                );
-                move_pos(mf);
-            }
-            _ => {}
+            let cur: *const u8 = mf_ptr(mf);
+            let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
+            let hash_value: u32 = *cur as u32 | (*cur.offset(1) as u32) << 8;
+            let cur_match: u32 = *(*mf).hash.offset(hash_value as isize);
+            *(*mf).hash.offset(hash_value as isize) = pos;
+            bt_skip_func(
+                len_limit,
+                pos,
+                cur,
+                cur_match,
+                (*mf).depth,
+                (*mf).son,
+                (*mf).cyclic_pos,
+                (*mf).cyclic_size,
+            );
+            move_pos(mf);
         }
         amount -= 1;
         if amount == 0 {
@@ -549,45 +540,36 @@ pub(crate) unsafe fn lzma_mf_bt3_find(mf: *mut lzma_mf, matches: *mut lzma_match
 }
 #[inline]
 pub(crate) unsafe fn lzma_mf_bt3_skip(mf: *mut lzma_mf, mut amount: u32) {
-    let mut current_block_9: u64;
     loop {
         let mut len_limit: u32 = mf_avail(mf);
         if (*mf).nice_len <= len_limit {
             len_limit = (*mf).nice_len;
-            current_block_9 = 11875828834189669668;
         } else if len_limit < 3 || true && (*mf).action == LZMA_SYNC_FLUSH {
             move_pending(mf);
-            current_block_9 = 18088007599891946824;
         } else {
-            current_block_9 = 11875828834189669668;
-        }
-        match current_block_9 {
-            11875828834189669668 => {
-                let cur: *const u8 = mf_ptr(mf);
-                let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
-                let temp: u32 = lzma_crc32_table[0][*cur as usize] ^ *cur.offset(1) as u32;
-                let hash_2_value: u32 = temp & HASH_2_MASK as u32;
-                let hash_value: u32 = (temp ^ (*cur.offset(2) as u32) << 8) & (*mf).hash_mask;
-                let cur_match: u32 = *(*mf)
-                    .hash
-                    .offset((FIX_3_HASH_SIZE as u32 + hash_value) as isize);
-                *(*mf).hash.offset(hash_2_value as isize) = pos;
-                *(*mf)
-                    .hash
-                    .offset((FIX_3_HASH_SIZE as u32 + hash_value) as isize) = pos;
-                bt_skip_func(
-                    len_limit,
-                    pos,
-                    cur,
-                    cur_match,
-                    (*mf).depth,
-                    (*mf).son,
-                    (*mf).cyclic_pos,
-                    (*mf).cyclic_size,
-                );
-                move_pos(mf);
-            }
-            _ => {}
+            let cur: *const u8 = mf_ptr(mf);
+            let pos: u32 = (*mf).read_pos.wrapping_add((*mf).offset);
+            let temp: u32 = lzma_crc32_table[0][*cur as usize] ^ *cur.offset(1) as u32;
+            let hash_2_value: u32 = temp & HASH_2_MASK as u32;
+            let hash_value: u32 = (temp ^ (*cur.offset(2) as u32) << 8) & (*mf).hash_mask;
+            let cur_match: u32 = *(*mf)
+                .hash
+                .offset((FIX_3_HASH_SIZE as u32 + hash_value) as isize);
+            *(*mf).hash.offset(hash_2_value as isize) = pos;
+            *(*mf)
+                .hash
+                .offset((FIX_3_HASH_SIZE as u32 + hash_value) as isize) = pos;
+            bt_skip_func(
+                len_limit,
+                pos,
+                cur,
+                cur_match,
+                (*mf).depth,
+                (*mf).son,
+                (*mf).cyclic_pos,
+                (*mf).cyclic_size,
+            );
+            move_pos(mf);
         }
         amount -= 1;
         if amount == 0 {

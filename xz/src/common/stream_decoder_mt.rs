@@ -78,6 +78,15 @@ pub const SEQ_BLOCK_DIRECT_RUN: stream_decoder_mt_seq = 6;
 pub const SEQ_BLOCK_DIRECT_INIT: stream_decoder_mt_seq = 5;
 pub const SEQ_BLOCK_THR_RUN: stream_decoder_mt_seq = 4;
 pub const SEQ_BLOCK_THR_INIT: stream_decoder_mt_seq = 3;
+const STREAM_MT_BLOCK_HEADER: u64 = 7149356873433890176;
+const STREAM_MT_BLOCK_INIT: u64 = 3123434771885419771;
+const STREAM_MT_BLOCK_THR_INIT: u64 = 11441799814184323368;
+const STREAM_MT_BLOCK_THR_RUN: u64 = 7728257318064351663;
+const STREAM_MT_BLOCK_DIRECT_RUN: u64 = 7173345243791314703;
+const STREAM_MT_INDEX_DECODE: u64 = 13812071707085482240;
+const STREAM_MT_STREAM_FOOTER: u64 = 15174413556390356007;
+const STREAM_MT_STREAM_PADDING: u64 = 17073193239823527980;
+const STREAM_MT_RESTART_LOOP: u64 = 11639917216603986996;
 pub const SEQ_BLOCK_INIT: stream_decoder_mt_seq = 2;
 pub const SEQ_BLOCK_HEADER: stream_decoder_mt_seq = 1;
 pub const SEQ_STREAM_HEADER: stream_decoder_mt_seq = 0;
@@ -851,7 +860,7 @@ unsafe fn stream_decode_mt(
         action == LZMA_FINISH || *in_pos == in_size && !(*coder).out_was_filled;
     (*coder).out_was_filled = false;
     loop {
-        let mut current_block_239: u64;
+        let mut block_state: u64;
         match (*coder).sequence {
             0 => {
                 let in_old: size_t = *in_pos;
@@ -893,19 +902,19 @@ unsafe fn stream_decode_mt(
                 if (*coder).tell_any_check {
                     return LZMA_GET_CHECK;
                 }
-                current_block_239 = 7149356873433890176;
+                block_state = STREAM_MT_BLOCK_HEADER;
             }
             1 => {
-                current_block_239 = 7149356873433890176;
+                block_state = STREAM_MT_BLOCK_HEADER;
             }
             2 => {
-                current_block_239 = 3123434771885419771;
+                block_state = STREAM_MT_BLOCK_INIT;
             }
             3 => {
-                current_block_239 = 11441799814184323368;
+                block_state = STREAM_MT_BLOCK_THR_INIT;
             }
             4 => {
-                current_block_239 = 7728257318064351663;
+                block_state = STREAM_MT_BLOCK_THR_RUN;
             }
             5 => {
                 let ret__3: lzma_ret = read_output_and_wait(
@@ -942,10 +951,10 @@ unsafe fn stream_decode_mt(
                 }
                 (*coder).mem_direct_mode = (*coder).mem_next_filters;
                 (*coder).sequence = SEQ_BLOCK_DIRECT_RUN;
-                current_block_239 = 7173345243791314703;
+                block_state = STREAM_MT_BLOCK_DIRECT_RUN;
             }
             6 => {
-                current_block_239 = 7173345243791314703;
+                block_state = STREAM_MT_BLOCK_DIRECT_RUN;
             }
             7 => {
                 let ret__5: lzma_ret = read_output_and_wait(
@@ -966,16 +975,16 @@ unsafe fn stream_decode_mt(
                     return LZMA_OK;
                 }
                 (*coder).sequence = SEQ_INDEX_DECODE;
-                current_block_239 = 13812071707085482240;
+                block_state = STREAM_MT_INDEX_DECODE;
             }
             8 => {
-                current_block_239 = 13812071707085482240;
+                block_state = STREAM_MT_INDEX_DECODE;
             }
             9 => {
-                current_block_239 = 15174413556390356007;
+                block_state = STREAM_MT_STREAM_FOOTER;
             }
             10 => {
-                current_block_239 = 17073193239823527980;
+                block_state = STREAM_MT_STREAM_PADDING;
             }
             11 => {
                 if !(*coder).fail_fast {
@@ -1001,8 +1010,8 @@ unsafe fn stream_decode_mt(
             }
             _ => return LZMA_PROG_ERROR,
         }
-        match current_block_239 {
-            7173345243791314703 => {
+        match block_state {
+            STREAM_MT_BLOCK_DIRECT_RUN => {
                 let in_old_1: size_t = *in_pos;
                 let out_old: size_t = *out_pos;
                 let code = match (*coder).block_decoder.code {
@@ -1034,9 +1043,9 @@ unsafe fn stream_decode_mt(
                     return ret__4;
                 }
                 (*coder).sequence = SEQ_BLOCK_HEADER;
-                current_block_239 = 11639917216603986996;
+                block_state = STREAM_MT_RESTART_LOOP;
             }
-            7149356873433890176 => {
+            STREAM_MT_BLOCK_HEADER => {
                 let in_old_0: size_t = *in_pos;
                 let ret_0: lzma_ret = decode_block_header(coder, allocator, in_0, in_pos, in_size);
                 (*coder).progress_in += (*in_pos - in_old_0) as u64;
@@ -1064,14 +1073,14 @@ unsafe fn stream_decode_mt(
                     } else {
                         return LZMA_OK;
                     }
-                    current_block_239 = 11639917216603986996;
+                    block_state = STREAM_MT_RESTART_LOOP;
                 } else if ret_0 == LZMA_RET_INTERNAL2 {
                     (*coder).sequence = SEQ_INDEX_WAIT_OUTPUT;
-                    current_block_239 = 11639917216603986996;
+                    block_state = STREAM_MT_RESTART_LOOP;
                 } else if ret_0 != LZMA_STREAM_END {
                     (*coder).pending_error = ret_0;
                     (*coder).sequence = SEQ_ERROR;
-                    current_block_239 = 11639917216603986996;
+                    block_state = STREAM_MT_RESTART_LOOP;
                 } else {
                     (*coder).mem_next_filters = lzma_raw_decoder_memusage(
                         ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
@@ -1079,14 +1088,14 @@ unsafe fn stream_decode_mt(
                     if (*coder).mem_next_filters == UINT64_MAX {
                         (*coder).pending_error = LZMA_OPTIONS_ERROR;
                         (*coder).sequence = SEQ_ERROR;
-                        current_block_239 = 11639917216603986996;
+                        block_state = STREAM_MT_RESTART_LOOP;
                     } else {
                         (*coder).sequence = SEQ_BLOCK_INIT;
-                        current_block_239 = 3123434771885419771;
+                        block_state = STREAM_MT_BLOCK_INIT;
                     }
                 }
             }
-            13812071707085482240 => {
+            STREAM_MT_INDEX_DECODE => {
                 if *in_pos >= in_size {
                     return LZMA_OK;
                 }
@@ -1098,12 +1107,12 @@ unsafe fn stream_decode_mt(
                     return ret_5;
                 }
                 (*coder).sequence = SEQ_STREAM_FOOTER;
-                current_block_239 = 15174413556390356007;
+                block_state = STREAM_MT_STREAM_FOOTER;
             }
             _ => {}
         }
-        match current_block_239 {
-            3123434771885419771 => {
+        match block_state {
+            STREAM_MT_BLOCK_INIT => {
                 if let Some(ret) = stream_decode_mt_block_init(
                     coder,
                     allocator,
@@ -1117,7 +1126,7 @@ unsafe fn stream_decode_mt(
                 }
                 continue;
             }
-            15174413556390356007 => {
+            STREAM_MT_STREAM_FOOTER => {
                 let in_old_3: size_t = *in_pos;
                 lzma_bufcpy(
                     in_0,
@@ -1176,12 +1185,12 @@ unsafe fn stream_decode_mt(
                     return LZMA_STREAM_END;
                 }
                 (*coder).sequence = SEQ_STREAM_PADDING;
-                current_block_239 = 17073193239823527980;
+                block_state = STREAM_MT_STREAM_PADDING;
             }
             _ => {}
         }
-        match current_block_239 {
-            17073193239823527980 => {
+        match block_state {
+            STREAM_MT_STREAM_PADDING => {
                 loop {
                     if *in_pos >= in_size {
                         if action != LZMA_FINISH {
@@ -1209,9 +1218,9 @@ unsafe fn stream_decode_mt(
                 if ret__7 != LZMA_OK {
                     return ret__7;
                 }
-                current_block_239 = 11639917216603986996;
+                block_state = STREAM_MT_RESTART_LOOP;
             }
-            11441799814184323368 => {
+            STREAM_MT_BLOCK_THR_INIT => {
                 if let Some(ret) = stream_decode_mt_thread_init(
                     coder,
                     allocator,
@@ -1227,8 +1236,8 @@ unsafe fn stream_decode_mt(
             }
             _ => {}
         }
-        match current_block_239 {
-            7728257318064351663 => {
+        match block_state {
+            STREAM_MT_BLOCK_THR_RUN => {
                 if action == LZMA_FINISH && (*coder).fail_fast {
                     let in_avail: size_t = in_size - *in_pos;
                     let in_needed: size_t = (*(*coder).thr).in_size - (*(*coder).thr).in_filled;

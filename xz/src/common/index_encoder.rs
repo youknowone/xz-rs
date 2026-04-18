@@ -28,7 +28,6 @@ unsafe fn index_encode(
     out_size: size_t,
     _action: lzma_action,
 ) -> lzma_ret {
-    let mut current_block: u64;
     let coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
     let out_start: size_t = *out_pos;
     let mut ret: lzma_ret = LZMA_OK;
@@ -69,11 +68,8 @@ unsafe fn index_encode(
                 } else {
                     (*coder).sequence = SEQ_UNPADDED;
                 }
-                current_block = 10048703153582371463;
             }
-            2 | 3 => {
-                current_block = 10048703153582371463;
-            }
+            2 | 3 => {}
             5 => {
                 if (*coder).pos > 0 {
                     (*coder).pos -= 1;
@@ -88,49 +84,43 @@ unsafe fn index_encode(
                     );
                     (*coder).sequence = SEQ_CRC32;
                 }
-                current_block = 10175200006830010844;
             }
-            6 => {
-                current_block = 10175200006830010844;
-            }
+            6 => {}
             _ => return LZMA_PROG_ERROR,
         }
-        match current_block {
-            10048703153582371463 => {
-                let size: lzma_vli = if (*coder).sequence == SEQ_UNPADDED {
-                    (*coder).iter.block.unpadded_size
-                } else {
-                    (*coder).iter.block.uncompressed_size
-                };
-                ret = lzma_vli_encode(
-                    size,
-                    ::core::ptr::addr_of_mut!((*coder).pos),
-                    out,
-                    out_pos,
-                    out_size,
-                );
-                if ret != LZMA_STREAM_END {
+        if (*coder).sequence == SEQ_UNPADDED || (*coder).sequence == SEQ_UNCOMPRESSED {
+            let size: lzma_vli = if (*coder).sequence == SEQ_UNPADDED {
+                (*coder).iter.block.unpadded_size
+            } else {
+                (*coder).iter.block.uncompressed_size
+            };
+            ret = lzma_vli_encode(
+                size,
+                ::core::ptr::addr_of_mut!((*coder).pos),
+                out,
+                out_pos,
+                out_size,
+            );
+            if ret != LZMA_STREAM_END {
+                break;
+            }
+            ret = LZMA_OK;
+            (*coder).pos = 0;
+            (*coder).sequence += 1;
+        } else {
+            loop {
+                if *out_pos == out_size {
+                    return LZMA_OK;
+                }
+                *out.offset(*out_pos as isize) =
+                    ((*coder).crc32 >> ((*coder).pos * 8) & 0xff) as u8;
+                *out_pos += 1;
+                (*coder).pos += 1;
+                if (*coder).pos >= 4 {
                     break;
                 }
-                ret = LZMA_OK;
-                (*coder).pos = 0;
-                (*coder).sequence += 1;
             }
-            _ => {
-                loop {
-                    if *out_pos == out_size {
-                        return LZMA_OK;
-                    }
-                    *out.offset(*out_pos as isize) =
-                        ((*coder).crc32 >> ((*coder).pos * 8) & 0xff) as u8;
-                    *out_pos += 1;
-                    (*coder).pos += 1;
-                    if (*coder).pos >= 4 {
-                        break;
-                    }
-                }
-                return LZMA_STREAM_END;
-            }
+            return LZMA_STREAM_END;
         }
     }
     let out_used: size_t = *out_pos - out_start;

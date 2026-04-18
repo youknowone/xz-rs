@@ -24,7 +24,6 @@ unsafe fn auto_decode(
     action: lzma_action,
 ) -> lzma_ret {
     let coder: *mut lzma_auto_coder = coder_ptr as *mut lzma_auto_coder;
-    let current_block_28: u64;
     match (*coder).sequence {
         0 => {
             if *in_pos >= in_size {
@@ -58,37 +57,28 @@ unsafe fn auto_decode(
                     return LZMA_GET_CHECK;
                 }
             }
-            current_block_28 = 13935781298497728377;
         }
-        1 => {
-            current_block_28 = 13935781298497728377;
-        }
-        2 => {
-            current_block_28 = 4647193646042868866;
-        }
+        1 | 2 => {}
         _ => return LZMA_PROG_ERROR,
     }
-    match current_block_28 {
-        13935781298497728377 => {
-            debug_assert!((*coder).next.code.is_some());
-            let code = (*coder).next.code.unwrap_unchecked();
-            let ret: lzma_ret = code(
-                (*coder).next.coder,
-                allocator,
-                input,
-                in_pos,
-                in_size,
-                out,
-                out_pos,
-                out_size,
-                action,
-            );
-            if ret != LZMA_STREAM_END || (*coder).flags & LZMA_CONCATENATED as u32 == 0 {
-                return ret;
-            }
-            (*coder).sequence = SEQ_FINISH;
+    if (*coder).sequence != SEQ_FINISH {
+        debug_assert!((*coder).next.code.is_some());
+        let code = (*coder).next.code.unwrap_unchecked();
+        let ret: lzma_ret = code(
+            (*coder).next.coder,
+            allocator,
+            input,
+            in_pos,
+            in_size,
+            out,
+            out_pos,
+            out_size,
+            action,
+        );
+        if ret != LZMA_STREAM_END || (*coder).flags & LZMA_CONCATENATED as u32 == 0 {
+            return ret;
         }
-        _ => {}
+        (*coder).sequence = SEQ_FINISH;
     }
     if *in_pos < in_size {
         return LZMA_DATA_ERROR;

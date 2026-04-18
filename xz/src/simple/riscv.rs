@@ -43,7 +43,6 @@ fn riscv_encode_impl(now_pos: u32, buffer: &mut [u8]) -> size_t {
     let size = buffer.len() - 8;
     let ptr = buffer.as_mut_ptr();
     let mut i: size_t = 0;
-    let mut current_block_22: u64;
     while i <= size {
         let mut inst: u32 = unsafe { *ptr.add(i) as u32 };
         if inst == 0xef {
@@ -74,7 +73,6 @@ fn riscv_encode_impl(now_pos: u32, buffer: &mut [u8]) -> size_t {
                 let inst2: u32 = unsafe { read32le_at(buffer, i + 4) };
                 if (inst << 8 ^ inst2.wrapping_sub(3)) & 0xf8003 != 0 {
                     i += 6 - 2;
-                    current_block_22 = 12517898123489920830;
                 } else {
                     let mut addr_0: u32 = inst & 0xfffff000;
                     addr_0 = addr_0.wrapping_add((inst2 >> 20).wrapping_sub(inst2 >> 19 & 0x1000));
@@ -84,13 +82,12 @@ fn riscv_encode_impl(now_pos: u32, buffer: &mut [u8]) -> size_t {
                         write32le_at(buffer, i, inst);
                         write32be_at(buffer, i + 4, addr_0);
                     }
-                    current_block_22 = 15125582407903384992;
+                    i += 8 - 2;
                 }
             } else {
                 let fake_rs1: u32 = inst >> 27;
                 if inst.wrapping_sub(0x3117) << 18 >= fake_rs1 & 0x1d {
                     i += 4 - 2;
-                    current_block_22 = 12517898123489920830;
                 } else {
                     let fake_addr: u32 = unsafe { read32le_at(buffer, i + 4) };
                     let fake_inst2: u32 = inst >> 12 | fake_addr << 20;
@@ -99,12 +96,6 @@ fn riscv_encode_impl(now_pos: u32, buffer: &mut [u8]) -> size_t {
                         write32le_at(buffer, i, inst);
                         write32le_at(buffer, i + 4, fake_inst2);
                     }
-                    current_block_22 = 15125582407903384992;
-                }
-            }
-            match current_block_22 {
-                12517898123489920830 => {}
-                _ => {
                     i += 8 - 2;
                 }
             }
@@ -155,7 +146,6 @@ fn riscv_decode_impl(now_pos: u32, buffer: &mut [u8]) -> size_t {
     let size = buffer.len() - 8;
     let ptr = buffer.as_mut_ptr();
     let mut i: size_t = 0;
-    let mut current_block_23: u64;
     while i <= size {
         let mut inst: u32 = unsafe { *ptr.add(i) as u32 };
         if inst == 0xef {
@@ -183,30 +173,26 @@ fn riscv_decode_impl(now_pos: u32, buffer: &mut [u8]) -> size_t {
                 inst2 = unsafe { read32le_at(buffer, i + 4) };
                 if (inst << 8 ^ inst2.wrapping_sub(3)) & 0xf8003 != 0 {
                     i += 6 - 2;
-                    current_block_23 = 12517898123489920830;
                 } else {
                     let mut addr_0: u32 = inst & 0xfffff000;
                     addr_0 = addr_0.wrapping_add(inst2 >> 20);
                     inst = (0x17 | (2) << 7) as u32 | inst2 << 12;
                     inst2 = addr_0;
-                    current_block_23 = 6669252993407410313;
+                    unsafe {
+                        write32le_at(buffer, i, inst);
+                        write32le_at(buffer, i + 4, inst2);
+                    }
+                    i += 8 - 2;
                 }
             } else {
                 let inst2_rs1: u32 = inst >> 27;
                 if inst.wrapping_sub(0x3117) << 18 >= inst2_rs1 & 0x1d {
                     i += 4 - 2;
-                    current_block_23 = 12517898123489920830;
                 } else {
                     let mut addr_1: u32 = unsafe { read32be_at(buffer, i + 4) };
                     addr_1 = addr_1.wrapping_sub(now_pos.wrapping_add(i as u32));
                     inst2 = inst >> 12 | addr_1 << 20;
                     inst = 0x17 | inst2_rs1 << 7 | addr_1.wrapping_add(0x800) & 0xfffff000;
-                    current_block_23 = 6669252993407410313;
-                }
-            }
-            match current_block_23 {
-                12517898123489920830 => {}
-                _ => {
                     unsafe {
                         write32le_at(buffer, i, inst);
                         write32le_at(buffer, i + 4, inst2);

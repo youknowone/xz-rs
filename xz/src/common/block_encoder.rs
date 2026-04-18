@@ -31,7 +31,7 @@ unsafe fn block_encode(
     {
         return LZMA_DATA_ERROR;
     }
-    let current_block_34: u64 = match (*coder).sequence {
+    match (*coder).sequence {
         0 => {
             let in_start: size_t = *in_pos;
             let out_start: size_t = *out_pos;
@@ -69,13 +69,11 @@ unsafe fn block_encode(
             (*(*coder).block).compressed_size = (*coder).compressed_size;
             (*(*coder).block).uncompressed_size = (*coder).uncompressed_size;
             (*coder).sequence = SEQ_PADDING;
-            6470892831169497455
         }
-        1 => 6470892831169497455,
-        2 => 47327340716975230,
+        1 | 2 => {}
         _ => return LZMA_PROG_ERROR,
-    };
-    if current_block_34 == 6470892831169497455 {
+    }
+    if (*coder).sequence != SEQ_CHECK {
         while (*coder).compressed_size & 3 != 0 {
             if *out_pos >= out_size {
                 return LZMA_OK;

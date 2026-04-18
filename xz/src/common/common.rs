@@ -348,7 +348,6 @@ pub unsafe fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret
         (*strm).total_out = (*strm).total_out.wrapping_add(out_pos as u64);
     }
     (*(*strm).internal).avail_in = (*strm).avail_in;
-    let current_block_49: u64;
     match ret {
         0 => {
             if out_pos == 0 && in_pos == 0 {
@@ -360,19 +359,16 @@ pub unsafe fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret
             } else {
                 (*(*strm).internal).allow_buf_error = false;
             }
-            current_block_49 = 12556861819962772176;
         }
         101 => {
             (*(*strm).internal).allow_buf_error = false;
             ret = LZMA_OK;
-            current_block_49 = 12556861819962772176;
         }
         12 => {
             (*(*strm).internal).allow_buf_error = false;
             if (*(*strm).internal).sequence == ISEQ_FINISH {
                 (*(*strm).internal).sequence = ISEQ_RUN;
             }
-            current_block_49 = 12556861819962772176;
         }
         1 => {
             if (*(*strm).internal).sequence == ISEQ_SYNC_FLUSH
@@ -383,21 +379,14 @@ pub unsafe fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret
             } else {
                 (*(*strm).internal).sequence = ISEQ_END;
             }
-            current_block_49 = 16143107162343188004;
+            (*(*strm).internal).allow_buf_error = false;
         }
         2 | 3 | 4 | 6 => {
-            current_block_49 = 16143107162343188004;
+            (*(*strm).internal).allow_buf_error = false;
         }
         _ => {
             (*(*strm).internal).sequence = ISEQ_ERROR;
-            current_block_49 = 12556861819962772176;
         }
-    }
-    match current_block_49 {
-        16143107162343188004 => {
-            (*(*strm).internal).allow_buf_error = false;
-        }
-        _ => {}
     }
     ret
 }

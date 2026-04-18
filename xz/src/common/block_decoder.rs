@@ -33,7 +33,7 @@ unsafe fn block_decode(
     action: lzma_action,
 ) -> lzma_ret {
     let coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
-    let current_block_40: u64 = match (*coder).sequence {
+    match (*coder).sequence {
         0 => {
             let in_start: size_t = *in_pos;
             let out_start: size_t = *out_pos;
@@ -106,13 +106,11 @@ unsafe fn block_decode(
             (*(*coder).block).compressed_size = (*coder).compressed_size;
             (*(*coder).block).uncompressed_size = (*coder).uncompressed_size;
             (*coder).sequence = SEQ_PADDING;
-            17473121293339793080
         }
-        1 => 17473121293339793080,
-        2 => 9393557385011460022,
+        1 | 2 => {}
         _ => return LZMA_PROG_ERROR,
-    };
-    if current_block_40 == 17473121293339793080 {
+    }
+    if (*coder).sequence != SEQ_CHECK {
         while (*coder).compressed_size & 3 != 0 {
             if *in_pos >= in_size {
                 return LZMA_OK;

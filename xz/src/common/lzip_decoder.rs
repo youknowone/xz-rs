@@ -42,6 +42,11 @@ pub const LZIP_V1_FOOTER_SIZE: u32 = 20;
 pub const LZIP_LC: u32 = 3;
 pub const LZIP_LP: u32 = 0;
 pub const LZIP_PB: u32 = 2;
+const LZIP_BLOCK_VERSION: u64 = 11220331375136032509;
+const LZIP_BLOCK_DICT_SIZE: u64 = 2770508642018830579;
+const LZIP_BLOCK_CODER_INIT: u64 = 15476230294461844687;
+const LZIP_BLOCK_LZMA_STREAM: u64 = 13394712405657322686;
+const LZIP_BLOCK_MEMBER_FOOTER: u64 = 13619784596304402172;
 unsafe fn lzip_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
@@ -55,7 +60,7 @@ unsafe fn lzip_decode(
 ) -> lzma_ret {
     let coder: *mut lzma_lzip_coder = coder_ptr as *mut lzma_lzip_coder;
     loop {
-        let mut current_block_80: u64;
+        let mut block_state: u64;
         match (*coder).sequence {
             0 => {
                 let lzip_id_string: [u8; 4] = [0x4c as u8, 0x5a as u8, 0x49 as u8, 0x50 as u8];
@@ -82,27 +87,27 @@ unsafe fn lzip_decode(
                 (*coder).uncompressed_size = 0;
                 (*coder).member_size = core::mem::size_of::<[u8; 4]>() as u64;
                 (*coder).sequence = SEQ_VERSION;
-                current_block_80 = 11220331375136032509;
+                block_state = LZIP_BLOCK_VERSION;
             }
             1 => {
-                current_block_80 = 11220331375136032509;
+                block_state = LZIP_BLOCK_VERSION;
             }
             2 => {
-                current_block_80 = 2770508642018830579;
+                block_state = LZIP_BLOCK_DICT_SIZE;
             }
             3 => {
-                current_block_80 = 15476230294461844687;
+                block_state = LZIP_BLOCK_CODER_INIT;
             }
             4 => {
-                current_block_80 = 13394712405657322686;
+                block_state = LZIP_BLOCK_LZMA_STREAM;
             }
             5 => {
-                current_block_80 = 13619784596304402172;
+                block_state = LZIP_BLOCK_MEMBER_FOOTER;
             }
             _ => return LZMA_PROG_ERROR,
         }
-        match current_block_80 {
-            11220331375136032509 => {
+        match block_state {
+            LZIP_BLOCK_VERSION => {
                 if *in_pos >= in_size {
                     return LZMA_OK;
                 }
@@ -116,12 +121,12 @@ unsafe fn lzip_decode(
                 if (*coder).tell_any_check {
                     return LZMA_GET_CHECK;
                 }
-                current_block_80 = 2770508642018830579;
+                block_state = LZIP_BLOCK_DICT_SIZE;
             }
             _ => {}
         }
-        match current_block_80 {
-            2770508642018830579 => {
+        match block_state {
+            LZIP_BLOCK_DICT_SIZE => {
                 if *in_pos >= in_size {
                     return LZMA_OK;
                 }
@@ -144,12 +149,12 @@ unsafe fn lzip_decode(
                     as *const c_void)
                 .wrapping_add(LZMA_MEMUSAGE_BASE);
                 (*coder).sequence = SEQ_CODER_INIT;
-                current_block_80 = 15476230294461844687;
+                block_state = LZIP_BLOCK_CODER_INIT;
             }
             _ => {}
         }
-        match current_block_80 {
-            15476230294461844687 => {
+        match block_state {
+            LZIP_BLOCK_CODER_INIT => {
                 if (*coder).memusage > (*coder).memlimit {
                     return LZMA_MEMLIMIT_ERROR;
                 }
@@ -182,12 +187,12 @@ unsafe fn lzip_decode(
                 }
                 (*coder).crc32 = 0;
                 (*coder).sequence = SEQ_LZMA_STREAM;
-                current_block_80 = 13394712405657322686;
+                block_state = LZIP_BLOCK_LZMA_STREAM;
             }
             _ => {}
         }
-        match current_block_80 {
-            13394712405657322686 => {
+        match block_state {
+            LZIP_BLOCK_LZMA_STREAM => {
                 let in_start: size_t = *in_pos;
                 let out_start: size_t = *out_pos;
                 let code = match (*coder).lzma_decoder.code {

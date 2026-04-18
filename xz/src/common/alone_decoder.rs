@@ -30,7 +30,6 @@ unsafe fn alone_decode(
 ) -> lzma_ret {
     let coder: *mut lzma_alone_coder = coder_ptr as *mut lzma_alone_coder;
     while *out_pos < out_size && ((*coder).sequence == SEQ_CODE || *in_pos < in_size) {
-        let current_block_42: u64;
         match (*coder).sequence {
             0 => {
                 if lzma_lzma_lclppb_decode(
@@ -41,7 +40,6 @@ unsafe fn alone_decode(
                 }
                 (*coder).sequence = SEQ_DICTIONARY_SIZE;
                 *in_pos += 1;
-                current_block_42 = 11048769245176032998;
             }
             1 => {
                 (*coder).options.dict_size = ((*coder).options.dict_size as size_t
@@ -65,16 +63,13 @@ unsafe fn alone_decode(
                     (*coder).sequence = SEQ_UNCOMPRESSED_SIZE;
                 }
                 *in_pos += 1;
-                current_block_42 = 11048769245176032998;
             }
             2 => {
                 (*coder).uncompressed_size |=
                     (*input.offset(*in_pos as isize) as lzma_vli) << ((*coder).pos * 8);
                 *in_pos += 1;
                 (*coder).pos += 1;
-                if (*coder).pos < 8 {
-                    current_block_42 = 11048769245176032998;
-                } else {
+                if (*coder).pos >= 8 {
                     if (*coder).picky
                         && (*coder).uncompressed_size != LZMA_VLI_UNKNOWN
                         && (*coder).uncompressed_size >= 1 << 38
@@ -90,12 +85,9 @@ unsafe fn alone_decode(
                     .wrapping_add(LZMA_MEMUSAGE_BASE);
                     (*coder).pos = 0;
                     (*coder).sequence = SEQ_CODER_INIT;
-                    current_block_42 = 14763689060501151050;
                 }
             }
-            3 => {
-                current_block_42 = 14763689060501151050;
-            }
+            3 => {}
             4 => {
                 let code = match (*coder).next.code {
                     Some(code) => code,
@@ -115,41 +107,38 @@ unsafe fn alone_decode(
             }
             _ => return LZMA_PROG_ERROR,
         }
-        match current_block_42 {
-            14763689060501151050 => {
-                if (*coder).memusage > (*coder).memlimit {
-                    return LZMA_MEMLIMIT_ERROR;
-                }
-                let mut filters: [lzma_filter_info; 2] = [
-                    lzma_filter_info_s {
-                        id: LZMA_FILTER_LZMA1EXT,
-                        init: Some(
-                            lzma_lzma_decoder_init
-                                as unsafe fn(
-                                    *mut lzma_next_coder,
-                                    *const lzma_allocator,
-                                    *const lzma_filter_info,
-                                ) -> lzma_ret,
-                        ),
-                        options: ::core::ptr::addr_of_mut!((*coder).options) as *mut c_void,
-                    },
-                    lzma_filter_info_s {
-                        id: 0,
-                        init: None,
-                        options: core::ptr::null_mut(),
-                    },
-                ];
-                let ret_: lzma_ret = lzma_next_filter_init(
-                    ::core::ptr::addr_of_mut!((*coder).next),
-                    allocator,
-                    ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter_info,
-                );
-                if ret_ != LZMA_OK {
-                    return ret_;
-                }
-                (*coder).sequence = SEQ_CODE;
+        if (*coder).sequence == SEQ_CODER_INIT {
+            if (*coder).memusage > (*coder).memlimit {
+                return LZMA_MEMLIMIT_ERROR;
             }
-            _ => {}
+            let mut filters: [lzma_filter_info; 2] = [
+                lzma_filter_info_s {
+                    id: LZMA_FILTER_LZMA1EXT,
+                    init: Some(
+                        lzma_lzma_decoder_init
+                            as unsafe fn(
+                                *mut lzma_next_coder,
+                                *const lzma_allocator,
+                                *const lzma_filter_info,
+                            ) -> lzma_ret,
+                    ),
+                    options: ::core::ptr::addr_of_mut!((*coder).options) as *mut c_void,
+                },
+                lzma_filter_info_s {
+                    id: 0,
+                    init: None,
+                    options: core::ptr::null_mut(),
+                },
+            ];
+            let ret_: lzma_ret = lzma_next_filter_init(
+                ::core::ptr::addr_of_mut!((*coder).next),
+                allocator,
+                ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter_info,
+            );
+            if ret_ != LZMA_OK {
+                return ret_;
+            }
+            (*coder).sequence = SEQ_CODE;
         }
     }
     LZMA_OK

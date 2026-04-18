@@ -701,7 +701,6 @@ unsafe fn str_to_filters(
     flags: u32,
     allocator: *const lzma_allocator,
 ) -> *const c_char {
-    let mut current_block: u64;
     let mut errmsg: *const c_char = core::ptr::null();
     while **str as u8 == b' ' {
         *str = (*str).offset(1);
@@ -761,7 +760,6 @@ unsafe fn str_to_filters(
     loop {
         if i_0 == LZMA_FILTERS_MAX as size_t {
             errmsg = crate::c_str!("The maximum number of filters is four");
-            current_block = 6100283484465977373;
             break;
         } else {
             if *(*str) as u8 == b'-' && *(*str).offset(1) as u8 == b'-' {
@@ -778,7 +776,6 @@ unsafe fn str_to_filters(
             }
             if filter_end == *str {
                 errmsg = crate::c_str!("Filter name is missing");
-                current_block = 6100283484465977373;
                 break;
             } else {
                 errmsg = parse_filter(
@@ -790,7 +787,6 @@ unsafe fn str_to_filters(
                     only_xz,
                 );
                 if !errmsg.is_null() {
-                    current_block = 6100283484465977373;
                     break;
                 }
                 while **str as u8 == b' ' {
@@ -798,45 +794,39 @@ unsafe fn str_to_filters(
                 }
                 i_0 += 1;
                 if **str == 0 {
-                    current_block = 15090052786889560393;
                     break;
                 }
             }
         }
     }
-    match current_block {
-        15090052786889560393 => {
-            temp_filters[i_0 as usize].id = LZMA_VLI_UNKNOWN;
-            temp_filters[i_0 as usize].options = core::ptr::null_mut();
-            if flags & LZMA_STR_NO_VALIDATION as u32 == 0 {
-                let mut dummy: size_t = 0;
-                let ret: lzma_ret = lzma_validate_chain(
-                    ::core::ptr::addr_of_mut!(temp_filters) as *mut lzma_filter,
-                    ::core::ptr::addr_of_mut!(dummy),
-                );
-                if ret != LZMA_OK {
-                    errmsg = b"Invalid filter chain ('lzma2' missing at the end?)\0" as *const u8
-                        as *const c_char;
-                    current_block = 6100283484465977373;
-                } else {
-                    current_block = 12381812505308290051;
-                }
+    if errmsg.is_null() && **str == 0 {
+        temp_filters[i_0 as usize].id = LZMA_VLI_UNKNOWN;
+        temp_filters[i_0 as usize].options = core::ptr::null_mut();
+        if flags & LZMA_STR_NO_VALIDATION as u32 == 0 {
+            let mut dummy: size_t = 0;
+            let ret: lzma_ret = lzma_validate_chain(
+                ::core::ptr::addr_of_mut!(temp_filters) as *mut lzma_filter,
+                ::core::ptr::addr_of_mut!(dummy),
+            );
+            if ret != LZMA_OK {
+                errmsg = b"Invalid filter chain ('lzma2' missing at the end?)\0" as *const u8
+                    as *const c_char;
             } else {
-                current_block = 12381812505308290051;
+                core::ptr::copy_nonoverlapping(
+                    ::core::ptr::addr_of_mut!(temp_filters) as *const u8,
+                    filters as *mut u8,
+                    (i_0 + 1) * core::mem::size_of::<lzma_filter>(),
+                );
+                return core::ptr::null();
             }
-            match current_block {
-                6100283484465977373 => {}
-                _ => {
-                    core::ptr::copy_nonoverlapping(
-                        ::core::ptr::addr_of_mut!(temp_filters) as *const u8,
-                        filters as *mut u8,
-                        (i_0 + 1) * core::mem::size_of::<lzma_filter>(),
-                    );
-                    return core::ptr::null();
-                }
-            }
+        } else {
+            core::ptr::copy_nonoverlapping(
+                ::core::ptr::addr_of_mut!(temp_filters) as *const u8,
+                filters as *mut u8,
+                (i_0 + 1) * core::mem::size_of::<lzma_filter>(),
+            );
+            return core::ptr::null();
         }
-        _ => {}
     }
     while i_0 > 0 {
         i_0 -= 1;
