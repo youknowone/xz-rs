@@ -1,7 +1,7 @@
 use crate::alloc::allocator_or_rust;
 use crate::types::*;
 #[cfg(all(target_family = "wasm", target_os = "unknown"))]
-use std::alloc::{alloc, alloc_zeroed, dealloc, Layout};
+use std::alloc::{Layout, alloc, alloc_zeroed, dealloc};
 
 #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
 unsafe extern "C" {
@@ -196,25 +196,26 @@ pub unsafe fn lzma_next_filter_update(
     )
 }
 pub unsafe fn lzma_next_end(next: *mut lzma_next_coder, allocator: *const lzma_allocator) {
-    if (*next).init != 0 {
-        if let Some(end) = (*next).end {
-            end((*next).coder, allocator);
-        } else {
-            lzma_free((*next).coder, allocator);
-        }
-        *next = lzma_next_coder_s {
-            coder: core::ptr::null_mut(),
-            id: LZMA_VLI_UNKNOWN,
-            init: 0,
-            code: None,
-            end: None,
-            get_progress: None,
-            get_check: None,
-            memconfig: None,
-            update: None,
-            set_out_limit: None,
-        };
+    if (*next).init == 0 {
+        return;
     }
+    if let Some(end) = (*next).end {
+        end((*next).coder, allocator);
+    } else {
+        lzma_free((*next).coder, allocator);
+    }
+    *next = lzma_next_coder_s {
+        coder: core::ptr::null_mut(),
+        id: LZMA_VLI_UNKNOWN,
+        init: 0,
+        code: None,
+        end: None,
+        get_progress: None,
+        get_check: None,
+        memconfig: None,
+        update: None,
+        set_out_limit: None,
+    };
 }
 pub unsafe fn lzma_strm_init(strm: *mut lzma_stream) -> lzma_ret {
     if strm.is_null() {

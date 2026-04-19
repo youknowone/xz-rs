@@ -57,35 +57,36 @@ pub const SEQ_LITERAL_MATCHED: lzma_decoder_seq = 3;
 pub const SEQ_LITERAL: lzma_decoder_seq = 2;
 pub const SEQ_IS_MATCH: lzma_decoder_seq = 1;
 pub const SEQ_NORMALIZE: lzma_decoder_seq = 0;
-const BLOCK_NORMALIZE_OR_IS_MATCH: u64 = 5979571030476392895;
-const BLOCK_LITERAL: u64 = 13844743919235296534;
-const BLOCK_LITERAL_MATCHED: u64 = 18125716024132132232;
-const BLOCK_LITERAL_WRITE: u64 = 10535798129821001304;
-const BLOCK_IS_REP: u64 = 3469750012682708893;
-const BLOCK_MATCH_LEN_CHOICE: u64 = 1138292997408115650;
-const BLOCK_MATCH_LEN_CHOICE2: u64 = 13912927785247575907;
-const BLOCK_MATCH_LEN_BITTREE: u64 = 592696588731961849;
-const BLOCK_DIST_SLOT: u64 = 4174862988780014241;
-const BLOCK_DIST_MODEL: u64 = 617447976488552541;
-const BLOCK_DIRECT: u64 = 15418612220330286504;
-const BLOCK_ALIGN: u64 = 10510472849010538284;
-const BLOCK_EOPM: u64 = 7073645523065812117;
-const BLOCK_IS_REP0: u64 = 4420799852307653083;
-const BLOCK_IS_REP0_LONG: u64 = 1698084742280242340;
-const BLOCK_SHORTREP: u64 = 5341942013764523046;
-const BLOCK_IS_REP1: u64 = 11808118301119257848;
-const BLOCK_IS_REP2: u64 = 3996983927318648760;
-const BLOCK_REP_LEN_CHOICE: u64 = 12043352250568755004;
-const BLOCK_REP_LEN_CHOICE2: u64 = 6834592846991627977;
-const BLOCK_REP_LEN_BITTREE: u64 = 2467942631393454738;
-const BLOCK_COPY: u64 = 17340485688450593529;
-const BLOCK_RETURN: u64 = 4609795085482299213;
-const BLOCK_LEN_BITTREE_INIT: u64 = 16690975975023747857;
-const BLOCK_REP_LEN_PREPARE: u64 = 15498320742470848828;
-const BLOCK_DIST_SLOT_INIT: u64 = 8485842003490715114;
-const BLOCK_EOPM_IF_VALID: u64 = 12043253436139097694;
-const BLOCK_VALIDATE_DISTANCE: u64 = 13383302701878543647;
-const BLOCK_MAIN_LOOP: u64 = 4956146061682418353;
+type DecoderBlockState = u8;
+const BLOCK_NORMALIZE_OR_IS_MATCH: DecoderBlockState = 0;
+const BLOCK_LITERAL: DecoderBlockState = 1;
+const BLOCK_LITERAL_MATCHED: DecoderBlockState = 2;
+const BLOCK_LITERAL_WRITE: DecoderBlockState = 3;
+const BLOCK_IS_REP: DecoderBlockState = 4;
+const BLOCK_MATCH_LEN_CHOICE: DecoderBlockState = 5;
+const BLOCK_MATCH_LEN_CHOICE2: DecoderBlockState = 6;
+const BLOCK_MATCH_LEN_BITTREE: DecoderBlockState = 7;
+const BLOCK_DIST_SLOT: DecoderBlockState = 8;
+const BLOCK_DIST_MODEL: DecoderBlockState = 9;
+const BLOCK_DIRECT: DecoderBlockState = 10;
+const BLOCK_ALIGN: DecoderBlockState = 11;
+const BLOCK_EOPM: DecoderBlockState = 12;
+const BLOCK_IS_REP0: DecoderBlockState = 13;
+const BLOCK_IS_REP0_LONG: DecoderBlockState = 14;
+const BLOCK_SHORTREP: DecoderBlockState = 15;
+const BLOCK_IS_REP1: DecoderBlockState = 16;
+const BLOCK_IS_REP2: DecoderBlockState = 17;
+const BLOCK_REP_LEN_CHOICE: DecoderBlockState = 18;
+const BLOCK_REP_LEN_CHOICE2: DecoderBlockState = 19;
+const BLOCK_REP_LEN_BITTREE: DecoderBlockState = 20;
+const BLOCK_COPY: DecoderBlockState = 21;
+const BLOCK_RETURN: DecoderBlockState = 22;
+const BLOCK_LEN_BITTREE_INIT: DecoderBlockState = 23;
+const BLOCK_REP_LEN_PREPARE: DecoderBlockState = 24;
+const BLOCK_DIST_SLOT_INIT: DecoderBlockState = 25;
+const BLOCK_EOPM_IF_VALID: DecoderBlockState = 26;
+const BLOCK_VALIDATE_DISTANCE: DecoderBlockState = 27;
+const BLOCK_MAIN_LOOP: DecoderBlockState = 28;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_range_decoder {
@@ -198,7 +199,7 @@ unsafe fn rc_read_init(
     LZMA_STREAM_END
 }
 #[inline(never)]
-fn resume_block_for_sequence(sequence: lzma_decoder_seq) -> u64 {
+fn resume_block_for_sequence(sequence: lzma_decoder_seq) -> DecoderBlockState {
     match sequence {
         0 | 1 => BLOCK_NORMALIZE_OR_IS_MATCH,
         2 => BLOCK_LITERAL,
@@ -502,7 +503,7 @@ unsafe fn lzma_decode(
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
-    let mut block_state: u64;
+    let mut block_state: DecoderBlockState;
     let coder: *mut lzma_lzma1_decoder = coder_ptr as *mut lzma_lzma1_decoder;
     let init_ret: lzma_ret = rc_read_init(
         ::core::ptr::addr_of_mut!((*coder).rc),

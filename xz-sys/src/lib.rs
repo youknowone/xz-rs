@@ -21,7 +21,7 @@ use libc::size_t;
 #[cfg(not(all(target_family = "wasm", target_os = "unknown")))]
 use libc::{c_char, c_int, c_uchar, c_uint, c_void};
 #[cfg(all(target_family = "wasm", target_os = "unknown"))]
-use std::alloc::{alloc, alloc_zeroed, dealloc, Layout};
+use std::alloc::{Layout, alloc, alloc_zeroed, dealloc};
 #[cfg(all(target_family = "wasm", target_os = "unknown"))]
 use std::os::raw::{c_char, c_int, c_uchar, c_uint, c_void};
 #[cfg(all(target_family = "wasm", target_os = "unknown"))]
@@ -204,9 +204,9 @@ pub const LZMA_VERSION: u32 = xz::common::common::LZMA_VERSION as u32;
 
 /* `lzma/base.h`: return codes */
 pub use xz::types::{
-    LZMA_BUF_ERROR, LZMA_DATA_ERROR, LZMA_FORMAT_ERROR, LZMA_GET_CHECK, LZMA_MEMLIMIT_ERROR,
-    LZMA_MEM_ERROR, LZMA_NO_CHECK, LZMA_OK, LZMA_OPTIONS_ERROR, LZMA_PROG_ERROR, LZMA_SEEK_NEEDED,
-    LZMA_STREAM_END, LZMA_UNSUPPORTED_CHECK,
+    LZMA_BUF_ERROR, LZMA_DATA_ERROR, LZMA_FORMAT_ERROR, LZMA_GET_CHECK, LZMA_MEM_ERROR,
+    LZMA_MEMLIMIT_ERROR, LZMA_NO_CHECK, LZMA_OK, LZMA_OPTIONS_ERROR, LZMA_PROG_ERROR,
+    LZMA_SEEK_NEEDED, LZMA_STREAM_END, LZMA_UNSUPPORTED_CHECK,
 };
 
 /* `lzma/base.h`: actions */
@@ -498,6 +498,18 @@ pub unsafe extern "C" fn lzma_stream_decoder(
     xz::common::stream_decoder::lzma_stream_decoder(strm.cast(), memlimit, flags)
 }
 
+/* `lzma/container.h`: auto decoder */
+
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn lzma_auto_decoder(
+    strm: *mut lzma_stream,
+    memlimit: u64,
+    flags: u32,
+) -> lzma_ret {
+    normalize_c_stream_allocator(strm);
+    xz::common::auto_decoder::lzma_auto_decoder(strm.cast(), memlimit, flags)
+}
+
 /* `lzma/container.h`: alone encoder / decoder */
 
 #[unsafe(no_mangle)]
@@ -515,17 +527,7 @@ pub unsafe extern "C" fn lzma_alone_decoder(strm: *mut lzma_stream, memlimit: u6
     xz::common::alone_decoder::lzma_alone_decoder(strm.cast(), memlimit)
 }
 
-/* `lzma/container.h`: auto / lzip decoder */
-
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn lzma_auto_decoder(
-    strm: *mut lzma_stream,
-    memlimit: u64,
-    flags: u32,
-) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz::common::auto_decoder::lzma_auto_decoder(strm.cast(), memlimit, flags)
-}
+/* `lzma/container.h`: lzip decoder */
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_lzip_decoder(

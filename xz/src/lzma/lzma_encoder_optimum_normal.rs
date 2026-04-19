@@ -219,16 +219,17 @@ unsafe fn not_equal_16(a: *const u8, b: *const u8) -> bool {
 unsafe fn fill_dist_prices(coder: *mut lzma_lzma1_encoder) {
     let mut dist_state: u32 = 0;
     while dist_state < DIST_STATES {
-        let dist_slot_prices: *mut u32 =
-            ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).dist_slot_prices)
-                as *mut [u32; 64])
-                .offset(dist_state as isize)) as *mut u32;
+        let dist_slot_prices: *mut u32 = ::core::ptr::addr_of_mut!(
+            *(::core::ptr::addr_of_mut!((*coder).dist_slot_prices) as *mut [u32; 64])
+                .offset(dist_state as isize)
+        ) as *mut u32;
         let mut dist_slot: u32 = 0;
         while dist_slot < (*coder).dist_table_size {
             *dist_slot_prices.offset(dist_slot as isize) = rc_bittree_price(
-                ::core::ptr::addr_of_mut!(*(::core::ptr::addr_of_mut!((*coder).dist_slot)
-                    as *mut [probability; 64])
-                    .offset(dist_state as isize)) as *mut probability,
+                ::core::ptr::addr_of_mut!(
+                    *(::core::ptr::addr_of_mut!((*coder).dist_slot) as *mut [probability; 64])
+                        .offset(dist_state as isize)
+                ) as *mut probability,
                 DIST_SLOT_BITS,
                 dist_slot,
             );
@@ -576,6 +577,10 @@ unsafe fn helper1(
     }
     len_end
 }
+// Keep this forced inline: on the focused encode workload
+// (`scripts/profile_backend.sh xz encode --input-kind random --size 1048576
+// --iters 150 --warmup 20`), changing this to `#[inline]` roughly doubled
+// runtime by degrading the caller's codegen.
 #[inline(always)]
 unsafe fn helper2(
     coder: *mut lzma_lzma1_encoder,

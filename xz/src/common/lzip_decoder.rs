@@ -42,11 +42,12 @@ pub const LZIP_V1_FOOTER_SIZE: u32 = 20;
 pub const LZIP_LC: u32 = 3;
 pub const LZIP_LP: u32 = 0;
 pub const LZIP_PB: u32 = 2;
-const LZIP_BLOCK_VERSION: u64 = 11220331375136032509;
-const LZIP_BLOCK_DICT_SIZE: u64 = 2770508642018830579;
-const LZIP_BLOCK_CODER_INIT: u64 = 15476230294461844687;
-const LZIP_BLOCK_LZMA_STREAM: u64 = 13394712405657322686;
-const LZIP_BLOCK_MEMBER_FOOTER: u64 = 13619784596304402172;
+type LzipBlockState = u8;
+const LZIP_BLOCK_VERSION: LzipBlockState = 0;
+const LZIP_BLOCK_DICT_SIZE: LzipBlockState = 1;
+const LZIP_BLOCK_CODER_INIT: LzipBlockState = 2;
+const LZIP_BLOCK_LZMA_STREAM: LzipBlockState = 3;
+const LZIP_BLOCK_MEMBER_FOOTER: LzipBlockState = 4;
 unsafe fn lzip_decode(
     coder_ptr: *mut c_void,
     allocator: *const lzma_allocator,
@@ -60,7 +61,7 @@ unsafe fn lzip_decode(
 ) -> lzma_ret {
     let coder: *mut lzma_lzip_coder = coder_ptr as *mut lzma_lzip_coder;
     loop {
-        let mut block_state: u64;
+        let mut block_state: LzipBlockState;
         match (*coder).sequence {
             0 => {
                 let lzip_id_string: [u8; 4] = [0x4c as u8, 0x5a as u8, 0x49 as u8, 0x50 as u8];

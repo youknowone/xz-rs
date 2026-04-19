@@ -54,7 +54,19 @@ unsafe fn fill_window(
         move_window(::core::ptr::addr_of_mut!((*coder).mf));
     }
     let mut write_pos: size_t = (*coder).mf.write_pos as size_t;
-    let mut ret = if (*coder).next.code.is_none() {
+    let mut ret = if let Some(code) = (*coder).next.code {
+        code(
+            (*coder).next.coder,
+            allocator,
+            input,
+            in_pos,
+            in_size,
+            (*coder).mf.buffer,
+            ::core::ptr::addr_of_mut!(write_pos),
+            (*coder).mf.size as size_t,
+            action,
+        )
+    } else {
         lzma_bufcpy(
             input,
             in_pos,
@@ -68,22 +80,6 @@ unsafe fn fill_window(
         } else {
             LZMA_OK
         }
-    } else {
-        let code = match (*coder).next.code {
-            Some(code) => code,
-            None => core::hint::unreachable_unchecked(),
-        };
-        code(
-            (*coder).next.coder,
-            allocator,
-            input,
-            in_pos,
-            in_size,
-            (*coder).mf.buffer,
-            ::core::ptr::addr_of_mut!(write_pos),
-            (*coder).mf.size as size_t,
-            action,
-        )
     };
     (*coder).mf.write_pos = write_pos as u32;
     core::ptr::write_bytes(
@@ -362,12 +358,8 @@ unsafe fn lz_encoder_update(
     reversed_filters: *const lzma_filter,
 ) -> lzma_ret {
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
-    if (*coder).lz.options_update.is_none() {
+    let Some(options_update) = (*coder).lz.options_update else {
         return LZMA_PROG_ERROR;
-    }
-    let options_update = match (*coder).lz.options_update {
-        Some(options_update) => options_update,
-        None => return LZMA_PROG_ERROR,
     };
     let ret_: lzma_ret = options_update((*coder).lz.coder, reversed_filters);
     if ret_ != LZMA_OK {
@@ -385,10 +377,10 @@ unsafe fn lz_encoder_set_out_limit(
     out_limit: u64,
 ) -> lzma_ret {
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
-    if (*coder).next.code.is_none() {
-        if let Some(set_out_limit) = (*coder).lz.set_out_limit {
-            return set_out_limit((*coder).lz.coder, uncomp_size, out_limit);
-        }
+    if (*coder).next.code.is_none()
+        && let Some(set_out_limit) = (*coder).lz.set_out_limit
+    {
+        return set_out_limit((*coder).lz.coder, uncomp_size, out_limit);
     }
     LZMA_OPTIONS_ERROR
 }

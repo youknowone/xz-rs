@@ -78,15 +78,16 @@ pub const SEQ_BLOCK_DIRECT_RUN: stream_decoder_mt_seq = 6;
 pub const SEQ_BLOCK_DIRECT_INIT: stream_decoder_mt_seq = 5;
 pub const SEQ_BLOCK_THR_RUN: stream_decoder_mt_seq = 4;
 pub const SEQ_BLOCK_THR_INIT: stream_decoder_mt_seq = 3;
-const STREAM_MT_BLOCK_HEADER: u64 = 7149356873433890176;
-const STREAM_MT_BLOCK_INIT: u64 = 3123434771885419771;
-const STREAM_MT_BLOCK_THR_INIT: u64 = 11441799814184323368;
-const STREAM_MT_BLOCK_THR_RUN: u64 = 7728257318064351663;
-const STREAM_MT_BLOCK_DIRECT_RUN: u64 = 7173345243791314703;
-const STREAM_MT_INDEX_DECODE: u64 = 13812071707085482240;
-const STREAM_MT_STREAM_FOOTER: u64 = 15174413556390356007;
-const STREAM_MT_STREAM_PADDING: u64 = 17073193239823527980;
-const STREAM_MT_RESTART_LOOP: u64 = 11639917216603986996;
+type StreamMtBlockState = u8;
+const STREAM_MT_BLOCK_HEADER: StreamMtBlockState = 0;
+const STREAM_MT_BLOCK_INIT: StreamMtBlockState = 1;
+const STREAM_MT_BLOCK_THR_INIT: StreamMtBlockState = 2;
+const STREAM_MT_BLOCK_THR_RUN: StreamMtBlockState = 3;
+const STREAM_MT_BLOCK_DIRECT_RUN: StreamMtBlockState = 4;
+const STREAM_MT_INDEX_DECODE: StreamMtBlockState = 5;
+const STREAM_MT_STREAM_FOOTER: StreamMtBlockState = 6;
+const STREAM_MT_STREAM_PADDING: StreamMtBlockState = 7;
+const STREAM_MT_RESTART_LOOP: StreamMtBlockState = 8;
 pub const SEQ_BLOCK_INIT: stream_decoder_mt_seq = 2;
 pub const SEQ_BLOCK_HEADER: stream_decoder_mt_seq = 1;
 pub const SEQ_STREAM_HEADER: stream_decoder_mt_seq = 0;
@@ -860,7 +861,7 @@ unsafe fn stream_decode_mt(
         action == LZMA_FINISH || *in_pos == in_size && !(*coder).out_was_filled;
     (*coder).out_was_filled = false;
     loop {
-        let mut block_state: u64;
+        let mut block_state: StreamMtBlockState;
         match (*coder).sequence {
             0 => {
                 let in_old: size_t = *in_pos;

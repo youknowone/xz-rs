@@ -1,5 +1,5 @@
 use crate::types::*;
-use std::alloc::{alloc, alloc_zeroed, dealloc, Layout};
+use std::alloc::{Layout, alloc, alloc_zeroed, dealloc};
 
 const RUST_ALLOC_ALIGN: usize = 16;
 
@@ -140,8 +140,9 @@ pub(crate) unsafe fn internal_alloc_zeroed_bytes(
 }
 
 pub(crate) unsafe fn internal_alloc_object<T>(allocator: *const lzma_allocator) -> *mut T {
-    let allocator = allocator_or_rust(allocator);
-    if let Some(alloc) = unsafe { (*allocator).alloc } {
+    if !allocator.is_null()
+        && let Some(alloc) = unsafe { (*allocator).alloc }
+    {
         return unsafe {
             alloc((*allocator).opaque, 1, core::mem::size_of::<T>() as size_t) as *mut T
         };
@@ -157,8 +158,9 @@ pub(crate) unsafe fn internal_alloc_array<T>(
         Some(size) => size,
         None => return core::ptr::null_mut(),
     };
-    let allocator = allocator_or_rust(allocator);
-    if let Some(alloc) = unsafe { (*allocator).alloc } {
+    if !allocator.is_null()
+        && let Some(alloc) = unsafe { (*allocator).alloc }
+    {
         return unsafe { alloc((*allocator).opaque, 1, size as size_t) as *mut T };
     }
     rust_alloc_impl(size, core::mem::align_of::<T>(), false) as *mut T
@@ -172,8 +174,9 @@ pub(crate) unsafe fn internal_alloc_zeroed_array<T>(
         Some(size) => size,
         None => return core::ptr::null_mut(),
     };
-    let allocator = allocator_or_rust(allocator);
-    if let Some(alloc) = unsafe { (*allocator).alloc } {
+    if !allocator.is_null()
+        && let Some(alloc) = unsafe { (*allocator).alloc }
+    {
         let ptr = unsafe { alloc((*allocator).opaque, 1, size as size_t) as *mut T };
         if !ptr.is_null() {
             unsafe { core::ptr::write_bytes(ptr as *mut u8, 0, size) };
@@ -184,8 +187,9 @@ pub(crate) unsafe fn internal_alloc_zeroed_array<T>(
 }
 
 pub(crate) unsafe fn internal_free(ptr: *mut c_void, allocator: *const lzma_allocator) {
-    let allocator = allocator_or_rust(allocator);
-    if let Some(free) = unsafe { (*allocator).free } {
+    if !allocator.is_null()
+        && let Some(free) = unsafe { (*allocator).free }
+    {
         unsafe { free((*allocator).opaque, ptr) };
         return;
     }
