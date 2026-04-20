@@ -10,7 +10,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            rust: '1.85' # msrv
+            rust: '1.88' # msrv
           - os: ubuntu-latest
             rust: stable
           - os: ubuntu-latest
