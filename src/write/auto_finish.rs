@@ -52,7 +52,7 @@ impl<W: Write> AutoFinishXzEncoder<W> {
     #[inline]
     pub fn finish(mut self) -> io::Result<W> {
         self.try_finish()?;
-        self.0.obj.take().ok_or_else(XzEncoder::<W>::finished_error)
+        Ok(self.0.obj.take().unwrap())
     }
 
     /// Returns the number of bytes produced by the compressor
@@ -142,7 +142,7 @@ impl<W: Write> AutoFinishXzDecoder<W> {
     #[inline]
     pub fn finish(mut self) -> io::Result<W> {
         self.try_finish()?;
-        self.0.obj.take().ok_or_else(XzDecoder::<W>::finished_error)
+        Ok(self.0.obj.take().unwrap())
     }
 
     /// Returns the number of bytes produced by the decompressor

@@ -32,11 +32,6 @@ pub struct XzDecoder<W: Write> {
 }
 
 impl<W: Write> XzEncoder<W> {
-    #[inline]
-    pub(super) fn finished_error() -> io::Error {
-        io::Error::new(io::ErrorKind::BrokenPipe, "xz stream already finished")
-    }
-
     /// Create a new compression stream which will compress at the given level
     /// to write compress output to the give output stream.
     ///
@@ -92,10 +87,7 @@ impl<W: Write> XzEncoder<W> {
     }
 
     fn dump(&mut self) -> io::Result<()> {
-        match self.obj.as_mut() {
-            Some(obj) => obj.write_all(&self.buf)?,
-            None => return Err(Self::finished_error()),
-        }
+        self.obj.as_mut().unwrap().write_all(&self.buf)?;
         self.buf.clear();
         Ok(())
     }
@@ -135,7 +127,7 @@ impl<W: Write> XzEncoder<W> {
     #[inline]
     pub fn finish(mut self) -> io::Result<W> {
         self.try_finish()?;
-        self.obj.take().ok_or_else(Self::finished_error)
+        Ok(self.obj.take().unwrap())
     }
 
     /// Returns the number of bytes produced by the compressor
@@ -190,10 +182,7 @@ impl<W: Write> Write for XzEncoder<W> {
                 break;
             }
         }
-        match self.obj.as_mut() {
-            Some(obj) => obj.flush(),
-            None => Err(Self::finished_error()),
-        }
+        self.obj.as_mut().unwrap().flush()
     }
 }
 
@@ -214,11 +203,6 @@ impl<W: Write> Drop for XzEncoder<W> {
 }
 
 impl<W: Write> XzDecoder<W> {
-    #[inline]
-    pub(super) fn finished_error() -> io::Error {
-        io::Error::new(io::ErrorKind::BrokenPipe, "xz stream already finished")
-    }
-
     /// Creates a new decoding stream which will decode into `obj` one xz stream
     /// from the input written to it.
     #[inline]
@@ -277,10 +261,7 @@ impl<W: Write> XzDecoder<W> {
     }
 
     fn dump(&mut self) -> io::Result<()> {
-        match self.obj.as_mut() {
-            Some(obj) => obj.write_all(&self.buf)?,
-            None => return Err(Self::finished_error()),
-        }
+        self.obj.as_mut().unwrap().write_all(&self.buf)?;
         self.buf.clear();
         Ok(())
     }
@@ -332,7 +313,7 @@ impl<W: Write> XzDecoder<W> {
     #[inline]
     pub fn finish(mut self) -> io::Result<W> {
         self.try_finish()?;
-        self.obj.take().ok_or_else(Self::finished_error)
+        Ok(self.obj.take().unwrap())
     }
 
     /// Returns the number of bytes produced by the decompressor
@@ -379,10 +360,7 @@ impl<W: Write> Write for XzDecoder<W> {
     #[inline]
     fn flush(&mut self) -> io::Result<()> {
         self.dump()?;
-        match self.obj.as_mut() {
-            Some(obj) => obj.flush(),
-            None => Err(Self::finished_error()),
-        }
+        self.obj.as_mut().unwrap().flush()
     }
 }
 

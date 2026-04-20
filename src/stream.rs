@@ -6,6 +6,7 @@
 
 #![cfg_attr(feature = "xz", allow(unused_unsafe))]
 
+use std::collections::LinkedList;
 use std::error;
 use std::fmt;
 use std::io;
@@ -41,7 +42,7 @@ pub struct MtStreamBuilder {
 /// A custom chain of filters to configure an encoding stream.
 pub struct Filters {
     inner: Vec<liblzma_sys::lzma_filter>,
-    lzma_opts: Vec<Box<liblzma_sys::lzma_options_lzma>>,
+    lzma_opts: LinkedList<liblzma_sys::lzma_options_lzma>,
 }
 
 /// The `action` argument for [`Stream::process`],
@@ -693,7 +694,7 @@ impl Filters {
                 id: liblzma_sys::LZMA_VLI_UNKNOWN,
                 options: std::ptr::null_mut(),
             }],
-            lzma_opts: Vec::new(),
+            lzma_opts: LinkedList::new(),
         }
     }
 
@@ -707,9 +708,8 @@ impl Filters {
     /// what you are doing.  LZMA2 is almost always a better choice.
     #[inline]
     pub fn lzma1(&mut self, opts: &LzmaOptions) -> &mut Filters {
-        let mut opts = Box::new(opts.raw);
-        let ptr = (&mut *opts as *mut liblzma_sys::lzma_options_lzma).cast();
-        self.lzma_opts.push(opts);
+        self.lzma_opts.push_back(opts.raw);
+        let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_LZMA1,
             options: ptr,
@@ -739,9 +739,8 @@ impl Filters {
     /// [`position_bits`]: LzmaOptions::position_bits
     #[inline]
     pub fn lzma2(&mut self, opts: &LzmaOptions) -> &mut Filters {
-        let mut opts = Box::new(opts.raw);
-        let ptr = (&mut *opts as *mut liblzma_sys::lzma_options_lzma).cast();
-        self.lzma_opts.push(opts);
+        self.lzma_opts.push_back(opts.raw);
+        let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
         self.push(liblzma_sys::lzma_filter {
             id: liblzma_sys::LZMA_FILTER_LZMA2,
             options: ptr,
@@ -1305,7 +1304,7 @@ fn cvt(rc: liblzma_sys::lzma_ret) -> Result<Status, Error> {
         liblzma_sys::LZMA_DATA_ERROR => Err(Error::Data),
         liblzma_sys::LZMA_BUF_ERROR => Ok(Status::MemNeeded),
         liblzma_sys::LZMA_PROG_ERROR => Err(Error::Program),
-        _ => Err(Error::Program),
+        c => panic!("unknown return code: {}", c),
     }
 }
 
