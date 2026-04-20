@@ -77,8 +77,8 @@ fn rs_sys_avoids_literal_lzma_const_defs() {
             stmt.push(' ');
             if trimmed.ends_with(';') {
                 assert!(
-                    stmt.contains("= xz::"),
-                    "LZMA const must alias xz symbol, not use local literal (line {}): {}",
+                    stmt.contains("= xz_core::"),
+                    "LZMA const must alias xz-core symbol, not use local literal (line {}): {}",
                     start_line,
                     stmt
                 );

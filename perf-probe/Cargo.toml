@@ -6,11 +6,11 @@ publish = false
 
 [features]
 default = []
-xz = ["dep:xz"]
+xz-core = ["dep:xz-core"]
 xz-sys = ["dep:xz-sys"]
 liblzma-sys = ["dep:liblzma-sys"]
 
 [dependencies]
 liblzma-sys = { path = "../liblzma-sys", optional = true }
-xz = { path = "../xz", optional = true }
+xz-core = { path = "../xz-core", optional = true }
 xz-sys = { path = "../xz-sys", optional = true }

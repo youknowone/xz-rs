@@ -53,19 +53,19 @@
 #![deny(missing_docs)]
 
 #[cfg(any(
-    all(feature = "xz", feature = "xz-sys"),
-    all(feature = "xz", feature = "liblzma-sys"),
+    all(feature = "xz-core", feature = "xz-sys"),
+    all(feature = "xz-core", feature = "liblzma-sys"),
     all(feature = "xz-sys", feature = "liblzma-sys"),
 ))]
-compile_error!("Enable exactly one of `xz`, `xz-sys`, or `liblzma-sys`");
+compile_error!("Enable exactly one of `xz-core`, `xz-sys`, or `liblzma-sys`");
 
-#[cfg(not(any(feature = "xz", feature = "xz-sys", feature = "liblzma-sys")))]
-compile_error!("Enable `xz`, `xz-sys`, or `liblzma-sys`");
+#[cfg(not(any(feature = "xz-core", feature = "xz-sys", feature = "liblzma-sys")))]
+compile_error!("Enable `xz-core`, `xz-sys`, or `liblzma-sys`");
 
-#[cfg(feature = "xz")]
+#[cfg(feature = "xz-core")]
 pub(crate) mod sys {
-    pub(crate) use xz::check::check::lzma_check_is_supported;
-    pub(crate) use xz::common::{
+    pub(crate) use xz_core::check::check::lzma_check_is_supported;
+    pub(crate) use xz_core::common::{
         alone_decoder::lzma_alone_decoder,
         alone_encoder::lzma_alone_encoder,
         auto_decoder::lzma_auto_decoder,
@@ -82,15 +82,17 @@ pub(crate) mod sys {
         string_conversion::LZMA_PRESET_DEFAULT,
     };
     #[cfg(feature = "parallel")]
-    pub(crate) use xz::common::{
+    pub(crate) use xz_core::common::{
         filter_encoder::lzma_mt_block_size,
         stream_mt::{
             lzma_stream_decoder_mt, lzma_stream_encoder_mt, lzma_stream_encoder_mt_memusage,
         },
     };
-    pub(crate) use xz::lz::lz_encoder::lzma_mf_is_supported;
-    pub(crate) use xz::lzma::lzma_encoder_presets::{lzma_lzma_preset, LZMA_PRESET_LEVEL_MASK};
-    pub(crate) use xz::types::*;
+    pub(crate) use xz_core::lz::lz_encoder::lzma_mf_is_supported;
+    pub(crate) use xz_core::lzma::lzma_encoder_presets::{
+        lzma_lzma_preset, LZMA_PRESET_LEVEL_MASK,
+    };
+    pub(crate) use xz_core::types::*;
 }
 
 #[cfg(feature = "xz-sys")]

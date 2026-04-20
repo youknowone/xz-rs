@@ -17,10 +17,10 @@ rust-version = "1.88"
 exclude = [".github/"]
 
 [workspace]
-members = ["systest", "xz", "xz-sys", "perf-probe"]
+members = ["systest", "xz-core", "xz-sys", "perf-probe"]
 
 [dependencies]
-xz = { path = "xz", optional = true }
+xz-core = { path = "xz-core", optional = true }
 xz-sys = { path = "xz-sys", optional = true }
 liblzma-sys = { path = "liblzma-sys", version = "0.4.5", optional = true, default-features = false }
 num_cpus = { version = "1.16.0", optional = true }
@@ -48,8 +48,8 @@ liblzma-sys = { path = "liblzma-sys" }
 wasm-bindgen-test = "0.3"
 
 [features]
-default = ["xz"]
-xz = ["dep:xz"]
+default = ["xz-core"]
+xz-core = ["dep:xz-core"]
 xz-sys = ["dep:xz-sys"]
 liblzma-sys = ["dep:liblzma-sys"]
 static = ["liblzma-sys?/static"]

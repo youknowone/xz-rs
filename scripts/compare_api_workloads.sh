@@ -50,7 +50,7 @@ esac
 RUST_BIN="$RUST_TARGET/release/examples/$EXAMPLE_NAME"
 C_BIN="$C_TARGET/release/examples/$EXAMPLE_NAME"
 
-env CARGO_TARGET_DIR="$RUST_TARGET" cargo build --example "$EXAMPLE_NAME" --release --no-default-features --features xz >/dev/null
+env CARGO_TARGET_DIR="$RUST_TARGET" cargo build --example "$EXAMPLE_NAME" --release --no-default-features --features xz-core >/dev/null
 env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" cargo build --example "$EXAMPLE_NAME" --release --no-default-features --features liblzma-sys >/dev/null
 
 hyperfine \
@@ -58,7 +58,7 @@ hyperfine \
   --warmup 2 \
   --export-json "$RESULTS_DIR/api-${WORKLOAD}.json" \
   --export-markdown "$RESULTS_DIR/api-${WORKLOAD}.md" \
-  --command-name xz \
+  --command-name xz-core \
   "$RUST_BIN ${RAW_ARGS[*]}" \
   --command-name c \
   "$C_BIN ${RAW_ARGS[*]}"

@@ -6,7 +6,7 @@ Important: the C and Rust sys backends must never be linked into the same proces
 
 The root crate now has three backend modes:
 
-- `xz`: direct Rust ABI calls into the pure Rust port
+- `xz-core`: direct Rust ABI calls into the pure Rust port
 - `xz-sys`: C ABI calls into the pure Rust port through the `xz-sys` shell
 - `liblzma-sys`: C ABI calls into vendored C `liblzma`
 
@@ -28,7 +28,7 @@ cargo test --test sys_equivalence
 
 ## 2. Compare the full test suite
 
-Use `hyperfine` to compare end-to-end wall clock time of the deterministic root test bundle (`xz` vs C) and `systest` with isolated target directories per backend:
+Use `hyperfine` to compare end-to-end wall clock time of the deterministic root test bundle (`xz-core` vs C) and `systest` with isolated target directories per backend:
 
 ```bash
 scripts/compare_backends.sh --runs 10 --warmup 2
@@ -58,7 +58,7 @@ The root bundle intentionally skips QuickCheck-based unit tests because they gen
 
 ## 3. Compare focused workloads
 
-Use `perf-probe`, a small standalone binary crate that links exactly one backend at a time. `scripts/compare_workloads.sh` compares all three backends in separate processes: direct `xz`, `xz-sys`, and vendored C `liblzma-sys`.
+Use `perf-probe`, a small standalone binary crate that links exactly one backend at a time. `scripts/compare_workloads.sh` compares all three backends in separate processes: direct `xz-core`, `xz-sys`, and vendored C `liblzma-sys`.
 
 Examples:
 
@@ -124,9 +124,9 @@ Use `--name-pattern <substring>` to isolate a file family inside the XZ corpus w
 Examples:
 
 ```bash
-scripts/profile_backend.sh xz decode --size 1048576 --iters 800 --warmup 80
-scripts/profile_backend.sh xz size --input-kind random --size 1048576 --iters 800 --warmup 80
-scripts/profile_backend.sh xz encode --input-kind random --size 8388608 --iters 150 --warmup 20
+scripts/profile_backend.sh xz-core decode --size 1048576 --iters 800 --warmup 80
+scripts/profile_backend.sh xz-core size --input-kind random --size 1048576 --iters 800 --warmup 80
+scripts/profile_backend.sh xz-core encode --input-kind random --size 8388608 --iters 150 --warmup 20
 scripts/profile_backend.sh c crc64 --size 16777216 --iters 400
 ```
 
@@ -151,8 +151,8 @@ On macOS the script prefers `samply`; on Linux it falls back to `perf`; otherwis
 After a profile points to a hot Rust function, inspect its optimized output:
 
 ```bash
-scripts/inspect_codegen.sh xz::lzma::lzma_encoder::lzma_encode --package xz
-scripts/inspect_codegen.sh xz::check::crc64_fast::lzma_crc64 --package xz --format llvm
+scripts/inspect_codegen.sh xz_core::lzma::lzma_encoder::lzma_encode --package xz-core
+scripts/inspect_codegen.sh xz_core::check::crc64_fast::lzma_crc64 --package xz-core --format llvm
 ```
 
 This uses `cargo-asm` and builds under `target/codegen` by default.
