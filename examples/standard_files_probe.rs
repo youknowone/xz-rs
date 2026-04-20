@@ -4,9 +4,9 @@ use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
 
-use liblzma::read;
-use liblzma::stream;
-use liblzma::write;
+use xz::read;
+use xz::stream;
+use xz::write;
 
 #[cfg(feature = "xz-core")]
 const BACKEND_NAME: &str = "xz-core";

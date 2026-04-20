@@ -70,7 +70,7 @@ SYSTEST_RUST_CMD="env CARGO_TARGET_DIR=$SYSTEST_RUST_TARGET cargo test -p systes
 SYSTEST_C_CMD="env LZMA_API_STATIC=1 CARGO_TARGET_DIR=$SYSTEST_C_TARGET cargo test -p systest --release --no-default-features --features liblzma-sys -- --test-threads=1"
 
 echo "prebuilding root test binaries..."
-env CARGO_TARGET_DIR="$ROOT_RUST_TARGET" cargo test -p liblzma --release --no-default-features --features xz-core --no-run >/dev/null
+env CARGO_TARGET_DIR="$ROOT_RUST_TARGET" cargo test -p xz --release --no-default-features --features xz-core --no-run >/dev/null
 env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$ROOT_C_TARGET" cargo test --release --no-default-features --features liblzma-sys --no-run >/dev/null
 
 hyperfine \

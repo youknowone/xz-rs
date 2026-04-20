@@ -2,7 +2,7 @@ use std::env;
 use std::io::Read;
 use std::time::{Duration, Instant};
 
-use liblzma::bufread;
+use xz::bufread;
 
 #[cfg(feature = "xz-core")]
 const BACKEND_NAME: &str = "xz-core";

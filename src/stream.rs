@@ -761,7 +761,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -782,7 +782,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.delta_properties(&[0x00]).unwrap();
@@ -800,7 +800,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -821,7 +821,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.x86_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -839,7 +839,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -860,7 +860,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.powerpc_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -878,7 +878,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -899,7 +899,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.ia64_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -917,7 +917,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -938,7 +938,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.arm_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -956,7 +956,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -977,7 +977,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.arm64_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -995,7 +995,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -1016,7 +1016,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.riscv_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -1034,7 +1034,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -1055,7 +1055,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.arm_thumb_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -1073,7 +1073,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();
@@ -1094,7 +1094,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let mut filters = Filters::new();
     /// filters.sparc_properties(&[0x00, 0x00, 0x00, 0x00]).unwrap();
@@ -1138,7 +1138,7 @@ impl Filters {
     ///
     /// # Examples
     /// ```
-    /// use liblzma::stream::{Filters, LzmaOptions};
+    /// use xz::stream::{Filters, LzmaOptions};
     ///
     /// let dict_size = 0x40000;
     /// let mut opts = LzmaOptions::new_preset(6).unwrap();

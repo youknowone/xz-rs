@@ -92,7 +92,7 @@ scripts/compare_api_workloads.sh qc --mode both --cases 128 --max-size 4096 --it
 scripts/compare_api_workloads.sh bufread-trailing --mode both --input-size 1024 --trailing-size 123 --iters 1000 --warmup 100
 ```
 
-This uses [`examples/standard_files_probe.rs`](../examples/standard_files_probe.rs), which mirrors the `tests/xz.rs` `standard_files` path and writes reports to:
+This uses [`examples/standard_files_probe.rs`](../examples/standard_files_probe.rs), which mirrors the `tests/standard_files.rs` `standard_files` path and writes reports to:
 
 - `target/perf-results/api-standard-files.json`
 - `target/perf-results/api-standard-files.md`

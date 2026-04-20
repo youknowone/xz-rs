@@ -23,10 +23,10 @@ fi
 
 for ((repeat = 0; repeat < REPEATS; repeat++)); do
   for prefix in \
-    "liblzma-" \
+    "xz-" \
     "drop_incomplete-" \
     "sys_equivalence-" \
-    "xz-"
+    "standard_files-"
   do
     BIN=""
     while IFS= read -r candidate; do
@@ -40,7 +40,7 @@ for ((repeat = 0; repeat < REPEATS; repeat++)); do
       exit 1
     fi
     ARGS=(--test-threads=1)
-    if [[ "$prefix" == "liblzma-" ]]; then
+    if [[ "$prefix" == "xz-" ]]; then
       # QuickCheck-based tests use a fresh RNG per process, so backend-to-backend
       # wall-clock comparisons on them are not stable. Cover those paths with
       # deterministic focused probes instead.

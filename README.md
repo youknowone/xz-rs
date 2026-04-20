@@ -1,17 +1,17 @@
-# liblzma
+# xz
 
-[![CI](https://github.com/Portable-Network-Archive/liblzma-rs/actions/workflows/main.yml/badge.svg)](https://github.com/Portable-Network-Archive/liblzma-rs/actions/workflows/main.yml)
+[![CI](https://github.com/youknowone/xz-rs/actions/workflows/main.yml/badge.svg)](https://github.com/youknowone/xz-rs/actions/workflows/main.yml)
 [![Crates.io][crates-badge]][crates-url]
 
-[crates-badge]: https://img.shields.io/crates/v/liblzma.svg
-[crates-url]: https://crates.io/crates/liblzma
+[crates-badge]: https://img.shields.io/crates/v/xz.svg
+[crates-url]: https://crates.io/crates/xz
 
-[Documentation](https://docs.rs/liblzma)
+[Documentation](https://docs.rs/xz)
 
 Bindings to the liblzma implementation in Rust, also provides types to
 read/write xz streams.
 
-**This crate is forked from [xz2](https://crates.io/crates/xz2) and `liblzma = "0.1.x"` is fully compatible with `xz2 = "0.1.7"`,**
+**This crate is forked from [xz2](https://crates.io/crates/xz2) and `xz = "0.1.x"` is fully compatible with `xz2 = "0.1.7"`,**
 so you can migrate simply.
 
 ## Migrate from xz2
@@ -20,13 +20,13 @@ so you can migrate simply.
 # Cargo.toml
 [dependencies]
 -xz2 = "0.1.7"
-+liblzma = "0.1.7"
++xz = "0.1.7"
 ```
 
 ```diff
 // *.rs
 -use xz2;
-+use liblzma;
++use xz;
 ```
 
 ## Version 0.2.x breaking changes
@@ -47,12 +47,12 @@ so you can migrate simply.
 
 ## Backend selection
 
-The default build uses the pure Rust backend via `xz-sys`.
+The default build uses the pure Rust backend via `xz-core`.
 
 Use the original C backend only when you explicitly opt into it:
 
 ```toml
-liblzma = { version = "0.4", default-features = false, features = ["liblzma-sys"] }
+xz = { version = "0.4", default-features = false, features = ["liblzma-sys"] }
 ```
 
 ## License
@@ -69,5 +69,5 @@ at your option.
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted
-for inclusion in liblzma by you, as defined in the Apache-2.0 license, shall be
+for inclusion in xz by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.

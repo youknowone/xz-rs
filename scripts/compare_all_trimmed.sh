@@ -106,7 +106,7 @@ record_pair() {
 
 echo "prebuilding root test binaries..."
 env CARGO_TARGET_DIR="$RUST_TARGET" \
-  cargo test -p liblzma --release --no-default-features --features xz-core --lib --tests --no-run >/dev/null
+  cargo test -p xz --release --no-default-features --features xz-core --lib --tests --no-run >/dev/null
 env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" \
   cargo test --release --no-default-features --features liblzma-sys --lib --tests --no-run >/dev/null
 

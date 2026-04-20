@@ -2,8 +2,8 @@ use std::env;
 use std::io::{Read, Write};
 use std::time::{Duration, Instant};
 
-use liblzma::read;
-use liblzma::write;
+use xz::read;
+use xz::write;
 
 #[cfg(feature = "xz-core")]
 const BACKEND_NAME: &str = "xz-core";
