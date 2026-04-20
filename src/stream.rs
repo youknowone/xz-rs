@@ -4,7 +4,7 @@
 //! encoding/decoding of LZMA streams. Each [`Stream`] is either an encoder or
 //! decoder and processes data in a streaming fashion.
 
-#![cfg_attr(feature = "xz", allow(unused_unsafe))]
+#![cfg_attr(feature = "xz-core", allow(unused_unsafe))]
 
 use std::collections::LinkedList;
 use std::error;

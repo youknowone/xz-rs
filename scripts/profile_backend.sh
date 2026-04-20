@@ -3,11 +3,11 @@ set -euo pipefail
 
 if [[ $# -lt 2 ]]; then
   cat <<'EOF' >&2
-Usage: scripts/profile_backend.sh <c|liblzma-sys|xz|rust|xz-sys> <encode|decode|size|crc32|crc64> [backend_probe args...]
+Usage: scripts/profile_backend.sh <c|liblzma-sys|xz-core|rust|xz-sys> <encode|decode|size|crc32|crc64> [backend_probe args...]
 
 Examples:
-  scripts/profile_backend.sh xz decode --size 1048576 --iters 500 --warmup 50
-  scripts/profile_backend.sh xz size --input-kind random --size 1048576 --iters 800 --warmup 80
+  scripts/profile_backend.sh xz-core decode --size 1048576 --iters 500 --warmup 50
+  scripts/profile_backend.sh xz-core size --input-kind random --size 1048576 --iters 800 --warmup 80
 
 Environment:
   PROFILER=auto|samply|perf|plain   default: auto
@@ -29,8 +29,8 @@ case "$BACKEND" in
     TARGET_DIR="target/profile-bench-c"
     BACKEND_ENV=(LZMA_API_STATIC=1)
     ;;
-  xz|rust)
-    FEATURE="xz"
+  xz-core|xz|rust)
+    FEATURE="xz-core"
     TARGET_DIR="target/profile-bench-rust"
     BACKEND_ENV=()
     ;;

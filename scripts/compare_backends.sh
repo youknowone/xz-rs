@@ -33,7 +33,7 @@ while [[ $# -gt 0 ]]; do
       cat <<'EOF'
 Usage: scripts/compare_backends.sh [options]
 
-Compare full test-suite wall clock time for the direct `xz` backend and C backend using hyperfine.
+Compare full test-suite wall clock time for the direct `xz-core` backend and C backend using hyperfine.
 Results are written under target/perf-results by default.
 
 Options:
@@ -70,7 +70,7 @@ SYSTEST_RUST_CMD="env CARGO_TARGET_DIR=$SYSTEST_RUST_TARGET cargo test -p systes
 SYSTEST_C_CMD="env LZMA_API_STATIC=1 CARGO_TARGET_DIR=$SYSTEST_C_TARGET cargo test -p systest --release --no-default-features --features liblzma-sys -- --test-threads=1"
 
 echo "prebuilding root test binaries..."
-env CARGO_TARGET_DIR="$ROOT_RUST_TARGET" cargo test -p liblzma --release --no-default-features --features xz --no-run >/dev/null
+env CARGO_TARGET_DIR="$ROOT_RUST_TARGET" cargo test -p liblzma --release --no-default-features --features xz-core --no-run >/dev/null
 env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$ROOT_C_TARGET" cargo test --release --no-default-features --features liblzma-sys --no-run >/dev/null
 
 hyperfine \
@@ -79,7 +79,7 @@ hyperfine \
   --warmup "$WARMUP" \
   --export-json "$RESULTS_DIR/root-tests.json" \
   --export-markdown "$RESULTS_DIR/root-tests.md" \
-  --command-name xz-tests \
+  --command-name xz-core-tests \
   "$ROOT_RUST_CMD" \
   --command-name c-tests \
   "$ROOT_C_CMD"

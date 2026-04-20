@@ -1,13 +1,13 @@
 #![cfg(not(target_family = "wasm"))]
 
 #[cfg(any(
-    all(feature = "xz", feature = "xz-sys"),
-    all(feature = "xz", feature = "liblzma-sys"),
+    all(feature = "xz-core", feature = "xz-sys"),
+    all(feature = "xz-core", feature = "liblzma-sys"),
     all(feature = "xz-sys", feature = "liblzma-sys"),
 ))]
-compile_error!("Enable exactly one backend feature: xz, xz-sys, or liblzma-sys");
-#[cfg(not(any(feature = "xz", feature = "xz-sys", feature = "liblzma-sys")))]
-compile_error!("Enable one backend feature: xz, xz-sys, or liblzma-sys");
+compile_error!("Enable exactly one backend feature: xz-core, xz-sys, or liblzma-sys");
+#[cfg(not(any(feature = "xz-core", feature = "xz-sys", feature = "liblzma-sys")))]
+compile_error!("Enable one backend feature: xz-core, xz-sys, or liblzma-sys");
 
 use std::env;
 use std::fs;
@@ -23,10 +23,10 @@ use liblzma_sys::{
     lzma_index_uncompressed_size, lzma_stream_buffer_bound, lzma_stream_buffer_decode,
     lzma_stream_flags as BackendStreamFlags, lzma_stream_footer_decode,
 };
-#[cfg(feature = "xz")]
-use xz::check::{crc32_fast::lzma_crc32, crc64_fast::lzma_crc64};
-#[cfg(feature = "xz")]
-use xz::common::{
+#[cfg(feature = "xz-core")]
+use xz_core::check::{crc32_fast::lzma_crc32, crc64_fast::lzma_crc64};
+#[cfg(feature = "xz-core")]
+use xz_core::common::{
     easy_buffer_encoder::lzma_easy_buffer_encode,
     index::{lzma_index_end, lzma_index_uncompressed_size},
     index_decoder::lzma_index_buffer_decode,
@@ -34,8 +34,8 @@ use xz::common::{
     stream_buffer_encoder::lzma_stream_buffer_bound,
     stream_flags_decoder::lzma_stream_footer_decode,
 };
-#[cfg(feature = "xz")]
-use xz::types::{
+#[cfg(feature = "xz-core")]
+use xz_core::types::{
     LZMA_CHECK_CRC64, LZMA_OK, LZMA_STREAM_HEADER_SIZE, lzma_index as BackendIndex,
     lzma_stream_flags as BackendStreamFlags,
 };
@@ -47,8 +47,8 @@ use xz_sys::{
     lzma_stream_flags as BackendStreamFlags, lzma_stream_footer_decode,
 };
 
-#[cfg(feature = "xz")]
-const BACKEND_NAME: &str = "xz";
+#[cfg(feature = "xz-core")]
+const BACKEND_NAME: &str = "xz-core";
 #[cfg(feature = "liblzma-sys")]
 const BACKEND_NAME: &str = "liblzma-sys";
 #[cfg(feature = "xz-sys")]
@@ -225,7 +225,7 @@ fn usage() -> String {
     let mut message = String::new();
     message.push_str("Usage:\n");
     message.push_str(
-        "  cargo run -p perf-probe --release --no-default-features --features <xz|xz-sys|liblzma-sys> -- \\\n",
+        "  cargo run -p perf-probe --release --no-default-features --features <xz-core|xz-sys|liblzma-sys> -- \\\n",
     );
     message.push_str("    --workload <encode|decode|size|crc32|crc64> [options]\n\n");
     message.push_str("Options:\n");
@@ -489,7 +489,7 @@ fn fold_bytes(len: usize, data: &[u8]) -> u64 {
 }
 
 unsafe fn backend_encode(input: &[u8], preset: u32) -> Vec<u8> {
-    #[cfg(feature = "xz")]
+    #[cfg(feature = "xz-core")]
     let bound = lzma_stream_buffer_bound(input.len());
     #[cfg(any(feature = "xz-sys", feature = "liblzma-sys"))]
     let bound = unsafe { lzma_stream_buffer_bound(input.len()) };

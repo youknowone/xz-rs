@@ -12,8 +12,8 @@ Options:
   --target-dir <dir>   Cargo target dir (default: target/codegen)
 
 Example:
-  scripts/inspect_codegen.sh xz::lzma::lzma2_encoder::lzma2_encode \
-    --package xz --format asm
+  scripts/inspect_codegen.sh xz_core::lzma::lzma2_encoder::lzma2_encode \
+    --package xz-core --format asm
 EOF
 }
 
@@ -30,7 +30,7 @@ fi
 SYMBOL="$1"
 shift
 
-PACKAGE="xz"
+PACKAGE="xz-core"
 FORMAT="asm"
 FEATURES=""
 TARGET_DIR="target/codegen"

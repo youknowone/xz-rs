@@ -5,21 +5,21 @@ use std::ptr;
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion, Throughput};
 
 #[cfg(any(
-    all(feature = "xz", feature = "xz-sys"),
-    all(feature = "xz", feature = "liblzma-sys"),
+    all(feature = "xz-core", feature = "xz-sys"),
+    all(feature = "xz-core", feature = "liblzma-sys"),
     all(feature = "xz-sys", feature = "liblzma-sys"),
 ))]
 compile_error!("backend_comparison bench must be built with exactly one backend feature");
-#[cfg(not(any(feature = "xz", feature = "xz-sys", feature = "liblzma-sys")))]
-compile_error!("backend_comparison bench requires `xz`, `xz-sys`, or `liblzma-sys`");
+#[cfg(not(any(feature = "xz-core", feature = "xz-sys", feature = "liblzma-sys")))]
+compile_error!("backend_comparison bench requires `xz-core`, `xz-sys`, or `liblzma-sys`");
 
 #[cfg(feature = "liblzma-sys")]
 use liblzma_sys::{
     lzma_crc32, lzma_crc64, lzma_easy_buffer_encode, lzma_stream_buffer_bound,
     lzma_stream_buffer_decode, LZMA_CHECK_CRC64, LZMA_OK,
 };
-#[cfg(feature = "xz")]
-use xz::{
+#[cfg(feature = "xz-core")]
+use xz_core::{
     check::{crc32_fast::lzma_crc32, crc64_fast::lzma_crc64},
     common::{
         easy_buffer_encoder::lzma_easy_buffer_encode,
@@ -34,8 +34,8 @@ use xz_sys::{
     lzma_stream_buffer_decode, LZMA_CHECK_CRC64, LZMA_OK,
 };
 
-#[cfg(feature = "xz")]
-const BACKEND_NAME: &str = "xz";
+#[cfg(feature = "xz-core")]
+const BACKEND_NAME: &str = "xz-core";
 #[cfg(feature = "liblzma-sys")]
 const BACKEND_NAME: &str = "liblzma-sys";
 #[cfg(feature = "xz-sys")]

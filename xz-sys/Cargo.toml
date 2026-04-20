@@ -22,5 +22,5 @@ parallel = []
 wasm = ["static", "bindgen"]
 
 [dependencies]
-xz = { path = "../xz" }
+xz-core = { path = "../xz-core" }
 libc = "0.2"

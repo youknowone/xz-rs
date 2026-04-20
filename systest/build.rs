@@ -177,7 +177,7 @@ fn main() {
     let bare_externs = vec!["libc"];
     let mut path_externs = Vec::new();
     if use_rs_sys {
-        path_externs.push(("xz", latest_rlib(&deps_dir, "xz")));
+        path_externs.push(("xz_core", latest_rlib(&deps_dir, "xz_core")));
     }
     let rustc_wrapper = write_rustc_wrapper(
         &PathBuf::from(env::var_os("OUT_DIR").unwrap()),

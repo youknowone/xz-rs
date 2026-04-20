@@ -4,8 +4,8 @@ use std::time::{Duration, Instant};
 
 use liblzma::bufread;
 
-#[cfg(feature = "xz")]
-const BACKEND_NAME: &str = "xz";
+#[cfg(feature = "xz-core")]
+const BACKEND_NAME: &str = "xz-core";
 #[cfg(feature = "xz-sys")]
 const BACKEND_NAME: &str = "xz-sys";
 #[cfg(feature = "liblzma-sys")]

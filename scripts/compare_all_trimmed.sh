@@ -106,7 +106,7 @@ record_pair() {
 
 echo "prebuilding root test binaries..."
 env CARGO_TARGET_DIR="$RUST_TARGET" \
-  cargo test -p liblzma --release --no-default-features --features xz --lib --tests --no-run >/dev/null
+  cargo test -p liblzma --release --no-default-features --features xz-core --lib --tests --no-run >/dev/null
 env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" \
   cargo test --release --no-default-features --features liblzma-sys --lib --tests --no-run >/dev/null
 
@@ -118,14 +118,14 @@ env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" \
 
 echo "prebuilding focused workload probes..."
 env CARGO_TARGET_DIR="$RUST_TARGET" \
-  cargo build -p perf-probe --release --no-default-features --features xz >/dev/null
+  cargo build -p perf-probe --release --no-default-features --features xz-core >/dev/null
 env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" \
   cargo build -p perf-probe --release --no-default-features --features liblzma-sys >/dev/null
 
 echo "prebuilding API workload probes..."
 for example in standard_files_probe qc_probe bufread_trailing_probe; do
   env CARGO_TARGET_DIR="$RUST_TARGET" \
-    cargo build --example "$example" --release --no-default-features --features xz >/dev/null
+    cargo build --example "$example" --release --no-default-features --features xz-core >/dev/null
   env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" \
     cargo build --example "$example" --release --no-default-features --features liblzma-sys >/dev/null
 done
@@ -142,7 +142,7 @@ DECODE_INPUT="$RESULTS_DIR/decode-input-1048576.xz"
 record_pair \
   root-tests \
   "root test bundle" \
-  xz-tests \
+  xz-core-tests \
   "./scripts/run_root_test_bins.sh $RUST_TARGET $ROOT_REPEATS" \
   c-tests \
   "./scripts/run_root_test_bins.sh $C_TARGET $ROOT_REPEATS"
@@ -158,7 +158,7 @@ record_pair \
 record_pair \
   encode \
   "focused encode random 1MiB" \
-  xz \
+  xz-core \
   "$PROBE_RUST_BIN --workload encode --input-kind random --size 1048576 --iters 300 --warmup 20" \
   c \
   "$PROBE_C_BIN --workload encode --input-kind random --size 1048576 --iters 300 --warmup 20"
@@ -166,7 +166,7 @@ record_pair \
 record_pair \
   decode \
   "focused decode random 1MiB" \
-  xz \
+  xz-core \
   "$PROBE_RUST_BIN --workload decode --compressed-input $DECODE_INPUT --expected-size 1048576 --iters 800 --warmup 80" \
   c \
   "$PROBE_C_BIN --workload decode --compressed-input $DECODE_INPUT --expected-size 1048576 --iters 800 --warmup 80"
@@ -174,7 +174,7 @@ record_pair \
 record_pair \
   size \
   "focused uncompressed_size random 1MiB" \
-  xz \
+  xz-core \
   "$PROBE_RUST_BIN --workload size --compressed-input $DECODE_INPUT --expected-size 1048576 --iters 2000000 --warmup 200000" \
   c \
   "$PROBE_C_BIN --workload size --compressed-input $DECODE_INPUT --expected-size 1048576 --iters 2000000 --warmup 200000"
@@ -182,7 +182,7 @@ record_pair \
 record_pair \
   crc32 \
   "focused crc32 16MiB" \
-  xz \
+  xz-core \
   "$PROBE_RUST_BIN --workload crc32 --size 16777216 --iters 300 --warmup 20" \
   c \
   "$PROBE_C_BIN --workload crc32 --size 16777216 --iters 300 --warmup 20"
@@ -190,7 +190,7 @@ record_pair \
 record_pair \
   crc64-large \
   "focused crc64 16MiB" \
-  xz \
+  xz-core \
   "$PROBE_RUST_BIN --workload crc64 --size 16777216 --iters 400 --warmup 20" \
   c \
   "$PROBE_C_BIN --workload crc64 --size 16777216 --iters 400 --warmup 20"
@@ -198,7 +198,7 @@ record_pair \
 record_pair \
   crc64-smallchunk \
   "focused crc64 1MiB chunk 16" \
-  xz \
+  xz-core \
   "$PROBE_RUST_BIN --workload crc64 --size 1048576 --chunk-size 16 --iters 400 --warmup 40" \
   c \
   "$PROBE_C_BIN --workload crc64 --size 1048576 --chunk-size 16 --iters 400 --warmup 40"
@@ -206,7 +206,7 @@ record_pair \
 record_pair \
   api-standard-files-all \
   "API standard files all" \
-  xz \
+  xz-core \
   "$API_RUST_EXAMPLES/standard_files_probe --mode all --iters 200 --warmup 20" \
   c \
   "$API_C_EXAMPLES/standard_files_probe --mode all --iters 200 --warmup 20"
@@ -214,7 +214,7 @@ record_pair \
 record_pair \
   api-standard-files-good \
   "API standard files good" \
-  xz \
+  xz-core \
   "$API_RUST_EXAMPLES/standard_files_probe --mode good --iters 1000 --warmup 100" \
   c \
   "$API_C_EXAMPLES/standard_files_probe --mode good --iters 1000 --warmup 100"
@@ -222,7 +222,7 @@ record_pair \
 record_pair \
   api-standard-files-delta \
   "API standard files good delta" \
-  xz \
+  xz-core \
   "$API_RUST_EXAMPLES/standard_files_probe --mode good --name-pattern delta --iters 400 --warmup 40" \
   c \
   "$API_C_EXAMPLES/standard_files_probe --mode good --name-pattern delta --iters 400 --warmup 40"
@@ -230,7 +230,7 @@ record_pair \
 record_pair \
   api-qc \
   "API qc both" \
-  xz \
+  xz-core \
   "$API_RUST_EXAMPLES/qc_probe --mode both --cases 128 --max-size 4096 --iters 200 --warmup 20" \
   c \
   "$API_C_EXAMPLES/qc_probe --mode both --cases 128 --max-size 4096 --iters 200 --warmup 20"
@@ -238,7 +238,7 @@ record_pair \
 record_pair \
   api-bufread-trailing \
   "API bufread trailing" \
-  xz \
+  xz-core \
   "$API_RUST_EXAMPLES/bufread_trailing_probe --mode both --input-size 1024 --trailing-size 123 --iters 1000 --warmup 100" \
   c \
   "$API_C_EXAMPLES/bufread_trailing_probe --mode both --input-size 1024 --trailing-size 123 --iters 1000 --warmup 100"
