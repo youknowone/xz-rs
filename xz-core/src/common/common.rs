@@ -1,4 +1,4 @@
-use crate::alloc::{lzma_alloc_bytes, lzma_alloc_zeroed_bytes, lzma_free_ptr};
+pub use crate::alloc::{lzma_alloc, lzma_alloc_zero, lzma_free};
 use crate::types::*;
 pub const LZMA_VERSION_MAJOR: u32 = 5;
 pub const LZMA_VERSION_MINOR: u32 = 8;
@@ -15,15 +15,6 @@ pub fn lzma_version_number() -> u32 {
 }
 pub fn lzma_version_string() -> *const c_char {
     crate::c_str!("5.8.3")
-}
-pub unsafe fn lzma_alloc(size: size_t, allocator: *const lzma_allocator) -> *mut c_void {
-    lzma_alloc_bytes(size, allocator)
-}
-pub unsafe fn lzma_alloc_zero(size: size_t, allocator: *const lzma_allocator) -> *mut c_void {
-    lzma_alloc_zeroed_bytes(size, allocator)
-}
-pub unsafe fn lzma_free(ptr: *mut c_void, allocator: *const lzma_allocator) {
-    lzma_free_ptr(ptr, allocator);
 }
 #[inline]
 pub unsafe fn lzma_stream_allocator(strm: *const lzma_stream) -> *const lzma_allocator {

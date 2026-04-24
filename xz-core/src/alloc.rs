@@ -18,7 +18,9 @@ pub use c::{c_allocator, c_allocator_ptr, lzma_c_alloc, lzma_c_free};
 pub use custom::allocator_or_c;
 pub use rust::rust_allocator;
 
+pub use policy::{lzma_alloc, lzma_alloc_zero, lzma_free};
+
 pub(crate) use policy::{
     internal_alloc_array, internal_alloc_bytes, internal_alloc_object, internal_alloc_zeroed_array,
-    internal_free, lzma_alloc_bytes, lzma_alloc_zeroed_bytes, lzma_free_ptr,
+    internal_free,
 };
