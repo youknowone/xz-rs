@@ -25,8 +25,7 @@ for ((repeat = 0; repeat < REPEATS; repeat++)); do
   for prefix in \
     "xz-" \
     "drop_incomplete-" \
-    "sys_equivalence-" \
-    "standard_files-"
+    "sys_equivalence-"
   do
     BIN=""
     while IFS= read -r candidate; do

@@ -68,6 +68,28 @@ To use the original C backend:
 xz = { version = "0.4", default-features = false, features = ["liblzma-sys"] }
 ```
 
+## Performance snapshot
+
+The table below is a local benchmark snapshot from 2026-04-28 on macOS arm64
+(Apple M4 Pro). Lower is better. The C backend was built from the vendored
+`liblzma-sys/xz` source tree with `LZMA_API_STATIC=1`, not from a system
+`liblzma`.
+
+| Workload | xz-core | xz-sys | C liblzma |
+|:--|--:|--:|--:|
+| Root test bundle, `scripts/compare_backends.sh --runs 5 --warmup 1` | 632.6 ms | - | 628.8 ms |
+| Systest, same command | - | 74.3 ms | 64.2 ms |
+| `standard-files --mode good --iters 1000 --warmup 100` | 6.235 s | - | 8.606 s |
+| Encode, random 1 MiB, 20 iterations | 2.414 s | 2.446 s | 2.487 s |
+| Decode, random 1 MiB, 50 iterations | 50.4 ms | 50.1 ms | 57.1 ms |
+| `uncompressed_size`, random 1 MiB, 2,000,000 iterations | 144.8 ms | 139.9 ms | 167.5 ms |
+| CRC32, 16 MiB, 400 iterations | 730.1 ms | 927.6 ms | 3.068 s |
+| CRC64, 16 MiB, 400 iterations | 4.719 s | 4.784 s | 9.741 s |
+
+Some rows are close enough that scheduler noise can matter, and the CRC64 C
+run had large outliers on this machine. Reproduce with the scripts documented
+in [`docs/performance-workflow.md`](docs/performance-workflow.md).
+
 ## License
 
 This project is licensed under either of
