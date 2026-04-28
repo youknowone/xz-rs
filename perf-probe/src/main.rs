@@ -23,6 +23,8 @@ use liblzma_sys::{
     lzma_index_uncompressed_size, lzma_stream_buffer_bound, lzma_stream_buffer_decode,
     lzma_stream_flags as BackendStreamFlags, lzma_stream_footer_decode,
 };
+#[cfg(feature = "xz-core-custom-allocator")]
+use xz_core::alloc::{c_allocator, rust_allocator};
 #[cfg(feature = "xz-core")]
 use xz_core::check::{crc32_fast::lzma_crc32, crc64_fast::lzma_crc64};
 #[cfg(feature = "xz-core")]
@@ -69,6 +71,13 @@ enum InputKind {
     Text,
 }
 
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum AllocatorPolicy {
+    Default,
+    Rust,
+    C,
+}
+
 #[derive(Debug)]
 struct Config {
     workload: Workload,
@@ -82,6 +91,7 @@ struct Config {
     preset: u32,
     iters: usize,
     warmup: usize,
+    allocator: AllocatorPolicy,
 }
 
 #[derive(Debug)]
@@ -98,14 +108,15 @@ fn main() {
     });
 
     println!(
-        "config: backend={} workload={:?} input={:?} size={} preset={} iters={} warmup={}",
+        "config: backend={} workload={:?} input={:?} size={} preset={} iters={} warmup={} allocator={:?}",
         BACKEND_NAME,
         config.workload,
         config.input_kind,
         config.size,
         config.preset,
         config.iters,
-        config.warmup
+        config.warmup,
+        config.allocator
     );
     if let Some(path) = &config.input_path {
         println!("input_path: {}", path.display());
@@ -143,6 +154,7 @@ impl Config {
             preset: 6,
             iters: 200,
             warmup: 20,
+            allocator: AllocatorPolicy::Default,
         };
 
         while let Some(arg) = args.next() {
@@ -188,6 +200,9 @@ impl Config {
                 "--warmup" => {
                     config.warmup = parse_usize(next_arg(&mut args, "--warmup")?, "--warmup")?;
                 }
+                "--allocator" => {
+                    config.allocator = parse_allocator(next_arg(&mut args, "--allocator")?)?;
+                }
                 "--help" | "-h" => return Err(usage()),
                 unknown => return Err(format!("unknown argument `{unknown}`\n\n{}", usage())),
             }
@@ -217,6 +232,11 @@ impl Config {
             return Err("`--chunk-size` is only supported with crc32/crc64 workloads".to_owned());
         }
 
+        #[cfg(not(feature = "xz-core-custom-allocator"))]
+        if config.allocator != AllocatorPolicy::Default {
+            return Err("`--allocator` requires `--features xz-core-custom-allocator`".to_owned());
+        }
+
         Ok(config)
     }
 }
@@ -244,6 +264,7 @@ fn usage() -> String {
     message.push_str("  --preset <0-9>              LZMA preset used by encode/decode prep\n");
     message.push_str("  --iters <n>                 Timed iterations\n");
     message.push_str("  --warmup <n>                Untimed warmup iterations\n");
+    message.push_str("  --allocator <default|rust|c> xz-core custom_allocator policy probe only\n");
     message
 }
 
@@ -271,6 +292,15 @@ fn parse_input_kind(value: String) -> Result<InputKind, String> {
         "random" => Ok(InputKind::Random),
         "text" => Ok(InputKind::Text),
         _ => Err(format!("unsupported input kind `{value}`")),
+    }
+}
+
+fn parse_allocator(value: String) -> Result<AllocatorPolicy, String> {
+    match value.as_str() {
+        "default" => Ok(AllocatorPolicy::Default),
+        "rust" => Ok(AllocatorPolicy::Rust),
+        "c" => Ok(AllocatorPolicy::C),
+        _ => Err(format!("unsupported allocator `{value}`")),
     }
 }
 
@@ -306,7 +336,7 @@ fn load_compressed_input(config: &Config) -> Result<(Vec<u8>, usize), std::io::E
         )),
         None => {
             let raw = load_raw_input(config)?;
-            let compressed = unsafe { backend_encode(&raw, config.preset) };
+            let compressed = unsafe { backend_encode(&raw, config.preset, config.allocator) };
             Ok((compressed, raw.len()))
         }
     }
@@ -340,7 +370,7 @@ fn run_encode(config: &Config) {
         std::process::exit(1);
     });
 
-    let first = unsafe { backend_encode(&input, config.preset) };
+    let first = unsafe { backend_encode(&input, config.preset, config.allocator) };
     if let Some(path) = &config.save_output_path {
         fs::write(path, &first).unwrap_or_else(|err| {
             eprintln!("failed to write encoded output: {err}");
@@ -349,7 +379,7 @@ fn run_encode(config: &Config) {
     }
 
     let measurement = measure(input.len(), config.iters, config.warmup, || unsafe {
-        let output = backend_encode(&input, config.preset);
+        let output = backend_encode(&input, config.preset, config.allocator);
         fold_bytes(output.len(), &output)
     });
     print_measurement(&measurement, config.iters);
@@ -488,18 +518,40 @@ fn fold_bytes(len: usize, data: &[u8]) -> u64 {
     acc
 }
 
-unsafe fn backend_encode(input: &[u8], preset: u32) -> Vec<u8> {
+unsafe fn backend_encode(input: &[u8], preset: u32, allocator: AllocatorPolicy) -> Vec<u8> {
     #[cfg(feature = "xz-core")]
     let bound = lzma_stream_buffer_bound(input.len());
     #[cfg(any(feature = "xz-sys", feature = "liblzma-sys"))]
     let bound = unsafe { lzma_stream_buffer_bound(input.len()) };
     let mut out = vec![0u8; bound];
     let mut out_pos: usize = 0;
+
+    #[cfg(feature = "xz-core-custom-allocator")]
+    let allocator_storage;
+    #[cfg(feature = "xz-core-custom-allocator")]
+    let allocator_ptr = match allocator {
+        AllocatorPolicy::Default => ptr::null(),
+        AllocatorPolicy::Rust => {
+            allocator_storage = rust_allocator();
+            &allocator_storage
+        }
+        AllocatorPolicy::C => {
+            allocator_storage = c_allocator();
+            &allocator_storage
+        }
+    };
+
+    #[cfg(not(feature = "xz-core-custom-allocator"))]
+    let allocator_ptr = {
+        debug_assert_eq!(allocator, AllocatorPolicy::Default);
+        ptr::null()
+    };
+
     let ret = unsafe {
         lzma_easy_buffer_encode(
             preset,
             LZMA_CHECK_CRC64,
-            ptr::null(),
+            allocator_ptr,
             input.as_ptr(),
             input.len(),
             out.as_mut_ptr(),

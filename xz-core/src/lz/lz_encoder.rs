@@ -159,7 +159,11 @@ unsafe fn lz_encoder_prepare(
     let old_size: u32 = (*mf).size;
     (*mf).size = (*mf).keep_size_before + reserve + (*mf).keep_size_after;
     if !(*mf).buffer.is_null() && old_size != (*mf).size {
-        crate::alloc::internal_free_bytes((*mf).buffer as *mut c_void, allocator);
+        crate::alloc::internal_free_array(
+            (*mf).buffer,
+            (old_size + LZMA_MEMCMPLEN_EXTRA) as size_t,
+            allocator,
+        );
         (*mf).buffer = core::ptr::null_mut();
     }
     (*mf).match_len_max = (*lz_options).match_len_max as u32;
@@ -246,10 +250,10 @@ unsafe fn lz_encoder_init(
     lz_options: *const lzma_lz_options,
 ) -> bool {
     if (*mf).buffer.is_null() {
-        (*mf).buffer = crate::alloc::internal_alloc_bytes(
+        (*mf).buffer = crate::alloc::internal_alloc_array::<u8>(
             ((*mf).size + LZMA_MEMCMPLEN_EXTRA) as size_t,
             allocator,
-        ) as *mut u8;
+        );
         if (*mf).buffer.is_null() {
             return true;
         }
@@ -347,7 +351,11 @@ unsafe fn lz_encoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocato
         (*coder).mf.hash_count as size_t,
         allocator,
     );
-    crate::alloc::internal_free_bytes((*coder).mf.buffer as *mut c_void, allocator);
+    crate::alloc::internal_free_array(
+        (*coder).mf.buffer,
+        ((*coder).mf.size + LZMA_MEMCMPLEN_EXTRA) as size_t,
+        allocator,
+    );
     if let Some(end) = (*coder).lz.end {
         end((*coder).lz.coder, allocator);
     } else {

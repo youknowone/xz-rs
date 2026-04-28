@@ -56,6 +56,10 @@ pub(crate) fn alloc_impl(size: usize, align: usize, zeroed: bool) -> *mut c_void
     user_ptr as *mut c_void
 }
 
+fn raw_layout(size: usize, align: usize) -> Option<Layout> {
+    Layout::from_size_align(size, align.max(RUST_ALLOC_ALIGN)).ok()
+}
+
 pub(crate) unsafe fn free_impl(ptr: *mut c_void) {
     if ptr.is_null() || ptr == ZERO_SIZE_PTR {
         return;
@@ -101,7 +105,9 @@ pub(crate) unsafe fn internal_alloc_bytes(
 }
 
 pub(crate) unsafe fn internal_alloc_object<T>(_allocator: *const lzma_allocator) -> *mut T {
-    let layout = Layout::new::<T>();
+    let Some(layout) = raw_layout(core::mem::size_of::<T>(), core::mem::align_of::<T>()) else {
+        return core::ptr::null_mut();
+    };
     if layout.size() == 0 {
         return core::ptr::NonNull::<T>::dangling().as_ptr();
     }
@@ -112,7 +118,10 @@ pub(crate) unsafe fn internal_alloc_array<T>(
     count: size_t,
     _allocator: *const lzma_allocator,
 ) -> *mut T {
-    let Ok(layout) = Layout::array::<T>(count as usize) else {
+    let Some(size) = (count as usize).checked_mul(core::mem::size_of::<T>()) else {
+        return core::ptr::null_mut();
+    };
+    let Some(layout) = raw_layout(size, core::mem::align_of::<T>()) else {
         return core::ptr::null_mut();
     };
     if layout.size() == 0 {
@@ -125,7 +134,10 @@ pub(crate) unsafe fn internal_alloc_zeroed_array<T>(
     count: size_t,
     _allocator: *const lzma_allocator,
 ) -> *mut T {
-    let Ok(layout) = Layout::array::<T>(count as usize) else {
+    let Some(size) = (count as usize).checked_mul(core::mem::size_of::<T>()) else {
+        return core::ptr::null_mut();
+    };
+    let Some(layout) = raw_layout(size, core::mem::align_of::<T>()) else {
         return core::ptr::null_mut();
     };
     if layout.size() == 0 {
@@ -142,7 +154,10 @@ pub(crate) unsafe fn internal_free<T>(ptr: *mut T, _allocator: *const lzma_alloc
     if ptr.is_null() || core::mem::size_of::<T>() == 0 {
         return;
     }
-    unsafe { dealloc(ptr.cast::<u8>(), Layout::new::<T>()) };
+    let Some(layout) = raw_layout(core::mem::size_of::<T>(), core::mem::align_of::<T>()) else {
+        return;
+    };
+    unsafe { dealloc(ptr.cast::<u8>(), layout) };
 }
 
 pub(crate) unsafe fn internal_free_array<T>(
@@ -150,7 +165,10 @@ pub(crate) unsafe fn internal_free_array<T>(
     count: size_t,
     _allocator: *const lzma_allocator,
 ) {
-    let Ok(layout) = Layout::array::<T>(count as usize) else {
+    let Some(size) = (count as usize).checked_mul(core::mem::size_of::<T>()) else {
+        return;
+    };
+    let Some(layout) = raw_layout(size, core::mem::align_of::<T>()) else {
         return;
     };
     if ptr.is_null() || layout.size() == 0 {
