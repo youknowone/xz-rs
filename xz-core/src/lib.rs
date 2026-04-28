@@ -21,6 +21,7 @@ pub mod delta;
 pub mod lz;
 pub mod lzma;
 pub mod rangecoder;
+mod raw_alloc;
 pub mod simple;
 pub mod tuklib;
 pub mod types;

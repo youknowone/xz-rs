@@ -1,7 +1,8 @@
 use crate::types::*;
 
 use super::c::{c_alloc_bytes, c_alloc_zeroed_bytes, c_allocator_ptr, c_free_ptr};
-use super::rust::{RUST_ALLOC_ALIGN, rust_alloc_impl, rust_allocator_ptr, rust_free_ptr};
+use super::rust::rust_allocator_ptr;
+use crate::raw_alloc::{RUST_ALLOC_ALIGN, alloc_impl, free_ptr};
 
 fn c_size(size: size_t) -> size_t {
     if size == 0 { 1 } else { size }
@@ -66,7 +67,7 @@ pub(crate) unsafe fn internal_alloc_bytes(
     if let Some(alloc) = unsafe { (*allocator).alloc } {
         return unsafe { alloc((*allocator).opaque, 1, size) };
     }
-    rust_alloc_impl(size as usize, RUST_ALLOC_ALIGN, false)
+    alloc_impl(size as usize, RUST_ALLOC_ALIGN, false)
 }
 
 pub(crate) unsafe fn internal_alloc_object<T>(allocator: *const lzma_allocator) -> *mut T {
@@ -77,7 +78,7 @@ pub(crate) unsafe fn internal_alloc_object<T>(allocator: *const lzma_allocator) 
             alloc((*allocator).opaque, 1, core::mem::size_of::<T>() as size_t) as *mut T
         };
     }
-    rust_alloc_impl(core::mem::size_of::<T>(), core::mem::align_of::<T>(), false) as *mut T
+    alloc_impl(core::mem::size_of::<T>(), core::mem::align_of::<T>(), false) as *mut T
 }
 
 pub(crate) unsafe fn internal_alloc_array<T>(
@@ -92,7 +93,7 @@ pub(crate) unsafe fn internal_alloc_array<T>(
     {
         return unsafe { alloc((*allocator).opaque, 1, size as size_t) as *mut T };
     }
-    rust_alloc_impl(size, core::mem::align_of::<T>(), false) as *mut T
+    alloc_impl(size, core::mem::align_of::<T>(), false) as *mut T
 }
 
 pub(crate) unsafe fn internal_alloc_zeroed_array<T>(
@@ -111,15 +112,27 @@ pub(crate) unsafe fn internal_alloc_zeroed_array<T>(
         }
         return ptr;
     }
-    rust_alloc_impl(size, core::mem::align_of::<T>(), true) as *mut T
+    alloc_impl(size, core::mem::align_of::<T>(), true) as *mut T
 }
 
-pub(crate) unsafe fn internal_free(ptr: *mut c_void, allocator: *const lzma_allocator) {
+pub(crate) unsafe fn internal_free_bytes(ptr: *mut c_void, allocator: *const lzma_allocator) {
     if !allocator.is_null()
         && let Some(free) = unsafe { (*allocator).free }
     {
         unsafe { free((*allocator).opaque, ptr) };
         return;
     }
-    unsafe { rust_free_ptr(ptr) };
+    unsafe { free_ptr(ptr) };
+}
+
+pub(crate) unsafe fn internal_free<T>(ptr: *mut T, allocator: *const lzma_allocator) {
+    unsafe { internal_free_bytes(ptr.cast(), allocator) };
+}
+
+pub(crate) unsafe fn internal_free_array<T>(
+    ptr: *mut T,
+    _count: size_t,
+    allocator: *const lzma_allocator,
+) {
+    unsafe { internal_free_bytes(ptr.cast(), allocator) };
 }

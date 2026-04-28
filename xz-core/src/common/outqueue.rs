@@ -25,7 +25,7 @@ unsafe fn free_one_cached_buffer(outq: *mut lzma_outq, allocator: *const lzma_al
     (*outq).cache = (*buf).next;
     (*outq).bufs_allocated -= 1;
     (*outq).mem_allocated -= lzma_outq_outbuf_memusage((*buf).allocated);
-    crate::alloc::internal_free(buf as *mut c_void, allocator);
+    crate::alloc::internal_free_bytes(buf as *mut c_void, allocator);
 }
 pub unsafe fn lzma_outq_clear_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator) {
     while !(*outq).cache.is_null() {

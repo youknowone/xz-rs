@@ -130,7 +130,7 @@ unsafe fn index_encode(
     ret
 }
 unsafe fn index_encoder_end(coder: *mut c_void, allocator: *const lzma_allocator) {
-    crate::alloc::internal_free(coder, allocator);
+    crate::alloc::internal_free(coder as *mut lzma_index_coder, allocator);
 }
 unsafe fn index_encoder_reset(coder: *mut lzma_index_coder, i: *const lzma_index) {
     lzma_index_iter_init(::core::ptr::addr_of_mut!((*coder).iter), i);

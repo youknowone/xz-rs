@@ -92,7 +92,7 @@ unsafe fn auto_decode(
 unsafe fn auto_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_auto_coder = coder_ptr as *mut lzma_auto_coder;
     lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 unsafe fn auto_decoder_get_check(coder_ptr: *const c_void) -> lzma_check {
     let coder: *const lzma_auto_coder = coder_ptr as *const lzma_auto_coder;

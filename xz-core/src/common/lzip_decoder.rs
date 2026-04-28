@@ -264,7 +264,7 @@ unsafe fn lzip_decode(
 unsafe fn lzip_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_lzip_coder = coder_ptr as *mut lzma_lzip_coder;
     lzma_next_end(::core::ptr::addr_of_mut!((*coder).lzma_decoder), allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 unsafe fn lzip_decoder_get_check(_coder_ptr: *const c_void) -> lzma_check {
     LZMA_CHECK_CRC32

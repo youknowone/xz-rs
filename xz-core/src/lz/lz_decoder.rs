@@ -166,13 +166,13 @@ unsafe fn lz_decode(
 unsafe fn lz_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_coder = coder_ptr as *mut lzma_coder;
     lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
-    crate::alloc::internal_free((*coder).dict.buf as *mut c_void, allocator);
+    crate::alloc::internal_free_bytes((*coder).dict.buf as *mut c_void, allocator);
     if let Some(end) = (*coder).lz.end {
         end((*coder).lz.coder, allocator);
     } else {
-        crate::alloc::internal_free((*coder).lz.coder, allocator);
+        crate::alloc::internal_free_bytes((*coder).lz.coder, allocator);
     }
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 pub unsafe fn lzma_lz_decoder_init(
     next: *mut lzma_next_coder,
@@ -258,7 +258,7 @@ pub unsafe fn lzma_lz_decoder_init(
         .dict_size
         .wrapping_add((2 * LZ_DICT_REPEAT_MAX) as size_t);
     if (*coder).dict.size != alloc_size {
-        crate::alloc::internal_free((*coder).dict.buf as *mut c_void, allocator);
+        crate::alloc::internal_free_bytes((*coder).dict.buf as *mut c_void, allocator);
         (*coder).dict.buf = crate::alloc::internal_alloc_bytes(
             alloc_size.wrapping_add(LZ_DICT_EXTRA as size_t),
             allocator,

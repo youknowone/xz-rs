@@ -1038,8 +1038,10 @@ pub unsafe fn lzma_lzma_encoder_create(
     lz_options: *mut lzma_lz_options,
 ) -> lzma_ret {
     if (*coder_ptr).is_null() {
-        *coder_ptr =
-            crate::alloc::internal_alloc_object::<lzma_lzma1_encoder>(allocator) as *mut c_void;
+        *coder_ptr = crate::alloc::internal_alloc_bytes(
+            core::mem::size_of::<lzma_lzma1_encoder>() as size_t,
+            allocator,
+        );
         if (*coder_ptr).is_null() {
             return LZMA_MEM_ERROR;
         }

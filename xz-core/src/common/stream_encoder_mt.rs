@@ -380,7 +380,7 @@ unsafe extern "C" fn worker_start(thr_ptr: *mut c_void) -> *mut c_void {
         ::core::ptr::addr_of_mut!((*thr).block_encoder),
         worker_allocator(thr),
     );
-    crate::alloc::internal_free((*thr).in_0 as *mut c_void, worker_allocator(thr));
+    crate::alloc::internal_free_bytes((*thr).in_0 as *mut c_void, worker_allocator(thr));
     MYTHREAD_RET_VALUE
 }
 unsafe fn threads_stop(coder: *mut lzma_stream_coder, wait_for_threads: bool) {
@@ -477,7 +477,7 @@ unsafe fn threads_end(coder: *mut lzma_stream_coder, allocator: *const lzma_allo
         let _ret: c_int = mythread_join((*(*coder).threads.offset(i_0 as isize)).thread_id);
         i_0 += 1;
     }
-    crate::alloc::internal_free((*coder).threads as *mut c_void, allocator);
+    crate::alloc::internal_free_array((*coder).threads, (*coder).threads_max as size_t, allocator);
 }
 unsafe fn initialize_new_thread(
     coder: *mut lzma_stream_coder,
@@ -526,7 +526,7 @@ unsafe fn initialize_new_thread(
         }
         mythread_mutex_destroy(::core::ptr::addr_of_mut!((*thr).mutex));
     }
-    crate::alloc::internal_free((*thr).in_0 as *mut c_void, allocator);
+    crate::alloc::internal_free_bytes((*thr).in_0 as *mut c_void, allocator);
     LZMA_MEM_ERROR
 }
 unsafe fn get_thread(coder: *mut lzma_stream_coder, allocator: *const lzma_allocator) -> lzma_ret {
@@ -971,7 +971,7 @@ unsafe fn stream_encoder_mt_end(coder_ptr: *mut c_void, allocator: *const lzma_a
     lzma_index_end((*coder).index, allocator);
     mythread_cond_destroy(::core::ptr::addr_of_mut!((*coder).cond));
     mythread_mutex_destroy(::core::ptr::addr_of_mut!((*coder).mutex));
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 unsafe fn stream_encoder_mt_update(
     coder_ptr: *mut c_void,
@@ -1107,13 +1107,13 @@ unsafe fn stream_encoder_mt_create_coder(
     }
     (*next).coder = coder as *mut c_void;
     if mythread_mutex_init(::core::ptr::addr_of_mut!((*coder).mutex)) != 0 {
-        crate::alloc::internal_free(coder as *mut c_void, allocator);
+        crate::alloc::internal_free(coder, allocator);
         (*next).coder = core::ptr::null_mut();
         return core::ptr::null_mut();
     }
     if mythread_cond_init(::core::ptr::addr_of_mut!((*coder).cond)) != 0 {
         mythread_mutex_destroy(::core::ptr::addr_of_mut!((*coder).mutex));
-        crate::alloc::internal_free(coder as *mut c_void, allocator);
+        crate::alloc::internal_free(coder, allocator);
         (*next).coder = core::ptr::null_mut();
         return core::ptr::null_mut();
     }

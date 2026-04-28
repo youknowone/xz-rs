@@ -208,7 +208,7 @@ unsafe fn goto_out(
 unsafe fn index_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_index_coder = coder_ptr as *mut lzma_index_coder;
     lzma_index_end((*coder).index, allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 unsafe fn index_decoder_memconfig(
     coder_ptr: *mut c_void,

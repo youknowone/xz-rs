@@ -150,7 +150,7 @@ unsafe fn microlzma_decode(
 unsafe fn microlzma_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_microlzma_coder = coder_ptr as *mut lzma_microlzma_coder;
     lzma_next_end(::core::ptr::addr_of_mut!((*coder).lzma), allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 unsafe fn microlzma_decoder_init(
     next: *mut lzma_next_coder,

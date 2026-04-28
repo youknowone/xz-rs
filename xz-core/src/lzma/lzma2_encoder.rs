@@ -222,8 +222,8 @@ unsafe fn lzma2_encode(
 }
 unsafe fn lzma2_encoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_lzma2_coder = coder_ptr as *mut lzma_lzma2_coder;
-    crate::alloc::internal_free((*coder).lzma, allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free_bytes((*coder).lzma, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 unsafe fn lzma2_encoder_options_update(
     coder_ptr: *mut c_void,

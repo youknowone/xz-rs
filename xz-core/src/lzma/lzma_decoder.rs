@@ -2368,8 +2368,10 @@ pub unsafe fn lzma_lzma_decoder_create(
     lz_options: *mut lzma_lz_options,
 ) -> lzma_ret {
     if (*lz).coder.is_null() {
-        (*lz).coder =
-            crate::alloc::internal_alloc_object::<lzma_lzma1_decoder>(allocator) as *mut c_void;
+        (*lz).coder = crate::alloc::internal_alloc_bytes(
+            core::mem::size_of::<lzma_lzma1_decoder>() as size_t,
+            allocator,
+        );
         if (*lz).coder.is_null() {
             return LZMA_MEM_ERROR;
         }

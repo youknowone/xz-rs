@@ -456,7 +456,7 @@ unsafe fn file_info_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_a
     lzma_next_end(::core::ptr::addr_of_mut!((*coder).index_decoder), allocator);
     lzma_index_end((*coder).this_index, allocator);
     lzma_index_end((*coder).combined_index, allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 unsafe fn lzma_file_info_decoder_init(
     next: *mut lzma_next_coder,

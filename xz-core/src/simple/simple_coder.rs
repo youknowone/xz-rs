@@ -175,8 +175,8 @@ unsafe fn simple_code(
 unsafe fn simple_coder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_simple_coder = coder_ptr as *mut lzma_simple_coder;
     lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
-    crate::alloc::internal_free((*coder).simple, allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free_bytes((*coder).simple, allocator);
+    crate::alloc::internal_free_bytes(coder as *mut c_void, allocator);
 }
 unsafe fn simple_coder_update(
     coder_ptr: *mut c_void,

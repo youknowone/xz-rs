@@ -160,7 +160,7 @@ unsafe fn block_decode(
 unsafe fn block_decoder_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
     let coder: *mut lzma_block_coder = coder_ptr as *mut lzma_block_coder;
     lzma_next_end(::core::ptr::addr_of_mut!((*coder).next), allocator);
-    crate::alloc::internal_free(coder as *mut c_void, allocator);
+    crate::alloc::internal_free(coder, allocator);
 }
 pub(crate) unsafe fn lzma_block_decoder_init(
     next: *mut lzma_next_coder,
