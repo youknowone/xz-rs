@@ -50,6 +50,7 @@ jobs:
     - uses: Swatinem/rust-cache@v2
       with:
         cache-targets: "false"
+        save-if: ${{ github.event_name != 'pull_request' }}
     - name: Set crt-static
       if: matrix.crt_static == 'yes'
       run: echo RUSTFLAGS=-Ctarget-feature=+crt-static >> $GITHUB_ENV
@@ -59,7 +60,7 @@ jobs:
       run: echo LZMA_API_STATIC=1 >> $GITHUB_ENV
       shell: bash
     - name: copy Cargo.lock for msrv check
-      if: matrix.rust == '1.85'
+      if: matrix.rust == '1.88'
       run: |
         cp Cargo.lock.msrv Cargo.lock
     - run: |
@@ -86,10 +87,6 @@ jobs:
     - run: |
         cargo run --manifest-path systest/Cargo.toml --no-default-features --features xz-sys
         cargo clean -p xz-sys
-        cargo run --manifest-path systest/Cargo.toml --no-default-features --features liblzma-sys
-        cargo clean -p xz -p liblzma-sys
-      if: matrix.static == 'yes'
-    - run: cargo run --manifest-path systest/Cargo.toml --no-default-features --features liblzma-sys,bindgen
       if: matrix.static == 'yes'
 
 
@@ -116,5 +113,6 @@ jobs:
     - uses: Swatinem/rust-cache@v2
       with:
         cache-targets: "false"
+        save-if: ${{ github.event_name != 'pull_request' }}
     - name: Run upstream C xz test harness against xz-sys
       run: scripts/run_xz_c_tests_with_xz_sys.sh

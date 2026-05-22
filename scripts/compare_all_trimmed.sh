@@ -110,12 +110,6 @@ env CARGO_TARGET_DIR="$RUST_TARGET" \
 env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" \
   cargo test --release --no-default-features --features liblzma-sys --lib --tests --no-run >/dev/null
 
-echo "prebuilding systest binaries..."
-env CARGO_TARGET_DIR="$RUST_TARGET" \
-  cargo test -p systest --release --no-default-features --features xz-sys --no-run >/dev/null
-env LZMA_API_STATIC=1 CARGO_TARGET_DIR="$C_TARGET" \
-  cargo test -p systest --release --no-default-features --features liblzma-sys --no-run >/dev/null
-
 echo "prebuilding focused workload probes..."
 env CARGO_TARGET_DIR="$RUST_TARGET" \
   cargo build -p perf-probe --release --no-default-features --features xz-core >/dev/null
@@ -146,14 +140,6 @@ record_pair \
   "./scripts/run_root_test_bins.sh $RUST_TARGET $ROOT_REPEATS" \
   c-tests \
   "./scripts/run_root_test_bins.sh $C_TARGET $ROOT_REPEATS"
-
-record_pair \
-  systest \
-  "systest" \
-  xz-sys-systest \
-  "env CARGO_TARGET_DIR=$RUST_TARGET cargo test -p systest --release --no-default-features --features xz-sys -- --test-threads=1" \
-  c-systest \
-  "env LZMA_API_STATIC=1 CARGO_TARGET_DIR=$C_TARGET cargo test -p systest --release --no-default-features --features liblzma-sys -- --test-threads=1"
 
 record_pair \
   encode \

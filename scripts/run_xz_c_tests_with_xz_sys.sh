@@ -2,11 +2,16 @@
 set -euo pipefail
 
 ROOT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)
-XZ_SRC_DIR="$ROOT_DIR/liblzma-sys/xz"
+XZ_SRC_DIR="$ROOT_DIR/vendor/xz"
 BUILD_DIR="${XZ_SYS_C_TEST_BUILD_DIR:-$ROOT_DIR/target/xz-sys-c-tests}"
 CARGO_BUILD_DIR="$BUILD_DIR/cargo"
 CMAKE_BUILD_DIR="$BUILD_DIR/cmake"
 JOBS="${JOBS:-$(getconf _NPROCESSORS_ONLN 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 2)}"
+
+if [ -f "$CMAKE_BUILD_DIR/CMakeCache.txt" ] \
+    && ! grep -Fq "CMAKE_HOME_DIRECTORY:INTERNAL=$XZ_SRC_DIR" "$CMAKE_BUILD_DIR/CMakeCache.txt"; then
+    rm -rf "$CMAKE_BUILD_DIR"
+fi
 
 if command -v ninja >/dev/null 2>&1; then
     CMAKE_GENERATOR=( -G Ninja )

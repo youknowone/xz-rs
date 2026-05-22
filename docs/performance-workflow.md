@@ -8,12 +8,12 @@ The root crate has three backend modes:
 
 - `xz-core`: direct Rust ABI calls into the pure Rust port. This is the default.
 - `xz-sys`: C ABI calls into the pure Rust port through the `xz-sys` shell
-- `liblzma-sys`: C ABI calls into vendored C `liblzma`
+- `liblzma-sys`: C ABI calls into the C `liblzma` implementation
 
-The comparison scripts in this document force the C backend to build from the vendored
-`liblzma-sys/xz` source tree by setting `LZMA_API_STATIC=1`. This avoids silently
+The comparison scripts in this document force the C backend to build from the
+`liblzma-sys` crate's vendored C source by setting `LZMA_API_STATIC=1`. This avoids silently
 benchmarking a system `liblzma` from `pkg-config`, which would make the C/Rust
-comparison depend on host packaging and compiler choices instead of the ported source.
+comparison depend on host packaging and compiler choices.
 
 ## 1. Baseline correctness
 
@@ -25,19 +25,18 @@ cargo test --no-default-features --features xz-sys
 cargo test --no-default-features --features liblzma-sys
 cargo test --test sys_equivalence
 cargo run --manifest-path systest/Cargo.toml --no-default-features --features xz-sys
-cargo run --manifest-path systest/Cargo.toml --no-default-features --features liblzma-sys
 ```
 
 ## 2. Compare the full test suite
 
-Use `hyperfine` to compare end-to-end wall clock time of the deterministic root test bundle (`xz-core` vs C) and `systest` with isolated target directories per backend:
+Use `hyperfine` to compare end-to-end wall clock time of the deterministic root test bundle (`xz-core` vs C) with isolated target directories per backend:
 
 ```bash
 scripts/compare_backends.sh --runs 10 --warmup 2
 ```
 
-For the full no-regression gate across the standard root, systest, focused, and
-API workloads, use the trimmed comparison wrapper:
+For the full no-regression gate across the standard root, focused, and API
+workloads, use the trimmed comparison wrapper:
 
 ```bash
 scripts/compare_all_trimmed.sh
@@ -51,8 +50,6 @@ This writes:
 
 - `target/perf-results/root-tests.json`
 - `target/perf-results/root-tests.md`
-- `target/perf-results/systest.json`
-- `target/perf-results/systest.md`
 
 Those reports are the coarse regression gate. Run them after major porting or optimization work.
 

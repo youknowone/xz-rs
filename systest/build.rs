@@ -88,97 +88,39 @@ fn write_rustc_wrapper(
 }
 
 fn main() {
-    let use_c_sys = env::var_os("CARGO_FEATURE_LIBLZMA_SYS").is_some();
     let use_rs_sys = env::var_os("CARGO_FEATURE_XZ_SYS").is_some();
     let use_parallel = env::var_os("CARGO_FEATURE_PARALLEL").is_some();
-    match (use_c_sys, use_rs_sys) {
-        (true, false) | (false, true) => {}
-        _ => panic!("Enable exactly one of features: liblzma-sys or xz-sys"),
+    if !use_rs_sys {
+        panic!("Enable feature: xz-sys");
     }
 
     let mut cfg = ctest::TestGenerator::new();
-    let use_bindgen = env::var_os("CARGO_FEATURE_BINDGEN").is_some();
-    if use_bindgen {
-        cfg.cfg("feature", Some("bindgen"));
-    }
-    if use_c_sys {
-        if let Ok(out) = env::var("DEP_LZMA_INCLUDE") {
-            cfg.include(&out);
-        } else {
-            // pkg-config-backed liblzma-sys builds can return early without exporting
-            // cargo:include metadata. Fall back to the vendored upstream API headers so
-            // systest can still compile its generated probe.
-            cfg.include("../liblzma-sys/xz/src/liblzma/api");
-        }
-    } else {
-        // Reuse vendored upstream headers to verify C header compatibility.
-        cfg.include("../liblzma-sys/xz/src/liblzma/api");
-    }
+    // Reuse vendored upstream headers to verify C header compatibility.
+    cfg.include("../vendor/xz/src/liblzma/api");
 
     cfg.header("lzma.h");
     cfg.rename_struct_ty(|ty| Some(ty.to_string()));
     cfg.rename_union_ty(|ty| Some(ty.to_string()));
     cfg.define("LZMA_API_STATIC", None);
-    cfg.skip_struct(move |s| {
-        (use_bindgen && (s.ident().ends_with("_s") || s.ident().contains("__bindgen_ty_")))
-            || (use_rs_sys && matches!(s.ident(), "StaticAllocator"))
-    });
-    cfg.skip_union(move |u| use_bindgen && u.ident().contains("__bindgen_ty_"));
-    cfg.skip_static(move |s| use_rs_sys && matches!(s.ident(), "C_ALLOCATOR"));
-    cfg.skip_struct_field(move |s, field| {
-        use_bindgen
-            && s.ident() == "lzma_index_iter"
-            && matches!(field.ident(), "stream" | "block" | "internal")
-    });
-    cfg.skip_struct_field_type(move |s, field| {
-        use_bindgen
-            && s.ident() == "lzma_index_iter"
-            && matches!(field.ident(), "stream" | "block" | "internal")
-    });
+    cfg.skip_struct(move |s| matches!(s.ident(), "StaticAllocator"));
+    cfg.skip_static(move |s| matches!(s.ident(), "C_ALLOCATOR"));
     cfg.skip_fn(move |f| {
-        (use_bindgen
-            && !use_parallel
+        (!use_parallel
             && matches!(
                 f.ident(),
                 "lzma_stream_decoder_mt"
                     | "lzma_stream_encoder_mt"
                     | "lzma_stream_encoder_mt_memusage"
             ))
-            || (use_rs_sys && matches!(f.ident(), "malloc" | "calloc" | "free"))
+            || matches!(f.ident(), "malloc" | "calloc" | "free")
     });
-    cfg.skip_alias(move |n| {
-        matches!(n.ident(), "__enum_ty" | "c_enum" | "lzma_reserved_enum")
-            || (use_bindgen
-                && matches!(
-                    n.ident(),
-                    "lzma_internal" | "lzma_index" | "lzma_index_hash"
-                ))
-    });
-    cfg.skip_signededness(move |ty| {
-        use_bindgen && matches!(ty, "lzma_delta_type" | "lzma_index_iter_mode")
-    });
-    if use_bindgen {
-        cfg.skip_const(|c| {
-            c.ident().starts_with("lzma_")
-                || matches!(
-                    c.ident(),
-                    "LZMA_H_INTERNAL" | "LZMA_VERSION_COMMIT" | "LZMA_VERSION_STABILITY_STRING"
-                )
-        });
-    }
+    cfg.skip_alias(move |n| matches!(n.ident(), "__enum_ty" | "c_enum" | "lzma_reserved_enum"));
 
-    let rust_api = if use_c_sys {
-        "../liblzma-sys/src/lib.rs"
-    } else {
-        "../xz-sys/src/lib.rs"
-    };
+    let rust_api = "../xz-sys/src/lib.rs";
 
     let deps_dir = target_deps_dir();
     let bare_externs = vec!["libc"];
-    let mut path_externs = Vec::new();
-    if use_rs_sys {
-        path_externs.push(("xz_core", latest_rlib(&deps_dir, "xz_core")));
-    }
+    let path_externs = vec![("xz_core", latest_rlib(&deps_dir, "xz_core"))];
     let rustc_wrapper = write_rustc_wrapper(
         &PathBuf::from(env::var_os("OUT_DIR").unwrap()),
         &deps_dir,

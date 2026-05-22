@@ -14,10 +14,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "cargo"
-    directory: "liblzma-sys"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "cargo"
     directory: "systest"
     schedule:
       interval: "daily"

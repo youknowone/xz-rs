@@ -2,7 +2,7 @@
 set -euo pipefail
 
 root_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)
-submodule_path="liblzma-sys/xz"
+submodule_path="vendor/xz"
 version_header="$root_dir/${submodule_path}/src/liblzma/api/lzma/version.h"
 
 read_version() {

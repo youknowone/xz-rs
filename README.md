@@ -8,7 +8,12 @@
 
 [Documentation](https://docs.rs/xz)
 
-Pure Rust xz2/liblzma-compatible crates for reading and writing xz streams.
+`xz` provides xz2/liblzma-compatible APIs backed by a pure Rust implementation
+of xz. Its core was built from a c2rust translation of the upstream xz codebase,
+then cleaned up to remove translation scaffolding and unnecessary C-shaped
+overhead. Unlike `xz2` or `liblzma`, `xz` lets applications eliminate the C
+dependency completely while using a Rust-only xz implementation, and it is a
+little faster in current benchmarks.
 
 **This crate is forked from [liblzma](https://crates.io/crates/liblzma) and `xz = "0.4.x"` is fully compatible with `liblzma = "0.4.6"`,**
 so you can migrate simply.
@@ -60,7 +65,9 @@ disable default features and choose exactly one backend explicitly:
 
 - `xz-core` calls the pure Rust core directly.
 - `xz-sys` calls the pure Rust core through the liblzma-compatible C ABI layer.
-- `liblzma-sys` calls the original C liblzma implementation.
+- `liblzma-sys` calls the external C liblzma implementation through the
+  `liblzma-sys` crate. Use it when you need the C backend instead of the bundled
+  Rust implementation.
 
 To use the original C backend:
 

@@ -124,52 +124,27 @@ fn rs_sys_exports_required_public_wrappers() {
 }
 
 #[test]
-fn rs_sys_exports_all_c_backend_functions() {
-    let c_bindgen = include_str!("../liblzma-sys/src/bindgen.rs");
-    let c_manual = include_str!("../liblzma-sys/src/manual.rs");
-    let rs_sys = include_str!("../xz-sys/src/lib.rs");
-
-    let c_api: std::collections::BTreeSet<_> = c_bindgen
-        .lines()
-        .chain(c_manual.lines())
-        .filter_map(|line| line.trim().strip_prefix("pub fn "))
-        .filter_map(|line| line.split_once('(').map(|(name, _)| name.trim()))
-        .filter(|name| name.starts_with("lzma_"))
-        .collect();
-
-    let rs_api: std::collections::BTreeSet<_> = rs_sys
-        .lines()
-        .filter_map(|line| {
-            let line = line.trim();
-            line.strip_prefix("pub unsafe extern \"C\" fn ")
-                .or_else(|| line.strip_prefix("pub extern \"C\" fn "))
-        })
-        .filter_map(|line| line.split_once('(').map(|(name, _)| name.trim()))
-        .filter(|name| name.starts_with("lzma_"))
-        .collect();
-
-    let missing: Vec<_> = c_api.difference(&rs_api).copied().collect();
-    assert!(
-        missing.is_empty(),
-        "xz-sys is missing public functions from liblzma-sys: {missing:?}",
-    );
-
-    let extras: Vec<_> = rs_api.difference(&c_api).copied().collect();
-    assert_eq!(
-        extras,
-        vec!["lzma_alloc", "lzma_alloc_zero", "lzma_free"],
-        "unexpected extra public functions in xz-sys: {extras:?}",
-    );
-}
-
-#[test]
-fn cargo_features_match_c_backend() {
-    let c_sys_features = parse_feature_table(include_str!("../liblzma-sys/Cargo.toml"));
+fn xz_sys_keeps_liblzma_sys_compatible_features() {
     let rs_sys_features = parse_feature_table(include_str!("../xz-sys/Cargo.toml"));
+    // Keep this list aligned with liblzma-sys 0.4.6 so xz-sys remains a
+    // drop-in feature-compatible replacement for consumers.
+    let expected = BTreeMap::from([
+        ("bindgen".to_string(), Vec::new()),
+        ("default".to_string(), vec!["bindgen".to_string()]),
+        ("fat-lto".to_string(), Vec::new()),
+        ("parallel".to_string(), Vec::new()),
+        ("static".to_string(), Vec::new()),
+        ("thin-lto".to_string(), Vec::new()),
+        ("uncheck_liblzma_version".to_string(), Vec::new()),
+        (
+            "wasm".to_string(),
+            vec!["static".to_string(), "bindgen".to_string()],
+        ),
+    ]);
 
     assert_eq!(
-        rs_sys_features, c_sys_features,
-        "xz-sys feature table must stay compatible with liblzma-sys",
+        rs_sys_features, expected,
+        "xz-sys feature table must stay compatible with liblzma-sys feature names",
     );
 }
 
@@ -422,68 +397,120 @@ fn api_functions_are_exported() {
     }
 
     assert_fn_exported!(
-        lzma_code,
-        lzma_end,
-        lzma_get_progress,
-        lzma_memusage,
-        lzma_memlimit_get,
-        lzma_memlimit_set,
-        lzma_easy_encoder_memusage,
-        lzma_easy_decoder_memusage,
-        lzma_easy_encoder,
-        lzma_easy_buffer_encode,
-        lzma_stream_encoder,
-        lzma_alone_encoder,
-        lzma_stream_buffer_bound,
-        lzma_stream_buffer_encode,
-        lzma_stream_decoder,
-        lzma_auto_decoder,
         lzma_alone_decoder,
-        lzma_lzip_decoder,
-        lzma_stream_buffer_decode,
+        lzma_alone_encoder,
+        lzma_auto_decoder,
+        lzma_bcj_arm64_decode,
+        lzma_bcj_arm64_encode,
+        lzma_bcj_riscv_decode,
+        lzma_bcj_riscv_encode,
+        lzma_bcj_x86_decode,
+        lzma_bcj_x86_encode,
+        lzma_block_buffer_bound,
+        lzma_block_buffer_decode,
+        lzma_block_buffer_encode,
+        lzma_block_compressed_size,
+        lzma_block_decoder,
+        lzma_block_encoder,
+        lzma_block_header_decode,
+        lzma_block_header_encode,
+        lzma_block_header_size,
+        lzma_block_total_size,
+        lzma_block_uncomp_encode,
+        lzma_block_unpadded_size,
         lzma_check_is_supported,
         lzma_check_size,
+        lzma_code,
+        lzma_cputhreads,
         lzma_crc32,
         lzma_crc64,
-        lzma_get_check,
-        lzma_filter_encoder_is_supported,
+        lzma_easy_buffer_encode,
+        lzma_easy_decoder_memusage,
+        lzma_easy_encoder,
+        lzma_easy_encoder_memusage,
+        lzma_end,
+        lzma_file_info_decoder,
         lzma_filter_decoder_is_supported,
+        lzma_filter_encoder_is_supported,
+        lzma_filter_flags_decode,
+        lzma_filter_flags_encode,
+        lzma_filter_flags_size,
         lzma_filters_copy,
-        lzma_raw_encoder_memusage,
+        lzma_filters_free,
+        lzma_filters_update,
+        lzma_get_check,
+        lzma_get_progress,
+        lzma_index_append,
+        lzma_index_block_count,
+        lzma_index_buffer_decode,
+        lzma_index_buffer_encode,
+        lzma_index_cat,
+        lzma_index_checks,
+        lzma_index_decoder,
+        lzma_index_dup,
+        lzma_index_encoder,
+        lzma_index_end,
+        lzma_index_file_size,
+        lzma_index_hash_append,
+        lzma_index_hash_decode,
+        lzma_index_hash_end,
+        lzma_index_hash_init,
+        lzma_index_hash_size,
+        lzma_index_init,
+        lzma_index_iter_init,
+        lzma_index_iter_locate,
+        lzma_index_iter_next,
+        lzma_index_iter_rewind,
+        lzma_index_memusage,
+        lzma_index_memused,
+        lzma_index_size,
+        lzma_index_stream_count,
+        lzma_index_stream_flags,
+        lzma_index_stream_padding,
+        lzma_index_stream_size,
+        lzma_index_total_size,
+        lzma_index_uncompressed_size,
+        lzma_lzip_decoder,
+        lzma_lzma_preset,
+        lzma_memlimit_get,
+        lzma_memlimit_set,
+        lzma_memusage,
+        lzma_mf_is_supported,
+        lzma_microlzma_decoder,
+        lzma_microlzma_encoder,
+        lzma_mode_is_supported,
+        lzma_mt_block_size,
+        lzma_physmem,
+        lzma_properties_decode,
+        lzma_properties_encode,
+        lzma_properties_size,
+        lzma_raw_buffer_decode,
+        lzma_raw_buffer_encode,
+        lzma_raw_decoder,
         lzma_raw_decoder_memusage,
         lzma_raw_encoder,
-        lzma_raw_decoder,
-        lzma_filters_update,
-        lzma_raw_buffer_encode,
-        lzma_raw_buffer_decode,
-        lzma_properties_size,
-        lzma_properties_encode,
-        lzma_properties_decode,
-        lzma_physmem,
-        lzma_cputhreads,
-        lzma_stream_header_encode,
+        lzma_raw_encoder_memusage,
+        lzma_str_from_filters,
+        lzma_str_list_filters,
+        lzma_str_to_filters,
+        lzma_stream_buffer_bound,
+        lzma_stream_buffer_decode,
+        lzma_stream_buffer_encode,
+        lzma_stream_decoder,
+        lzma_stream_decoder_mt,
+        lzma_stream_encoder,
+        lzma_stream_encoder_mt,
+        lzma_stream_encoder_mt_memusage,
+        lzma_stream_flags_compare,
+        lzma_stream_footer_decode,
         lzma_stream_footer_encode,
         lzma_stream_header_decode,
-        lzma_stream_footer_decode,
-        lzma_stream_flags_compare,
+        lzma_stream_header_encode,
         lzma_version_number,
         lzma_version_string,
-        lzma_vli_encode,
         lzma_vli_decode,
+        lzma_vli_encode,
         lzma_vli_size,
-        lzma_lzma_preset,
-        lzma_mf_is_supported,
-        lzma_index_buffer_decode,
-        lzma_index_uncompressed_size,
-        lzma_index_end,
-    );
-
-    #[cfg(feature = "parallel")]
-    assert_fn_exported!(
-        lzma_stream_encoder_mt_memusage,
-        lzma_stream_encoder_mt,
-        lzma_stream_decoder_mt,
-        lzma_mt_block_size,
     );
 }
 
@@ -649,7 +676,7 @@ fn differential_roundtrip_across_backends() {
 
 #[test]
 fn differential_error_codes_on_invalid_corpus() {
-    let files_dir = Path::new("liblzma-sys/xz/tests/files");
+    let files_dir = Path::new("vendor/xz/tests/files");
     for entry in fs::read_dir(files_dir).expect("read xz test corpus directory") {
         let path = entry.expect("dir entry").path();
         if path.extension().and_then(|s| s.to_str()) != Some("xz") {

@@ -105,7 +105,7 @@ impl Config {
         I: Iterator<Item = String>,
     {
         let mut config = Self {
-            corpus_dir: PathBuf::from("liblzma-sys/xz/tests/files"),
+            corpus_dir: PathBuf::from("vendor/xz/tests/files"),
             mode: Mode::All,
             phase: Phase::Both,
             name_pattern: None,
