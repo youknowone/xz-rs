@@ -1,6 +1,6 @@
 [package]
 name = "xz-sys"
-version = "0.4.6"
+version = "0.4.6-rc.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "liblzma-sys compatible API layer backed by pure Rust xz-core"
@@ -22,5 +22,5 @@ parallel = []
 wasm = ["static", "bindgen"]
 
 [dependencies]
-xz-core = { path = "../xz-core", features = ["custom_allocator"] }
+xz-core = { path = "../xz-core", version = "0.1.0-rc.0", features = ["custom_allocator"] }
 libc = "0.2"
