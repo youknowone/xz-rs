@@ -91,6 +91,61 @@ Notes:
   errors and the upstream distinction between truncated input
   (`LZMA_DATA_ERROR`) and too-small output (`LZMA_BUF_ERROR`).
 
+### `common/block_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/block_encoder.c`
+- `vendor/xz/src/liblzma/common/block_encoder.h`
+- `xz-core/src/common/block_encoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- The shared `COMPRESSED_SIZE_MAX` constant missed C's final `& ~3` mask,
+  allowing a theoretical compressed-data limit up to three bytes higher than
+  upstream before Block Padding.
+
+Fix:
+
+- Applied the `& !3` mask to `COMPRESSED_SIZE_MAX`.
+- Added `compressed_size_max_matches_c_masking`.
+
+Additional audit result:
+
+- No other source-code mismatch found in uncompressed/compressed size limit
+  checks, raw filter delegation, Check update/finalization, Block Padding
+  output, raw-check copying, update gating, initialization validation, end
+  behavior, or supported action setup.
+
+### `common/block_buffer_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/block_buffer_encoder.c`
+- `vendor/xz/src/liblzma/common/block_encoder.h`
+- `xz-core/src/common/block_buffer_encoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- C `lzma_block_buffer_bound()` returns zero on 32-bit targets if the 64-bit
+  bound exceeds `SIZE_MAX`; Rust cast the 64-bit result to `size_t`, which
+  would truncate on 32-bit targets.
+
+Fix:
+
+- Added a `size_t` overflow guard before returning the bound.
+- Added `block_buffer_bound_rejects_values_over_size_t_max`.
+
+Additional audit result:
+
+- No other source-code mismatch found in LZMA2 uncompressed-size bound
+  calculation, single-call uncompressed LZMA2 fallback encoding, normal
+  compression attempt and output-position restore behavior, argument
+  validation, Check reservation/finalization, Block Padding, or uncomp wrapper
+  behavior.
+
 ### `common/index_decoder`
 
 Compared:
