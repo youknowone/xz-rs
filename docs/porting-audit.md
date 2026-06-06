@@ -167,6 +167,34 @@ Fix:
 - Test `depth == 0` before decrementing.
 - Added `level_zero_long_round_trip`.
 
+### `lz/lz_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lz/lz_encoder.c`
+- `vendor/xz/src/liblzma/lz/lz_encoder.h`
+- `vendor/xz/src/liblzma/common/memcmplen.h`
+- `xz-core/src/lz/lz_encoder.rs`
+
+Finding:
+
+- No source-code mismatch found in the sliding-window move, window fill,
+  flush/finish read-limit handling, pending-byte match-finder rewind, main
+  encode loop, match-finder selection and sizing, preset dictionary handling,
+  memory-usage calculation, end/update behavior, output-limit delegation, or
+  match-finder support reporting.
+
+Notes:
+
+- C `memmove()` in `move_window()` is represented by Rust `ptr::copy()`, which
+  permits overlap.
+- Rust keeps `LZMA_MEMCMPLEN_EXTRA` at zero because its `lzma_memcmplen`
+  implementation uses the portable byte-by-byte path instead of C's optional
+  unaligned word/SIMD reads.
+- The `lz.coder` free path differs mechanically because the default Rust
+  allocator requires typed deallocation; this matches the same policy used in
+  `lz/lz_decoder.rs` and doesn't change valid encoder behavior.
+
 ## Wrapper API Findings
 
 ### `stream::IGNORE_CHECK`
@@ -187,7 +215,6 @@ The next pass should focus on high-risk files that combine C fallthrough,
 unsigned arithmetic, pointer-window state, or feature-condition branches:
 
 - `common/stream_decoder_mt`
-- `lz/lz_encoder`
 - `lzma/lzma_encoder`
 - `lzma/lzma_decoder`
 - `lzma/lzma2_encoder`
