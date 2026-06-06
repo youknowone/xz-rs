@@ -150,6 +150,38 @@ Fix:
 - Return `LZMA_STREAM_END` immediately when the sequence remains `SEQ_BLOCK`.
 - Added `parallel_full_flush_short_chunks_round_trip`.
 
+### `common/stream_decoder_mt`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/stream_decoder_mt.c`
+- `vendor/xz/src/liblzma/common/common.h`
+- `xz-core/src/common/stream_decoder_mt.rs`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in worker-thread state transitions, partial
+  output updates, worker completion/error reporting, thread stop/end behavior,
+  thread reuse and cache accounting, `read_output_and_wait()` blocking and
+  fail-fast behavior, Block Header detection/decoding, threaded/direct mode
+  selection, memlimit handling, output queue cache clearing, threaded Block
+  startup, direct Block decoding, Index/Footer/Padding state transitions,
+  pending-error flushing, memconfig/get_progress, or public decoder
+  initialization.
+
+Notes:
+
+- Rust uses internal return names `LZMA_RET_INTERNAL1` and
+  `LZMA_RET_INTERNAL2`; these correspond to C's `LZMA_TIMED_OUT` and
+  `LZMA_INDEX_DETECTED` macros in `common.h`.
+- The C `switch` fallthrough in `stream_decode_mt()` is represented by Rust's
+  `StreamMtBlockState` dispatch and restart-loop sentinel.
+- Rust stores the worker allocator only when `custom_allocator` is enabled and
+  uses helper functions to preserve the same allocator passed to C worker
+  operations.
+
 ### `lz/lz_encoder_mf`
 
 Compared:
@@ -359,5 +391,4 @@ Fix:
 The next pass should focus on high-risk files that combine C fallthrough,
 unsigned arithmetic, pointer-window state, or feature-condition branches:
 
-- `common/stream_decoder_mt`
 - `lzma/lzma_decoder`
