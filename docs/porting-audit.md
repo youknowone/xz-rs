@@ -288,6 +288,32 @@ Additional audit result:
   validation, Check reservation/finalization, Block Padding, or uncomp wrapper
   behavior.
 
+### `common/block_buffer_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/block_buffer_decoder.c`
+- `vendor/xz/src/liblzma/common/block_decoder.c`
+- `xz-core/src/common/block_buffer_decoder.rs`
+- `xz-core/src/common/block_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in the single-call Block decoder argument
+  validation, stack-local `lzma_next_coder` initialization, Block decoder init
+  delegation, position save/restore, `LZMA_STREAM_END` to `LZMA_OK` conversion,
+  `LZMA_OK` truncation-vs-buffer-error classification, or unconditional
+  decoder cleanup.
+
+Notes:
+
+- Rust omits the C debug `assert()` before classifying a still-running decoder,
+  but preserves the released build behavior.
+- The related streaming `block_decode()` fallthrough from code to padding to
+  check handling is already covered by the `common/block_decoder` audit and is
+  the behavior exercised by this wrapper.
+
 ### `common/block_util`
 
 Compared:
