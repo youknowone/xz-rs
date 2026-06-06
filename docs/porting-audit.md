@@ -333,6 +333,62 @@ Notes:
   should port the upstream raw Index tests from `vendor/xz/tests/test_index.c`
   and `vendor/xz/tests/test_index_hash.c`.
 
+### `common/index_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/index_encoder.c`
+- `vendor/xz/src/liblzma/common/index.h`
+- `vendor/xz/src/liblzma/common/common.h`
+- `xz-core/src/common/index_encoder.rs`
+- `xz-core/src/common/index.rs`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in Index indicator emission, Record count VLI
+  encoding, Index iterator traversal, Unpadded and Uncompressed Size VLI
+  encoding, Index Padding emission, CRC32 accumulation/finalization, init/reset
+  behavior, public stream initialization, supported-action setup, stack-backed
+  single-call buffer encoding, output-space validation, or output-position
+  rollback on unexpected errors.
+
+Notes:
+
+- Rust preserves the C `switch` fallthrough from `SEQ_NEXT` to `SEQ_UNPADDED`
+  and from `SEQ_PADDING` to `SEQ_CRC32` with explicit loop continuation and
+  shared post-`match` handling.
+
+### `common/index_hash`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/index_hash.c`
+- `vendor/xz/src/liblzma/common/index.h`
+- `vendor/xz/src/liblzma/check/check.h`
+- `xz-core/src/common/index_hash.rs`
+- `xz-core/src/common/index.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in hash allocation/reset, hash-size reporting,
+  block append validation, accumulated block/index size limit checks, Index
+  indicator and count decoding, Record VLI decoding, Unpadded Size validation,
+  record hash accumulation, decoded-record limit checks, padding-size
+  calculation and zero-padding validation, final size comparison, hash
+  finalization/comparison, CRC32 accumulation/checking, or streaming return
+  values.
+
+Notes:
+
+- The vendored C configuration resolves `LZMA_CHECK_BEST` to SHA-256; Rust uses
+  `LZMA_CHECK_SHA256` directly in the corresponding index-hash paths.
+- Rust matches the normal upstream build. The C CRC32 check has a fuzzing-only
+  `FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION` branch; Rust has no corresponding
+  build cfg.
+
 ### `common/alone_decoder`
 
 Compared:
