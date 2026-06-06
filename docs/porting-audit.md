@@ -91,6 +91,31 @@ Notes:
   errors and the upstream distinction between truncated input
   (`LZMA_DATA_ERROR`) and too-small output (`LZMA_BUF_ERROR`).
 
+### `common/index_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/index_decoder.c`
+- `xz-core/src/common/index_decoder.rs`
+
+Finding:
+
+- No source-code mismatch found in Index indicator parsing, VLI Record count and
+  size parsing, post-decrement Record counting, padding consumption, CRC32
+  accumulation/verification, memlimit handling, reset/init/end behavior, or the
+  single-call `lzma_index_buffer_decode` wrapper.
+
+Notes:
+
+- The Rust loop/`match` structure preserves the C `switch` fallthrough between
+  `SEQ_COUNT` -> `SEQ_MEMUSAGE`, `SEQ_PADDING_INIT` -> `SEQ_PADDING`, and
+  `SEQ_PADDING` -> `SEQ_CRC32`.
+- The Rust `count -= 1` occurs before the zero check, matching C
+  `--coder->count == 0`.
+- Existing stream corpus tests exercise Index decoding indirectly. A later pass
+  should port the upstream raw Index tests from `vendor/xz/tests/test_index.c`
+  and `vendor/xz/tests/test_index_hash.c`.
+
 ### `common/alone_decoder`
 
 Compared:
@@ -162,7 +187,6 @@ The next pass should focus on high-risk files that combine C fallthrough,
 unsigned arithmetic, pointer-window state, or feature-condition branches:
 
 - `common/stream_decoder_mt`
-- `common/index_decoder`
 - `lz/lz_encoder`
 - `lzma/lzma_encoder`
 - `lzma/lzma_decoder`
