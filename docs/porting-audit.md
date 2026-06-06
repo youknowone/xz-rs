@@ -372,6 +372,47 @@ Additional audit result:
   repeated-match expansion, normal-match expansion, match+literal+rep0
   expansion, pending-symbol replay, or price-table refresh gating.
 
+### `lzma/lzma_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/lzma_decoder.c`
+- `vendor/xz/src/liblzma/lzma/lzma_decoder.h`
+- `vendor/xz/src/liblzma/lzma/lzma_common.h`
+- `vendor/xz/src/liblzma/lz/lz_decoder.h`
+- `vendor/xz/src/liblzma/rangecoder/range_decoder.h`
+- `xz-core/src/lzma/lzma_decoder.rs`
+- `xz-core/src/lz/lz_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in range-decoder initialization and
+  normalization, dictionary get/repeat/write helpers, literal subcoder
+  selection, literal and matched-literal decoding, simple-match and
+  repeated-match state transitions, length decoders, distance-slot and
+  distance-model decoding, direct and align-bit decoding, EOPM validation,
+  known-uncompressed-size termination, output-limit resume points, state
+  save/restore, decoder reset, LZMA1EXT setup, property decoding, or memory
+  usage reporting.
+
+Notes:
+
+- Rust represents the C `switch`/`goto` resumable decoder as explicit
+  `BLOCK_*` states. The `SEQ_*` resume values still map to the same C labels,
+  including `SEQ_DIST_MODEL`, `SEQ_DIRECT`, `SEQ_ALIGN`, and the length decoder
+  choice/choice2/bittree labels.
+- The non-resumable fast path keeps C's unrolled length, distance, direct-bit,
+  and align-bit decoding, while the slow path keeps the C safe-normalization
+  re-entry boundaries.
+- Rust uses `wrapping_*` in the dictionary and range/distance arithmetic where
+  C relies on unsigned arithmetic. Bounded loop counters and bit-tree symbols
+  keep the remaining plain shifts and increments within the same ranges as C.
+- `lzma_lzma_decoder_create()` installs a typed `end` deallocator in Rust; C
+  leaves `lz->end` null and relies on the generic fallback free. This is a
+  mechanical allocator difference and matches the Rust LZ wrapper's typed-free
+  policy.
+
 ## Wrapper API Findings
 
 ### `stream::IGNORE_CHECK`
@@ -388,7 +429,7 @@ Fix:
 
 ## Next Audit Targets
 
-The next pass should focus on high-risk files that combine C fallthrough,
-unsigned arithmetic, pointer-window state, or feature-condition branches:
-
-- `lzma/lzma_decoder`
+The initial high-risk decoder/encoder state-machine pass is now complete. The
+next pass should continue through the remaining same-stem pairs from
+`scripts/porting_audit_map.sh`, prioritizing shared utility modules and files
+with allocator, CRC/check, filter-chain, or feature-condition branches.
