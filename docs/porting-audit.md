@@ -237,6 +237,77 @@ Finding:
   truncated properties rejection, Filter Properties decoding, or input-position
   advancement.
 
+### `common/filter_common`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/filter_common.c`
+- `vendor/xz/src/liblzma/common/filter_common.h`
+- `xz-core/src/common/filter_common.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in the filter feature table, filter option
+  copy/free behavior, maximum filter count checks, chain validation, encoder
+  filter-order reversal, decoder filter-order preservation, raw coder
+  initialization cleanup on error, or raw coder memory-usage calculation.
+
+Notes:
+
+- Rust uses `lzma_filter_options_free()` to preserve the allocation size needed
+  by its allocator glue; this corresponds to C freeing each filter's copied
+  `options` pointer.
+
+### `common/filter_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/filter_encoder.c`
+- `vendor/xz/src/liblzma/common/filter_encoder.h`
+- `vendor/xz/src/liblzma/common/common.h`
+- `xz-core/src/common/filter_encoder.rs`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in the encoder function table, encoder lookup,
+  support query, filter update validation and reversed-chain construction, raw
+  encoder initialization, supported-action setup, memory-usage delegation,
+  multithreaded block-size selection, property-size lookup, or property
+  encoding.
+
+Notes:
+
+- Rust spells out the C `lzma_next_strm_init()` macro expansion in
+  `lzma_raw_encoder()`, including `lzma_strm_init()`, `lzma_end()` on init
+  failure, and supported-action setup after success.
+
+### `common/filter_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/filter_decoder.c`
+- `vendor/xz/src/liblzma/common/filter_decoder.h`
+- `vendor/xz/src/liblzma/common/common.h`
+- `xz-core/src/common/filter_decoder.rs`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in the decoder function table, decoder lookup,
+  support query, raw decoder initialization, supported-action setup,
+  memory-usage delegation, Filter Properties option-pointer clearing,
+  unsupported-filter rejection, empty-property handling for filters without a
+  properties decoder, or property decoder delegation.
+
+Notes:
+
+- Rust spells out the C `lzma_next_strm_init()` macro expansion in
+  `lzma_raw_decoder()`, matching the same initialization and cleanup behavior.
+
 ### `common/index_decoder`
 
 Compared:
