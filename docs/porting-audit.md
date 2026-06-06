@@ -305,6 +305,41 @@ Notes:
   variants. The helper bodies preserve the C `mf_find()`/`mf_skip()` ordering,
   including `read_ahead` updates.
 
+### `lzma/lzma_encoder_optimum_normal`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/lzma_encoder_optimum_normal.c`
+- `vendor/xz/src/liblzma/lzma/lzma_encoder_private.h`
+- `vendor/xz/src/liblzma/lzma/lzma_common.h`
+- `vendor/xz/src/liblzma/lzma/fastpos.h`
+- `vendor/xz/src/liblzma/lz/memcmplen.h`
+- `vendor/xz/src/liblzma/lz/lz_encoder.h`
+- `vendor/xz/src/liblzma/rangecoder/price.h`
+- `xz-core/src/lzma/lzma_encoder_optimum_normal.rs`
+- `xz-core/src/lz/lz_encoder_mf.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- C `uint32_t` position arithmetic wraps around 4 GiB boundaries. The Rust port
+  used checked debug-build addition in the normal optimum path for
+  `position + cur`, `position + 1`, and literal-after-match/rep offsets.
+
+Fix:
+
+- Added a small `position_add()` wrapper using `wrapping_add()` and used it for
+  all position-offset additions in `lzma_encoder_optimum_normal.rs`.
+- Added `position_add_wraps_like_uint32_t`.
+
+Additional audit result:
+
+- No other source-code mismatch found in literal price calculation, repeated
+  match prices, distance/align price table refresh, optimum backward traversal,
+  initial candidate setup, state/reps reconstruction, literal/short-rep updates,
+  repeated-match expansion, normal-match expansion, match+literal+rep0
+  expansion, pending-symbol replay, or price-table refresh gating.
+
 ## Wrapper API Findings
 
 ### `stream::IGNORE_CHECK`
@@ -325,5 +360,4 @@ The next pass should focus on high-risk files that combine C fallthrough,
 unsigned arithmetic, pointer-window state, or feature-condition branches:
 
 - `common/stream_decoder_mt`
-- `lzma/lzma_encoder_optimum_normal`
 - `lzma/lzma_decoder`
