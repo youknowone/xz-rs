@@ -350,6 +350,58 @@ Fix:
 - Replaced `d += 1` with `d = d.wrapping_add(1)`.
 - Added `alone_decoder_rejects_wrapping_dictionary_size`.
 
+### `common/alone_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/alone_encoder.c`
+- `vendor/xz/src/liblzma/common/common.h`
+- `xz-core/src/common/alone_encoder.rs`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in LZMA_Alone header emission, partial header
+  buffering, dictionary-size validation and rounding, unknown uncompressed-size
+  marker writing, LZMA1 filter initialization, end cleanup, public stream
+  initialization, or supported-action setup.
+
+Notes:
+
+- Rust spells out the C `lzma_next_strm_init()` and `lzma_next_coder_init()`
+  macro expansions while preserving their cleanup behavior.
+
+### `common/easy_*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/easy_encoder.c`
+- `vendor/xz/src/liblzma/common/easy_buffer_encoder.c`
+- `vendor/xz/src/liblzma/common/easy_encoder_memusage.c`
+- `vendor/xz/src/liblzma/common/easy_decoder_memusage.c`
+- `vendor/xz/src/liblzma/common/easy_preset.c`
+- `vendor/xz/src/liblzma/common/easy_preset.h`
+- `xz-core/src/common/easy_encoder.rs`
+- `xz-core/src/common/easy_buffer_encoder.rs`
+- `xz-core/src/common/easy_encoder_memusage.rs`
+- `xz-core/src/common/easy_decoder_memusage.rs`
+- `xz-core/src/common/easy_preset.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in preset expansion, LZMA2 filter-chain
+  construction, invalid-preset return values, stream encoder delegation,
+  single-call stream buffer encoder delegation, or encoder/decoder memory-usage
+  delegation.
+
+Notes:
+
+- Rust uses `MaybeUninit<lzma_options_easy>` for C's stack-allocated
+  `lzma_options_easy`; initialization is completed only after
+  `lzma_easy_preset()` succeeds.
+
 ### `common/stream_encoder_mt`
 
 Compared:
