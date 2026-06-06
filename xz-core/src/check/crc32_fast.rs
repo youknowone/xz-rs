@@ -325,13 +325,13 @@ fn lzma_crc32_generic(mut buf: &[u8], mut crc: u32) -> u32 {
         }
         let (mut bulk, tail) = buf.split_at(buf.len() & !7);
         while !bulk.is_empty() {
-            crc ^= unsafe { aligned_read32ne(bulk.as_ptr()) };
+            crc ^= unsafe { u32::from_le(aligned_read32ne(bulk.as_ptr())) };
             bulk = &bulk[4..];
             crc = lzma_crc32_table[7][(crc & 0xff) as usize]
                 ^ lzma_crc32_table[6][(crc >> 8 & 0xff) as usize]
                 ^ lzma_crc32_table[5][(crc >> 16 & 0xff) as usize]
                 ^ lzma_crc32_table[4][(crc >> 24) as usize];
-            let tmp: u32 = unsafe { aligned_read32ne(bulk.as_ptr()) } as u32;
+            let tmp: u32 = unsafe { u32::from_le(aligned_read32ne(bulk.as_ptr())) };
             bulk = &bulk[4..];
             crc = lzma_crc32_table[3][(tmp & 0xff) as usize]
                 ^ lzma_crc32_table[2][(tmp >> 8 & 0xff) as usize]
@@ -350,19 +350,19 @@ fn lzma_crc32_generic(mut buf: &[u8], mut crc: u32) -> u32 {
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 unsafe fn aligned_read16le(buf: *const u8) -> u16 {
-    core::ptr::read_unaligned(buf as *const u16)
+    u16::from_le(core::ptr::read_unaligned(buf as *const u16))
 }
 
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 unsafe fn aligned_read32le(buf: *const u8) -> u32 {
-    core::ptr::read_unaligned(buf as *const u32)
+    u32::from_le(core::ptr::read_unaligned(buf as *const u32))
 }
 
 #[cfg(target_arch = "aarch64")]
 #[inline(always)]
 unsafe fn aligned_read64le(buf: *const u8) -> u64 {
-    core::ptr::read_unaligned(buf as *const u64)
+    u64::from_le(core::ptr::read_unaligned(buf as *const u64))
 }
 
 #[cfg(target_arch = "aarch64")]

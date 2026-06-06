@@ -1042,7 +1042,7 @@ unsafe fn crc64_step4(
     buf: *const u8,
     crc: u64,
 ) -> u64 {
-    let tmp = crc as u32 ^ aligned_read32ne(buf);
+    let tmp = crc as u32 ^ u32::from_le(aligned_read32ne(buf));
     *table3.add((tmp & 0xff) as usize)
         ^ *table2.add((tmp >> 8 & 0xff) as usize)
         ^ crc >> 32
