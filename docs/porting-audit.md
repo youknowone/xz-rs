@@ -527,6 +527,53 @@ Notes:
 - `LZMA_FAIL_FAST` is accepted through `LZMA_SUPPORTED_FLAGS` in both C and
   Rust, but the single-threaded stream decoder doesn't otherwise use it.
 
+### `common/stream_flags_*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/stream_flags_common.c`
+- `vendor/xz/src/liblzma/common/stream_flags_common.h`
+- `vendor/xz/src/liblzma/common/stream_flags_encoder.c`
+- `vendor/xz/src/liblzma/common/stream_flags_decoder.c`
+- `xz-core/src/common/stream_flags_common.rs`
+- `xz-core/src/common/stream_flags_encoder.rs`
+- `xz-core/src/common/stream_flags_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in Header/Footer magic constants, Stream Flags
+  comparison, check-ID validation, Backward Size validation, Header/Footer flag
+  encoding, Header/Footer CRC emission, reserved-bit rejection, Header/Footer
+  CRC verification, unknown Header Backward Size handling, or Footer Backward
+  Size decoding.
+
+Notes:
+
+- Rust matches the normal upstream build. The C decoder has fuzzing-only
+  `FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION` branches that skip CRC errors;
+  Rust has no corresponding build cfg.
+
+### `common/vli_*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/vli_encoder.c`
+- `vendor/xz/src/liblzma/common/vli_decoder.c`
+- `vendor/xz/src/liblzma/common/vli_size.c`
+- `xz-core/src/common/vli_encoder.rs`
+- `xz-core/src/common/vli_decoder.rs`
+- `xz-core/src/common/vli_size.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in single-call versus multi-call VLI mode,
+  empty input/output error selection, argument validation, partial encode
+  resume position handling, partial decode resume initialization, compact-form
+  rejection, maximum encoded-length rejection, return values, or encoded-size
+  calculation.
+
 ### `lz/lz_encoder_mf`
 
 Compared:
