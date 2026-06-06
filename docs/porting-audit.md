@@ -21,6 +21,24 @@ Regenerate the file map with:
 scripts/porting_audit_map.sh
 ```
 
+## C-Only Source Accounting
+
+The seven upstream C sources without same-stem Rust modules are accounted for as
+follows:
+
+- `check/crc32_small.c` and `check/crc64_small.c` are `COND_SMALL` alternate
+  runtime CRC implementations. The Rust port implements the table/fast CRC
+  path; the CRC32 and CRC64 audits compare that path against C and include
+  standard check-vector tests.
+- `check/crc32_tablegen.c` and `check/crc64_tablegen.c` are generators for the
+  CRC table headers used by the fast path. The CRC32 and CRC64 audits include
+  numeric table comparisons against the generated C headers.
+- `check/crc_clmul_consts_gen.c` generates CLMUL constants for x86 assembly and
+  intrinsics paths. The Rust port doesn't implement the CLMUL CRC path.
+- `lzma/fastpos_tablegen.c` and `rangecoder/price_tablegen.c` are generators for
+  runtime tables. The `lzma/fastpos_table` and `rangecoder/price_table` audits
+  compare the generated table contents used by Rust.
+
 ## Audited Items
 
 ### `check/check`
