@@ -41,6 +41,32 @@ Fix:
 - Added `auto_decoder_accepts_lzip_streams`, comparing auto-decoder output with
   direct lzip decoder output on `vendor/xz/tests/files/good-1-v1.lz`.
 
+### `common/lzip_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/lzip_decoder.c`
+- `xz-core/src/common/lzip_decoder.rs`
+- `vendor/xz/tests/test_lzip_decoder.c`
+
+Finding:
+
+- No source-code mismatch found in the decoded state machine, footer checks,
+  `LZMA_CONCATENATED`, `LZMA_IGNORE_CHECK`, `LZMA_TELL_ANY_CHECK`, or memlimit
+  retry paths.
+
+Test coverage added:
+
+- Added `tests/lzip_decoder.rs`, porting the core upstream lzip decoder cases to
+  Rust integration tests using the vendor `.lz` fixtures:
+  - v0/v1 single-member decode with one-byte input chunks
+  - concatenated v0/v1 member combinations
+  - trailing data handling, including the magic-prefix trailing-data case
+  - invalid magic/version/dictionary/footer/checksum fixtures
+  - truncated trailing magic returning `LZMA_BUF_ERROR` as `Status::MemNeeded`
+  - `LZMA_IGNORE_CHECK`, `LZMA_TELL_ANY_CHECK`, invalid flags, and memlimit
+    retry behavior
+
 ### `common/alone_decoder`
 
 Compared:
@@ -112,7 +138,6 @@ The next pass should focus on high-risk files that combine C fallthrough,
 unsigned arithmetic, pointer-window state, or feature-condition branches:
 
 - `common/stream_decoder_mt`
-- `common/lzip_decoder`
 - `common/index_decoder`
 - `common/block_decoder`
 - `lz/lz_encoder`
