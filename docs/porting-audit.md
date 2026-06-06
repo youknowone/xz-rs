@@ -819,6 +819,267 @@ Finding:
   rejection, maximum encoded-length rejection, return values, or encoded-size
   calculation.
 
+### `common/common`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/common.c`
+- `vendor/xz/src/liblzma/common/common.h`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/common/common_types.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in version reporting, stream allocator lookup,
+  buffer copy accounting, next-filter init/update/end behavior, stream
+  initialization, `lzma_code()` action sequencing, progress/check accessors, or
+  memory-limit get/set behavior.
+
+Notes:
+
+- Rust keeps the C `lzma_next_coder_init()` behavior by ending the old coder only
+  when the stored init function changes, then stores the current init pointer and
+  filter ID.
+- Rust has a few defensive checks where C has assertions or valid-API
+  preconditions, such as invalid `lzma_bufcpy()` positions and null
+  `lzma_get_check()` streams. These don't change behavior for valid C API calls.
+- `lzma_strm_init()` initializes `internal.avail_in` to zero in Rust. C doesn't
+  need this before the first `lzma_code()` call, and the value is overwritten at
+  the same point in the public state machine.
+
+### `common/hardware_*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/hardware_cputhreads.c`
+- `vendor/xz/src/liblzma/common/hardware_physmem.c`
+- `xz-core/src/common/hardware_cputhreads.rs`
+- `xz-core/src/common/hardware_physmem.rs`
+- `xz-core/src/tuklib/tuklib_cpucores.rs`
+- `xz-core/src/tuklib/tuklib_physmem.rs`
+
+Finding:
+
+- No source-code mismatch found in the public wrappers: `lzma_cputhreads()` calls
+  the CPU-core shim and `lzma_physmem()` calls the physical-memory shim.
+
+Notes:
+
+- C has Linux symbol-version compatibility declarations around
+  `lzma_cputhreads()`. Rust doesn't reproduce ELF symbol-version aliases in
+  `xz-core`; that is an ABI packaging difference, not a wrapper-result mismatch.
+
+### `common/file_info`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/file_info.c`
+- `xz-core/src/common/file_info.rs`
+- `vendor/xz/src/liblzma/common/index_decoder.h`
+- `xz-core/src/common/index_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in temp-buffer filling, in-buffer vs external
+  seek selection, reverse seek sizing, padding scan, format-error hiding, Index
+  decoder handoff, Stream Header/Footer comparisons, multi-Stream Index
+  concatenation, memory-limit reporting/updating, decoder reset, or public
+  `lzma_file_info_decoder()` setup.
+
+Notes:
+
+- Rust expresses the C `switch`/`FALLTHROUGH` state machine as a loop over
+  explicit `SEQ_*` constants. The same transitions are preserved, including the
+  seek avoidance cases that reuse `coder->temp`.
+- Rust checks optional callback fields before invoking `index_decoder.code` or
+  `index_decoder.memconfig` and returns `LZMA_PROG_ERROR` if they are missing;
+  C relies on the preceding initialization invariants.
+
+### `common/string_conversion`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/string_conversion.c`
+- `xz-core/src/common/string_conversion.rs`
+- `vendor/xz/src/liblzma/api/lzma/lzma12.h`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- The Rust port changed the public `lzma_str_to_filters()` programming-error
+  message for null `str` or `filters` arguments from C's `"NULL pointer"` text
+  to a Rust-internal `"core::ptr::null_mut()"` spelling.
+
+Fix:
+
+- Restored the C API error string exactly.
+- Added `str_to_filters_null_pointer_message_matches_c_api`.
+
+Additional audit result:
+
+- No other source-code mismatch found in fixed-size string building, decimal and
+  KiB/MiB/GiB parsing, preset parsing, option maps, filter-name maps,
+  filter-chain parsing, validation handoff, `error_pos` accounting,
+  filter-chain stringification, or filter-list stringification.
+
+Notes:
+
+- `lzma_str_from_filters()` and `lzma_str_list_filters()` are behind
+  `xz-core`'s `custom_allocator` feature; `xz-sys` enables that feature. The
+  audited bodies match C's logic.
+- C uses `offsetof()` for option maps while Rust stores the concrete offsets.
+  The checked `repr(C)` layout of `lzma_options_lzma`, `lzma_options_bcj`, and
+  `lzma_options_delta` matches those offsets.
+
+### `delta/*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/delta/delta_common.c`
+- `vendor/xz/src/liblzma/delta/delta_common.h`
+- `vendor/xz/src/liblzma/delta/delta_private.h`
+- `vendor/xz/src/liblzma/delta/delta_encoder.c`
+- `vendor/xz/src/liblzma/delta/delta_decoder.c`
+- `xz-core/src/delta/delta_common.rs`
+- `xz-core/src/delta/delta_encoder.rs`
+- `xz-core/src/delta/delta_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in delta coder allocation/reset, memory-usage
+  validation, distance and type checks, next-filter initialization, encode and
+  decode history indexing, in-place encode/decode paths, `LZMA_FINISH`
+  propagation, properties encoding/decoding, or filter update forwarding.
+
+Notes:
+
+- C's `uint8_t pos` wraparound is represented by `u8` and explicit
+  `wrapping_sub()` in Rust where needed.
+- Rust uses typed allocation/free helpers but preserves the C coder layout
+  fields relevant to filter behavior.
+
+### `simple/simple_coder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/simple/simple_coder.c`
+- `vendor/xz/src/liblzma/simple/simple_private.h`
+- `vendor/xz/src/liblzma/simple/simple_encoder.c`
+- `vendor/xz/src/liblzma/simple/simple_decoder.c`
+- `xz-core/src/simple/simple_coder.rs`
+- `xz-core/src/simple/simple_encoder.rs`
+- `xz-core/src/simple/simple_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in simple coder allocation, `copy_or_code()`,
+  direct no-next buffering, next-coder result handling, filter invocation,
+  unfiltered-tail preservation, filtered-output flushing, finish/end-state
+  handling, update forwarding, start-offset property encoding, or property
+  decoding.
+
+Notes:
+
+- Rust uses slice and pointer-copy operations in place of C `memmove()` and
+  `memcpy()`, preserving the same overlap behavior for the tail-copy paths.
+- Public property decoding keeps C's behavior that zero-sized properties free
+  the temporary options object and leave the caller's `options` pointer
+  unchanged.
+
+### `simple/x86`
+
+Compared:
+
+- `vendor/xz/src/liblzma/simple/x86.c`
+- `xz-core/src/simple/x86.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in E8/E9 scanning, previous-mask and previous
+  position updates, `Test86MSByte` checks, source/destination address
+  conversions, byte rewrites, buffer-position handling, encoder/decoder reset,
+  or public encode/decode wrappers.
+
+Notes:
+
+- C `uint32_t` address arithmetic is represented with wrapping Rust arithmetic.
+  The branch and mask conditions match the C implementation.
+
+### `simple/{arm,armthumb,powerpc,sparc,ia64}`
+
+Compared:
+
+- `vendor/xz/src/liblzma/simple/arm.c`
+- `vendor/xz/src/liblzma/simple/armthumb.c`
+- `vendor/xz/src/liblzma/simple/powerpc.c`
+- `vendor/xz/src/liblzma/simple/sparc.c`
+- `vendor/xz/src/liblzma/simple/ia64.c`
+- `xz-core/src/simple/arm.rs`
+- `xz-core/src/simple/armthumb.rs`
+- `xz-core/src/simple/powerpc.rs`
+- `xz-core/src/simple/sparc.rs`
+- `xz-core/src/simple/ia64.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in instruction match predicates, endian-specific
+  instruction assembly/disassembly, branch target arithmetic, loop step sizes,
+  write-back byte order, or coder initialization parameters.
+
+Notes:
+
+- The ARMThumb inner `i += 2` skip after a converted instruction is preserved in
+  addition to the outer two-byte loop step.
+- The IA64 branch-table, slot loop, six-byte instruction extraction, and
+  normalized-instruction checks match C's implementation.
+
+### `simple/arm64`
+
+Compared:
+
+- `vendor/xz/src/liblzma/simple/arm64.c`
+- `xz-core/src/simple/arm64.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in BL conversion, ADRP range filtering,
+  destination immediate reconstruction, little-endian word handling, four-byte
+  loop alignment, coder initialization, or public start-offset alignment.
+
+Notes:
+
+- Rust uses `wrapping_add()` and `wrapping_sub()` for the C `uint32_t` program
+  counter and immediate arithmetic.
+
+### `simple/riscv`
+
+Compared:
+
+- `vendor/xz/src/liblzma/simple/riscv.c`
+- `xz-core/src/simple/riscv.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in JAL filtering, AUIPC pair detection, non-pair
+  skip distance, special AUIPC encoding, fake-pair handling, real-pair decoding,
+  mixed little/big-endian storage choices, two-byte loop stepping, coder
+  initialization, or public start-offset alignment.
+
+Notes:
+
+- The Rust helpers explicitly read and write little-endian or big-endian words,
+  matching the C `read32le()`/`write32le()`/`write32be()` choices.
+- `NOT_AUIPC_PAIR` and `NOT_SPECIAL_AUIPC` are represented as direct Rust
+  expressions with the same unsigned wrapping and comparison behavior.
+
 ### `lz/lz_encoder_mf`
 
 Compared:

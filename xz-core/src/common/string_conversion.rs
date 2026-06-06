@@ -853,8 +853,7 @@ pub unsafe fn lzma_str_to_filters(
         *error_pos = 0;
     }
     if str.is_null() || filters.is_null() {
-        return b"Unexpected core::ptr::null_mut() pointer argument(s) to lzma_str_to_filters()\0"
-            as *const u8 as *const c_char;
+        return crate::c_str!("Unexpected NULL pointer argument(s) to lzma_str_to_filters()");
     }
     let supported_flags: u32 = LZMA_STR_ALL_FILTERS as u32 | LZMA_STR_NO_VALIDATION as u32;
     if flags & !supported_flags != 0 {
