@@ -67,6 +67,30 @@ Test coverage added:
   - `LZMA_IGNORE_CHECK`, `LZMA_TELL_ANY_CHECK`, invalid flags, and memlimit
     retry behavior
 
+### `common/block_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/block_decoder.c`
+- `xz-core/src/common/block_decoder.rs`
+- `vendor/xz/src/liblzma/common/block_buffer_decoder.c`
+- `xz-core/src/common/block_buffer_decoder.rs`
+
+Finding:
+
+- No source-code mismatch found in Block decoding state transitions, compressed
+  and uncompressed size limit calculations, padding consumption, Check
+  finalization/verification, `ignore_check`, or the single-call block buffer
+  wrapper.
+
+Notes:
+
+- The Rust `SEQ_CODE`/`SEQ_PADDING`/`SEQ_CHECK` structure preserves the C
+  fallthrough and re-entry behavior.
+- The block buffer wrapper preserves the upstream position-restore behavior on
+  errors and the upstream distinction between truncated input
+  (`LZMA_DATA_ERROR`) and too-small output (`LZMA_BUF_ERROR`).
+
 ### `common/alone_decoder`
 
 Compared:
@@ -139,7 +163,6 @@ unsigned arithmetic, pointer-window state, or feature-condition branches:
 
 - `common/stream_decoder_mt`
 - `common/index_decoder`
-- `common/block_decoder`
 - `lz/lz_encoder`
 - `lzma/lzma_encoder`
 - `lzma/lzma_decoder`
