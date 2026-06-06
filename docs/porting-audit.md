@@ -628,6 +628,41 @@ Notes:
 - Rust spells out the C `lzma_next_strm_init()` and `lzma_next_coder_init()`
   macro expansions while preserving their cleanup behavior.
 
+### `common/microlzma_*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/microlzma_decoder.c`
+- `vendor/xz/src/liblzma/common/microlzma_encoder.c`
+- `vendor/xz/src/liblzma/lzma/lzma_decoder.c`
+- `vendor/xz/src/liblzma/lzma/lzma_encoder.c`
+- `xz-core/src/common/microlzma_decoder.rs`
+- `xz-core/src/common/microlzma_encoder.rs`
+- `xz-core/src/lzma/lzma_decoder.rs`
+- `xz-core/src/lzma/lzma_encoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in MicroLZMA decoder input/output limiting,
+  property-byte bitwise negation, exact-size option setup, LZMA1EXT decoder
+  initialization, dummy first-byte injection, compressed/uncompressed remaining
+  size accounting, exact/non-exact completion rules, public decoder init, or
+  supported-action setup.
+- No source-code mismatch found in MicroLZMA encoder output-limit delegation,
+  first-byte overwrite with negated properties, input-position adjustment from
+  the encoded uncompressed byte count, properties validation, LZMA1 encoder
+  initialization, public encoder init, or supported-action setup.
+
+Notes:
+
+- C designated initialization and Rust explicit initialization both leave the
+  unused `lzma_options_lzma` reserved fields at zero.
+- Rust omits the C debug `assert()` calls around encoder output-limit and
+  consumed-input invariants, but preserves the released build return behavior.
+- Upstream has dedicated coverage in `vendor/xz/tests/test_microlzma.c`; a
+  later test-porting pass should add Rust API tests for the same cases.
+
 ### `common/easy_*`
 
 Compared:
