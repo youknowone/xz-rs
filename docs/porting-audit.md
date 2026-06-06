@@ -146,6 +146,97 @@ Additional audit result:
   validation, Check reservation/finalization, Block Padding, or uncomp wrapper
   behavior.
 
+### `common/block_util`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/block_util.c`
+- `vendor/xz/src/liblzma/common/index.h`
+- `xz-core/src/common/block_util.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in compressed-size derivation from Unpadded
+  Size, known Compressed Size consistency checks, Unpadded Size validation,
+  unknown-size propagation, Total Size rounding, or check-size handling.
+
+### `common/block_header_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/block_header_encoder.c`
+- `vendor/xz/src/liblzma/common/filter_flags_encoder.c`
+- `vendor/xz/src/liblzma/common/filter_encoder.c`
+- `xz-core/src/common/block_header_encoder.rs`
+- `xz-core/src/common/filter_flags_encoder.rs`
+- `xz-core/src/common/filter_encoder.rs`
+- `xz-core/src/common/block_util.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in Block Header Size calculation, compressed
+  and uncompressed size VLI handling, filter-count limits, Filter Flags size
+  calculation, Block Header validation before encode, Block Flags bits, Filter
+  Flags encoding, header padding zero-fill, CRC32 emission, or property
+  size/encode delegation.
+
+### `common/block_header_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/block_header_decoder.c`
+- `vendor/xz/src/liblzma/common/filter_flags_decoder.c`
+- `vendor/xz/src/liblzma/common/filter_common.c`
+- `xz-core/src/common/block_header_decoder.rs`
+- `xz-core/src/common/filter_flags_decoder.rs`
+- `xz-core/src/common/filter_common.rs`
+- `xz-core/src/common/block_util.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in filter array sentinel initialization,
+  version downgrade, `ignore_check` reset, header-size/check validation, CRC32
+  verification, unsupported Block Flags rejection, compressed and uncompressed
+  size VLI decoding, Compressed Size validation through
+  `lzma_block_unpadded_size()`, Filter Flags decoding, filter-option cleanup on
+  errors, or padding rejection.
+
+### `common/filter_flags_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/filter_flags_encoder.c`
+- `vendor/xz/src/liblzma/common/filter_encoder.c`
+- `xz-core/src/common/filter_flags_encoder.rs`
+- `xz-core/src/common/filter_encoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in reserved Filter ID rejection, property-size
+  lookup, Filter ID and properties-size VLI encoding, output-space validation,
+  Filter Properties encoding, or output-position advancement.
+
+### `common/filter_flags_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/filter_flags_decoder.c`
+- `vendor/xz/src/liblzma/common/filter_decoder.c`
+- `xz-core/src/common/filter_flags_decoder.rs`
+- `xz-core/src/common/filter_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in options-pointer clearing, Filter ID VLI
+  decoding, reserved Filter ID rejection, properties-size VLI decoding,
+  truncated properties rejection, Filter Properties decoding, or input-position
+  advancement.
+
 ### `common/index_decoder`
 
 Compared:
