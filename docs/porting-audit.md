@@ -277,6 +277,34 @@ Notes:
   audited call path invokes the dummy simulation only before `rc_flush()` queues
   flush symbols.
 
+### `lzma/lzma_encoder_optimum_fast`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/lzma_encoder_optimum_fast.c`
+- `vendor/xz/src/liblzma/lzma/lzma_encoder_private.h`
+- `vendor/xz/src/liblzma/lz/memcmplen.h`
+- `vendor/xz/src/liblzma/lz/lz_encoder.h`
+- `xz-core/src/lzma/lzma_encoder_optimum_fast.rs`
+- `xz-core/src/lz/lz_encoder_mf.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in fast-mode match selection, repeated-match
+  scanning, `change_pair()` distance heuristics, look-ahead match comparison,
+  read-ahead preservation, literal fallback decisions, or final match skip
+  accounting.
+
+Notes:
+
+- Rust's `not_equal_16()` uses `read_unaligned::<u16>()`; this preserves the C
+  two-byte inequality test because only equality/inequality of the two-byte
+  sequence is observed.
+- Rust caches the `mf.find` and `mf.skip` callbacks and calls raw helper
+  variants. The helper bodies preserve the C `mf_find()`/`mf_skip()` ordering,
+  including `read_ahead` updates.
+
 ## Wrapper API Findings
 
 ### `stream::IGNORE_CHECK`
@@ -297,6 +325,5 @@ The next pass should focus on high-risk files that combine C fallthrough,
 unsigned arithmetic, pointer-window state, or feature-condition branches:
 
 - `common/stream_decoder_mt`
-- `lzma/lzma_encoder_optimum_fast`
 - `lzma/lzma_encoder_optimum_normal`
 - `lzma/lzma_decoder`
