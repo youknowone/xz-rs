@@ -527,6 +527,53 @@ Notes:
 - `LZMA_FAIL_FAST` is accepted through `LZMA_SUPPORTED_FLAGS` in both C and
   Rust, but the single-threaded stream decoder doesn't otherwise use it.
 
+### `common/stream_buffer_*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/stream_buffer_encoder.c`
+- `vendor/xz/src/liblzma/common/stream_buffer_decoder.c`
+- `vendor/xz/src/liblzma/common/index.h`
+- `xz-core/src/common/stream_buffer_encoder.rs`
+- `xz-core/src/common/stream_buffer_decoder.rs`
+- `xz-core/src/common/block_buffer_encoder.rs`
+- `xz-core/src/common/stream_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in Stream buffer bound calculation, check
+  validation, caller position validation, successful-output-position commit,
+  Stream Header emission, optional empty-input Block omission, Block buffer
+  encoding delegation, Index creation/append/encode cleanup, Footer Backward
+  Size assignment, Stream Footer emission, single-call Stream decoder
+  initialization, forbidden flag rejection, error-position rollback, truncated
+  input versus full output classification, memlimit reporting, or decoder
+  cleanup.
+
+### `common/filter_buffer_*`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/filter_buffer_encoder.c`
+- `vendor/xz/src/liblzma/common/filter_buffer_decoder.c`
+- `vendor/xz/src/liblzma/common/filter_encoder.h`
+- `vendor/xz/src/liblzma/common/filter_decoder.h`
+- `xz-core/src/common/filter_buffer_encoder.rs`
+- `xz-core/src/common/filter_buffer_decoder.rs`
+- `xz-core/src/common/filter_encoder.rs`
+- `xz-core/src/common/filter_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in raw buffer input/output argument validation,
+  raw encoder/decoder initialization, single-call `LZMA_FINISH` execution,
+  `LZMA_STREAM_END` to `LZMA_OK` conversion, output-position rollback on raw
+  encode errors, input/output-position rollback on raw decode errors,
+  truncated-input versus too-small-output classification, one-byte decode probe
+  behavior for ambiguous full-input/full-output cases, or coder cleanup.
+
 ### `common/stream_flags_*`
 
 Compared:
