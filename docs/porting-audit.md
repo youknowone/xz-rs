@@ -182,6 +182,46 @@ Notes:
   uses helper functions to preserve the same allocator passed to C worker
   operations.
 
+### `common/stream_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/stream_decoder.c`
+- `vendor/xz/src/liblzma/common/stream_decoder.h`
+- `vendor/xz/src/liblzma/common/common.h`
+- `vendor/xz/src/liblzma/common/block_header_decoder.c`
+- `vendor/xz/src/liblzma/common/filter_common.c`
+- `xz-core/src/common/stream_decoder.rs`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/common/block_header_decoder.rs`
+- `xz-core/src/common/filter_common.rs`
+- `xz-core/src/common/common_types.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in Stream Header decoding, check notification
+  flags, Block Header buffering and Index detection, Block Header decoding and
+  filter-option cleanup, Block decoder startup and run behavior, Index hash
+  appending/decoding, Stream Footer verification, concatenated Stream Padding
+  handling, reset/end behavior, get-check/memconfig behavior, public
+  initialization, or supported action setup.
+
+Notes:
+
+- Rust represents C fallthrough between Stream Header -> Block Header, Block
+  Header -> Block Init, Block Init -> Block Run, Index -> Footer, Footer ->
+  Padding, and Padding -> next Stream by setting `sequence` and continuing the
+  outer loop.
+- C's `return_if_error(lzma_block_header_decode(...))` leaves the local filter
+  array cleanup to `lzma_block_header_decode()` on error. Rust additionally
+  calls `lzma_filters_free()` before returning from that error path; the Block
+  Header decoder initializes the array with a terminating sentinel before
+  returning errors and resets allocated entries on its internal cleanup paths,
+  so this is a safe mechanical difference.
+- `LZMA_FAIL_FAST` is accepted through `LZMA_SUPPORTED_FLAGS` in both C and
+  Rust, but the single-threaded stream decoder doesn't otherwise use it.
+
 ### `lz/lz_encoder_mf`
 
 Compared:
