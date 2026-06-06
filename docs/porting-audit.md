@@ -450,6 +450,38 @@ Notes:
 - Rust spells out the C `lzma_next_strm_init()` macro expansion in
   `lzma_raw_decoder()`, matching the same initialization and cleanup behavior.
 
+### `common/index`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/index.c`
+- `vendor/xz/src/liblzma/common/index.h`
+- `vendor/xz/src/liblzma/common/stream_flags_common.h`
+- `xz-core/src/common/index.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in the Index AVL tree helpers, stream/group
+  initialization and cleanup, preallocation, memory-usage calculation, public
+  size/count/check/padding accessors, block append validation and accounting,
+  concatenation, duplication, iterator state projection, iterator traversal, or
+  uncompressed-offset location.
+
+Notes:
+
+- Rust uses typed allocation/free helpers for `index_group` flexible-array
+  storage, but preserves the C allocation sizes, `last`/`allocated` accounting,
+  and preallocation limits.
+- The C unsigned wraparound in stream-padding and file-size calculations is
+  represented with explicit Rust wrapping arithmetic.
+- `index_tree_append()` keeps the same AVL balancing and insertion-side
+  assumptions as C: it appends nodes to the right edge and rotates only from
+  the bottom-up right-chain state that the Index builder creates.
+- `lzma_index_iter_next()` keeps the C mode ordering, internal method handling,
+  empty-Stream skipping for Block modes, and empty-Block skipping for
+  `LZMA_INDEX_ITER_NONEMPTY_BLOCK`.
+
 ### `common/index_decoder`
 
 Compared:
