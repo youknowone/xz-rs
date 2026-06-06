@@ -195,6 +195,51 @@ Notes:
   allocator requires typed deallocation; this matches the same policy used in
   `lz/lz_decoder.rs` and doesn't change valid encoder behavior.
 
+### `lzma/lzma2_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/lzma2_encoder.c`
+- `vendor/xz/src/liblzma/lzma/lzma2_encoder.h`
+- `xz-core/src/lzma/lzma2_encoder.rs`
+
+Finding:
+
+- No source-code mismatch found in LZMA2 chunk header construction,
+  uncompressed-chunk fallback, state/property/dictionary reset flags,
+  partial header/data copy state, options update, initialization, memory-usage
+  reporting, properties encoding, or recommended block-size calculation.
+
+Notes:
+
+- The Rust sequence checks preserve the C fallthrough among
+  `SEQ_INIT` -> `SEQ_LZMA_ENCODE` -> `SEQ_LZMA_COPY` and
+  `SEQ_UNCOMPRESSED_HEADER` -> `SEQ_UNCOMPRESSED_COPY`.
+- C `--d` in property encoding is represented by Rust `d -= 1`; the preceding
+  `max(dict_size, LZMA_DICT_SIZE_MIN)` keeps it away from underflow.
+
+### `lzma/lzma2_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/lzma2_decoder.c`
+- `xz-core/src/lzma/lzma2_decoder.rs`
+
+Finding:
+
+- No source-code mismatch found in control-byte parsing, reserved control-byte
+  rejection, dictionary/property/state reset requirements, compressed and
+  uncompressed size decoding, LZMA chunk completion checks, raw copy chunks,
+  initialization/end behavior, memory-usage reporting, or properties decoding.
+
+Test coverage added:
+
+- Added `tests/lzma2_corpus.rs`, exercising the upstream LZMA2-specific `.xz`
+  corpus fixtures:
+  - `good-1-lzma2-1.xz` through `good-1-lzma2-5.xz`
+  - `good-2-lzma2.xz`
+  - `bad-1-lzma2-1.xz` through `bad-1-lzma2-11.xz`
+
 ## Wrapper API Findings
 
 ### `stream::IGNORE_CHECK`
@@ -217,5 +262,3 @@ unsigned arithmetic, pointer-window state, or feature-condition branches:
 - `common/stream_decoder_mt`
 - `lzma/lzma_encoder`
 - `lzma/lzma_decoder`
-- `lzma/lzma2_encoder`
-- `lzma/lzma2_decoder`
