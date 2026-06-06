@@ -3,9 +3,9 @@
 use xz::stream::{Action, Error, Status, Stream, IGNORE_CHECK};
 
 const BAD_CRC32_XZ: &[u8] = include_bytes!("../vendor/xz/tests/files/bad-1-check-crc32.xz");
+const GOOD_LZIP: &[u8] = include_bytes!("../vendor/xz/tests/files/good-1-v1.lz");
 
-fn decode_stream(input: &[u8], flags: u32) -> Result<Vec<u8>, Error> {
-    let mut stream = Stream::new_stream_decoder(u64::MAX, flags).unwrap();
+fn decode_with(mut stream: Stream, input: &[u8]) -> Result<Vec<u8>, Error> {
     let mut input_pos = 0usize;
     let mut decoded = Vec::new();
 
@@ -32,6 +32,10 @@ fn decode_stream(input: &[u8], flags: u32) -> Result<Vec<u8>, Error> {
     panic!("decoder did not converge");
 }
 
+fn decode_stream(input: &[u8], flags: u32) -> Result<Vec<u8>, Error> {
+    decode_with(Stream::new_stream_decoder(u64::MAX, flags).unwrap(), input)
+}
+
 #[test]
 fn alone_decoder_rejects_wrapping_dictionary_size() {
     let input = [
@@ -55,4 +59,13 @@ fn stream_decoder_ignore_check_skips_integrity_check_verification() {
 
     let decoded = decode_stream(BAD_CRC32_XZ, IGNORE_CHECK).unwrap();
     assert!(!decoded.is_empty());
+}
+
+#[test]
+fn auto_decoder_accepts_lzip_streams() {
+    let direct = decode_with(Stream::new_lzip_decoder(u64::MAX, 0).unwrap(), GOOD_LZIP).unwrap();
+    let auto = decode_with(Stream::new_auto_decoder(u64::MAX, 0).unwrap(), GOOD_LZIP).unwrap();
+
+    assert_eq!(auto, direct);
+    assert!(!auto.is_empty());
 }

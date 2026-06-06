@@ -1,4 +1,5 @@
 use crate::common::alone_decoder::lzma_alone_decoder_init;
+use crate::common::lzip_decoder::lzma_lzip_decoder_init;
 use crate::types::*;
 pub type auto_decoder_seq = c_uint;
 pub const SEQ_FINISH: auto_decoder_seq = 2;
@@ -32,6 +33,16 @@ unsafe fn auto_decode(
             (*coder).sequence = SEQ_CODE;
             if *input.offset(*in_pos as isize) == 0xfd {
                 let ret: lzma_ret = lzma_stream_decoder_init(
+                    ::core::ptr::addr_of_mut!((*coder).next),
+                    allocator,
+                    (*coder).memlimit,
+                    (*coder).flags,
+                );
+                if ret != LZMA_OK {
+                    return ret;
+                }
+            } else if *input.offset(*in_pos as isize) == 0x4c {
+                let ret: lzma_ret = lzma_lzip_decoder_init(
                     ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
                     (*coder).memlimit,
