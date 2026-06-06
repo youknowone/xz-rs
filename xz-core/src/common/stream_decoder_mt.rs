@@ -617,7 +617,7 @@ fn comp_blk_size(coder: *const lzma_stream_coder) -> size_t {
     }
 }
 fn is_direct_mode_needed(size: lzma_vli) -> bool {
-    size == LZMA_VLI_UNKNOWN || size > SIZE_MAX.wrapping_div(3 as c_ulong) as lzma_vli
+    size == LZMA_VLI_UNKNOWN || size > SIZE_MAX.wrapping_div(3 as size_t) as lzma_vli
 }
 unsafe fn stream_decoder_reset(
     coder: *mut lzma_stream_coder,

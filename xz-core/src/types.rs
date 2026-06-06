@@ -178,8 +178,10 @@ pub const LZMA_PB_MAX: u32 = 4;
 pub const LZMA_DELTA_DIST_MAX: u32 = 256;
 pub const LZMA_BACKWARD_SIZE_MIN: u32 = 4;
 pub const LZMA_BACKWARD_SIZE_MAX: u64 = 1 << 34;
-pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
-pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
+// Match C's UINTPTR_MAX and SIZE_MAX macros. On LLP64 targets, size_t and
+// uintptr_t are wider than unsigned long.
+pub const UINTPTR_MAX: uintptr_t = uintptr_t::MAX;
+pub const SIZE_MAX: size_t = size_t::MAX;
 pub const INDEX_INDICATOR: u8 = 0;
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
@@ -916,5 +918,16 @@ pub unsafe fn memchr(s: *const c_void, c: c_int, n: size_t) -> *mut c_void {
     match ::memchr::memchr(needle, bytes) {
         Some(index) => (s as *const u8).add(index) as *mut c_void,
         None => core::ptr::null_mut(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SIZE_MAX, UINTPTR_MAX, size_t, uintptr_t};
+
+    #[test]
+    fn c_size_bounds_use_pointer_width_types() {
+        assert_eq!(SIZE_MAX, size_t::MAX);
+        assert_eq!(UINTPTR_MAX, uintptr_t::MAX);
     }
 }

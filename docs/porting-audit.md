@@ -933,6 +933,43 @@ Notes:
   The checked `repr(C)` layout of `lzma_options_lzma`, `lzma_options_bcj`, and
   `lzma_options_delta` matches those offsets.
 
+### `common/outqueue`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/outqueue.c`
+- `vendor/xz/src/liblzma/common/outqueue.h`
+- `xz-core/src/common/outqueue.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- While auditing `outqueue`, the Rust shared `SIZE_MAX` constant was found to be
+  based on `c_ulong`. That happens to match `size_t` on LP64 targets but not on
+  LLP64 targets such as 64-bit Windows, where C `SIZE_MAX` is pointer-width and
+  `unsigned long` remains 32-bit.
+
+Fix:
+
+- Define `UINTPTR_MAX` as `uintptr_t::MAX` and `SIZE_MAX` as `size_t::MAX`.
+- Updated the multithreaded decoder direct-mode threshold to divide
+  pointer-width `SIZE_MAX`.
+- Added `c_size_bounds_use_pointer_width_types`.
+
+Additional audit result:
+
+- No other source-code mismatch found in output queue memory-usage estimates,
+  cache clearing, cache-size retention, queue initialization, queue teardown,
+  preallocation, moving cache buffers into active use, readability checks,
+  output reads, finish return propagation, size-info reporting, or partial-output
+  callback gating.
+
+Notes:
+
+- Rust uses typed allocation helpers for variable-sized `lzma_outbuf`
+  allocations, but its allocated size and accounting still use
+  `sizeof(lzma_outbuf) + buf_size`, matching C.
+
 ### `delta/*`
 
 Compared:
@@ -1124,6 +1161,53 @@ Notes:
 - The `lz.coder` free path differs mechanically because the default Rust
   allocator requires typed deallocation; this matches the same policy used in
   `lz/lz_decoder.rs` and doesn't change valid encoder behavior.
+
+### `lzma/fastpos_table`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/fastpos_table.c`
+- `xz-core/src/lzma/fastpos_table.rs`
+- `vendor/xz/src/liblzma/lzma/fastpos.h`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- Numeric extraction confirmed all 8192 Rust `lzma_fastpos` entries match the C
+  generated table. No source-code mismatch found in table length or exported
+  table type.
+
+### `lzma/lzma_encoder_presets`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/lzma_encoder_presets.c`
+- `vendor/xz/src/liblzma/api/lzma/container.h`
+- `vendor/xz/src/liblzma/api/lzma/lzma12.h`
+- `xz-core/src/lzma/lzma_encoder_presets.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in preset level/flag validation, preset
+  dictionary reset, default lc/lp/pb setup, dictionary-size table, fast vs normal
+  mode selection, match-finder selection, nice-length/depth setup, extreme-preset
+  overrides, or boolean return convention.
+
+### `rangecoder/price_table`
+
+Compared:
+
+- `vendor/xz/src/liblzma/rangecoder/price_table.c`
+- `vendor/xz/src/liblzma/rangecoder/range_encoder.h`
+- `xz-core/src/rangecoder/price_table.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- Numeric extraction confirmed all 128 Rust `lzma_rc_prices` entries match the C
+  generated table. No source-code mismatch found in table length or exported
+  table type.
 
 ### `lzma/lzma2_encoder`
 
