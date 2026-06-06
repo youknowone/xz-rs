@@ -83,10 +83,20 @@ pub unsafe fn lzma_check_finish(check: *mut lzma_check_state, check_type: lzma_c
 
     match check_type {
         LZMA_CHECK_CRC32 => {
-            (*check).buffer.u32_0[0] = (*check).state.crc32;
+            let bytes = (*check).state.crc32.to_le_bytes();
+            core::ptr::copy_nonoverlapping(
+                bytes.as_ptr(),
+                ::core::ptr::addr_of_mut!((*check).buffer.u8_0) as *mut u8,
+                bytes.len(),
+            );
         }
         LZMA_CHECK_CRC64 => {
-            (*check).buffer.u64_0[0] = (*check).state.crc64;
+            let bytes = (*check).state.crc64.to_le_bytes();
+            core::ptr::copy_nonoverlapping(
+                bytes.as_ptr(),
+                ::core::ptr::addr_of_mut!((*check).buffer.u8_0) as *mut u8,
+                bytes.len(),
+            );
         }
         LZMA_CHECK_SHA256 => {
             lzma_sha256_finish(check);

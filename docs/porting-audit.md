@@ -23,6 +23,148 @@ scripts/porting_audit_map.sh
 
 ## Audited Items
 
+### `check/check`
+
+Compared:
+
+- `vendor/xz/src/liblzma/check/check.c`
+- `vendor/xz/src/liblzma/check/check.h`
+- `xz-core/src/check/check.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- The Rust port wrote CRC32 and CRC64 results through native-endian `u32` and
+  `u64` union fields instead of storing the final check bytes in the C
+  `conv32le()`/`conv64le()` byte order. This was correct on little-endian hosts
+  but wrong on big-endian targets.
+
+Fix:
+
+- Store CRC32 and CRC64 finished check values through `buffer.u8_0` using
+  `to_le_bytes()`.
+- Added check regression tests for CRC finish byte order and standard CRC
+  vectors.
+
+Additional audit result:
+
+- No other source-code mismatch found in supported-check lookup, check-size
+  lookup, check state initialization, update dispatch, SHA-256 delegation, or
+  unsupported check no-op behavior.
+
+Notes:
+
+- Rust currently treats CRC32, CRC64, and SHA-256 as available, matching this
+  vendored build configuration.
+- Rust defensively ignores null `lzma_check_state` pointers in internal
+  check init/update/finish helpers; C doesn't guard those internal calls.
+
+### `check/crc32_fast`
+
+Compared:
+
+- `vendor/xz/src/liblzma/check/crc32_fast.c`
+- `vendor/xz/src/liblzma/check/crc32_table_le.h`
+- `vendor/xz/src/liblzma/check/crc32_table_be.h`
+- `vendor/xz/src/liblzma/check/crc_common.h`
+- `xz-core/src/check/crc32_fast.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- The Rust generic CRC32 path used the little-endian generated table but read
+  bulk words in native-endian order. This was correct on little-endian hosts but
+  didn't match C's `WORDS_BIGENDIAN` path on big-endian targets.
+
+Fix:
+
+- Interpret CRC32 bulk reads and AArch64 CRC helper reads as little-endian using
+  `from_le()`.
+- Added a standard CRC32 check-vector regression test.
+
+Additional audit result:
+
+- Numeric comparison confirmed the Rust CRC32 table exactly matches
+  `crc32_table_le.h`. No other source-code mismatch found in initial/final CRC
+  inversion, alignment handling, slice-by-eight table lookup order, tail-byte
+  handling, or public wrapper behavior.
+
+Notes:
+
+- Rust keeps an AArch64 CRC optimized path but doesn't port every upstream
+  runtime dispatch variant such as x86 CLMUL or LoongArch. This is an
+  implementation/performance difference, not a result mismatch for the generic
+  API.
+
+### `check/crc64_fast`
+
+Compared:
+
+- `vendor/xz/src/liblzma/check/crc64_fast.c`
+- `vendor/xz/src/liblzma/check/crc64_table_le.h`
+- `vendor/xz/src/liblzma/check/crc64_table_be.h`
+- `vendor/xz/src/liblzma/check/crc_common.h`
+- `xz-core/src/check/crc64_fast.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- The Rust generic CRC64 path used the little-endian generated table but read
+  bulk words in native-endian order. This was correct on little-endian hosts but
+  didn't match C's `WORDS_BIGENDIAN` path on big-endian targets.
+
+Fix:
+
+- Interpret CRC64 bulk reads as little-endian using `from_le()`.
+- Added a standard CRC64/XZ check-vector regression test.
+
+Additional audit result:
+
+- Numeric comparison confirmed the Rust CRC64 table exactly matches
+  `crc64_table_le.h`. No other source-code mismatch found in initial/final CRC
+  inversion, alignment handling, slice-by-four table lookup order, tail-byte
+  handling, or public wrapper behavior.
+
+Notes:
+
+- Rust uses the generic CRC64 implementation and doesn't port the optional
+  upstream arch-optimized dispatch. This is an implementation/performance
+  difference, not a result mismatch for the generic API.
+
+### `check/sha256`
+
+Compared:
+
+- `vendor/xz/src/liblzma/check/sha256.c`
+- `vendor/xz/src/liblzma/check/check.h`
+- `xz-core/src/check/sha256.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- The Rust SHA-256 path manually byte-swapped input words, the message length,
+  and final digest words before storing them through native-endian union fields.
+  This was correct on little-endian hosts but wrong on big-endian targets.
+
+Fix:
+
+- Read SHA-256 block words with `from_be_bytes()` and write the message length
+  and final digest through `buffer.u8_0` using `to_be_bytes()`.
+- Added a SHA-256 `abc` standard-vector regression test.
+
+Additional audit result:
+
+- Numeric comparison confirmed the Rust `SHA256_K` table exactly matches C. No
+  other source-code mismatch found in rotation functions, compression rounds,
+  state initialization, buffered update behavior, padding, message-length
+  accounting, or digest finalization.
+
+Notes:
+
+- Rust uses the internal SHA-256 implementation. The vendored C configuration
+  may also use the internal implementation, or map the helper functions to an
+  external platform SHA-256 provider when configured that way.
+
 ### `common/auto_decoder`
 
 Compared:
