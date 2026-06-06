@@ -240,6 +240,43 @@ Test coverage added:
   - `good-2-lzma2.xz`
   - `bad-1-lzma2-1.xz` through `bad-1-lzma2-11.xz`
 
+### `lzma/lzma_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lzma/lzma_encoder.c`
+- `vendor/xz/src/liblzma/lzma/lzma_encoder.h`
+- `vendor/xz/src/liblzma/lzma/lzma_encoder_private.h`
+- `vendor/xz/src/liblzma/lzma/lzma_common.h`
+- `vendor/xz/src/liblzma/lzma/fastpos.h`
+- `vendor/xz/src/liblzma/rangecoder/range_encoder.h`
+- `vendor/xz/src/liblzma/rangecoder/range_common.h`
+- `vendor/xz/src/liblzma/rangecoder/price.h`
+- `xz-core/src/lzma/lzma_encoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in range-encoder symbol buffering and
+  partial-output resume, dummy output-limit simulation, literal subcoder
+  selection, state transitions, length price updates, match and repeated-match
+  distance rotation, LZMA1/LZMA2 encode-loop limits, EOPM/flush completion,
+  option validation, LZ option setup, reset/create behavior, memory-usage
+  reporting, property encoding, or mode support reporting.
+
+Notes:
+
+- The Rust file includes the C `range_encoder.h` inline logic directly; its
+  `rc_encode()` implementation caches range-coder fields locally and writes
+  them back at the same partial-output boundaries as C.
+- C state, literal, bit-reset, price, and distance-slot macros are represented
+  by direct Rust expressions or shared helpers in `types.rs`.
+- Rust adds pointer-access helper functions and an `lzma_encoder_end()` typed
+  deallocator; these are mechanical differences from the C allocation model.
+- `rc_encode_dummy()` ignores `RC_FLUSH` in its Rust fallback arm, but the
+  audited call path invokes the dummy simulation only before `rc_flush()` queues
+  flush symbols.
+
 ## Wrapper API Findings
 
 ### `stream::IGNORE_CHECK`
@@ -260,5 +297,6 @@ The next pass should focus on high-risk files that combine C fallthrough,
 unsigned arithmetic, pointer-window state, or feature-condition branches:
 
 - `common/stream_decoder_mt`
-- `lzma/lzma_encoder`
+- `lzma/lzma_encoder_optimum_fast`
+- `lzma/lzma_encoder_optimum_normal`
 - `lzma/lzma_decoder`
