@@ -1210,6 +1210,50 @@ Notes:
 - `NOT_AUIPC_PAIR` and `NOT_SPECIAL_AUIPC` are represented as direct Rust
   expressions with the same unsigned wrapping and comparison behavior.
 
+### `lz/lz_decoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/lz/lz_decoder.h`
+- `vendor/xz/src/liblzma/lz/lz_decoder.c`
+- `vendor/xz/src/liblzma/lzma/lzma_decoder.c`
+- `vendor/xz/src/liblzma/lzma/lzma2_decoder.c`
+- `xz-core/src/lz/lz_decoder.rs`
+- `xz-core/src/lzma/lzma_decoder.rs`
+- `xz-core/src/lzma/lzma2_decoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in dictionary reset/wrap handling, output-limit
+  calculation, dictionary-to-output copying, reset-after-LZ-code behavior,
+  next-filter temporary-buffer flow, `next_finished`/`this_finished` handling,
+  base decoder allocation/reuse, dictionary-size minimum/rounding/overflow
+  checks, preset dictionary tail-copying, next-filter initialization, or memory
+  usage calculation for the Rust implementation's dictionary repeat strategy.
+- No source-code mismatch found in the ported header helpers used by the LZMA
+  and LZMA2 decoders: `dict_get`, `dict_get0`, distance validation,
+  byte/memcpy-style `dict_repeat`, `dict_put`, `dict_put_safe`, `dict_write`,
+  and `dict_reset`.
+
+Notes:
+
+- Rust implements the C `LZMA_LZ_DECODER_CONFIG == 1` repeat strategy: byte-wise
+  copying for overlapping repeats and `copy_nonoverlapping()` for
+  non-overlapping repeats. Therefore `LZ_DICT_EXTRA` is zero in Rust.
+- C builds that select the SSE2 repeat strategy reserve `LZ_DICT_EXTRA == 32`;
+  the local static `liblzma-sys` config used for comparison doesn't define the
+  fast-unaligned/SSE2 prerequisites on this aarch64 host.
+- Rust uses a non-null sentinel function for the internal LZ callback field
+  because Rust function pointers cannot represent C `NULL`; valid decoder init
+  replaces it before use.
+- Rust has a defensive internal guard after `lz_init()` to reject an impossible
+  "OK but null coder" state. C relies on the same internal contract and has no
+  corresponding public behavior for that state.
+- LZMA1 decoder cleanup uses a Rust `end` callback to perform typed free. C
+  leaves that callback `NULL` and lets the LZ wrapper call `lzma_free()`
+  directly; the allocation ownership is otherwise the same.
+
 ### `lz/lz_encoder_mf`
 
 Compared:
