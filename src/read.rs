@@ -226,7 +226,9 @@ impl<W: Write + Read> Write for XzDecoder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::stream::{LzmaOptions, PRESET_EXTREME};
+    use crate::stream::{Action, LzmaOptions, Status, PRESET_EXTREME};
+    #[cfg(feature = "parallel")]
+    use crate::stream::{Check, MtStreamBuilder};
     use quickcheck::quickcheck;
     use rand::{thread_rng, Rng};
     use std::iter;
@@ -263,6 +265,23 @@ mod tests {
         let mut data = vec![];
         d.read_to_end(&mut data).unwrap();
         assert_eq!(data, &m[..]);
+    }
+
+    #[test]
+    fn level_zero_long_round_trip() {
+        let mut state = 0x1234_5678u32;
+        let m: Vec<u8> = (0..65_536)
+            .map(|_| {
+                state = state.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+                (state >> 24) as u8
+            })
+            .collect();
+
+        let c = XzEncoder::new(&m[..], 0);
+        let mut d = XzDecoder::new(c);
+        let mut data = Vec::new();
+        d.read_to_end(&mut data).unwrap();
+        assert_eq!(data, m);
     }
 
     #[test]
@@ -377,6 +396,57 @@ mod tests {
         let mut data = Vec::new();
         d.read_to_end(&mut data).unwrap();
         assert_eq!(data, m);
+    }
+
+    #[cfg(feature = "parallel")]
+    #[test]
+    fn parallel_full_flush_short_chunks_round_trip() {
+        fn process_all(
+            stream: &mut crate::stream::Stream,
+            mut input: &[u8],
+            action: Action,
+            compressed: &mut Vec<u8>,
+        ) -> Status {
+            loop {
+                let input_before = stream.total_in();
+                let out_before = stream.total_out();
+                let mut output = [0; 128];
+
+                let status = stream.process(input, &mut output, action).unwrap();
+
+                let input_used = (stream.total_in() - input_before) as usize;
+                let output_used = (stream.total_out() - out_before) as usize;
+                input = &input[input_used..];
+                compressed.extend_from_slice(&output[..output_used]);
+
+                if matches!(action, Action::Run) {
+                    if input.is_empty() {
+                        return status;
+                    }
+                } else if status == Status::StreamEnd {
+                    return status;
+                }
+            }
+        }
+
+        let mut stream = MtStreamBuilder::new()
+            .preset(0)
+            .check(Check::Crc64)
+            .threads(16)
+            .encoder()
+            .unwrap();
+        let mut compressed = Vec::new();
+
+        process_all(&mut stream, &[1, 2, 3], Action::Run, &mut compressed);
+        process_all(&mut stream, &[], Action::FullFlush, &mut compressed);
+        process_all(&mut stream, &[4, 5, 6], Action::Run, &mut compressed);
+        process_all(&mut stream, &[], Action::FullFlush, &mut compressed);
+        process_all(&mut stream, &[], Action::Finish, &mut compressed);
+
+        let mut decoder = XzDecoder::new(&compressed[..]);
+        let mut decompressed = Vec::new();
+        decoder.read_to_end(&mut decompressed).unwrap();
+        assert_eq!(decompressed, [1, 2, 3, 4, 5, 6]);
     }
 
     #[cfg(feature = "parallel")]

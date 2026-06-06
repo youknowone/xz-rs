@@ -96,11 +96,10 @@ unsafe fn hc_find_func(
     *son.offset(cyclic_pos as isize) = cur_match;
     loop {
         let delta: u32 = pos.wrapping_sub(cur_match);
-        let old_depth = depth;
-        depth -= 1;
-        if old_depth == 0 || delta >= cyclic_size {
+        if depth == 0 || delta >= cyclic_size {
             return matches;
         }
+        depth -= 1;
         let pb: *const u8 = cur.offset(-(delta as isize));
         cur_match = *son.offset(
             cyclic_pos

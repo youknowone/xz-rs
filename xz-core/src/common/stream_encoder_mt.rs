@@ -936,6 +936,11 @@ unsafe fn stream_encode_mt(
         if ret != LZMA_STREAM_END {
             return ret;
         }
+        // FullFlush/FullBarrier complete while staying in SEQ_BLOCK. Only
+        // Finish advances to SEQ_INDEX and should fall through below.
+        if (*coder).sequence == SEQ_BLOCK {
+            return LZMA_STREAM_END;
+        }
     }
     if (*coder).sequence == SEQ_INDEX {
         let ret: lzma_ret = stream_encode_mt_index(coder, allocator, out, out_pos, out_size);

@@ -1,0 +1,58 @@
+#![cfg(not(target_family = "wasm"))]
+
+use xz::stream::{Action, Error, Status, Stream, IGNORE_CHECK};
+
+const BAD_CRC32_XZ: &[u8] = include_bytes!("../vendor/xz/tests/files/bad-1-check-crc32.xz");
+
+fn decode_stream(input: &[u8], flags: u32) -> Result<Vec<u8>, Error> {
+    let mut stream = Stream::new_stream_decoder(u64::MAX, flags).unwrap();
+    let mut input_pos = 0usize;
+    let mut decoded = Vec::new();
+
+    for _ in 0..10_000 {
+        let in_before = stream.total_in();
+        let out_before = stream.total_out();
+        let mut output = [0; 1024];
+
+        let status = stream.process(&input[input_pos..], &mut output, Action::Finish)?;
+
+        input_pos += (stream.total_in() - in_before) as usize;
+        let output_used = (stream.total_out() - out_before) as usize;
+        decoded.extend_from_slice(&output[..output_used]);
+
+        if status == Status::StreamEnd {
+            return Ok(decoded);
+        }
+
+        if stream.total_in() == in_before && stream.total_out() == out_before {
+            panic!("decoder made no progress");
+        }
+    }
+
+    panic!("decoder did not converge");
+}
+
+#[test]
+fn alone_decoder_rejects_wrapping_dictionary_size() {
+    let input = [
+        0x5D, // common valid LZMA properties
+        0x00, 0x00, 0x00, 0xE0, // dictionary size that overflows the picky check's rounding
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // uncompressed size
+    ];
+    let mut stream = Stream::new_auto_decoder(u64::MAX, 0).unwrap();
+    let mut output = [0; 1];
+
+    let err = stream
+        .process(&input, &mut output, Action::Run)
+        .expect_err("invalid .lzma header should be rejected");
+    assert_eq!(err, Error::Format);
+}
+
+#[test]
+fn stream_decoder_ignore_check_skips_integrity_check_verification() {
+    let err = decode_stream(BAD_CRC32_XZ, 0).unwrap_err();
+    assert_eq!(err, Error::Data);
+
+    let decoded = decode_stream(BAD_CRC32_XZ, IGNORE_CHECK).unwrap();
+    assert!(!decoded.is_empty());
+}

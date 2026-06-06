@@ -18,6 +18,7 @@ exclude = [".github/"]
 
 [workspace]
 members = ["systest", "xz-core", "xz-sys", "perf-probe"]
+exclude = ["fuzz"]
 
 [dependencies]
 xz-core = { path = "xz-core", optional = true }
