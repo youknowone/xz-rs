@@ -223,9 +223,10 @@ pub const HASH_3_SIZE: c_uint = 1u32 << 16;
 pub const LZMA_CHECK_SIZE_MAX: u32 = 64;
 pub const LZMA_STREAM_FLAGS_SIZE: u32 = 2;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
-pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
+pub const COMPRESSED_SIZE_MAX: c_ulonglong = (LZMA_VLI_MAX
     .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as u64)
-    .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64);
+    .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64))
+    & !3u64;
 pub type worker_state = c_uint;
 pub type lzma_index_iter_mode = c_uint;
 pub const THR_IDLE: worker_state = 0;
