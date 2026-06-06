@@ -150,6 +150,42 @@ Fix:
 - Return `LZMA_STREAM_END` immediately when the sequence remains `SEQ_BLOCK`.
 - Added `parallel_full_flush_short_chunks_round_trip`.
 
+### `common/stream_encoder`
+
+Compared:
+
+- `vendor/xz/src/liblzma/common/stream_encoder.c`
+- `vendor/xz/src/liblzma/common/common.h`
+- `vendor/xz/src/liblzma/common/stream_flags_encoder.c`
+- `xz-core/src/common/stream_encoder.rs`
+- `xz-core/src/common/common.rs`
+- `xz-core/src/common/stream_flags_encoder.rs`
+- `xz-core/src/types.rs`
+
+Finding:
+
+- No source-code mismatch found in Stream Header output buffering, empty-block
+  finish/full-flush behavior, Block encoder initialization boundaries, Block
+  Header encoding, action conversion for Block encoding, Index record
+  appending, Index encoder invocation, Stream Footer encoding, final
+  `LZMA_STREAM_END` reporting, end/free behavior, filter-chain update behavior,
+  public initialization, or supported action setup.
+
+Notes:
+
+- Rust represents C fallthrough between buffered Stream Header/Block
+  Header/Footer output and the next sequence by updating `sequence` and
+  continuing the outer loop.
+- The Rust `convert_action()` table matches C's `convert[]`, mapping
+  `LZMA_FULL_FLUSH`, `LZMA_FINISH`, and `LZMA_FULL_BARRIER` to
+  `LZMA_FINISH` for the Block encoder.
+- Both C and Rust initialize only `version` and `check` before Stream Header
+  encoding; `lzma_stream_header_encode()` doesn't read `backward_size`.
+- The filter-chain update path preserves C's temporary-copy-before-commit
+  behavior. On success, ownership of the copied filter options moves into
+  `coder->filters`; on failure, the temporary copy is freed and the current
+  chain is left unchanged.
+
 ### `common/stream_decoder_mt`
 
 Compared:
