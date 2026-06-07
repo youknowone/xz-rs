@@ -3,24 +3,53 @@
 use std::io::Read;
 
 use xz::read::XzDecoder;
-use xz::stream::{Action, Error, Status, Stream, PRESET_EXTREME};
+use xz::stream::{Action, Check, Error, Filters, LzmaOptions, PRESET_EXTREME, Status, Stream};
 
 pub const MEM_LIMIT: u64 = 300 << 20;
 const CONTROL_BYTES: usize = 8;
 const MAX_ENCODE_INPUT: usize = 128 * 1024;
+const UPSTREAM_IN_CHUNK_SIZE: usize = 2047;
+const UPSTREAM_OUT_SIZE: usize = 4096;
 
 pub fn preset(control: u8) -> u32 {
-    match control % 5 {
-        0 => 0,
-        1 => 1,
-        2 => 5,
-        3 => PRESET_EXTREME,
-        _ => 3 | PRESET_EXTREME,
+    match control {
+        0 | 1 | 5 => control as u32,
+        6 => PRESET_EXTREME,
+        7 => 3 | PRESET_EXTREME,
+        _ => match control % 6 {
+            0 => 2,
+            1 => 3,
+            2 => 4,
+            3 => 6,
+            4 => 7,
+            _ => 9 | PRESET_EXTREME,
+        },
     }
+}
+
+pub fn stream_encoder_from_preset(preset: u32) -> Stream {
+    let opts = LzmaOptions::new_preset(preset).unwrap();
+    let mut filters = Filters::new();
+    filters.lzma2(&opts);
+    Stream::new_stream_encoder(&filters, Check::Crc64).unwrap()
 }
 
 pub fn controls(data: &[u8]) -> &[u8] {
     &data[..data.len().min(CONTROL_BYTES)]
+}
+
+pub fn upstream_encode_input(data: &[u8]) -> &[u8] {
+    data.get(1..).unwrap_or_default()
+}
+
+pub fn upstream_encode_expected(input: &[u8]) -> Vec<u8> {
+    // vendor/xz/tests/ossfuzz/fuzz_common.h feeds the first half once, then
+    // resumes chunking from the original input pointer.
+    let first_chunk = input.len() / 2;
+    let mut expected = Vec::with_capacity(first_chunk + input.len());
+    expected.extend_from_slice(&input[..first_chunk]);
+    expected.extend_from_slice(input);
+    expected
 }
 
 pub fn encode_input(data: &[u8]) -> &[u8] {
@@ -96,6 +125,90 @@ fn process_encoder_action(
     panic!("encoder action did not converge: {action:?}");
 }
 
+fn process_encoder_upstream_action(
+    stream: &mut Stream,
+    input: &[u8],
+    action: Action,
+    encoded: &mut Vec<u8>,
+) -> Status {
+    let mut input_pos = 0usize;
+    let mut no_progress = 0usize;
+
+    for _ in 0..200_000 {
+        let in_before = stream.total_in();
+        let out_before = stream.total_out();
+        let mut output = vec![0; UPSTREAM_OUT_SIZE];
+
+        let status = stream
+            .process(&input[input_pos..], &mut output, action)
+            .unwrap();
+
+        input_pos += (stream.total_in() - in_before) as usize;
+        let output_used = (stream.total_out() - out_before) as usize;
+        encoded.extend_from_slice(&output[..output_used]);
+
+        if matches!(action, Action::Run) {
+            if input_pos == input.len() {
+                return status;
+            }
+        } else if status == Status::StreamEnd {
+            return status;
+        }
+
+        if stream.total_in() == in_before && stream.total_out() == out_before {
+            no_progress += 1;
+            if no_progress > 1 {
+                return status;
+            }
+        } else {
+            no_progress = 0;
+        }
+    }
+
+    panic!("upstream-shaped encoder action did not converge: {action:?}");
+}
+
+pub fn encode_like_upstream(mut stream: Stream, input: &[u8]) -> Vec<u8> {
+    let mut encoded = Vec::new();
+    let first_chunk = input.len() / 2;
+
+    if first_chunk > 0 {
+        process_encoder_upstream_action(
+            &mut stream,
+            &input[..first_chunk],
+            Action::Run,
+            &mut encoded,
+        );
+    }
+
+    if input.is_empty() {
+        process_encoder_upstream_action(&mut stream, &[], Action::Finish, &mut encoded);
+        return encoded;
+    }
+
+    let mut input_pos = 0usize;
+    while input_pos < input.len() {
+        let end = (input_pos + UPSTREAM_IN_CHUNK_SIZE).min(input.len());
+        let action = if end == input.len() {
+            Action::Finish
+        } else {
+            Action::Run
+        };
+        let status = process_encoder_upstream_action(
+            &mut stream,
+            &input[input_pos..end],
+            action,
+            &mut encoded,
+        );
+        if status == Status::StreamEnd {
+            return encoded;
+        }
+        input_pos = end;
+    }
+
+    encoded
+}
+
 pub fn encode_with_actions(
     mut stream: Stream,
     input: &[u8],
@@ -160,6 +273,74 @@ pub fn assert_xz_decodes_to(encoded: &[u8], expected: &[u8]) {
     let mut decoded = Vec::new();
     decoder.read_to_end(&mut decoded).unwrap();
     assert_eq!(decoded, expected);
+}
+
+fn process_decoder_upstream_action(stream: &mut Stream, input: &[u8], action: Action) -> bool {
+    let mut input_pos = 0usize;
+    let mut no_progress = 0usize;
+
+    for _ in 0..200_000 {
+        let in_before = stream.total_in();
+        let out_before = stream.total_out();
+        let mut output = vec![0; UPSTREAM_OUT_SIZE];
+
+        let status = match stream.process(&input[input_pos..], &mut output, action) {
+            Ok(status) => status,
+            Err(Error::Program) => panic!("decoder returned Program"),
+            Err(_) => return true,
+        };
+
+        input_pos += (stream.total_in() - in_before) as usize;
+        let made_progress = stream.total_in() != in_before || stream.total_out() != out_before;
+
+        if status == Status::StreamEnd {
+            return true;
+        }
+
+        if input_pos == input.len() && (matches!(action, Action::Run) || !made_progress) {
+            return false;
+        }
+
+        if made_progress {
+            no_progress = 0;
+        } else {
+            no_progress += 1;
+            if no_progress > 1 {
+                return false;
+            }
+        }
+    }
+
+    panic!("upstream-shaped decoder action did not converge: {action:?}");
+}
+
+pub fn feed_decoder_like_upstream(mut stream: Stream, input: &[u8]) {
+    let first_chunk = input.len() / 2;
+
+    if first_chunk > 0
+        && process_decoder_upstream_action(&mut stream, &input[..first_chunk], Action::Run)
+    {
+        return;
+    }
+
+    if input.is_empty() {
+        process_decoder_upstream_action(&mut stream, &[], Action::Run);
+        return;
+    }
+
+    let mut input_pos = 0usize;
+    while input_pos < input.len() {
+        let end = (input_pos + UPSTREAM_IN_CHUNK_SIZE).min(input.len());
+        let action = if end == input.len() {
+            Action::Finish
+        } else {
+            Action::Run
+        };
+        if process_decoder_upstream_action(&mut stream, &input[input_pos..end], action) {
+            return;
+        }
+        input_pos = end;
+    }
 }
 
 pub fn feed_decoder(mut stream: Stream, input: &[u8], controls: &[u8]) {
