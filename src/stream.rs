@@ -1253,6 +1253,16 @@ impl MtStreamBuilder {
         self
     }
 
+    /// Configure decoder flags for multithreaded decoding.
+    ///
+    /// This accepts the same flags as [`Stream::new_stream_decoder`], such as
+    /// [`IGNORE_CHECK`] and [`CONCATENATED`].
+    #[inline]
+    pub fn flags(&mut self, flags: u32) -> &mut Self {
+        self.raw.flags = flags;
+        self
+    }
+
     /// Memory usage limit to reduce the number of threads
     #[inline]
     pub fn memlimit_threading(&mut self, memlimit: u64) -> &mut Self {
