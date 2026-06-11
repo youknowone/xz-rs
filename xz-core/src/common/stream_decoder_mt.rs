@@ -880,16 +880,7 @@ unsafe fn stream_decode_mt(
     action: lzma_action,
 ) -> lzma_ret {
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
-    let mut wait_abs: mythread_condtime = mythread_condtime {
-        #[cfg(not(windows))]
-        tv_sec: 0,
-        #[cfg(not(windows))]
-        tv_nsec: 0,
-        #[cfg(windows)]
-        start: 0,
-        #[cfg(windows)]
-        timeout: 0,
-    };
+    let mut wait_abs: mythread_condtime = unsafe { core::mem::zeroed() };
     let mut has_blocked: bool = false;
     let waiting_allowed: bool =
         action == LZMA_FINISH || *in_pos == in_size && !(*coder).out_was_filled;
