@@ -87,8 +87,15 @@ impl<W: Write> XzEncoder<W> {
     }
 
     fn dump(&mut self) -> io::Result<()> {
-        self.obj.as_mut().unwrap().write_all(&self.buf)?;
-        self.buf.clear();
+        // Drain the buffer as bytes are accepted so that an error after a
+        // partial write doesn't resend already-written bytes on retry.
+        while !self.buf.is_empty() {
+            let n = self.obj.as_mut().unwrap().write(&self.buf)?;
+            if n == 0 {
+                return Err(io::ErrorKind::WriteZero.into());
+            }
+            self.buf.drain(..n);
+        }
         Ok(())
     }
 
@@ -261,8 +268,15 @@ impl<W: Write> XzDecoder<W> {
     }
 
     fn dump(&mut self) -> io::Result<()> {
-        self.obj.as_mut().unwrap().write_all(&self.buf)?;
-        self.buf.clear();
+        // Drain the buffer as bytes are accepted so that an error after a
+        // partial write doesn't resend already-written bytes on retry.
+        while !self.buf.is_empty() {
+            let n = self.obj.as_mut().unwrap().write(&self.buf)?;
+            if n == 0 {
+                return Err(io::ErrorKind::WriteZero.into());
+            }
+            self.buf.drain(..n);
+        }
         Ok(())
     }
 

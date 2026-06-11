@@ -226,9 +226,9 @@ impl<W: Write + Read> Write for XzDecoder<W> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::stream::{Action, LzmaOptions, Status, PRESET_EXTREME};
     #[cfg(feature = "parallel")]
-    use crate::stream::{Check, MtStreamBuilder};
+    use crate::stream::{Action, Check, MtStreamBuilder, Status};
+    use crate::stream::{LzmaOptions, PRESET_EXTREME};
     use quickcheck::quickcheck;
     use rand::{thread_rng, Rng};
     use std::iter;

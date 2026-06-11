@@ -126,7 +126,7 @@ pub fn decode_all<R: Read>(source: R) -> io::Result<Vec<u8>> {
 
 /// Compress from the given source as if using a [read::XzEncoder].
 ///
-/// The input data must be in the xz format.
+/// The output data will be in the xz format.
 /// The `level` argument is typically 0-9 with 6 being a good default.
 /// To use the slower `xz --extreme`-style preset, bitwise-OR a level with
 /// [`stream::PRESET_EXTREME`] (for example, `6 | stream::PRESET_EXTREME`).
@@ -181,8 +181,12 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
         lzma_stream_flags.assume_init()
     };
 
-    let index_plus_footer =
-        liblzma_sys::LZMA_STREAM_HEADER_SIZE as usize + lzma_stream_flags.backward_size as usize;
+    // backward_size can exceed usize on 32-bit targets; fail cleanly instead
+    // of truncating.
+    let index_plus_footer = usize::try_from(
+        liblzma_sys::LZMA_STREAM_HEADER_SIZE as u64 + lzma_stream_flags.backward_size,
+    )
+    .map_err(|_| io::Error::new(io::ErrorKind::Other, "lzma index too large"))?;
 
     source.seek(io::SeekFrom::End(0 - index_plus_footer as i64))?;
 
