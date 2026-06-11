@@ -12,7 +12,7 @@ static RUST_ALLOCATOR: StaticAllocator = StaticAllocator(lzma_allocator {
     opaque: core::ptr::null_mut(),
 });
 
-pub(super) unsafe fn lzma_rust_alloc(
+pub(super) unsafe extern "C" fn lzma_rust_alloc(
     _opaque: *mut c_void,
     nmemb: size_t,
     size: size_t,
@@ -23,7 +23,7 @@ pub(super) unsafe fn lzma_rust_alloc(
     alloc_impl(size, RUST_ALLOC_ALIGN, false)
 }
 
-pub(super) unsafe fn lzma_rust_free(_opaque: *mut c_void, ptr: *mut c_void) {
+pub(super) unsafe extern "C" fn lzma_rust_free(_opaque: *mut c_void, ptr: *mut c_void) {
     unsafe { free_impl(ptr) };
 }
 
