@@ -79,8 +79,10 @@ pub struct lzma_stream {
     pub next_out: *mut u8,
     pub avail_out: size_t,
     pub total_out: u64,
-    // Always present to keep the C lzma_stream ABI layout; reads are
-    // feature-gated to custom_allocator.
+    // Only xz-sys uses the allocator; without custom_allocator the field
+    // is omitted for a leaner build, diverging from the C lzma_stream
+    // layout on purpose.
+    #[cfg(feature = "custom_allocator")]
     pub allocator: *const lzma_allocator,
     pub internal: *mut lzma_internal,
     pub reserved_ptr1: *mut c_void,
