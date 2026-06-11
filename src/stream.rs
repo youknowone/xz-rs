@@ -1300,6 +1300,23 @@ impl MtStreamBuilder {
     }
 }
 
+/// Default soft memory limit enabling threaded decoding, mirroring xz's
+/// `--memlimit-mt-decompress` default: 1/4 of physical memory (assuming
+/// 128 MiB when the amount is unknown), capped at 1400 MiB on 32-bit
+/// systems. With the `lzma_mt` default of 0, every block falls back to the
+/// single-threaded direct mode.
+#[cfg(feature = "parallel")]
+pub(crate) fn default_memlimit_threading() -> u64 {
+    let mut total = unsafe { liblzma_sys::lzma_physmem() };
+    if total == 0 {
+        total = 128 << 20;
+    }
+    let limit = total / 4;
+    #[cfg(target_pointer_width = "32")]
+    let limit = limit.min(1400 << 20);
+    limit
+}
+
 fn cvt(rc: liblzma_sys::lzma_ret) -> Result<Status, Error> {
     match rc {
         liblzma_sys::LZMA_OK => Ok(Status::Ok),
