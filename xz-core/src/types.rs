@@ -863,6 +863,8 @@ pub use crate::common::filter_common::{
 };
 pub use crate::common::filter_decoder::{lzma_raw_decoder_init, lzma_raw_decoder_memusage};
 pub use crate::common::filter_encoder::{lzma_raw_encoder_init, lzma_raw_encoder_memusage};
+pub use crate::common::hardware_cputhreads::lzma_cputhreads;
+pub use crate::common::hardware_physmem::lzma_physmem;
 pub use crate::common::index::{
     lzma_index_append, lzma_index_end, lzma_index_init, lzma_index_memusage,
     lzma_index_padding_size, lzma_index_size,
