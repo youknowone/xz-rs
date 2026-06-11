@@ -882,14 +882,10 @@ pub use crate::common::stream_flags_encoder::{
     lzma_stream_footer_encode, lzma_stream_header_encode,
 };
 pub use crate::common::threading::{
-    __darwin_time_t, _CLOCK_MONOTONIC, _CLOCK_MONOTONIC_RAW, _CLOCK_MONOTONIC_RAW_APPROX,
-    _CLOCK_PROCESS_CPUTIME_ID, _CLOCK_REALTIME, _CLOCK_THREAD_CPUTIME_ID, _CLOCK_UPTIME_RAW,
-    _CLOCK_UPTIME_RAW_APPROX, MYTHREAD_RET_VALUE, SIG_SETMASK, clockid_t, mythread, mythread_cond,
-    mythread_cond_destroy, mythread_cond_init, mythread_cond_signal, mythread_cond_timedwait,
-    mythread_cond_wait, mythread_condtime, mythread_condtime_set, mythread_create, mythread_join,
-    mythread_mutex, mythread_mutex_destroy, mythread_mutex_init, mythread_mutex_lock,
-    mythread_mutex_unlock, mythread_sigmask, pthread_attr_t, pthread_cond_t, pthread_condattr_t,
-    pthread_mutex_t, pthread_mutexattr_t, pthread_t, sigset_t, time_t, timespec,
+    MYTHREAD_RET_VALUE, mythread, mythread_cond, mythread_cond_destroy, mythread_cond_init,
+    mythread_cond_signal, mythread_cond_timedwait, mythread_cond_wait, mythread_condtime,
+    mythread_condtime_set, mythread_create, mythread_join, mythread_mutex, mythread_mutex_destroy,
+    mythread_mutex_init, mythread_mutex_lock, mythread_mutex_unlock,
 };
 pub use crate::common::vli_decoder::lzma_vli_decode;
 pub use crate::common::vli_encoder::lzma_vli_encode;
