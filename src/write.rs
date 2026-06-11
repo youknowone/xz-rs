@@ -224,6 +224,7 @@ impl<W: Write> XzDecoder<W> {
     pub fn new_parallel(obj: W) -> Self {
         let stream = MtStreamBuilder::new()
             .memlimit_stop(u64::MAX)
+            .memlimit_threading(crate::stream::default_memlimit_threading())
             .threads(num_cpus::get() as u32)
             .decoder()
             .unwrap();
