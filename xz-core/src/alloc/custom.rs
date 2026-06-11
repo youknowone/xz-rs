@@ -185,14 +185,14 @@ mod tests {
 
     static FREE_COUNT: AtomicUsize = AtomicUsize::new(0);
 
-    unsafe fn c_alloc(_opaque: *mut c_void, nmemb: size_t, size: size_t) -> *mut c_void {
+    unsafe extern "C" fn c_alloc(_opaque: *mut c_void, nmemb: size_t, size: size_t) -> *mut c_void {
         let Some(bytes) = (nmemb as usize).checked_mul(size as usize) else {
             return core::ptr::null_mut();
         };
         unsafe { c_alloc_bytes(bytes as size_t) }
     }
 
-    unsafe fn counted_c_free(_opaque: *mut c_void, ptr: *mut c_void) {
+    unsafe extern "C" fn counted_c_free(_opaque: *mut c_void, ptr: *mut c_void) {
         FREE_COUNT.fetch_add(1, Ordering::Relaxed);
         unsafe { c_free_ptr(ptr) };
     }

@@ -25,8 +25,8 @@ pub type probability = u16;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_allocator {
-    pub alloc: Option<unsafe fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe fn(*mut c_void, *mut c_void) -> ()>,
+    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
+    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void)>,
     pub opaque: *mut c_void,
 }
 #[derive(Copy, Clone)]
@@ -79,6 +79,9 @@ pub struct lzma_stream {
     pub next_out: *mut u8,
     pub avail_out: size_t,
     pub total_out: u64,
+    // Only xz-sys uses the allocator; without custom_allocator the field
+    // is omitted for a leaner build, diverging from the C lzma_stream
+    // layout on purpose.
     #[cfg(feature = "custom_allocator")]
     pub allocator: *const lzma_allocator,
     pub internal: *mut lzma_internal,
