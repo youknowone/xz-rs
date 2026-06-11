@@ -62,6 +62,10 @@ pub use xz_core::types::lzma_mt;
 pub use xz_core::types::lzma_options_lzma;
 pub use xz_core::types::lzma_stream;
 pub use xz_core::types::lzma_stream_flags;
+pub use xz_core::types::{
+    LZMA_INDEX_ITER_ANY, LZMA_INDEX_ITER_BLOCK, LZMA_INDEX_ITER_NONEMPTY_BLOCK,
+    LZMA_INDEX_ITER_STREAM,
+};
 
 fn normalize_c_allocator(allocator: *const lzma_allocator) -> *const lzma_allocator {
     xz_core::alloc::allocator_or_c(allocator.cast()).cast()
@@ -90,7 +94,7 @@ pub struct lzma_options_delta {
     pub reserved_ptr2: *mut c_void,
 }
 
-pub enum lzma_internal {}
+pub use xz_core::common::common_types::lzma_internal_s as lzma_internal;
 
 /******************
  * Basic Features *
@@ -224,7 +228,7 @@ pub unsafe extern "C" fn lzma_end(strm: *mut lzma_stream) {
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
-    normalize_c_stream_allocator(strm as *mut lzma_stream);
+    // Read-only accessor: never allocates, so the allocator is left as-is.
     xz_core::common::common::lzma_memlimit_get(strm.cast())
 }
 
@@ -268,13 +272,13 @@ pub unsafe extern "C" fn lzma_get_progress(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_memusage(strm: *const lzma_stream) -> u64 {
-    normalize_c_stream_allocator(strm as *mut lzma_stream);
+    // Read-only accessor: never allocates, so the allocator is left as-is.
     xz_core::common::common::lzma_memusage(strm.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
-    normalize_c_stream_allocator(strm as *mut lzma_stream);
+    // Read-only accessor: never allocates, so the allocator is left as-is.
     xz_core::common::common::lzma_get_check(strm.cast())
 }
 
@@ -951,7 +955,7 @@ pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u6
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
+pub unsafe extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
     xz_core::common::index::lzma_index_memused(i.cast())
 }
 
@@ -997,27 +1001,27 @@ pub unsafe extern "C" fn lzma_index_stream_padding(
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
+pub unsafe extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
     xz_core::common::index::lzma_index_stream_count(i.cast())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
+pub unsafe extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
     xz_core::common::index::lzma_index_block_count(i.cast())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
+pub unsafe extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
     xz_core::common::index::lzma_index_size(i.cast())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
+pub unsafe extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
     xz_core::common::index::lzma_index_stream_size(i.cast())
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
+pub unsafe extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
     xz_core::common::index::lzma_index_total_size(i.cast())
 }
 
@@ -1151,7 +1155,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
+pub unsafe extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
     xz_core::common::index_hash::lzma_index_hash_size(index_hash.cast())
 }
 
