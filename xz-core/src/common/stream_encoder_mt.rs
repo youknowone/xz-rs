@@ -1257,6 +1257,10 @@ unsafe fn stream_encoder_mt_init(
     if ret_ != LZMA_OK {
         return ret_;
     }
+    #[cfg(not(target_pointer_width = "64"))]
+    if block_size > usize::MAX as u64 || outbuf_size_max > usize::MAX as u64 {
+        return LZMA_MEM_ERROR;
+    }
     if lzma_raw_encoder_memusage(filters) == UINT64_MAX {
         return LZMA_OPTIONS_ERROR;
     }
