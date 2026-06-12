@@ -394,11 +394,14 @@ mod tests {
             .collect()
     }
 
-    // Lengths crossing every branch: <8 bit-tests, ==8, 8..16, 16..64,
-    // the 48-byte preload, the 64-byte fold loop, and ragged tails.
+    // Lengths crossing every branch: <8 bit-tests, ==8, every 8..16
+    // padding, every 16..32 tail size (each uses a distinct vmasks
+    // window), the 48-byte preload, the 64-byte fold loop, and ragged
+    // tails.
     const LENGTHS: &[usize] = &[
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 12, 15, 16, 17, 31, 32, 47, 48, 63, 64, 65, 96, 127, 128,
-        129, 255, 256, 1000, 4096,
+        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
+        25, 26, 27, 28, 29, 30, 31, 32, 47, 48, 63, 64, 65, 96, 127, 128, 129, 255, 256, 1000,
+        4096,
     ];
 
     #[test]

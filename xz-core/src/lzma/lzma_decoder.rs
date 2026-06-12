@@ -357,6 +357,7 @@ macro_rules! rc_normalize {
     };
 }
 
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
 macro_rules! rc_bittree_step {
     ($rc:ident, $rc_bound:ident, $prob:expr, $symbol:ident) => {{
         let prob = $prob;
@@ -399,6 +400,7 @@ macro_rules! rc_bittree8 {
     }};
 }
 
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
 macro_rules! rc_matched_literal_step {
     (
         $rc:ident,
