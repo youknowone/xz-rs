@@ -347,19 +347,19 @@ pub(crate) fn lzma_crc32_generic(mut buf: &[u8], mut crc: u32) -> u32 {
     !crc
 }
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "loongarch64"))]
 #[inline(always)]
 unsafe fn aligned_read16le(buf: *const u8) -> u16 {
     u16::from_le(core::ptr::read_unaligned(buf as *const u16))
 }
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "loongarch64"))]
 #[inline(always)]
 unsafe fn aligned_read32le(buf: *const u8) -> u32 {
     u32::from_le(core::ptr::read_unaligned(buf as *const u32))
 }
 
-#[cfg(target_arch = "aarch64")]
+#[cfg(any(target_arch = "aarch64", target_arch = "loongarch64"))]
 #[inline(always)]
 unsafe fn aligned_read64le(buf: *const u8) -> u64 {
     u64::from_le(core::ptr::read_unaligned(buf as *const u64))
@@ -418,6 +418,117 @@ unsafe fn lzma_crc32_arm64(buf: &[u8], mut crc: u32) -> u32 {
     !crc
 }
 
+// CRC32 instructions are part of the 64-bit LoongArch base ISA, so no
+// runtime detection is needed (crc32_loongarch.h). core::arch has no
+// stable LoongArch CRC intrinsics yet, hence the asm wrappers.
+#[cfg(target_arch = "loongarch64")]
+#[inline(always)]
+unsafe fn crc_w_b_w(v: i8, crc: i32) -> i32 {
+    let out: i32;
+    core::arch::asm!(
+        "crc.w.b.w {out}, {v}, {crc}",
+        out = lateout(reg) out,
+        v = in(reg) v,
+        crc = in(reg) crc,
+        options(pure, nomem, nostack),
+    );
+    out
+}
+
+#[cfg(target_arch = "loongarch64")]
+#[inline(always)]
+unsafe fn crc_w_h_w(v: i16, crc: i32) -> i32 {
+    let out: i32;
+    core::arch::asm!(
+        "crc.w.h.w {out}, {v}, {crc}",
+        out = lateout(reg) out,
+        v = in(reg) v,
+        crc = in(reg) crc,
+        options(pure, nomem, nostack),
+    );
+    out
+}
+
+#[cfg(target_arch = "loongarch64")]
+#[inline(always)]
+unsafe fn crc_w_w_w(v: i32, crc: i32) -> i32 {
+    let out: i32;
+    core::arch::asm!(
+        "crc.w.w.w {out}, {v}, {crc}",
+        out = lateout(reg) out,
+        v = in(reg) v,
+        crc = in(reg) crc,
+        options(pure, nomem, nostack),
+    );
+    out
+}
+
+#[cfg(target_arch = "loongarch64")]
+#[inline(always)]
+unsafe fn crc_w_d_w(v: i64, crc: i32) -> i32 {
+    let out: i32;
+    core::arch::asm!(
+        "crc.w.d.w {out}, {v}, {crc}",
+        out = lateout(reg) out,
+        v = in(reg) v,
+        crc = in(reg) crc,
+        options(pure, nomem, nostack),
+    );
+    out
+}
+
+#[cfg(target_arch = "loongarch64")]
+unsafe fn lzma_crc32_loongarch(buf: &[u8], crc_unsigned: u32) -> u32 {
+    let mut ptr = buf.as_ptr();
+    let mut size = buf.len();
+    let mut crc: i32 = !crc_unsigned as i32;
+
+    if size >= 8 {
+        let align = (0usize.wrapping_sub(ptr as usize)) & 7;
+
+        if align & 1 != 0 {
+            crc = crc_w_b_w(*ptr as i8, crc);
+            ptr = ptr.add(1);
+        }
+
+        if align & 2 != 0 {
+            crc = crc_w_h_w(aligned_read16le(ptr) as i16, crc);
+            ptr = ptr.add(2);
+        }
+
+        if align & 4 != 0 {
+            crc = crc_w_w_w(aligned_read32le(ptr) as i32, crc);
+            ptr = ptr.add(4);
+        }
+
+        size -= align;
+
+        let limit = ptr.add(size & !7);
+        while ptr < limit {
+            crc = crc_w_d_w(aligned_read64le(ptr) as i64, crc);
+            ptr = ptr.add(8);
+        }
+
+        size &= 7;
+    }
+
+    if size & 4 != 0 {
+        crc = crc_w_w_w(aligned_read32le(ptr) as i32, crc);
+        ptr = ptr.add(4);
+    }
+
+    if size & 2 != 0 {
+        crc = crc_w_h_w(aligned_read16le(ptr) as i16, crc);
+        ptr = ptr.add(2);
+    }
+
+    if size & 1 != 0 {
+        crc = crc_w_b_w(*ptr as i8, crc);
+    }
+
+    !(crc as u32)
+}
+
 pub unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
     let buf = if size == 0 {
         &[][..]
@@ -431,6 +542,9 @@ pub unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
         }
     }
 
+    #[cfg(target_arch = "loongarch64")]
+    return lzma_crc32_loongarch(buf, crc);
+
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
         if crate::check::crc_x86_clmul::is_arch_extension_supported() {
@@ -438,5 +552,6 @@ pub unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
         }
     }
 
+    #[cfg(not(target_arch = "loongarch64"))]
     lzma_crc32_generic(buf, crc)
 }
