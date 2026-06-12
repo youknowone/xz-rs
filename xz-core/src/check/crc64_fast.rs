@@ -1053,7 +1053,7 @@ unsafe fn crc64_step4(
 // Keep this loop pointer-based: the slice version left slice_index_fail
 // slow paths in optimized code for the large contiguous-buffer workload.
 #[inline(always)]
-unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
+pub(crate) unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
     let table0 = lzma_crc64_table[0].as_ptr();
     let table1 = lzma_crc64_table[1].as_ptr();
     let table2 = lzma_crc64_table[2].as_ptr();
@@ -1092,5 +1092,12 @@ unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64)
     !crc
 }
 pub unsafe fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if crate::check::crc_x86_clmul::is_arch_extension_supported() {
+            return crate::check::crc_x86_clmul::crc64_arch_optimized(buf, size, crc);
+        }
+    }
+
     lzma_crc64_generic(buf, size, crc)
 }
