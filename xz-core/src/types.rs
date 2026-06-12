@@ -622,6 +622,19 @@ pub unsafe fn mf_skip_raw(mf: *mut lzma_mf, amount: u32, skip: unsafe fn(*mut lz
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
 }
+// Buffers compared with lzma_memcmplen must allocate and zero this many
+// extra tail bytes: the fast path below may read up to 8 bytes past `limit`.
+#[cfg(all(
+    target_endian = "little",
+    any(target_arch = "aarch64", target_arch = "x86_64")
+))]
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 8;
+#[cfg(not(all(
+    target_endian = "little",
+    any(target_arch = "aarch64", target_arch = "x86_64")
+)))]
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 0;
+
 #[inline(always)]
 pub unsafe fn lzma_memcmplen(buf1: *const u8, buf2: *const u8, mut len: u32, limit: u32) -> u32 {
     debug_assert!(len <= limit);
