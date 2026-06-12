@@ -316,7 +316,7 @@ pub static lzma_crc32_table: [[u32; 256]; 8] = [
         0x646e019b, 0xeae10678, 0x264b06e6,
     ],
 ];
-fn lzma_crc32_generic(mut buf: &[u8], mut crc: u32) -> u32 {
+pub(crate) fn lzma_crc32_generic(mut buf: &[u8], mut crc: u32) -> u32 {
     crc = !crc;
     if buf.len() > 8 {
         while buf.as_ptr() as uintptr_t & 7 as uintptr_t != 0 {
@@ -428,6 +428,13 @@ pub unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
     {
         if std::arch::is_aarch64_feature_detected!("crc") {
             return lzma_crc32_arm64(buf, crc);
+        }
+    }
+
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if crate::check::crc_x86_clmul::is_arch_extension_supported() {
+            return crate::check::crc_x86_clmul::crc32_arch_optimized(buf.as_ptr(), buf.len(), crc);
         }
     }
 
