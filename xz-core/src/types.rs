@@ -623,15 +623,22 @@ pub unsafe fn mf_skip_raw(mf: *mut lzma_mf, amount: u32, skip: unsafe fn(*mut lz
     }
 }
 // Buffers compared with lzma_memcmplen must allocate and zero this many
-// extra tail bytes: the fast path below may read up to 8 bytes past `limit`.
+// extra tail bytes: the fast paths below may read up to this far past
+// `limit`. The cfgs must stay in lockstep with the branches in
+// lzma_memcmplen.
 #[cfg(all(
     target_endian = "little",
     any(target_arch = "aarch64", target_arch = "x86_64")
 ))]
 pub const LZMA_MEMCMPLEN_EXTRA: u32 = 8;
-#[cfg(not(all(
-    target_endian = "little",
-    any(target_arch = "aarch64", target_arch = "x86_64")
+#[cfg(all(target_arch = "x86", target_feature = "sse2"))]
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 16;
+#[cfg(not(any(
+    all(
+        target_endian = "little",
+        any(target_arch = "aarch64", target_arch = "x86_64")
+    ),
+    all(target_arch = "x86", target_feature = "sse2")
 )))]
 pub const LZMA_MEMCMPLEN_EXTRA: u32 = 0;
 
@@ -657,9 +664,32 @@ pub unsafe fn lzma_memcmplen(buf1: *const u8, buf2: *const u8, mut len: u32, lim
         limit
     }
 
-    #[cfg(not(all(
-        target_endian = "little",
-        any(target_arch = "aarch64", target_arch = "x86_64")
+    // SSE2 version for 32-bit x86; on x86-64 the version above is used
+    // instead, like in C memcmplen.h.
+    #[cfg(all(target_arch = "x86", target_feature = "sse2"))]
+    {
+        use core::arch::x86::{__m128i, _mm_cmpeq_epi8, _mm_loadu_si128, _mm_movemask_epi8};
+        while len < limit {
+            let x: u32 = 0xffff
+                ^ _mm_movemask_epi8(_mm_cmpeq_epi8(
+                    _mm_loadu_si128(buf1.add(len as usize) as *const __m128i),
+                    _mm_loadu_si128(buf2.add(len as usize) as *const __m128i),
+                )) as u32;
+            if x != 0 {
+                len += x.trailing_zeros();
+                return core::cmp::min(len, limit);
+            }
+            len += 16;
+        }
+        limit
+    }
+
+    #[cfg(not(any(
+        all(
+            target_endian = "little",
+            any(target_arch = "aarch64", target_arch = "x86_64")
+        ),
+        all(target_arch = "x86", target_feature = "sse2")
     )))]
     {
         while len < limit && *buf1.add(len as usize) == *buf2.add(len as usize) {
