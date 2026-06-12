@@ -212,7 +212,9 @@ unsafe fn block_buffer_encode(
     if (*block).version > 1 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*block).check > LZMA_CHECK_ID_MAX || try_to_compress && (*block).filters.is_null() {
+    if (*block).check as c_uint > LZMA_CHECK_ID_MAX as c_uint
+        || try_to_compress && (*block).filters.is_null()
+    {
         return LZMA_PROG_ERROR;
     }
     if lzma_check_is_supported((*block).check) == 0 {

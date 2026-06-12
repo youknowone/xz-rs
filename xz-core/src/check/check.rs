@@ -2,7 +2,7 @@ use crate::check::crc64_fast::lzma_crc64;
 use crate::check::sha256::{lzma_sha256_finish, lzma_sha256_init, lzma_sha256_update};
 use crate::types::*;
 pub fn lzma_check_is_supported(check_type: lzma_check) -> lzma_bool {
-    if check_type > LZMA_CHECK_ID_MAX {
+    if check_type as c_uint > LZMA_CHECK_ID_MAX as c_uint {
         return false as lzma_bool;
     }
     static available_checks: [lzma_bool; 16] = [
@@ -26,7 +26,7 @@ pub fn lzma_check_is_supported(check_type: lzma_check) -> lzma_bool {
     available_checks[check_type as usize]
 }
 pub fn lzma_check_size(check_type: lzma_check) -> u32 {
-    if check_type > LZMA_CHECK_ID_MAX {
+    if check_type as c_uint > LZMA_CHECK_ID_MAX as c_uint {
         return UINT32_MAX;
     }
     static check_sizes: [u8; 16] = [

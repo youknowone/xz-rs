@@ -159,7 +159,7 @@ pub(crate) unsafe fn lzma_block_encoder_init(
     if (*block).version > 1 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*block).check > LZMA_CHECK_ID_MAX {
+    if (*block).check as c_uint > LZMA_CHECK_ID_MAX as c_uint {
         return LZMA_PROG_ERROR;
     }
     if lzma_check_is_supported((*block).check) == 0 {

@@ -25,7 +25,7 @@ pub unsafe fn lzma_stream_buffer_encode(
     mut out_size: size_t,
 ) -> lzma_ret {
     if filters.is_null()
-        || check > LZMA_CHECK_ID_MAX
+        || check as c_uint > LZMA_CHECK_ID_MAX as c_uint
         || input.is_null() && in_size != 0
         || out.is_null()
         || out_pos_ptr.is_null()

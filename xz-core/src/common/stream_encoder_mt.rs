@@ -1260,7 +1260,7 @@ unsafe fn stream_encoder_mt_init(
     if lzma_raw_encoder_memusage(filters) == UINT64_MAX {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*options).check > LZMA_CHECK_ID_MAX {
+    if (*options).check as c_uint > LZMA_CHECK_ID_MAX as c_uint {
         return LZMA_PROG_ERROR;
     }
     if lzma_check_is_supported((*options).check) == 0 {
