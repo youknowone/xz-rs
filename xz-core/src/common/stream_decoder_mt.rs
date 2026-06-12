@@ -1523,6 +1523,9 @@ unsafe fn stream_decoder_mt_init(
         (*coder).threads = core::ptr::null_mut();
         (*coder).threads_free = core::ptr::null_mut();
         (*coder).threads_initialized = 0;
+        // threads_end frees `threads` with `threads_max` as the element
+        // count, so it must not be read uninitialized on the first init.
+        (*coder).threads_max = 0;
     }
     lzma_filters_free(
         ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
