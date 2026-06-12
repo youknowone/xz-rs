@@ -24,6 +24,18 @@ pub struct lz_decoder_temp_buf {
     pub buffer: [u8; LZMA_BUFFER_SIZE as usize],
 }
 pub const LZMA_BUFFER_SIZE: u32 = 4096;
+// The SSE2 dict_repeat in lzma_decoder.rs can copy up to 32 bytes more
+// than requested, so the dictionary buffer needs this much extra space
+// at the end. Must match the cfg on dict_repeat's non-overlap branch.
+#[cfg(all(
+    any(target_arch = "x86", target_arch = "x86_64"),
+    target_feature = "sse2"
+))]
+pub const LZ_DICT_EXTRA: u32 = 32;
+#[cfg(not(all(
+    any(target_arch = "x86", target_arch = "x86_64"),
+    target_feature = "sse2"
+)))]
 pub const LZ_DICT_EXTRA: u32 = 0;
 pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
     coder: core::ptr::null_mut(),

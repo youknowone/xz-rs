@@ -1,5 +1,9 @@
 use crate::lz::lz_decoder::{lzma_lz_decoder_init, lzma_lz_decoder_memusage, lzma_lz_options};
 use crate::types::*;
+#[cfg(all(target_arch = "x86", target_feature = "sse2"))]
+use core::arch::x86::{__m128i, _mm_loadu_si128, _mm_storeu_si128};
+#[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
+use core::arch::x86_64::{__m128i, _mm_loadu_si128, _mm_storeu_si128};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lzma1_decoder {
@@ -149,12 +153,40 @@ unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> boo
             }
         }
     } else {
-        core::ptr::copy_nonoverlapping(
-            (*dict).buf.offset(back as isize) as *const u8,
-            (*dict).buf.offset((*dict).pos as isize) as *mut u8,
-            left as size_t,
-        );
-        (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
+        #[cfg(not(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "sse2"
+        )))]
+        {
+            core::ptr::copy_nonoverlapping(
+                (*dict).buf.offset(back as isize) as *const u8,
+                (*dict).buf.offset((*dict).pos as isize) as *mut u8,
+                left as size_t,
+            );
+            (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
+        }
+        // This can copy up to 32 bytes more than required (if left == 0,
+        // still 32 bytes); LZ_DICT_EXTRA in lz_decoder.rs reserves the
+        // tail space and its cfg must match this branch.
+        #[cfg(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "sse2"
+        ))]
+        {
+            let mut pos: size_t = (*dict).pos;
+            (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
+            loop {
+                let x0 = _mm_loadu_si128((*dict).buf.add(back) as *const __m128i);
+                let x1 = _mm_loadu_si128((*dict).buf.add(back + 16) as *const __m128i);
+                back = back.wrapping_add(32);
+                _mm_storeu_si128((*dict).buf.add(pos) as *mut __m128i, x0);
+                _mm_storeu_si128((*dict).buf.add(pos + 16) as *mut __m128i, x1);
+                pos = pos.wrapping_add(32);
+                if pos >= (*dict).pos {
+                    break;
+                }
+            }
+        }
     }
     if !(*dict).has_wrapped {
         (*dict).full = (*dict).pos.wrapping_sub(LZ_DICT_INIT_POS as size_t);
