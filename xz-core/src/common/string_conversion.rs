@@ -1273,6 +1273,6 @@ unsafe extern "C" fn run_static_initializers() {
 }
 #[used]
 #[cfg_attr(target_os = "linux", unsafe(link_section = ".init_array"))]
-#[cfg_attr(target_os = "windows", unsafe(link_section = ".CRT$XIB"))]
+#[cfg_attr(target_os = "windows", unsafe(link_section = ".CRT$XCU"))]
 #[cfg_attr(target_os = "macos", unsafe(link_section = "__DATA,__mod_init_func"))]
 static INIT_ARRAY: [unsafe extern "C" fn(); 1] = [run_static_initializers];
