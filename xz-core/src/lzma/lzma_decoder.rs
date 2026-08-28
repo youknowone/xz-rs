@@ -105,21 +105,20 @@ pub struct lzma_length_decoder {
 }
 #[inline]
 unsafe fn dict_get(dict: *const lzma_dict, distance: u32) -> u8 {
-    *(*dict).buf.offset(
-        (*dict)
-            .pos
-            .wrapping_sub(distance as size_t)
-            .wrapping_sub(1)
-            .wrapping_add(if (distance as size_t) < (*dict).pos {
-                0
-            } else {
-                (*dict).size.wrapping_sub(LZ_DICT_REPEAT_MAX as size_t)
-            }) as isize,
-    )
+    let index = (*dict)
+        .pos
+        .wrapping_sub(distance as size_t)
+        .wrapping_sub(1)
+        .wrapping_add(if (distance as size_t) < (*dict).pos {
+            0
+        } else {
+            (*dict).size.wrapping_sub(LZ_DICT_REPEAT_MAX as size_t)
+        });
+    *(*dict).buf.wrapping_add(index)
 }
 #[inline]
 unsafe fn dict_get0(dict: *const lzma_dict) -> u8 {
-    *(*dict).buf.offset((*dict).pos.wrapping_sub(1) as isize)
+    *(*dict).buf.wrapping_add((*dict).pos.wrapping_sub(1))
 }
 #[inline]
 unsafe fn dict_is_distance_valid(dict: *const lzma_dict, distance: size_t) -> bool {
@@ -140,7 +139,7 @@ unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> boo
     }
     if distance < left {
         loop {
-            *(*dict).buf.offset((*dict).pos as isize) = *(*dict).buf.offset(back as isize);
+            *(*dict).buf.wrapping_add((*dict).pos) = *(*dict).buf.wrapping_add(back);
             back += 1;
             (*dict).pos = (*dict).pos.wrapping_add(1);
             left -= 1;
@@ -150,8 +149,8 @@ unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> boo
         }
     } else {
         core::ptr::copy_nonoverlapping(
-            (*dict).buf.offset(back as isize) as *const u8,
-            (*dict).buf.offset((*dict).pos as isize) as *mut u8,
+            (*dict).buf.wrapping_add(back) as *const u8,
+            (*dict).buf.wrapping_add((*dict).pos) as *mut u8,
             left as size_t,
         );
         (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
@@ -163,7 +162,7 @@ unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> boo
 }
 #[inline]
 unsafe fn dict_put(dict: *mut lzma_dict, byte: u8) {
-    *(*dict).buf.offset((*dict).pos as isize) = byte;
+    *(*dict).buf.wrapping_add((*dict).pos) = byte;
     (*dict).pos = (*dict).pos.wrapping_add(1);
     if !(*dict).has_wrapped {
         (*dict).full = (*dict).pos.wrapping_sub(LZ_DICT_INIT_POS as size_t);
@@ -189,10 +188,10 @@ unsafe fn rc_read_init(
         if *in_pos == in_size {
             return LZMA_OK;
         }
-        if (*rc).init_bytes_left == 5 && *input.offset(*in_pos as isize) != 0 {
+        if (*rc).init_bytes_left == 5 && *input.wrapping_add(*in_pos) != 0 {
             return LZMA_DATA_ERROR;
         }
-        (*rc).code = (*rc).code << 8 | *input.offset(*in_pos as isize) as u32;
+        (*rc).code = (*rc).code << 8 | *input.wrapping_add(*in_pos) as u32;
         *in_pos = (*in_pos).wrapping_add(1);
         (*rc).init_bytes_left = (*rc).init_bytes_left.wrapping_sub(1);
     }
@@ -517,8 +516,8 @@ unsafe fn lzma_decode(
     let mut dict: lzma_dict = *dictptr;
     let dict_start: size_t = dict.pos;
     let mut rc: lzma_range_decoder = (*coder).rc;
-    let mut rc_in_ptr: *const u8 = input.offset(*in_pos as isize);
-    let rc_in_end: *const u8 = input.offset(in_size as isize);
+    let mut rc_in_ptr: *const u8 = input.wrapping_add(*in_pos);
+    let rc_in_end: *const u8 = input.wrapping_add(in_size);
     let rc_in_fast_end: *const u8 = if rc_in_end.offset_from(rc_in_ptr) <= 20 {
         rc_in_ptr
     } else {
@@ -2209,7 +2208,7 @@ unsafe fn lzma_decode(
     }
     (*dictptr).full = dict.full;
     (*coder).rc = rc;
-    *in_pos = rc_in_ptr.offset_from(input) as size_t;
+    *in_pos = rc_in_ptr.addr().wrapping_sub(input.addr());
     (*coder).state = state as lzma_lzma_state;
     (*coder).rep0 = rep0;
     (*coder).rep1 = rep1;
@@ -2486,4 +2485,31 @@ pub(crate) unsafe fn lzma_lzma_props_decode(
         *options = opt as *mut c_void;
         return LZMA_OK;
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// LZMA2 props 38/39 make `dict.pos` reach 2 GiB. `ptr::offset(pos as isize)`
+    /// and `ptr::add(pos)` both trip the 32-bit debug overflow check (`isize::MIN`
+    /// / `count > isize::MAX`). `wrapping_add` is the in-range unsigned index.
+    #[test]
+    fn dict_put_offset_at_2gib_matches_wrapping_add() {
+        let mut storage = [0u8; 1];
+        let pos: usize = 1 << 31;
+        let mut dict = lzma_dict {
+            buf: storage.as_mut_ptr().wrapping_sub(pos),
+            pos,
+            full: pos,
+            limit: pos + 1,
+            size: pos + 1,
+            has_wrapped: true,
+            need_reset: false,
+        };
+
+        unsafe { dict_put(core::ptr::addr_of_mut!(dict), 0x5A) };
+        assert_eq!(storage[0], 0x5A);
+        assert_eq!(dict.pos, pos + 1);
+    }
 }

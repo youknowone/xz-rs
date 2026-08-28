@@ -35,7 +35,7 @@ pub const LZMA_LZ_DECODER_INIT: lzma_lz_decoder = lzma_lz_decoder {
 unsafe fn lz_decoder_reset(coder: *mut lzma_coder) {
     (*coder).dict.pos = LZ_DICT_INIT_POS as size_t;
     (*coder).dict.full = 0;
-    *(*coder).dict.buf.offset((LZ_DICT_INIT_POS - 1) as isize) = '\0' as i32 as u8;
+    *(*coder).dict.buf.wrapping_add((LZ_DICT_INIT_POS - 1) as size_t) = '\0' as i32 as u8;
     (*coder).dict.has_wrapped = false;
     (*coder).dict.need_reset = false;
 }
@@ -56,8 +56,8 @@ unsafe fn decode_buffer(
                 (*coder)
                     .dict
                     .buf
-                    .offset((*coder).dict.size as isize)
-                    .offset(-(LZ_DICT_REPEAT_MAX as isize)) as *const u8,
+                    .wrapping_add((*coder).dict.size)
+                    .wrapping_sub(LZ_DICT_REPEAT_MAX as size_t) as *const u8,
                 (*coder).dict.buf as *mut u8,
                 LZ_DICT_REPEAT_MAX as size_t,
             );
@@ -81,8 +81,8 @@ unsafe fn decode_buffer(
         let copy_size: size_t = (*coder).dict.pos.wrapping_sub(dict_start);
         if copy_size > 0 {
             core::ptr::copy_nonoverlapping(
-                (*coder).dict.buf.offset(dict_start as isize) as *const u8,
-                out.offset(*out_pos as isize) as *mut u8,
+                (*coder).dict.buf.wrapping_add(dict_start) as *const u8,
+                out.wrapping_add(*out_pos) as *mut u8,
                 copy_size,
             );
         }
@@ -288,8 +288,8 @@ pub unsafe fn lzma_lz_decoder_init(
         };
         let offset: size_t = lz_options.preset_dict_size.wrapping_sub(copy_size);
         core::ptr::copy_nonoverlapping(
-            lz_options.preset_dict.offset(offset as isize) as *const u8,
-            (*coder).dict.buf.offset((*coder).dict.pos as isize) as *mut u8,
+            lz_options.preset_dict.wrapping_add(offset) as *const u8,
+            (*coder).dict.buf.wrapping_add((*coder).dict.pos) as *mut u8,
             copy_size,
         );
         (*coder).dict.pos = (*coder).dict.pos.wrapping_add(copy_size);
