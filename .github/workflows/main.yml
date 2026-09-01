@@ -118,7 +118,7 @@ jobs:
     - name: Install cargo-fuzz
       run: cargo install cargo-fuzz --version 0.13.1
     - name: Run fuzz smoke targets
-      run: FUZZ_RUNS=4096 FUZZ_SANITIZER=none scripts/run_fuzz_smoke.sh
+      run: FUZZ_RUNS=4096 FUZZ_SANITIZER=address scripts/run_fuzz_smoke.sh
 
   upstream-c-tests:
     name: Upstream C xz tests with xz-sys

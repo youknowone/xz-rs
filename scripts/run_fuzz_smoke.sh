@@ -16,16 +16,25 @@ if ! (cd "$ROOT_DIR" && "${CARGO_CMD[@]}" fuzz --version >/dev/null 2>&1); then
     exit 1
 fi
 
-targets=(
-    stream_encode
-    auto_decode
-    stream_decode
-    alone_decode
-    mt_stream_decode
-    mt_stream_encode
-)
+# FUZZ_TARGETS selects a subset; otherwise every target defined in fuzz/ runs,
+# so a newly added target cannot be left out of the smoke run.
+targets=()
+if [ -n "${FUZZ_TARGETS:-}" ]; then
+    read -r -a targets <<< "$FUZZ_TARGETS"
+else
+    while IFS= read -r line; do
+        if [ -n "$line" ]; then
+            targets+=("$line")
+        fi
+    done < <(cd "$ROOT_DIR" && "${CARGO_CMD[@]}" fuzz list)
+fi
+
+if [ "${#targets[@]}" -eq 0 ]; then
+    echo "no fuzz targets found" >&2
+    exit 1
+fi
 
 for target in "${targets[@]}"; do
-    echo "Running fuzz smoke target: ${target}"
+    echo "Running fuzz smoke target: ${target} (sanitizer=${SANITIZER}, runs=${RUNS})"
     (cd "$ROOT_DIR" && "${CARGO_CMD[@]}" fuzz run --sanitizer "$SANITIZER" "$target" -- -runs="$RUNS")
 done
