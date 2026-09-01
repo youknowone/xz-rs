@@ -1,6 +1,6 @@
 [package]
 name = "xz"
-version = "0.4.6"
+version = "0.4.6-rc.0"
 authors = ["Alex Crichton <alex@alexcrichton.com>", "Portable-Network-Archive Developers"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -21,8 +21,8 @@ members = ["systest", "xz-core", "xz-sys", "perf-probe"]
 exclude = ["fuzz"]
 
 [dependencies]
-xz-core = { path = "xz-core", optional = true }
-xz-sys = { path = "xz-sys", optional = true }
+xz-core = { path = "xz-core", version = "0.1.0-rc.0", optional = true }
+xz-sys = { path = "xz-sys", version = "0.4.6-rc.0", optional = true }
 liblzma-sys = { version = "0.4.6", optional = true, default-features = false }
 num_cpus = { version = "1.16.0", optional = true }
 criterion = { version = "0.5", features = ["html_reports"], optional = true }

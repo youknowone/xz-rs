@@ -956,7 +956,7 @@ checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
 
 [[package]]
 name = "xz"
-version = "0.4.6"
+version = "0.4.6-rc.0"
 dependencies = [
  "criterion",
  "getrandom 0.2.17",
@@ -973,7 +973,7 @@ dependencies = [
 
 [[package]]
 name = "xz-core"
-version = "0.0.1"
+version = "0.1.0-rc.0"
 dependencies = [
  "libc",
  "memchr",
@@ -982,7 +982,7 @@ dependencies = [
 
 [[package]]
 name = "xz-sys"
-version = "0.4.6"
+version = "0.4.6-rc.0"
 dependencies = [
  "libc",
  "xz-core",
