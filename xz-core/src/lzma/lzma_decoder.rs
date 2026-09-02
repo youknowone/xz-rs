@@ -1253,7 +1253,12 @@ macro_rules! rc_bittree_rev4 {
 macro_rules! rc_matched_literal {
     ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $match_byte:expr, $symbol:ident) => {{
         let probs_base: *mut probability = $probs_base;
+        // match_bit and match_byte are separate registers that both start
+        // out as match_byte << 1, like t_match_bit and t_match_byte in
+        // range_decoder.h. Keep them in distinct locals so neither operand
+        // can be mistaken for an alias of the other.
         let t_match_byte: u32 = (($match_byte) as u32) << 1;
+        let t_match_bit: u32 = t_match_byte;
         $symbol = 1;
         core::arch::asm!(
             "add {offset:e}, {symbol:e}",
@@ -1513,7 +1518,7 @@ macro_rules! rc_matched_literal {
             t0 = out(reg) _,
             t1 = out(reg) _,
             prob = out(reg) _,
-            match_bit = inout(reg) t_match_byte => _,
+            match_bit = inout(reg) t_match_bit => _,
             symbol = inout(reg) $symbol,
             match_byte = inout(reg) t_match_byte => _,
             offset = inout(reg) 0x100u32 => _,
