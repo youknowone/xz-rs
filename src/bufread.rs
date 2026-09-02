@@ -6,7 +6,7 @@ use std::io::prelude::*;
 #[cfg(feature = "parallel")]
 use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
-use crate::sys as liblzma_sys;
+use crate::sys;
 
 /// A xz encoder, or compressor.
 ///
@@ -188,7 +188,7 @@ impl<R: BufRead> XzDecoder<R> {
     /// input. All the concatenated xz streams from input will be consumed.
     #[inline]
     pub fn new_multi_decoder(r: R) -> XzDecoder<R> {
-        let stream = Stream::new_auto_decoder(u64::MAX, liblzma_sys::LZMA_CONCATENATED).unwrap();
+        let stream = Stream::new_auto_decoder(u64::MAX, sys::LZMA_CONCATENATED).unwrap();
         XzDecoder::new_stream(r, stream)
     }
 

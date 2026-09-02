@@ -8,7 +8,7 @@ use std::io::prelude::*;
 #[cfg(feature = "parallel")]
 use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
-use crate::sys as liblzma_sys;
+use crate::sys;
 pub use auto_finish::{AutoFinishXzDecoder, AutoFinishXzEncoder};
 
 /// A compression stream which will have uncompressed data written to it and
@@ -235,7 +235,7 @@ impl<W: Write> XzDecoder<W> {
     /// from the input written to it.
     #[inline]
     pub fn new_multi_decoder(obj: W) -> XzDecoder<W> {
-        let stream = Stream::new_stream_decoder(u64::MAX, liblzma_sys::LZMA_CONCATENATED).unwrap();
+        let stream = Stream::new_stream_decoder(u64::MAX, sys::LZMA_CONCATENATED).unwrap();
         XzDecoder::new_stream(obj, stream)
     }
 

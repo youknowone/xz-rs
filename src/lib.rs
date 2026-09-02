@@ -105,7 +105,6 @@ pub(crate) mod sys {
     pub(crate) use liblzma_sys::*;
 }
 
-use crate::sys as liblzma_sys;
 use std::io::{self, prelude::*};
 
 pub mod stream;
@@ -159,19 +158,16 @@ pub fn copy_decode<R: Read, W: Write>(source: R, mut destination: W) -> io::Resu
 /// Find the size in bytes of uncompressed data from xz file.
 pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
     use std::mem::MaybeUninit;
-    let mut footer = [0u8; liblzma_sys::LZMA_STREAM_HEADER_SIZE as usize];
+    let mut footer = [0u8; sys::LZMA_STREAM_HEADER_SIZE as usize];
 
-    source.seek(io::SeekFrom::End(
-        0 - (liblzma_sys::LZMA_STREAM_HEADER_SIZE as i64),
-    ))?;
+    source.seek(io::SeekFrom::End(0 - (sys::LZMA_STREAM_HEADER_SIZE as i64)))?;
     source.read_exact(&mut footer)?;
 
     let lzma_stream_flags = unsafe {
         let mut lzma_stream_flags = MaybeUninit::uninit();
-        let ret =
-            liblzma_sys::lzma_stream_footer_decode(lzma_stream_flags.as_mut_ptr(), footer.as_ptr());
+        let ret = sys::lzma_stream_footer_decode(lzma_stream_flags.as_mut_ptr(), footer.as_ptr());
 
-        if ret != liblzma_sys::LZMA_OK {
+        if ret != sys::LZMA_OK {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
                 "Failed to parse lzma footer",
@@ -183,10 +179,9 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
 
     // backward_size can exceed usize on 32-bit targets; fail cleanly instead
     // of truncating.
-    let index_plus_footer = usize::try_from(
-        liblzma_sys::LZMA_STREAM_HEADER_SIZE as u64 + lzma_stream_flags.backward_size,
-    )
-    .map_err(|_| io::Error::new(io::ErrorKind::Other, "lzma index too large"))?;
+    let index_plus_footer =
+        usize::try_from(sys::LZMA_STREAM_HEADER_SIZE as u64 + lzma_stream_flags.backward_size)
+            .map_err(|_| io::Error::new(io::ErrorKind::Other, "lzma index too large"))?;
 
     source.seek(io::SeekFrom::End(0 - index_plus_footer as i64))?;
 
@@ -196,11 +191,11 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
         .collect::<io::Result<Vec<u8>>>()?;
 
     let uncompressed_size = unsafe {
-        let mut i: MaybeUninit<*mut liblzma_sys::lzma_index> = MaybeUninit::uninit();
+        let mut i: MaybeUninit<*mut sys::lzma_index> = MaybeUninit::uninit();
         let mut memlimit = u64::MAX;
         let mut in_pos = 0usize;
 
-        let ret = liblzma_sys::lzma_index_buffer_decode(
+        let ret = sys::lzma_index_buffer_decode(
             i.as_mut_ptr(),
             &mut memlimit,
             std::ptr::null(),
@@ -209,7 +204,7 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
             buf.len(),
         );
 
-        if ret != liblzma_sys::LZMA_OK {
+        if ret != sys::LZMA_OK {
             return Err(io::Error::new(
                 io::ErrorKind::Other,
                 "Failed to parse lzma footer",
@@ -218,9 +213,9 @@ pub fn uncompressed_size<R: Read + Seek>(mut source: R) -> io::Result<u64> {
 
         let i = i.assume_init();
 
-        let uncompressed_size = liblzma_sys::lzma_index_uncompressed_size(i);
+        let uncompressed_size = sys::lzma_index_uncompressed_size(i);
 
-        liblzma_sys::lzma_index_end(i, std::ptr::null());
+        sys::lzma_index_end(i, std::ptr::null());
 
         uncompressed_size
     };
