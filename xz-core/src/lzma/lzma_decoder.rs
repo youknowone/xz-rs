@@ -158,6 +158,7 @@ unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> boo
             target_feature = "sse2"
         )))]
         {
+            const _: () = assert!(crate::lz::lz_decoder::LZ_DICT_EXTRA == 0);
             core::ptr::copy_nonoverlapping(
                 (*dict).buf.offset(back as isize) as *const u8,
                 (*dict).buf.offset((*dict).pos as isize) as *mut u8,
@@ -167,12 +168,14 @@ unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> boo
         }
         // This can copy up to 32 bytes more than required (if left == 0,
         // still 32 bytes); LZ_DICT_EXTRA in lz_decoder.rs reserves the
-        // tail space and its cfg must match this branch.
+        // tail space and its cfg must match this branch. The assert below
+        // turns a cfg that drifted apart into a build failure.
         #[cfg(all(
             any(target_arch = "x86", target_arch = "x86_64"),
             target_feature = "sse2"
         ))]
         {
+            const _: () = assert!(crate::lz::lz_decoder::LZ_DICT_EXTRA == 32);
             let mut pos: size_t = (*dict).pos;
             (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
             loop {

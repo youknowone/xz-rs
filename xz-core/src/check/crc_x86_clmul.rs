@@ -66,6 +66,9 @@ unsafe fn my_load128(p: *const u8) -> __m128i {
 #[target_feature(enable = "ssse3", enable = "sse4.1", enable = "pclmulqdq")]
 #[inline]
 unsafe fn keep_high_bytes(v: __m128i, count: size_t) -> __m128i {
+    // my_load128 reads 16 bytes, so the offset must leave that much room
+    // in the 64-byte table.
+    debug_assert!(count <= 48);
     _mm_and_si128(my_load128(vmasks.0.as_ptr().add(count)), v)
 }
 
@@ -73,6 +76,9 @@ unsafe fn keep_high_bytes(v: __m128i, count: size_t) -> __m128i {
 #[target_feature(enable = "ssse3", enable = "sse4.1", enable = "pclmulqdq")]
 #[inline]
 unsafe fn shift_left(v: __m128i, amount: size_t) -> __m128i {
+    // 32 - amount is an unsigned subtraction, so an amount above 32 would
+    // wrap into a huge offset rather than a small one.
+    debug_assert!(amount <= 16);
     _mm_shuffle_epi8(v, my_load128(vmasks.0.as_ptr().add(32 - amount)))
 }
 
@@ -80,6 +86,7 @@ unsafe fn shift_left(v: __m128i, amount: size_t) -> __m128i {
 #[target_feature(enable = "ssse3", enable = "sse4.1", enable = "pclmulqdq")]
 #[inline]
 unsafe fn shift_right(v: __m128i, amount: size_t) -> __m128i {
+    debug_assert!(amount <= 16);
     _mm_shuffle_epi8(v, my_load128(vmasks.0.as_ptr().add(32 + amount)))
 }
 
