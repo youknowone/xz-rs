@@ -1610,6 +1610,12 @@ unsafe fn lzma_decode(
     let mut rc: lzma_range_decoder = (*coder).rc;
     let mut rc_in_ptr: *const u8 = input.offset(*in_pos as isize);
     let rc_in_end: *const u8 = input.offset(in_size as isize);
+    // LZMA_IN_REQUIRED from lzma_decoder.c. Decoding one symbol uses at most
+    // 22 probability bits and 26 direct bits, which the range coder normalizes
+    // out of no more than 20 input bytes. The fast path below reads and
+    // advances rc_in_ptr without ever comparing it against rc_in_end, so the
+    // soundness of every unsafe read there rests on this reservation alone.
+    // The bound is taken from the C source as-is and is not re-derived here.
     let rc_in_fast_end: *const u8 = if rc_in_end.offset_from(rc_in_ptr) <= 20 {
         rc_in_ptr
     } else {

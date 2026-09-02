@@ -419,8 +419,10 @@ unsafe fn lzma_crc32_arm64(buf: &[u8], mut crc: u32) -> u32 {
 }
 
 // CRC32 instructions are part of the 64-bit LoongArch base ISA, so no
-// runtime detection is needed (crc32_loongarch.h). core::arch has no
-// stable LoongArch CRC intrinsics yet, hence the asm wrappers.
+// runtime detection is needed (crc32_loongarch.h, crc_common.h). The
+// absence of a probe is inherited from C, which relies on the same
+// guarantee from the LoongArch specification. core::arch has no stable
+// LoongArch CRC intrinsics yet, hence the asm wrappers.
 #[cfg(target_arch = "loongarch64")]
 #[inline(always)]
 unsafe fn crc_w_b_w(v: i8, crc: i32) -> i32 {

@@ -337,6 +337,10 @@ pub fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64 {
     if unsafe { lz_encoder_prepare(::core::ptr::addr_of_mut!(mf), core::ptr::null(), lz_options) } {
         return UINT64_MAX;
     }
+    // mf.size, not mf.size + LZMA_MEMCMPLEN_EXTRA: lz_encoder.c reports the
+    // same figure and leaves the tail padding out of the estimate. The buffer
+    // is still allocated with the padding, so this under-reports by EXTRA
+    // bytes exactly as the C original does.
     ((mf.hash_count as u64) + (mf.sons_count as u64)) * core::mem::size_of::<u32>() as u64
         + mf.size as u64
         + core::mem::size_of::<lzma_coder>() as u64

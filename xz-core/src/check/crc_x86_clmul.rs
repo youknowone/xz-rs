@@ -139,6 +139,11 @@ unsafe fn extract_crc64(v0: __m128i) -> u64 {
 ///
 /// `is_arch_extension_supported()` must have returned true, and `buf`
 /// must point to at least `size` readable bytes.
+///
+/// The unguarded contract comes from crc_x86_clmul.h, where the same
+/// function is reachable only through the C feature dispatch and performs
+/// no check of its own. Calling it on a CPU without those extensions
+/// executes an illegal instruction rather than merely being unsound.
 #[target_feature(enable = "ssse3", enable = "sse4.1", enable = "pclmulqdq")]
 pub unsafe fn crc32_arch_optimized(mut buf: *const u8, mut size: size_t, mut crc: u32) -> u32 {
     if size == 0 {
@@ -262,6 +267,11 @@ pub unsafe fn crc32_arch_optimized(mut buf: *const u8, mut size: size_t, mut crc
 ///
 /// `is_arch_extension_supported()` must have returned true, and `buf`
 /// must point to at least `size` readable bytes.
+///
+/// The unguarded contract comes from crc_x86_clmul.h, where the same
+/// function is reachable only through the C feature dispatch and performs
+/// no check of its own. Calling it on a CPU without those extensions
+/// executes an illegal instruction rather than merely being unsound.
 #[target_feature(enable = "ssse3", enable = "sse4.1", enable = "pclmulqdq")]
 pub unsafe fn crc64_arch_optimized(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
     if size == 0 {

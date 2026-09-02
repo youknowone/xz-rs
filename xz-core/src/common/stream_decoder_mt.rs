@@ -1326,6 +1326,9 @@ unsafe fn stream_decode_mt(
     }
 }
 unsafe fn stream_decoder_mt_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    // stream_decoder_mt_end() in stream_decoder_mt.c likewise frees the coder
+    // without destroying coder->mutex and coder->cond. Kept that way to stay
+    // identical to the C original.
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     threads_end(coder, allocator);
     lzma_outq_end(::core::ptr::addr_of_mut!((*coder).outq), allocator);
