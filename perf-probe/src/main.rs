@@ -97,8 +97,33 @@ struct Config {
 #[derive(Debug)]
 struct Measurement {
     elapsed: Duration,
+    cpu: Duration,
     throughput_mib_s: f64,
     digest: u64,
+}
+
+// Wall clock counts the time the process spends descheduled, so on a loaded
+// machine it measures the rest of the system as much as the backend. Thread
+// CPU time only advances while this thread is on a core, which keeps the
+// backend comparison usable when the machine is busy. It still cannot tell a
+// performance core from an efficiency one, so callers should compare minima
+// over several rounds rather than single measurements.
+#[cfg(unix)]
+fn thread_cpu_time() -> Duration {
+    let mut ts = std::mem::MaybeUninit::<libc::timespec>::zeroed();
+    let ret = unsafe { libc::clock_gettime(libc::CLOCK_THREAD_CPUTIME_ID, ts.as_mut_ptr()) };
+    if ret != 0 {
+        return Duration::ZERO;
+    }
+    let ts = unsafe { ts.assume_init() };
+    Duration::new(ts.tv_sec as u64, ts.tv_nsec as u32)
+}
+
+// Reported as zero rather than silently substituting the wall clock, so a
+// platform without a thread CPU clock is visible in the output.
+#[cfg(not(unix))]
+fn thread_cpu_time() -> Duration {
+    Duration::ZERO
 }
 
 fn main() {
@@ -485,15 +510,18 @@ where
         digest ^= black_box(work());
     }
 
+    let cpu_start = thread_cpu_time();
     let start = Instant::now();
     for _ in 0..iters {
         digest ^= black_box(work());
     }
     let elapsed = start.elapsed();
+    let cpu = thread_cpu_time().saturating_sub(cpu_start);
     let mib = (bytes_per_iter as f64 * iters as f64) / (1024.0 * 1024.0);
 
     Measurement {
         elapsed,
+        cpu,
         throughput_mib_s: mib / elapsed.as_secs_f64(),
         digest,
     }
@@ -501,10 +529,11 @@ where
 
 fn print_measurement(measurement: &Measurement, iters: usize) {
     println!(
-        "{}: total={:.3?} ns_per_iter={:.0} throughput_mib_s={:.2} digest={:#x}",
+        "{}: total={:.3?} ns_per_iter={:.0} cpu_ns_per_iter={:.0} throughput_mib_s={:.2} digest={:#x}",
         BACKEND_NAME,
         measurement.elapsed,
         measurement.elapsed.as_nanos() as f64 / iters as f64,
+        measurement.cpu.as_nanos() as f64 / iters as f64,
         measurement.throughput_mib_s,
         measurement.digest
     );
