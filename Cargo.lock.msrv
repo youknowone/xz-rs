@@ -985,6 +985,7 @@ name = "xz-sys"
 version = "0.4.6-rc.0"
 dependencies = [
  "libc",
+ "liblzma-sys",
  "xz-core",
 ]
 
