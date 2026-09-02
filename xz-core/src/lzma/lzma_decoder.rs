@@ -1,5 +1,9 @@
 use crate::lz::lz_decoder::{lzma_lz_decoder_init, lzma_lz_decoder_memusage, lzma_lz_options};
 use crate::types::*;
+#[cfg(all(target_arch = "x86", target_feature = "sse2"))]
+use core::arch::x86::{__m128i, _mm_loadu_si128, _mm_storeu_si128};
+#[cfg(all(target_arch = "x86_64", target_feature = "sse2"))]
+use core::arch::x86_64::{__m128i, _mm_loadu_si128, _mm_storeu_si128};
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_lzma1_decoder {
@@ -149,12 +153,43 @@ unsafe fn dict_repeat(dict: *mut lzma_dict, distance: u32, len: *mut u32) -> boo
             }
         }
     } else {
-        core::ptr::copy_nonoverlapping(
-            (*dict).buf.offset(back as isize) as *const u8,
-            (*dict).buf.offset((*dict).pos as isize) as *mut u8,
-            left as size_t,
-        );
-        (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
+        #[cfg(not(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "sse2"
+        )))]
+        {
+            const _: () = assert!(crate::lz::lz_decoder::LZ_DICT_EXTRA == 0);
+            core::ptr::copy_nonoverlapping(
+                (*dict).buf.offset(back as isize) as *const u8,
+                (*dict).buf.offset((*dict).pos as isize) as *mut u8,
+                left as size_t,
+            );
+            (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
+        }
+        // This can copy up to 32 bytes more than required (if left == 0,
+        // still 32 bytes); LZ_DICT_EXTRA in lz_decoder.rs reserves the
+        // tail space and its cfg must match this branch. The assert below
+        // turns a cfg that drifted apart into a build failure.
+        #[cfg(all(
+            any(target_arch = "x86", target_arch = "x86_64"),
+            target_feature = "sse2"
+        ))]
+        {
+            const _: () = assert!(crate::lz::lz_decoder::LZ_DICT_EXTRA == 32);
+            let mut pos: size_t = (*dict).pos;
+            (*dict).pos = (*dict).pos.wrapping_add(left as size_t);
+            loop {
+                let x0 = _mm_loadu_si128((*dict).buf.add(back) as *const __m128i);
+                let x1 = _mm_loadu_si128((*dict).buf.add(back + 16) as *const __m128i);
+                back = back.wrapping_add(32);
+                _mm_storeu_si128((*dict).buf.add(pos) as *mut __m128i, x0);
+                _mm_storeu_si128((*dict).buf.add(pos + 16) as *mut __m128i, x1);
+                pos = pos.wrapping_add(32);
+                if pos >= (*dict).pos {
+                    break;
+                }
+            }
+        }
     }
     if !(*dict).has_wrapped {
         (*dict).full = (*dict).pos.wrapping_sub(LZ_DICT_INIT_POS as size_t);
@@ -325,6 +360,7 @@ macro_rules! rc_normalize {
     };
 }
 
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
 macro_rules! rc_bittree_step {
     ($rc:ident, $rc_bound:ident, $prob:expr, $symbol:ident) => {{
         let prob = $prob;
@@ -342,8 +378,9 @@ macro_rules! rc_bittree_step {
     }};
 }
 
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
 macro_rules! rc_bittree8 {
-    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $symbol:ident) => {{
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $final_add:expr, $symbol:ident) => {{
         let probs_base = $probs_base;
         $symbol = 1;
         rc_normalize!($rc, $rc_in_ptr);
@@ -362,9 +399,11 @@ macro_rules! rc_bittree8 {
         rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
         rc_normalize!($rc, $rc_in_ptr);
         rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        $symbol = $symbol.wrapping_add(($final_add) as u32);
     }};
 }
 
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
 macro_rules! rc_matched_literal_step {
     (
         $rc:ident,
@@ -398,6 +437,7 @@ macro_rules! rc_matched_literal_step {
     }};
 }
 
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
 macro_rules! rc_matched_literal {
     ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $match_byte:expr, $symbol:ident) => {{
         let probs_base = $probs_base;
@@ -496,6 +536,1057 @@ macro_rules! rc_matched_literal {
         );
     }};
 }
+
+// x86-64 inline assembly variants of the multi-bit range decoder
+// operations (range_decoder.h, LZMA_RANGE_DECODER_CONFIG 0x1F0),
+// generated from the C asm macros via c2rust and cleaned up. The
+// normalization label is 8 and the rc_direct loop label is 9 because
+// LLVM can misparse asm labels 0 and 1.
+#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+const RC_BIT_MODEL_OFFSET: i32 =
+    ((1u32 << RC_MOVE_BITS) - 1).wrapping_sub(RC_BIT_MODEL_TOTAL) as i32;
+
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
+macro_rules! rc_bittree3 {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $final_add:expr, $symbol:ident) => {{
+        let probs_base = $probs_base;
+        $symbol = 1;
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        $symbol = $symbol.wrapping_add(($final_add) as u32);
+    }};
+}
+
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
+macro_rules! rc_bittree6 {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $final_add:expr, $symbol:ident) => {{
+        let probs_base = $probs_base;
+        $symbol = 1;
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        rc_normalize!($rc, $rc_in_ptr);
+        rc_bittree_step!($rc, $rc_bound, probs_base.add($symbol as usize), $symbol);
+        $symbol = $symbol.wrapping_add(($final_add) as u32);
+    }};
+}
+
+#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+macro_rules! rc_bittree3 {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $final_add:expr, $symbol:ident) => {{
+        let probs_base: *mut probability = $probs_base;
+        core::arch::asm!(
+            "movzwl 2({probs_base}), {prob0:e}",
+            "mov $2, {symbol:e}",
+            "movzwl 4({probs_base}), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 6({probs_base}), {t0:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob0:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob0:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            "add {symbol:e}, {symbol:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb ${last_sbb}, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            range = inout(reg) $rc.range,
+            code = inout(reg) $rc.code,
+            t0 = out(reg) _,
+            t1 = out(reg) _,
+            prob0 = out(reg) _,
+            prob1 = out(reg) _,
+            symbol = out(reg) $symbol,
+            in_ptr = inout(reg) $rc_in_ptr,
+            probs_base = in(reg) probs_base,
+            last_sbb = const -1i32 - ($final_add),
+            top_value = const RC_TOP_VALUE,
+            shift_bits = const RC_SHIFT_BITS,
+            bit_model_total_bits = const RC_BIT_MODEL_TOTAL_BITS,
+            bit_model_offset = const RC_BIT_MODEL_OFFSET,
+            move_bits = const RC_MOVE_BITS,
+            options(att_syntax),
+        );
+    }};
+}
+
+#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+macro_rules! rc_bittree6 {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $final_add:expr, $symbol:ident) => {{
+        let probs_base: *mut probability = $probs_base;
+        core::arch::asm!(
+            "movzwl 2({probs_base}), {prob0:e}",
+            "mov $2, {symbol:e}",
+            "movzwl 4({probs_base}), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 6({probs_base}), {t0:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob0:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob0:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob0:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob0:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "add {symbol:e}, {symbol:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb ${last_sbb}, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            range = inout(reg) $rc.range,
+            code = inout(reg) $rc.code,
+            t0 = out(reg) _,
+            t1 = out(reg) _,
+            prob0 = out(reg) _,
+            prob1 = out(reg) _,
+            symbol = out(reg) $symbol,
+            in_ptr = inout(reg) $rc_in_ptr,
+            probs_base = in(reg) probs_base,
+            last_sbb = const -1i32 - ($final_add),
+            top_value = const RC_TOP_VALUE,
+            shift_bits = const RC_SHIFT_BITS,
+            bit_model_total_bits = const RC_BIT_MODEL_TOTAL_BITS,
+            bit_model_offset = const RC_BIT_MODEL_OFFSET,
+            move_bits = const RC_MOVE_BITS,
+            options(att_syntax),
+        );
+    }};
+}
+
+#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+macro_rules! rc_bittree8 {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $final_add:expr, $symbol:ident) => {{
+        let probs_base: *mut probability = $probs_base;
+        core::arch::asm!(
+            "movzwl 2({probs_base}), {prob0:e}",
+            "mov $2, {symbol:e}",
+            "movzwl 4({probs_base}), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 6({probs_base}), {t0:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob0:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob0:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob0:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob0:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob0:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob0:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            "movzwl ({probs_base}, {symbol:r}, 4), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 2({probs_base}, {symbol:r}, 4), {t0:e}",
+            "lea ({symbol:r}, {symbol:r}), {symbol:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, ({probs_base}, {t1:r}, 1)",
+            "add {symbol:e}, {symbol:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "sbb ${last_sbb}, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, ({probs_base}, {t1:r}, 1)",
+            range = inout(reg) $rc.range,
+            code = inout(reg) $rc.code,
+            t0 = out(reg) _,
+            t1 = out(reg) _,
+            prob0 = out(reg) _,
+            prob1 = out(reg) _,
+            symbol = out(reg) $symbol,
+            in_ptr = inout(reg) $rc_in_ptr,
+            probs_base = in(reg) probs_base,
+            last_sbb = const -1i32 - ($final_add),
+            top_value = const RC_TOP_VALUE,
+            shift_bits = const RC_SHIFT_BITS,
+            bit_model_total_bits = const RC_BIT_MODEL_TOTAL_BITS,
+            bit_model_offset = const RC_BIT_MODEL_OFFSET,
+            move_bits = const RC_MOVE_BITS,
+            options(att_syntax),
+        );
+    }};
+}
+
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
+macro_rules! rc_bittree_rev4_step {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:ident, $add:expr, $symbol:ident) => {{
+        rc_normalize!($rc, $rc_in_ptr);
+        let prob = $probs_base.add($symbol.wrapping_add($add) as usize);
+        $rc_bound = ($rc.range >> RC_BIT_MODEL_TOTAL_BITS).wrapping_mul(*prob as u32);
+        if $rc.code < $rc_bound {
+            $rc.range = $rc_bound;
+            prob_update_0(prob);
+        } else {
+            $rc.range = $rc.range.wrapping_sub($rc_bound);
+            $rc.code = $rc.code.wrapping_sub($rc_bound);
+            prob_update_1(prob);
+            $symbol = $symbol.wrapping_add($add);
+        }
+    }};
+}
+
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
+macro_rules! rc_bittree_rev4 {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $symbol:ident) => {{
+        let probs_base = $probs_base;
+        $symbol = 0;
+        rc_bittree_rev4_step!($rc, $rc_in_ptr, $rc_bound, probs_base, 1, $symbol);
+        rc_bittree_rev4_step!($rc, $rc_in_ptr, $rc_bound, probs_base, 2, $symbol);
+        rc_bittree_rev4_step!($rc, $rc_in_ptr, $rc_bound, probs_base, 4, $symbol);
+        rc_bittree_rev4_step!($rc, $rc_in_ptr, $rc_bound, probs_base, 8, $symbol);
+    }};
+}
+
+#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+macro_rules! rc_bittree_rev4 {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $symbol:ident) => {{
+        let probs_base: *mut probability = $probs_base;
+        core::arch::asm!(
+            "movzwl 2({probs_base}), {prob0:e}",
+            "xor {symbol:e}, {symbol:e}",
+            "movzwl 4({probs_base}), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 6({probs_base}), {t0:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea 1({symbol:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "cmovae {t0:e}, {symbol:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, 2({probs_base})",
+            "movzwl 8({probs_base}, {symbol:r}, 2), {prob0:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 12({probs_base}, {symbol:r}, 2), {t0:e}",
+            "cmovae {t0:e}, {prob0:e}",
+            "lea 2({symbol:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {t0:e}, {symbol:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, 4({probs_base}, {t1:r}, 2)",
+            "movzwl 16({probs_base}, {symbol:r}, 2), {prob1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob0:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "movzwl 24({probs_base}, {symbol:r}, 2), {t0:e}",
+            "cmovae {t0:e}, {prob1:e}",
+            "lea 4({symbol:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {t0:e}, {symbol:e}",
+            "lea {bit_model_offset}({prob0:r}), {t0:e}",
+            "cmovae {prob0:e}, {t0:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob0:e}",
+            "mov {prob0:x}, 8({probs_base}, {t1:r}, 2)",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob1:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea 8({symbol:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {t0:e}, {symbol:e}",
+            "lea {bit_model_offset}({prob1:r}), {t0:e}",
+            "cmovae {prob1:e}, {t0:e}",
+            "shr ${move_bits}, {t0:e}",
+            "sub {t0:e}, {prob1:e}",
+            "mov {prob1:x}, 16({probs_base}, {t1:r}, 2)",
+            range = inout(reg) $rc.range,
+            code = inout(reg) $rc.code,
+            t0 = out(reg) _,
+            t1 = out(reg) _,
+            prob0 = out(reg) _,
+            prob1 = out(reg) _,
+            symbol = out(reg) $symbol,
+            in_ptr = inout(reg) $rc_in_ptr,
+            probs_base = in(reg) probs_base,
+            top_value = const RC_TOP_VALUE,
+            shift_bits = const RC_SHIFT_BITS,
+            bit_model_total_bits = const RC_BIT_MODEL_TOTAL_BITS,
+            bit_model_offset = const RC_BIT_MODEL_OFFSET,
+            move_bits = const RC_MOVE_BITS,
+            options(att_syntax),
+        );
+    }};
+}
+
+#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+macro_rules! rc_matched_literal {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $probs_base:expr, $match_byte:expr, $symbol:ident) => {{
+        let probs_base: *mut probability = $probs_base;
+        // match_bit and match_byte are separate registers that both start
+        // out as match_byte << 1, like t_match_bit and t_match_byte in
+        // range_decoder.h. Keep them in distinct locals so neither operand
+        // can be mistaken for an alias of the other.
+        let t_match_byte: u32 = (($match_byte) as u32) << 1;
+        let t_match_bit: u32 = t_match_byte;
+        $symbol = 1;
+        core::arch::asm!(
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "xor {match_bit:e}, {offset:e}",
+            "add {match_byte:e}, {match_byte:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "cmovae {match_bit:e}, {offset:e}",
+            "mov {match_byte:e}, {match_bit:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "xor {match_bit:e}, {offset:e}",
+            "add {match_byte:e}, {match_byte:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "cmovae {match_bit:e}, {offset:e}",
+            "mov {match_byte:e}, {match_bit:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "xor {match_bit:e}, {offset:e}",
+            "add {match_byte:e}, {match_byte:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "cmovae {match_bit:e}, {offset:e}",
+            "mov {match_byte:e}, {match_bit:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "xor {match_bit:e}, {offset:e}",
+            "add {match_byte:e}, {match_byte:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "cmovae {match_bit:e}, {offset:e}",
+            "mov {match_byte:e}, {match_bit:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "xor {match_bit:e}, {offset:e}",
+            "add {match_byte:e}, {match_byte:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "cmovae {match_bit:e}, {offset:e}",
+            "mov {match_byte:e}, {match_bit:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "xor {match_bit:e}, {offset:e}",
+            "add {match_byte:e}, {match_byte:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "cmovae {match_bit:e}, {offset:e}",
+            "mov {match_byte:e}, {match_bit:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "xor {match_bit:e}, {offset:e}",
+            "add {match_byte:e}, {match_byte:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "cmovae {match_bit:e}, {offset:e}",
+            "mov {match_byte:e}, {match_bit:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            "add {offset:e}, {symbol:e}",
+            "and {offset:e}, {match_bit:e}",
+            "add {match_bit:e}, {symbol:e}",
+            "movzwl ({probs_base}, {symbol:r}, 2), {prob:e}",
+            "add {symbol:e}, {symbol:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "mov {range:e}, {t0:e}",
+            "shr ${bit_model_total_bits}, {range:e}",
+            "imul {prob:e}, {range:e}",
+            "sub {range:e}, {t0:e}",
+            "mov {code:e}, {t1:e}",
+            "sub {range:e}, {code:e}",
+            "cmovae {t0:e}, {range:e}",
+            "lea {bit_model_offset}({prob:r}), {t0:e}",
+            "cmovb {t1:e}, {code:e}",
+            "mov {symbol:e}, {t1:e}",
+            "cmovae {prob:e}, {t0:e}",
+            "sbb $-1, {symbol:e}",
+            "shr ${move_bits}, {t0:e}",
+            "and $0x1FF, {symbol:e}",
+            "sub {t0:e}, {prob:e}",
+            "mov {prob:x}, ({probs_base}, {t1:r}, 1)",
+            range = inout(reg) $rc.range,
+            code = inout(reg) $rc.code,
+            t0 = out(reg) _,
+            t1 = out(reg) _,
+            prob = out(reg) _,
+            match_bit = inout(reg) t_match_bit => _,
+            symbol = inout(reg) $symbol,
+            match_byte = inout(reg) t_match_byte => _,
+            offset = inout(reg) 0x100u32 => _,
+            in_ptr = inout(reg) $rc_in_ptr,
+            probs_base = in(reg) probs_base,
+            top_value = const RC_TOP_VALUE,
+            shift_bits = const RC_SHIFT_BITS,
+            bit_model_total_bits = const RC_BIT_MODEL_TOTAL_BITS,
+            bit_model_offset = const RC_BIT_MODEL_OFFSET,
+            move_bits = const RC_MOVE_BITS,
+            options(att_syntax),
+        );
+    }};
+}
+
+#[cfg(not(all(target_arch = "x86_64", target_pointer_width = "64")))]
+macro_rules! rc_direct {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $dest:ident, $count:ident) => {{
+        loop {
+            $dest = ($dest << 1).wrapping_add(1);
+            rc_normalize!($rc, $rc_in_ptr);
+            $rc.range >>= 1;
+            $rc.code = $rc.code.wrapping_sub($rc.range);
+            $rc_bound = 0u32.wrapping_sub($rc.code >> 31);
+            $dest = $dest.wrapping_add($rc_bound);
+            $rc.code = $rc.code.wrapping_add($rc.range & $rc_bound);
+            $count -= 1;
+            if $count == 0 {
+                break;
+            }
+        }
+    }};
+}
+
+#[cfg(all(target_arch = "x86_64", target_pointer_width = "64"))]
+macro_rules! rc_direct {
+    ($rc:ident, $rc_in_ptr:ident, $rc_bound:ident, $dest:ident, $count:ident) => {{
+        core::arch::asm!(
+            "9:",
+            "add {dest:e}, {dest:e}",
+            "lea 1({dest:r}), {t1:e}",
+            "cmp ${top_value}, {range:e}",
+            "jae 8f",
+            "shl ${shift_bits}, {code:e}",
+            "mov ({in_ptr}), {code:l}",
+            "shl ${shift_bits}, {range:e}",
+            "inc {in_ptr}",
+            "8:",
+            "shr $1, {range:e}",
+            "mov {code:e}, {t0:e}",
+            "sub {range:e}, {code:e}",
+            "cmovns {t1:e}, {dest:e}",
+            "cmovs {t0:e}, {code:e}",
+            "dec {count:e}",
+            "jnz 9b",
+            range = inout(reg) $rc.range,
+            code = inout(reg) $rc.code,
+            t0 = out(reg) _,
+            t1 = out(reg) _,
+            dest = inout(reg) $dest,
+            count = inout(reg) $count,
+            in_ptr = inout(reg) $rc_in_ptr,
+            top_value = const RC_TOP_VALUE,
+            shift_bits = const RC_SHIFT_BITS,
+            options(att_syntax),
+        );
+    }};
+}
 unsafe fn lzma_decode(
     coder_ptr: *mut c_void,
     dictptr: *mut lzma_dict,
@@ -519,6 +1610,12 @@ unsafe fn lzma_decode(
     let mut rc: lzma_range_decoder = (*coder).rc;
     let mut rc_in_ptr: *const u8 = input.offset(*in_pos as isize);
     let rc_in_end: *const u8 = input.offset(in_size as isize);
+    // LZMA_IN_REQUIRED from lzma_decoder.c. Decoding one symbol uses at most
+    // 22 probability bits and 26 direct bits, which the range coder normalizes
+    // out of no more than 20 input bytes. The fast path below reads and
+    // advances rc_in_ptr without ever comparing it against rc_in_end, so the
+    // soundness of every unsafe read there rests on this reservation alone.
+    // The bound is taken from the C source as-is and is not re-derived here.
     let rc_in_fast_end: *const u8 = if rc_in_end.offset_from(rc_in_ptr) <= 20 {
         rc_in_ptr
     } else {
@@ -1396,7 +2493,7 @@ unsafe fn lzma_decode(
                         } else {
                             state.wrapping_sub(3)
                         };
-                        rc_bittree8!(rc, rc_in_ptr, rc_bound, probs, symbol);
+                        rc_bittree8!(rc, rc_in_ptr, rc_bound, probs, 0, symbol);
                     } else {
                         state = if state <= STATE_LIT_SHORTREP {
                             state.wrapping_sub(3)
@@ -1447,30 +2544,14 @@ unsafe fn lzma_decode(
                             prob_update_0(::core::ptr::addr_of_mut!(
                                 (*coder).match_len_decoder.choice
                             ));
-                            symbol = 1;
-                            let match_len_low = length_low_row(match_len_decoder, pos_state);
-                            rc_normalize!(rc, rc_in_ptr);
-                            rc_bittree_step!(
+                            rc_bittree3!(
                                 rc,
+                                rc_in_ptr,
                                 rc_bound,
-                                match_len_low.add(symbol as usize),
+                                length_low_row(match_len_decoder, pos_state),
+                                -(1_i32 << 3) + 2,
                                 symbol
                             );
-                            rc_normalize!(rc, rc_in_ptr);
-                            rc_bittree_step!(
-                                rc,
-                                rc_bound,
-                                match_len_low.add(symbol as usize),
-                                symbol
-                            );
-                            rc_normalize!(rc, rc_in_ptr);
-                            rc_bittree_step!(
-                                rc,
-                                rc_bound,
-                                match_len_low.add(symbol as usize),
-                                symbol
-                            );
-                            symbol = symbol.wrapping_add((-(1_i32 << 3) + 2) as u32);
                             len = symbol;
                         } else {
                             rc.range = rc.range.wrapping_sub(rc_bound);
@@ -1486,30 +2567,14 @@ unsafe fn lzma_decode(
                                 prob_update_0(::core::ptr::addr_of_mut!(
                                     (*coder).match_len_decoder.choice2
                                 ));
-                                symbol = 1;
-                                let match_len_mid = length_mid_row(match_len_decoder, pos_state);
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
+                                rc_bittree3!(
                                     rc,
+                                    rc_in_ptr,
                                     rc_bound,
-                                    match_len_mid.add(symbol as usize),
+                                    length_mid_row(match_len_decoder, pos_state),
+                                    -(1_i32 << 3) + 2 + (1 << 3),
                                     symbol
                                 );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_mid.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_mid.add(symbol as usize),
-                                    symbol
-                                );
-                                symbol = symbol.wrapping_add((-(1_i32 << 3) + 2 + (1 << 3)) as u32);
                                 len = symbol;
                             } else {
                                 rc.range = rc.range.wrapping_sub(rc_bound);
@@ -1517,66 +2582,14 @@ unsafe fn lzma_decode(
                                 prob_update_1(::core::ptr::addr_of_mut!(
                                     (*coder).match_len_decoder.choice2
                                 ));
-                                symbol = 1;
-                                let match_len_high = length_high_probs(match_len_decoder);
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
+                                rc_bittree8!(
                                     rc,
+                                    rc_in_ptr,
                                     rc_bound,
-                                    match_len_high.add(symbol as usize),
+                                    length_high_probs(match_len_decoder),
+                                    -(1_i32 << 8) + 2 + (1 << 3) + (1 << 3),
                                     symbol
                                 );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_high.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_high.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_high.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_high.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_high.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_high.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    match_len_high.add(symbol as usize),
-                                    symbol
-                                );
-                                symbol = symbol
-                                    .wrapping_add((-(1_i32 << 8) + 2 + (1 << 3) + (1 << 3)) as u32);
                                 len = symbol;
                             }
                         }
@@ -1591,146 +2604,7 @@ unsafe fn lzma_decode(
                                     }) as isize,
                                 )
                         ) as *mut probability;
-                        symbol = 1;
-                        if rc.range < RC_TOP_VALUE as u32 {
-                            rc.range <<= RC_SHIFT_BITS;
-                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                            rc_in_ptr = rc_in_ptr.offset(1);
-                        }
-                        rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                            .wrapping_mul(*probs.offset(symbol as isize) as u32);
-                        if rc.code < rc_bound {
-                            rc.range = rc_bound;
-                            *probs.offset(symbol as isize) =
-                                (*probs.offset(symbol as isize) as u32).wrapping_add(
-                                    RC_BIT_MODEL_TOTAL
-                                        .wrapping_sub(*probs.offset(symbol as isize) as u32)
-                                        >> RC_MOVE_BITS,
-                                ) as probability;
-                            symbol <<= 1;
-                        } else {
-                            rc.range = rc.range.wrapping_sub(rc_bound);
-                            rc.code = rc.code.wrapping_sub(rc_bound);
-                            *probs.offset(symbol as isize) -=
-                                *probs.offset(symbol as isize) >> RC_MOVE_BITS;
-                            symbol = (symbol << 1).wrapping_add(1);
-                        }
-                        if rc.range < RC_TOP_VALUE as u32 {
-                            rc.range <<= RC_SHIFT_BITS;
-                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                            rc_in_ptr = rc_in_ptr.offset(1);
-                        }
-                        rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                            .wrapping_mul(*probs.offset(symbol as isize) as u32);
-                        if rc.code < rc_bound {
-                            rc.range = rc_bound;
-                            *probs.offset(symbol as isize) =
-                                (*probs.offset(symbol as isize) as u32).wrapping_add(
-                                    RC_BIT_MODEL_TOTAL
-                                        .wrapping_sub(*probs.offset(symbol as isize) as u32)
-                                        >> RC_MOVE_BITS,
-                                ) as probability;
-                            symbol <<= 1;
-                        } else {
-                            rc.range = rc.range.wrapping_sub(rc_bound);
-                            rc.code = rc.code.wrapping_sub(rc_bound);
-                            *probs.offset(symbol as isize) -=
-                                *probs.offset(symbol as isize) >> RC_MOVE_BITS;
-                            symbol = (symbol << 1).wrapping_add(1);
-                        }
-                        if rc.range < RC_TOP_VALUE as u32 {
-                            rc.range <<= RC_SHIFT_BITS;
-                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                            rc_in_ptr = rc_in_ptr.offset(1);
-                        }
-                        rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                            .wrapping_mul(*probs.offset(symbol as isize) as u32);
-                        if rc.code < rc_bound {
-                            rc.range = rc_bound;
-                            *probs.offset(symbol as isize) =
-                                (*probs.offset(symbol as isize) as u32).wrapping_add(
-                                    RC_BIT_MODEL_TOTAL
-                                        .wrapping_sub(*probs.offset(symbol as isize) as u32)
-                                        >> RC_MOVE_BITS,
-                                ) as probability;
-                            symbol <<= 1;
-                        } else {
-                            rc.range = rc.range.wrapping_sub(rc_bound);
-                            rc.code = rc.code.wrapping_sub(rc_bound);
-                            *probs.offset(symbol as isize) -=
-                                *probs.offset(symbol as isize) >> RC_MOVE_BITS;
-                            symbol = (symbol << 1).wrapping_add(1);
-                        }
-                        if rc.range < RC_TOP_VALUE as u32 {
-                            rc.range <<= RC_SHIFT_BITS;
-                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                            rc_in_ptr = rc_in_ptr.offset(1);
-                        }
-                        rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                            .wrapping_mul(*probs.offset(symbol as isize) as u32);
-                        if rc.code < rc_bound {
-                            rc.range = rc_bound;
-                            *probs.offset(symbol as isize) =
-                                (*probs.offset(symbol as isize) as u32).wrapping_add(
-                                    RC_BIT_MODEL_TOTAL
-                                        .wrapping_sub(*probs.offset(symbol as isize) as u32)
-                                        >> RC_MOVE_BITS,
-                                ) as probability;
-                            symbol <<= 1;
-                        } else {
-                            rc.range = rc.range.wrapping_sub(rc_bound);
-                            rc.code = rc.code.wrapping_sub(rc_bound);
-                            *probs.offset(symbol as isize) -=
-                                *probs.offset(symbol as isize) >> RC_MOVE_BITS;
-                            symbol = (symbol << 1).wrapping_add(1);
-                        }
-                        if rc.range < RC_TOP_VALUE as u32 {
-                            rc.range <<= RC_SHIFT_BITS;
-                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                            rc_in_ptr = rc_in_ptr.offset(1);
-                        }
-                        rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                            .wrapping_mul(*probs.offset(symbol as isize) as u32);
-                        if rc.code < rc_bound {
-                            rc.range = rc_bound;
-                            *probs.offset(symbol as isize) =
-                                (*probs.offset(symbol as isize) as u32).wrapping_add(
-                                    RC_BIT_MODEL_TOTAL
-                                        .wrapping_sub(*probs.offset(symbol as isize) as u32)
-                                        >> RC_MOVE_BITS,
-                                ) as probability;
-                            symbol <<= 1;
-                        } else {
-                            rc.range = rc.range.wrapping_sub(rc_bound);
-                            rc.code = rc.code.wrapping_sub(rc_bound);
-                            *probs.offset(symbol as isize) -=
-                                *probs.offset(symbol as isize) >> RC_MOVE_BITS;
-                            symbol = (symbol << 1).wrapping_add(1);
-                        }
-                        if rc.range < RC_TOP_VALUE as u32 {
-                            rc.range <<= RC_SHIFT_BITS;
-                            rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                            rc_in_ptr = rc_in_ptr.offset(1);
-                        }
-                        rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                            .wrapping_mul(*probs.offset(symbol as isize) as u32);
-                        if rc.code < rc_bound {
-                            rc.range = rc_bound;
-                            *probs.offset(symbol as isize) =
-                                (*probs.offset(symbol as isize) as u32).wrapping_add(
-                                    RC_BIT_MODEL_TOTAL
-                                        .wrapping_sub(*probs.offset(symbol as isize) as u32)
-                                        >> RC_MOVE_BITS,
-                                ) as probability;
-                            symbol <<= 1;
-                        } else {
-                            rc.range = rc.range.wrapping_sub(rc_bound);
-                            rc.code = rc.code.wrapping_sub(rc_bound);
-                            *probs.offset(symbol as isize) -=
-                                *probs.offset(symbol as isize) >> RC_MOVE_BITS;
-                            symbol = (symbol << 1).wrapping_add(1);
-                        }
-                        symbol = symbol.wrapping_add(-(1_i32 << 6) as u32);
+                        rc_bittree6!(rc, rc_in_ptr, rc_bound, probs, -(1_i32 << 6), symbol);
                         if symbol < DIST_MODEL_START {
                             rep0 = symbol;
                         } else {
@@ -1779,117 +2653,16 @@ unsafe fn lzma_decode(
                                 }
                             } else {
                                 limit = limit.wrapping_sub(ALIGN_BITS);
-                                loop {
-                                    rep0 = (rep0 << 1).wrapping_add(1);
-                                    if rc.range < RC_TOP_VALUE as u32 {
-                                        rc.range <<= RC_SHIFT_BITS;
-                                        rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                                        rc_in_ptr = rc_in_ptr.offset(1);
-                                    }
-                                    rc.range >>= 1;
-                                    rc.code = rc.code.wrapping_sub(rc.range);
-                                    rc_bound = 0u32.wrapping_sub(rc.code >> 31);
-                                    rep0 = rep0.wrapping_add(rc_bound);
-                                    rc.code = rc.code.wrapping_add(rc.range & rc_bound);
-                                    limit -= 1;
-                                    if limit == 0 {
-                                        break;
-                                    }
-                                }
+                                rc_direct!(rc, rc_in_ptr, rc_bound, rep0, limit);
                                 rep0 <<= ALIGN_BITS;
-                                symbol = 0;
-                                if rc.range < RC_TOP_VALUE as u32 {
-                                    rc.range <<= RC_SHIFT_BITS;
-                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                                    rc_in_ptr = rc_in_ptr.offset(1);
-                                }
-                                let pos_align_prob =
-                                    decoder_pos_align_prob(coder, symbol.wrapping_add(1));
-                                rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                                    .wrapping_mul(*pos_align_prob as u32);
-                                if rc.code < rc_bound {
-                                    rc.range = rc_bound;
-                                    *pos_align_prob = (*pos_align_prob as u32).wrapping_add(
-                                        RC_BIT_MODEL_TOTAL.wrapping_sub(*pos_align_prob as u32)
-                                            >> RC_MOVE_BITS,
-                                    )
-                                        as probability;
-                                } else {
-                                    rc.range = rc.range.wrapping_sub(rc_bound);
-                                    rc.code = rc.code.wrapping_sub(rc_bound);
-                                    *pos_align_prob =
-                                        *pos_align_prob - (*pos_align_prob >> RC_MOVE_BITS);
-                                    symbol += 1;
-                                }
-                                if rc.range < RC_TOP_VALUE as u32 {
-                                    rc.range <<= RC_SHIFT_BITS;
-                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                                    rc_in_ptr = rc_in_ptr.offset(1);
-                                }
-                                let pos_align_prob =
-                                    decoder_pos_align_prob(coder, symbol.wrapping_add(2));
-                                rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                                    .wrapping_mul(*pos_align_prob as u32);
-                                if rc.code < rc_bound {
-                                    rc.range = rc_bound;
-                                    *pos_align_prob = (*pos_align_prob as u32).wrapping_add(
-                                        RC_BIT_MODEL_TOTAL.wrapping_sub(*pos_align_prob as u32)
-                                            >> RC_MOVE_BITS,
-                                    )
-                                        as probability;
-                                } else {
-                                    rc.range = rc.range.wrapping_sub(rc_bound);
-                                    rc.code = rc.code.wrapping_sub(rc_bound);
-                                    *pos_align_prob =
-                                        *pos_align_prob - (*pos_align_prob >> RC_MOVE_BITS);
-                                    symbol = symbol.wrapping_add(2);
-                                }
-                                if rc.range < RC_TOP_VALUE as u32 {
-                                    rc.range <<= RC_SHIFT_BITS;
-                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                                    rc_in_ptr = rc_in_ptr.offset(1);
-                                }
-                                let pos_align_prob =
-                                    decoder_pos_align_prob(coder, symbol.wrapping_add(4));
-                                rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                                    .wrapping_mul(*pos_align_prob as u32);
-                                if rc.code < rc_bound {
-                                    rc.range = rc_bound;
-                                    *pos_align_prob = (*pos_align_prob as u32).wrapping_add(
-                                        RC_BIT_MODEL_TOTAL.wrapping_sub(*pos_align_prob as u32)
-                                            >> RC_MOVE_BITS,
-                                    )
-                                        as probability;
-                                } else {
-                                    rc.range = rc.range.wrapping_sub(rc_bound);
-                                    rc.code = rc.code.wrapping_sub(rc_bound);
-                                    *pos_align_prob =
-                                        *pos_align_prob - (*pos_align_prob >> RC_MOVE_BITS);
-                                    symbol = symbol.wrapping_add(4);
-                                }
-                                if rc.range < RC_TOP_VALUE as u32 {
-                                    rc.range <<= RC_SHIFT_BITS;
-                                    rc.code = rc.code << RC_SHIFT_BITS | *rc_in_ptr as u32;
-                                    rc_in_ptr = rc_in_ptr.offset(1);
-                                }
-                                let pos_align_prob =
-                                    decoder_pos_align_prob(coder, symbol.wrapping_add(8));
-                                rc_bound = (rc.range >> RC_BIT_MODEL_TOTAL_BITS)
-                                    .wrapping_mul(*pos_align_prob as u32);
-                                if rc.code < rc_bound {
-                                    rc.range = rc_bound;
-                                    *pos_align_prob = (*pos_align_prob as u32).wrapping_add(
-                                        RC_BIT_MODEL_TOTAL.wrapping_sub(*pos_align_prob as u32)
-                                            >> RC_MOVE_BITS,
-                                    )
-                                        as probability;
-                                } else {
-                                    rc.range = rc.range.wrapping_sub(rc_bound);
-                                    rc.code = rc.code.wrapping_sub(rc_bound);
-                                    *pos_align_prob =
-                                        *pos_align_prob - (*pos_align_prob >> RC_MOVE_BITS);
-                                    symbol = symbol.wrapping_add(8);
-                                }
+                                rc_bittree_rev4!(
+                                    rc,
+                                    rc_in_ptr,
+                                    rc_bound,
+                                    ::core::ptr::addr_of_mut!((*coder).pos_align)
+                                        as *mut probability,
+                                    symbol
+                                );
                                 rep0 = rep0.wrapping_add(symbol);
                                 if rep0 == UINT32_MAX {
                                     break;
@@ -2032,30 +2805,14 @@ unsafe fn lzma_decode(
                             if rc.code < rc_bound {
                                 rc.range = rc_bound;
                                 prob_update_0(::core::ptr::addr_of_mut!((*rep_len_decoder).choice));
-                                symbol = 1;
-                                let rep_len_low = length_low_row(rep_len_decoder, pos_state);
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
+                                rc_bittree3!(
                                     rc,
+                                    rc_in_ptr,
                                     rc_bound,
-                                    rep_len_low.add(symbol as usize),
+                                    length_low_row(rep_len_decoder, pos_state),
+                                    -(1_i32 << 3) + 2,
                                     symbol
                                 );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    rep_len_low.add(symbol as usize),
-                                    symbol
-                                );
-                                rc_normalize!(rc, rc_in_ptr);
-                                rc_bittree_step!(
-                                    rc,
-                                    rc_bound,
-                                    rep_len_low.add(symbol as usize),
-                                    symbol
-                                );
-                                symbol = symbol.wrapping_add((-(1_i32 << 3) + 2) as u32);
                                 len = symbol;
                             } else {
                                 rc.range = rc.range.wrapping_sub(rc_bound);
@@ -2069,31 +2826,14 @@ unsafe fn lzma_decode(
                                     prob_update_0(::core::ptr::addr_of_mut!(
                                         (*rep_len_decoder).choice2
                                     ));
-                                    symbol = 1;
-                                    let rep_len_mid = length_mid_row(rep_len_decoder, pos_state);
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
+                                    rc_bittree3!(
                                         rc,
+                                        rc_in_ptr,
                                         rc_bound,
-                                        rep_len_mid.add(symbol as usize),
+                                        length_mid_row(rep_len_decoder, pos_state),
+                                        -(1_i32 << 3) + 2 + (1 << 3),
                                         symbol
                                     );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_mid.add(symbol as usize),
-                                        symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_mid.add(symbol as usize),
-                                        symbol
-                                    );
-                                    symbol =
-                                        symbol.wrapping_add((-(1_i32 << 3) + 2 + (1 << 3)) as u32);
                                     len = symbol;
                                 } else {
                                     rc.range = rc.range.wrapping_sub(rc_bound);
@@ -2101,66 +2841,13 @@ unsafe fn lzma_decode(
                                     prob_update_1(::core::ptr::addr_of_mut!(
                                         (*rep_len_decoder).choice2
                                     ));
-                                    symbol = 1;
-                                    let rep_len_high = length_high_probs(rep_len_decoder);
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
+                                    rc_bittree8!(
                                         rc,
+                                        rc_in_ptr,
                                         rc_bound,
-                                        rep_len_high.add(symbol as usize),
+                                        length_high_probs(rep_len_decoder),
+                                        -(1_i32 << 8) + 2 + (1 << 3) + (1 << 3),
                                         symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_high.add(symbol as usize),
-                                        symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_high.add(symbol as usize),
-                                        symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_high.add(symbol as usize),
-                                        symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_high.add(symbol as usize),
-                                        symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_high.add(symbol as usize),
-                                        symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_high.add(symbol as usize),
-                                        symbol
-                                    );
-                                    rc_normalize!(rc, rc_in_ptr);
-                                    rc_bittree_step!(
-                                        rc,
-                                        rc_bound,
-                                        rep_len_high.add(symbol as usize),
-                                        symbol
-                                    );
-                                    symbol = symbol.wrapping_add(
-                                        (-(1_i32 << 8) + 2 + (1 << 3) + (1 << 3)) as u32,
                                     );
                                     len = symbol;
                                 }

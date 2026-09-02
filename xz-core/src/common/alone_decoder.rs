@@ -54,7 +54,7 @@ unsafe fn alone_decode(
                         d |= d >> 4;
                         d |= d >> 8;
                         d |= d >> 16;
-                        d += 1;
+                        d = d.wrapping_add(1);
                         if d != (*coder).options.dict_size {
                             return LZMA_FORMAT_ERROR;
                         }

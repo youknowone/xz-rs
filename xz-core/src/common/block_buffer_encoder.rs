@@ -24,9 +24,15 @@ pub fn lzma_block_buffer_bound64(uncompressed_size: u64) -> u64 {
     lzma2_size = (lzma2_size + 3) & !(3);
     HEADERS_BOUND as u64 + lzma2_size
 }
+fn size_t_bound_or_zero_with_max(ret: u64, size_max: u64) -> size_t {
+    if ret > size_max { 0 } else { ret as size_t }
+}
+fn size_t_bound_or_zero(ret: u64) -> size_t {
+    size_t_bound_or_zero_with_max(ret, size_t::MAX as u64)
+}
 pub fn lzma_block_buffer_bound(uncompressed_size: size_t) -> size_t {
     let ret: u64 = lzma_block_buffer_bound64(uncompressed_size as u64);
-    ret as size_t
+    size_t_bound_or_zero(ret)
 }
 unsafe fn block_encode_uncompressed(
     block: *mut lzma_block,
@@ -206,7 +212,9 @@ unsafe fn block_buffer_encode(
     if (*block).version > 1 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*block).check > LZMA_CHECK_ID_MAX || try_to_compress && (*block).filters.is_null() {
+    if (*block).check as c_uint > LZMA_CHECK_ID_MAX as c_uint
+        || try_to_compress && (*block).filters.is_null()
+    {
         return LZMA_PROG_ERROR;
     }
     if lzma_check_is_supported((*block).check) == 0 {
@@ -301,4 +309,32 @@ pub unsafe fn lzma_block_uncomp_encode(
         out_size,
         false,
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{size_t_bound_or_zero, size_t_bound_or_zero_with_max};
+    use crate::types::{
+        COMPRESSED_SIZE_MAX, LZMA_BLOCK_HEADER_SIZE_MAX, LZMA_CHECK_SIZE_MAX, LZMA_VLI_MAX, size_t,
+    };
+
+    #[test]
+    fn compressed_size_max_matches_c_masking() {
+        assert_eq!(
+            COMPRESSED_SIZE_MAX,
+            (LZMA_VLI_MAX - LZMA_BLOCK_HEADER_SIZE_MAX as u64 - LZMA_CHECK_SIZE_MAX as u64) & !3u64
+        );
+        assert_eq!(COMPRESSED_SIZE_MAX & 3, 0);
+    }
+
+    #[test]
+    fn block_buffer_bound_rejects_values_over_size_t_max() {
+        assert_eq!(size_t_bound_or_zero(123), 123 as size_t);
+
+        let simulated_32_bit_size_max = u32::MAX as u64;
+        assert_eq!(
+            size_t_bound_or_zero_with_max(simulated_32_bit_size_max + 1, simulated_32_bit_size_max),
+            0
+        );
+    }
 }

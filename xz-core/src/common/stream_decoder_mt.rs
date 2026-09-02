@@ -617,7 +617,7 @@ fn comp_blk_size(coder: *const lzma_stream_coder) -> size_t {
     }
 }
 fn is_direct_mode_needed(size: lzma_vli) -> bool {
-    size == LZMA_VLI_UNKNOWN || size > SIZE_MAX.wrapping_div(3 as c_ulong) as lzma_vli
+    size == LZMA_VLI_UNKNOWN || size > SIZE_MAX.wrapping_div(3 as size_t) as lzma_vli
 }
 unsafe fn stream_decoder_reset(
     coder: *mut lzma_stream_coder,
@@ -880,16 +880,7 @@ unsafe fn stream_decode_mt(
     action: lzma_action,
 ) -> lzma_ret {
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
-    let mut wait_abs: mythread_condtime = mythread_condtime {
-        #[cfg(not(windows))]
-        tv_sec: 0,
-        #[cfg(not(windows))]
-        tv_nsec: 0,
-        #[cfg(windows)]
-        start: 0,
-        #[cfg(windows)]
-        timeout: 0,
-    };
+    let mut wait_abs: mythread_condtime = unsafe { core::mem::zeroed() };
     let mut has_blocked: bool = false;
     let waiting_allowed: bool =
         action == LZMA_FINISH || *in_pos == in_size && !(*coder).out_was_filled;
@@ -1335,6 +1326,9 @@ unsafe fn stream_decode_mt(
     }
 }
 unsafe fn stream_decoder_mt_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    // stream_decoder_mt_end() in stream_decoder_mt.c likewise frees the coder
+    // without destroying coder->mutex and coder->cond. Kept that way to stay
+    // identical to the C original.
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     threads_end(coder, allocator);
     lzma_outq_end(::core::ptr::addr_of_mut!((*coder).outq), allocator);
@@ -1532,6 +1526,9 @@ unsafe fn stream_decoder_mt_init(
         (*coder).threads = core::ptr::null_mut();
         (*coder).threads_free = core::ptr::null_mut();
         (*coder).threads_initialized = 0;
+        // threads_end frees `threads` with `threads_max` as the element
+        // count, so it must not be read uninitialized on the first init.
+        (*coder).threads_max = 0;
     }
     lzma_filters_free(
         ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,

@@ -62,7 +62,9 @@ unsafe fn seek_to_pos(
     let pos_max: u64 = (*coder).file_cur_pos + (in_size - *in_pos) as u64;
     let mut external_seek_needed: bool = false;
     if target_pos >= pos_min && target_pos <= pos_max {
-        *in_pos += (target_pos - (*coder).file_cur_pos) as size_t;
+        // target_pos may be behind file_cur_pos (in-buffer backward seek);
+        // the difference is negative modulo 2^64 and must wrap like in C.
+        *in_pos = (*in_pos).wrapping_add(target_pos.wrapping_sub((*coder).file_cur_pos) as size_t);
         external_seek_needed = false;
     } else {
         *(*coder).external_seek_pos = target_pos;

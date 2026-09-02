@@ -168,7 +168,7 @@ pub unsafe fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret
         || (*strm).next_out.is_null() && (*strm).avail_out != 0
         || (*strm).internal.is_null()
         || (*(*strm).internal).next.code.is_none()
-        || action > LZMA_FULL_BARRIER
+        || action as c_uint > LZMA_FULL_BARRIER as c_uint
         || !(*(*strm).internal).supported_actions[action as usize]
     {
         return LZMA_PROG_ERROR;

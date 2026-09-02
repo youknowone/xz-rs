@@ -24,7 +24,6 @@ pub struct lzma_coder {
     pub mf: lzma_mf,
     pub next: lzma_next_coder,
 }
-pub const LZMA_MEMCMPLEN_EXTRA: u32 = 0;
 #[inline]
 unsafe fn move_window(mf: *mut lzma_mf) {
     debug_assert!((*mf).read_pos > (*mf).keep_size_before);
@@ -85,7 +84,7 @@ unsafe fn fill_window(
     core::ptr::write_bytes(
         (*coder).mf.buffer.offset(write_pos as isize) as *mut u8,
         0 as u8,
-        0,
+        LZMA_MEMCMPLEN_EXTRA as usize,
     );
     if ret == LZMA_STREAM_END {
         ret = LZMA_OK;
@@ -260,7 +259,7 @@ unsafe fn lz_encoder_init(
         core::ptr::write_bytes(
             (*mf).buffer.offset((*mf).size as isize) as *mut u8,
             0 as u8,
-            0,
+            LZMA_MEMCMPLEN_EXTRA as usize,
         );
     }
     (*mf).offset = (*mf).cyclic_size;
@@ -338,6 +337,10 @@ pub fn lzma_lz_encoder_memusage(lz_options: *const lzma_lz_options) -> u64 {
     if unsafe { lz_encoder_prepare(::core::ptr::addr_of_mut!(mf), core::ptr::null(), lz_options) } {
         return UINT64_MAX;
     }
+    // mf.size, not mf.size + LZMA_MEMCMPLEN_EXTRA: lz_encoder.c reports the
+    // same figure and leaves the tail padding out of the estimate. The buffer
+    // is still allocated with the padding, so this under-reports by EXTRA
+    // bytes exactly as the C original does.
     ((mf.hash_count as u64) + (mf.sons_count as u64)) * core::mem::size_of::<u32>() as u64
         + mf.size as u64
         + core::mem::size_of::<lzma_coder>() as u64

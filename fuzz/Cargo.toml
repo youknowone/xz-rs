@@ -1,0 +1,54 @@
+[package]
+name = "xz-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+xz = { path = "..", features = ["parallel"] }
+
+[[bin]]
+name = "stream_encode"
+path = "fuzz_targets/stream_encode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "stream_decode"
+path = "fuzz_targets/stream_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "auto_decode"
+path = "fuzz_targets/auto_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "alone_decode"
+path = "fuzz_targets/alone_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "mt_stream_decode"
+path = "fuzz_targets/mt_stream_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "mt_stream_encode"
+path = "fuzz_targets/mt_stream_encode.rs"
+test = false
+doc = false
+bench = false

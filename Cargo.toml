@@ -18,6 +18,7 @@ exclude = [".github/"]
 
 [workspace]
 members = ["systest", "xz-core", "xz-sys", "perf-probe"]
+exclude = ["fuzz"]
 
 [dependencies]
 xz-core = { path = "xz-core", version = "0.1.0-rc.0", optional = true }
@@ -31,6 +32,7 @@ rand = "0.8.0"
 quickcheck = "=1.0.1"
 regex = "=1.9.0"
 log = "=0.4.20"
+xz-core = { path = "xz-core" }
 
 [[bench]]
 name = "backend_comparison"

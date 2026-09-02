@@ -30,6 +30,13 @@ pub fn tuklib_physmem() -> u64 {
     }
     #[cfg(target_os = "windows")]
     {
+        use windows_sys::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
+
+        let mut meminfo: MEMORYSTATUSEX = unsafe { core::mem::zeroed() };
+        meminfo.dwLength = core::mem::size_of::<MEMORYSTATUSEX>() as u32;
+        if unsafe { GlobalMemoryStatusEx(&mut meminfo) } != 0 {
+            return meminfo.ullTotalPhys;
+        }
         0
     }
     #[cfg(not(any(target_os = "macos", target_os = "linux", target_os = "windows")))]

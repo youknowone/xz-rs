@@ -761,16 +761,7 @@ unsafe fn stream_encode_mt_blocks(
     let mut uncompressed_size: lzma_vli = 0;
     let mut ret: lzma_ret = LZMA_OK;
     let mut has_blocked: bool = false;
-    let mut wait_abs: mythread_condtime = mythread_condtime {
-        #[cfg(not(windows))]
-        tv_sec: 0 as __darwin_time_t,
-        #[cfg(not(windows))]
-        tv_nsec: 0,
-        #[cfg(windows)]
-        start: 0,
-        #[cfg(windows)]
-        timeout: 0,
-    };
+    let mut wait_abs: mythread_condtime = unsafe { core::mem::zeroed() };
     loop {
         let mut mythread_i_747: c_uint = 0;
         while if mythread_i_747 != 0 {
@@ -935,6 +926,11 @@ unsafe fn stream_encode_mt(
         );
         if ret != LZMA_STREAM_END {
             return ret;
+        }
+        // FullFlush/FullBarrier complete while staying in SEQ_BLOCK. Only
+        // Finish advances to SEQ_INDEX and should fall through below.
+        if (*coder).sequence == SEQ_BLOCK {
+            return LZMA_STREAM_END;
         }
     }
     if (*coder).sequence == SEQ_INDEX {
@@ -1261,10 +1257,14 @@ unsafe fn stream_encoder_mt_init(
     if ret_ != LZMA_OK {
         return ret_;
     }
+    #[cfg(not(target_pointer_width = "64"))]
+    if block_size > usize::MAX as u64 || outbuf_size_max > usize::MAX as u64 {
+        return LZMA_MEM_ERROR;
+    }
     if lzma_raw_encoder_memusage(filters) == UINT64_MAX {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*options).check > LZMA_CHECK_ID_MAX {
+    if (*options).check as c_uint > LZMA_CHECK_ID_MAX as c_uint {
         return LZMA_PROG_ERROR;
     }
     if lzma_check_is_supported((*options).check) == 0 {

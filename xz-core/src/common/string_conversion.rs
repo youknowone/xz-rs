@@ -296,15 +296,104 @@ static lzma12_mf_map: [name_value_map; 6] = [
         value: 0,
     },
 ];
-static mut lzma12_optmap: [option_map; 9] = [option_map {
-    name: [0; 12],
-    option_type: 0,
-    flags: 0,
-    offset: 0,
-    u: option_value {
-        map: core::ptr::null(),
+static mut lzma12_optmap: [option_map; 9] = [
+    option_map {
+        name: c_chars(*b"preset\0\0\0\0\0\0"),
+        option_type: OPTMAP_TYPE_LZMA_PRESET,
+        flags: 0,
+        offset: 0,
+        u: option_value {
+            map: core::ptr::null(),
+        },
     },
-}; 9];
+    option_map {
+        name: c_chars(*b"dict\0\0\0\0\0\0\0\0"),
+        option_type: 0,
+        flags: OPTMAP_USE_BYTE_SUFFIX,
+        offset: core::mem::offset_of!(lzma_options_lzma, dict_size) as u16,
+        u: option_value {
+            range: option_value_range {
+                min: LZMA_DICT_SIZE_MIN as u32,
+                max: (1u32 << 30).wrapping_add(1 << 29),
+            },
+        },
+    },
+    option_map {
+        name: c_chars(*b"lc\0\0\0\0\0\0\0\0\0\0"),
+        option_type: 0,
+        flags: 0,
+        offset: core::mem::offset_of!(lzma_options_lzma, lc) as u16,
+        u: option_value {
+            range: option_value_range {
+                min: LZMA_LCLP_MIN,
+                max: LZMA_LCLP_MAX,
+            },
+        },
+    },
+    option_map {
+        name: c_chars(*b"lp\0\0\0\0\0\0\0\0\0\0"),
+        option_type: 0,
+        flags: 0,
+        offset: core::mem::offset_of!(lzma_options_lzma, lp) as u16,
+        u: option_value {
+            range: option_value_range {
+                min: LZMA_LCLP_MIN,
+                max: LZMA_LCLP_MAX,
+            },
+        },
+    },
+    option_map {
+        name: c_chars(*b"pb\0\0\0\0\0\0\0\0\0\0"),
+        option_type: 0,
+        flags: 0,
+        offset: core::mem::offset_of!(lzma_options_lzma, pb) as u16,
+        u: option_value {
+            range: option_value_range {
+                min: LZMA_PB_MIN,
+                max: LZMA_PB_MAX,
+            },
+        },
+    },
+    option_map {
+        name: c_chars(*b"mode\0\0\0\0\0\0\0\0"),
+        option_type: OPTMAP_TYPE_LZMA_MODE,
+        flags: OPTMAP_USE_NAME_VALUE_MAP,
+        offset: core::mem::offset_of!(lzma_options_lzma, mode) as u16,
+        u: option_value {
+            map: ::core::ptr::addr_of!(lzma12_mode_map) as *const name_value_map,
+        },
+    },
+    option_map {
+        name: c_chars(*b"nice\0\0\0\0\0\0\0\0"),
+        option_type: 0,
+        flags: 0,
+        offset: core::mem::offset_of!(lzma_options_lzma, nice_len) as u16,
+        u: option_value {
+            range: option_value_range { min: 2, max: 273 },
+        },
+    },
+    option_map {
+        name: c_chars(*b"mf\0\0\0\0\0\0\0\0\0\0"),
+        option_type: OPTMAP_TYPE_LZMA_MATCH_FINDER,
+        flags: OPTMAP_USE_NAME_VALUE_MAP,
+        offset: core::mem::offset_of!(lzma_options_lzma, mf) as u16,
+        u: option_value {
+            map: ::core::ptr::addr_of!(lzma12_mf_map) as *const name_value_map,
+        },
+    },
+    option_map {
+        name: c_chars(*b"depth\0\0\0\0\0\0\0"),
+        option_type: 0,
+        flags: 0,
+        offset: core::mem::offset_of!(lzma_options_lzma, depth) as u16,
+        u: option_value {
+            range: option_value_range {
+                min: 0,
+                max: UINT32_MAX,
+            },
+        },
+    },
+];
 unsafe fn parse_lzma12(
     str: *mut *const c_char,
     str_end: *const c_char,
@@ -853,8 +942,7 @@ pub unsafe fn lzma_str_to_filters(
         *error_pos = 0;
     }
     if str.is_null() || filters.is_null() {
-        return b"Unexpected core::ptr::null_mut() pointer argument(s) to lzma_str_to_filters()\0"
-            as *const u8 as *const c_char;
+        return crate::c_str!("Unexpected NULL pointer argument(s) to lzma_str_to_filters()");
     }
     let supported_flags: u32 = LZMA_STR_ALL_FILTERS as u32 | LZMA_STR_NO_VALIDATION as u32;
     if flags & !supported_flags != 0 {
@@ -1171,108 +1259,40 @@ pub unsafe fn lzma_str_list_filters(
     }
     str_finish(output_str, ::core::ptr::addr_of_mut!(dest), allocator)
 }
-unsafe extern "C" fn run_static_initializers() {
-    lzma12_optmap = [
-        option_map {
-            name: c_chars(*b"preset\0\0\0\0\0\0"),
-            option_type: OPTMAP_TYPE_LZMA_PRESET,
-            flags: 0,
-            offset: 0,
-            u: option_value {
-                map: core::ptr::null(),
-            },
-        },
-        option_map {
-            name: c_chars(*b"dict\0\0\0\0\0\0\0\0"),
-            option_type: 0,
-            flags: OPTMAP_USE_BYTE_SUFFIX,
-            offset: 0,
-            u: option_value {
-                range: option_value_range {
-                    min: LZMA_DICT_SIZE_MIN as u32,
-                    max: (1u32 << 30).wrapping_add(1 << 29),
-                },
-            },
-        },
-        option_map {
-            name: c_chars(*b"lc\0\0\0\0\0\0\0\0\0\0"),
-            option_type: 0,
-            flags: 0,
-            offset: 20,
-            u: option_value {
-                range: option_value_range {
-                    min: LZMA_LCLP_MIN,
-                    max: LZMA_LCLP_MAX,
-                },
-            },
-        },
-        option_map {
-            name: c_chars(*b"lp\0\0\0\0\0\0\0\0\0\0"),
-            option_type: 0,
-            flags: 0,
-            offset: 24,
-            u: option_value {
-                range: option_value_range {
-                    min: LZMA_LCLP_MIN,
-                    max: LZMA_LCLP_MAX,
-                },
-            },
-        },
-        option_map {
-            name: c_chars(*b"pb\0\0\0\0\0\0\0\0\0\0"),
-            option_type: 0,
-            flags: 0,
-            offset: 28,
-            u: option_value {
-                range: option_value_range {
-                    min: LZMA_PB_MIN,
-                    max: LZMA_PB_MAX,
-                },
-            },
-        },
-        option_map {
-            name: c_chars(*b"mode\0\0\0\0\0\0\0\0"),
-            option_type: OPTMAP_TYPE_LZMA_MODE,
-            flags: OPTMAP_USE_NAME_VALUE_MAP,
-            offset: 32,
-            u: option_value {
-                map: ::core::ptr::addr_of!(lzma12_mode_map) as *const name_value_map,
-            },
-        },
-        option_map {
-            name: c_chars(*b"nice\0\0\0\0\0\0\0\0"),
-            option_type: 0,
-            flags: 0,
-            offset: 36,
-            u: option_value {
-                range: option_value_range { min: 2, max: 273 },
-            },
-        },
-        option_map {
-            name: c_chars(*b"mf\0\0\0\0\0\0\0\0\0\0"),
-            option_type: OPTMAP_TYPE_LZMA_MATCH_FINDER,
-            flags: OPTMAP_USE_NAME_VALUE_MAP,
-            offset: 40,
-            u: option_value {
-                map: ::core::ptr::addr_of!(lzma12_mf_map) as *const name_value_map,
-            },
-        },
-        option_map {
-            name: c_chars(*b"depth\0\0\0\0\0\0\0"),
-            option_type: 0,
-            flags: 0,
-            offset: 44,
-            u: option_value {
-                range: option_value_range {
-                    min: 0,
-                    max: UINT32_MAX,
-                },
-            },
-        },
-    ];
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::common::filter_common::lzma_filters_free;
+
+    #[test]
+    fn lzma12_options_parse_into_correct_fields() {
+        let mut filters = [lzma_filter {
+            id: LZMA_VLI_UNKNOWN,
+            options: core::ptr::null_mut(),
+        }; 5];
+        let mut error_pos: c_int = -1;
+        unsafe {
+            let msg = lzma_str_to_filters(
+                c"lzma2:dict=1MiB,lc=2,lp=1,pb=3,mode=fast,nice=100,mf=hc4,depth=7".as_ptr(),
+                ::core::ptr::addr_of_mut!(error_pos),
+                filters.as_mut_ptr(),
+                0,
+                core::ptr::null(),
+            );
+            assert!(msg.is_null());
+            assert_eq!(filters[0].id, LZMA_FILTER_LZMA2);
+            assert_eq!(filters[1].id, LZMA_VLI_UNKNOWN);
+            let opts = filters[0].options as *const lzma_options_lzma;
+            assert_eq!((*opts).dict_size, 1 << 20);
+            assert_eq!((*opts).lc, 2);
+            assert_eq!((*opts).lp, 1);
+            assert_eq!((*opts).pb, 3);
+            assert_eq!((*opts).mode, LZMA_MODE_FAST);
+            assert_eq!((*opts).nice_len, 100);
+            assert_eq!((*opts).mf, LZMA_MF_HC4);
+            assert_eq!((*opts).depth, 7);
+            lzma_filters_free(filters.as_mut_ptr(), core::ptr::null());
+        }
+    }
 }
-#[used]
-#[cfg_attr(target_os = "linux", unsafe(link_section = ".init_array"))]
-#[cfg_attr(target_os = "windows", unsafe(link_section = ".CRT$XIB"))]
-#[cfg_attr(target_os = "macos", unsafe(link_section = "__DATA,__mod_init_func"))]
-static INIT_ARRAY: [unsafe extern "C" fn(); 1] = [run_static_initializers];

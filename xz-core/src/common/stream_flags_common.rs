@@ -10,7 +10,9 @@ pub unsafe fn lzma_stream_flags_compare(
     if (*a).version != 0 || (*b).version != 0 {
         return LZMA_OPTIONS_ERROR;
     }
-    if (*a).check > LZMA_CHECK_ID_MAX || (*b).check > LZMA_CHECK_ID_MAX {
+    if (*a).check as c_uint > LZMA_CHECK_ID_MAX as c_uint
+        || (*b).check as c_uint > LZMA_CHECK_ID_MAX as c_uint
+    {
         return LZMA_PROG_ERROR;
     }
     if (*a).check != (*b).check {

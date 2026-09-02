@@ -6,7 +6,7 @@ use std::io::prelude::*;
 #[cfg(feature = "parallel")]
 use crate::stream::MtStreamBuilder;
 use crate::stream::{Action, Check, Status, Stream};
-use crate::sys as liblzma_sys;
+use crate::sys;
 
 /// A xz encoder, or compressor.
 ///
@@ -134,12 +134,15 @@ impl<R: BufRead> Read for XzEncoder<R> {
             };
             self.obj.consume(consumed);
 
-            ret?;
+            let status = ret?;
 
-            // If we haven't ready any data and we haven't hit EOF yet, then we
-            // need to keep asking for more data because if we return that 0
-            // bytes of data have been read then it will be interpreted as EOF.
-            if read == 0 && !eof {
+            // If we haven't read any data and the stream hasn't ended yet,
+            // keep going: before EOF more input is needed, and at EOF a
+            // multithreaded encoder configured with a timeout can report Ok
+            // without producing output while its workers are still
+            // finishing. Returning 0 here would be interpreted as EOF and
+            // truncate the compressed stream.
+            if read == 0 && status == Status::Ok {
                 continue;
             }
             return Ok(read);
@@ -174,6 +177,7 @@ impl<R: BufRead> XzDecoder<R> {
     pub fn new_parallel(r: R) -> Self {
         let stream = MtStreamBuilder::new()
             .memlimit_stop(u64::MAX)
+            .memlimit_threading(crate::stream::default_memlimit_threading())
             .threads(num_cpus::get() as u32)
             .decoder()
             .unwrap();
@@ -184,7 +188,7 @@ impl<R: BufRead> XzDecoder<R> {
     /// input. All the concatenated xz streams from input will be consumed.
     #[inline]
     pub fn new_multi_decoder(r: R) -> XzDecoder<R> {
-        let stream = Stream::new_auto_decoder(u64::MAX, liblzma_sys::LZMA_CONCATENATED).unwrap();
+        let stream = Stream::new_auto_decoder(u64::MAX, sys::LZMA_CONCATENATED).unwrap();
         XzDecoder::new_stream(r, stream)
     }
 
@@ -262,14 +266,22 @@ impl<R: BufRead> Read for XzDecoder<R> {
             self.obj.consume(consumed);
 
             let status = ret?;
-            if read > 0 || eof || status == Status::StreamEnd {
-                if read == 0 && status != Status::StreamEnd {
-                    return Err(io::Error::new(
-                        io::ErrorKind::UnexpectedEof,
-                        "premature eof",
-                    ));
-                }
+            if read > 0 || status == Status::StreamEnd {
                 return Ok(read);
+            }
+            if eof {
+                // At EOF the decoder is driven with Action::Finish until it
+                // reports StreamEnd. A multithreaded decoder configured with
+                // a timeout can report Ok without progress while its workers
+                // still hold pending output; a genuinely truncated stream
+                // surfaces as MemNeeded (buf error) on a following call.
+                if status == Status::Ok {
+                    continue;
+                }
+                return Err(io::Error::new(
+                    io::ErrorKind::UnexpectedEof,
+                    "premature eof",
+                ));
             }
             if consumed == 0 {
                 return Err(io::Error::new(

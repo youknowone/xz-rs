@@ -27,7 +27,7 @@ pub unsafe fn lzma_block_unpadded_size(block: *const lzma_block) -> lzma_vli {
         || !((*block).compressed_size <= LZMA_VLI_MAX
             || (*block).compressed_size == LZMA_VLI_UNKNOWN)
         || (*block).compressed_size == 0
-        || (*block).check > LZMA_CHECK_ID_MAX
+        || (*block).check as c_uint > LZMA_CHECK_ID_MAX as c_uint
     {
         return 0;
     }

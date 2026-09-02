@@ -12,14 +12,14 @@ use std::fmt;
 use std::io;
 use std::mem;
 
-use crate::sys as liblzma_sys;
+use crate::sys;
 
 /// Representation of an in-memory LZMA encoding or decoding stream.
 ///
 /// Wraps the raw underlying `lzma_stream` type and provides the ability to
 /// create streams which can either decode or encode various LZMA-based formats.
 pub struct Stream {
-    raw: liblzma_sys::lzma_stream,
+    raw: sys::lzma_stream,
 }
 
 unsafe impl Send for Stream {}
@@ -29,20 +29,20 @@ unsafe impl Sync for Stream {}
 ///
 /// This builder is consumed by a number of other methods.
 pub struct LzmaOptions {
-    raw: liblzma_sys::lzma_options_lzma,
+    raw: sys::lzma_options_lzma,
 }
 
 /// Builder to create a multithreaded stream encoder.
 #[cfg(feature = "parallel")]
 pub struct MtStreamBuilder {
-    raw: liblzma_sys::lzma_mt,
+    raw: sys::lzma_mt,
     filters: Option<Filters>,
 }
 
 /// A custom chain of filters to configure an encoding stream.
 pub struct Filters {
-    inner: Vec<liblzma_sys::lzma_filter>,
-    lzma_opts: LinkedList<liblzma_sys::lzma_options_lzma>,
+    inner: Vec<sys::lzma_filter>,
+    lzma_opts: LinkedList<sys::lzma_options_lzma>,
 }
 
 /// The `action` argument for [`Stream::process`],
@@ -57,7 +57,7 @@ pub enum Action {
     ///
     /// When decoding, decode as much input as possible and produce as much
     /// output as possible.
-    Run = liblzma_sys::LZMA_RUN as isize,
+    Run = sys::LZMA_RUN as isize,
 
     /// Make all the input available at output
     ///
@@ -77,7 +77,7 @@ pub enum Action {
     /// example, match finder with LZMA2).
     ///
     /// Decoders don't support `SyncFlush`.
-    SyncFlush = liblzma_sys::LZMA_SYNC_FLUSH as isize,
+    SyncFlush = sys::LZMA_SYNC_FLUSH as isize,
 
     /// Finish encoding of the current block.
     ///
@@ -89,7 +89,7 @@ pub enum Action {
     /// This action is currently supported only by stream encoder and easy
     /// encoder (which uses stream encoder). If there is no unfinished block, no
     /// empty block is created.
-    FullFlush = liblzma_sys::LZMA_FULL_FLUSH as isize,
+    FullFlush = sys::LZMA_FULL_FLUSH as isize,
 
     /// Finish encoding of the current block.
     ///
@@ -107,7 +107,7 @@ pub enum Action {
     /// With a `Stream` initialized with the single-threaded
     /// `new_stream_encoder` or `new_easy_encoder`, `FullBarrier` is an alias
     /// for `FullFlush`.
-    FullBarrier = liblzma_sys::LZMA_FULL_BARRIER as isize,
+    FullBarrier = sys::LZMA_FULL_BARRIER as isize,
 
     /// Finish the current operation
     ///
@@ -120,7 +120,7 @@ pub enum Action {
     /// was used when the decoder was initialized. When concatenated was not
     /// used, the only effect of `Finish` is that the amount of input must not
     /// be changed just like in the encoder.
-    Finish = liblzma_sys::LZMA_FINISH as isize,
+    Finish = sys::LZMA_FINISH as isize,
 }
 
 /// Return value of a [`Stream::process`] operation.
@@ -188,10 +188,10 @@ pub enum Error {
 #[allow(missing_docs)] // self-explanatory mostly
 #[derive(Debug, Copy, Clone)]
 pub enum Check {
-    None = liblzma_sys::LZMA_CHECK_NONE as isize,
-    Crc32 = liblzma_sys::LZMA_CHECK_CRC32 as isize,
-    Crc64 = liblzma_sys::LZMA_CHECK_CRC64 as isize,
-    Sha256 = liblzma_sys::LZMA_CHECK_SHA256 as isize,
+    None = sys::LZMA_CHECK_NONE as isize,
+    Crc32 = sys::LZMA_CHECK_CRC32 as isize,
+    Crc64 = sys::LZMA_CHECK_CRC64 as isize,
+    Sha256 = sys::LZMA_CHECK_SHA256 as isize,
 }
 
 /// Compression modes
@@ -204,14 +204,14 @@ pub enum Mode {
     ///
     /// Fast mode is usually at its best when combined with a hash chain match
     /// finder.
-    Fast = liblzma_sys::LZMA_MODE_FAST as isize,
+    Fast = sys::LZMA_MODE_FAST as isize,
 
     /// Normal compression.
     ///
     /// This is usually notably slower than fast mode. Use this together with
     /// binary tree match finders to expose the full potential of the LZMA1 or
     /// LZMA2 encoder.
-    Normal = liblzma_sys::LZMA_MODE_NORMAL as isize,
+    Normal = sys::LZMA_MODE_NORMAL as isize,
 }
 
 /// Match finders
@@ -229,50 +229,50 @@ pub enum Mode {
 #[derive(Debug, Copy, Clone)]
 pub enum MatchFinder {
     /// Hash Chain with 2- and 3-byte hashing
-    HashChain3 = liblzma_sys::LZMA_MF_HC3 as isize,
+    HashChain3 = sys::LZMA_MF_HC3 as isize,
     /// Hash Chain with 2-, 3-, and 4-byte hashing
-    HashChain4 = liblzma_sys::LZMA_MF_HC4 as isize,
+    HashChain4 = sys::LZMA_MF_HC4 as isize,
 
     /// Binary Tree with 2-byte hashing
-    BinaryTree2 = liblzma_sys::LZMA_MF_BT2 as isize,
+    BinaryTree2 = sys::LZMA_MF_BT2 as isize,
     /// Binary Tree with 2- and 3-byte hashing
-    BinaryTree3 = liblzma_sys::LZMA_MF_BT3 as isize,
+    BinaryTree3 = sys::LZMA_MF_BT3 as isize,
     /// Binary Tree with 2-, 3-, and 4-byte hashing
-    BinaryTree4 = liblzma_sys::LZMA_MF_BT4 as isize,
+    BinaryTree4 = sys::LZMA_MF_BT4 as isize,
 }
 
 /// A flag passed when initializing a decoder, causes [`Stream::process`] to return
 /// [`Status::GetCheck`] as soon as the integrity check is known.
-pub const TELL_ANY_CHECK: u32 = liblzma_sys::LZMA_TELL_ANY_CHECK;
+pub const TELL_ANY_CHECK: u32 = sys::LZMA_TELL_ANY_CHECK;
 
 /// A flag passed when initializing a decoder, causes [`Stream::process`] to return
 /// [`Error::NoCheck`] if the stream being decoded has no integrity check.
-pub const TELL_NO_CHECK: u32 = liblzma_sys::LZMA_TELL_NO_CHECK;
+pub const TELL_NO_CHECK: u32 = sys::LZMA_TELL_NO_CHECK;
 
 /// A flag passed when initializing a decoder, causes [`Stream::process`] to return
 /// [`Error::UnsupportedCheck`] if the stream being decoded has an integrity check
 /// that cannot be verified by this build of liblzma.
-pub const TELL_UNSUPPORTED_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK;
+pub const TELL_UNSUPPORTED_CHECK: u32 = sys::LZMA_TELL_UNSUPPORTED_CHECK;
 
 /// A flag passed when initializing a decoder, causes the decoder to ignore any
 /// integrity checks listed.
-pub const IGNORE_CHECK: u32 = liblzma_sys::LZMA_TELL_UNSUPPORTED_CHECK;
+pub const IGNORE_CHECK: u32 = sys::LZMA_IGNORE_CHECK;
 
 /// A flag passed when initializing a decoder, indicates that the stream may be
 /// multiple concatenated xz files.
-pub const CONCATENATED: u32 = liblzma_sys::LZMA_CONCATENATED;
+pub const CONCATENATED: u32 = sys::LZMA_CONCATENATED;
 
 /// Default compression preset level.
-pub const PRESET_DEFAULT: u32 = liblzma_sys::LZMA_PRESET_DEFAULT;
+pub const PRESET_DEFAULT: u32 = sys::LZMA_PRESET_DEFAULT;
 
 /// Mask for extracting the preset level bits from a preset value.
-pub const PRESET_LEVEL_MASK: u32 = liblzma_sys::LZMA_PRESET_LEVEL_MASK;
+pub const PRESET_LEVEL_MASK: u32 = sys::LZMA_PRESET_LEVEL_MASK;
 
 /// Flag to request the slower "extreme" variant of a preset.
 ///
 /// Combine this with a preset level using bitwise-OR.
 /// For example: `6 | PRESET_EXTREME`.
-pub const PRESET_EXTREME: u32 = liblzma_sys::LZMA_PRESET_EXTREME;
+pub const PRESET_EXTREME: u32 = sys::LZMA_PRESET_EXTREME;
 
 /// Encoder-related functions
 impl Stream {
@@ -288,9 +288,7 @@ impl Stream {
     #[inline]
     pub fn new_easy_encoder(preset: u32, check: Check) -> Result<Stream, Error> {
         let mut init = unsafe { Stream::zeroed() };
-        cvt(unsafe {
-            liblzma_sys::lzma_easy_encoder(&mut init.raw, preset, check as liblzma_sys::lzma_check)
-        })?;
+        cvt(unsafe { sys::lzma_easy_encoder(&mut init.raw, preset, check as sys::lzma_check) })?;
         Ok(init)
     }
 
@@ -309,7 +307,7 @@ impl Stream {
     #[inline]
     pub fn new_lzma_encoder(options: &LzmaOptions) -> Result<Stream, Error> {
         let mut init = unsafe { Stream::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_alone_encoder(&mut init.raw, &options.raw) })?;
+        cvt(unsafe { sys::lzma_alone_encoder(&mut init.raw, &options.raw) })?;
         Ok(init)
     }
 
@@ -321,10 +319,10 @@ impl Stream {
     pub fn new_stream_encoder(filters: &Filters, check: Check) -> Result<Stream, Error> {
         let mut init = unsafe { Stream::zeroed() };
         cvt(unsafe {
-            liblzma_sys::lzma_stream_encoder(
+            sys::lzma_stream_encoder(
                 &mut init.raw,
                 filters.inner.as_ptr(),
-                check as liblzma_sys::lzma_check,
+                check as sys::lzma_check,
             )
         })?;
         Ok(init)
@@ -334,7 +332,7 @@ impl Stream {
     #[inline]
     pub fn new_raw_encoder(filters: &Filters) -> Result<Stream, Error> {
         let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_raw_encoder(&mut init.raw, filters.inner.as_ptr()) })?;
+        cvt(unsafe { sys::lzma_raw_encoder(&mut init.raw, filters.inner.as_ptr()) })?;
         Ok(init)
     }
 }
@@ -346,7 +344,7 @@ impl Stream {
     #[inline]
     pub fn new_auto_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
         let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_auto_decoder(&mut init.raw, memlimit, flags) })?;
+        cvt(unsafe { sys::lzma_auto_decoder(&mut init.raw, memlimit, flags) })?;
         Ok(init)
     }
 
@@ -358,7 +356,7 @@ impl Stream {
     #[inline]
     pub fn new_stream_decoder(memlimit: u64, flags: u32) -> Result<Stream, Error> {
         let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_stream_decoder(&mut init.raw, memlimit, flags) })?;
+        cvt(unsafe { sys::lzma_stream_decoder(&mut init.raw, memlimit, flags) })?;
         Ok(init)
     }
 
@@ -368,7 +366,7 @@ impl Stream {
     #[inline]
     pub fn new_lzma_decoder(memlimit: u64) -> Result<Stream, Error> {
         let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_alone_decoder(&mut init.raw, memlimit) })?;
+        cvt(unsafe { sys::lzma_alone_decoder(&mut init.raw, memlimit) })?;
         Ok(init)
     }
 
@@ -376,7 +374,7 @@ impl Stream {
     #[inline]
     pub fn new_lzip_decoder(memlimit: u64, flags: u32) -> Result<Self, Error> {
         let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_lzip_decoder(&mut init.raw, memlimit, flags) })?;
+        cvt(unsafe { sys::lzma_lzip_decoder(&mut init.raw, memlimit, flags) })?;
         Ok(init)
     }
 
@@ -384,7 +382,7 @@ impl Stream {
     #[inline]
     pub fn new_raw_decoder(filters: &Filters) -> Result<Stream, Error> {
         let mut init = unsafe { Self::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_raw_decoder(&mut init.raw, filters.inner.as_ptr()) })?;
+        cvt(unsafe { sys::lzma_raw_decoder(&mut init.raw, filters.inner.as_ptr()) })?;
         Ok(init)
     }
 }
@@ -410,8 +408,8 @@ impl Stream {
         self.raw.avail_in = input.len();
         self.raw.next_out = output_ptr;
         self.raw.avail_out = output_len;
-        let action = action as liblzma_sys::lzma_action;
-        unsafe { cvt(liblzma_sys::lzma_code(&mut self.raw, action)) }
+        let action = action as sys::lzma_action;
+        unsafe { cvt(sys::lzma_code(&mut self.raw, action)) }
     }
 
     /// Processes some data from input into an output buffer.
@@ -494,7 +492,7 @@ impl Stream {
     /// This is only supported if the underlying stream supports a memlimit.
     #[inline]
     pub fn memlimit(&self) -> u64 {
-        unsafe { liblzma_sys::lzma_memlimit_get(&self.raw) }
+        unsafe { sys::lzma_memlimit_get(&self.raw) }
     }
 
     /// Set the current memory usage limit.
@@ -503,7 +501,7 @@ impl Stream {
     /// [`Error::Program`] if this stream doesn't take a memory limit.
     #[inline]
     pub fn set_memlimit(&mut self, limit: u64) -> Result<(), Error> {
-        cvt(unsafe { liblzma_sys::lzma_memlimit_set(&mut self.raw, limit) }).map(|_| ())
+        cvt(unsafe { sys::lzma_memlimit_set(&mut self.raw, limit) }).map(|_| ())
     }
 }
 
@@ -525,7 +523,7 @@ impl LzmaOptions {
     pub fn new_preset(preset: u32) -> Result<LzmaOptions, Error> {
         unsafe {
             let mut options = Self::new();
-            let ret = liblzma_sys::lzma_lzma_preset(&mut options.raw, preset);
+            let ret = sys::lzma_lzma_preset(&mut options.raw, preset);
             if ret != 0 {
                 Err(Error::Program)
             } else {
@@ -598,7 +596,7 @@ impl LzmaOptions {
     /// Configures the compression mode.
     #[inline]
     pub fn mode(&mut self, mode: Mode) -> &mut LzmaOptions {
-        self.raw.mode = mode as liblzma_sys::lzma_mode;
+        self.raw.mode = mode as sys::lzma_mode;
         self
     }
 
@@ -626,7 +624,7 @@ impl LzmaOptions {
     /// Configures the match finder ID.
     #[inline]
     pub fn match_finder(&mut self, mf: MatchFinder) -> &mut LzmaOptions {
-        self.raw.mf = mf as liblzma_sys::lzma_match_finder;
+        self.raw.mf = mf as sys::lzma_match_finder;
         self
     }
 
@@ -668,7 +666,7 @@ impl Check {
     /// Test if this check is supported in this build of liblzma.
     #[inline]
     pub fn is_supported(&self) -> bool {
-        let ret = unsafe { liblzma_sys::lzma_check_is_supported(*self as liblzma_sys::lzma_check) };
+        let ret = unsafe { sys::lzma_check_is_supported(*self as sys::lzma_check) };
 
         ret != 0
     }
@@ -678,8 +676,7 @@ impl MatchFinder {
     /// Test if this match finder is supported in this build of liblzma.
     #[inline]
     pub fn is_supported(&self) -> bool {
-        let ret =
-            unsafe { liblzma_sys::lzma_mf_is_supported(*self as liblzma_sys::lzma_match_finder) };
+        let ret = unsafe { sys::lzma_mf_is_supported(*self as sys::lzma_match_finder) };
 
         ret != 0
     }
@@ -690,8 +687,8 @@ impl Filters {
     #[inline]
     pub fn new() -> Filters {
         Filters {
-            inner: vec![liblzma_sys::lzma_filter {
-                id: liblzma_sys::LZMA_VLI_UNKNOWN,
+            inner: vec![sys::lzma_filter {
+                id: sys::LZMA_VLI_UNKNOWN,
                 options: std::ptr::null_mut(),
             }],
             lzma_opts: LinkedList::new(),
@@ -710,8 +707,8 @@ impl Filters {
     pub fn lzma1(&mut self, opts: &LzmaOptions) -> &mut Filters {
         self.lzma_opts.push_back(opts.raw);
         let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_LZMA1,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_LZMA1,
             options: ptr,
         })
     }
@@ -719,8 +716,8 @@ impl Filters {
     /// Add an LZMA1 filter with properties.
     #[inline]
     pub fn lzma1_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_LZMA1,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_LZMA1,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -741,8 +738,8 @@ impl Filters {
     pub fn lzma2(&mut self, opts: &LzmaOptions) -> &mut Filters {
         self.lzma_opts.push_back(opts.raw);
         let ptr = self.lzma_opts.back().unwrap() as *const _ as *mut _;
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_LZMA2,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_LZMA2,
             options: ptr,
         })
     }
@@ -750,8 +747,8 @@ impl Filters {
     /// Add an LZMA2 filter with properties.
     #[inline]
     pub fn lzma2_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_LZMA2,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_LZMA2,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -772,8 +769,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn delta(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_DELTA,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_DELTA,
             options: std::ptr::null_mut(),
         })
     }
@@ -789,8 +786,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn delta_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_DELTA,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_DELTA,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -811,8 +808,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn x86(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_X86,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_X86,
             options: std::ptr::null_mut(),
         })
     }
@@ -828,8 +825,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn x86_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_X86,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_X86,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -850,8 +847,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn powerpc(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_POWERPC,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_POWERPC,
             options: std::ptr::null_mut(),
         })
     }
@@ -867,8 +864,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn powerpc_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_POWERPC,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_POWERPC,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -889,8 +886,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn ia64(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_IA64,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_IA64,
             options: std::ptr::null_mut(),
         })
     }
@@ -906,8 +903,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn ia64_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_IA64,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_IA64,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -928,8 +925,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn arm(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_ARM,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_ARM,
             options: std::ptr::null_mut(),
         })
     }
@@ -945,8 +942,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn arm_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_ARM,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_ARM,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -967,8 +964,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn arm64(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_ARM64,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_ARM64,
             options: std::ptr::null_mut(),
         })
     }
@@ -984,8 +981,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn arm64_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_ARM64,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_ARM64,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -1006,8 +1003,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn riscv(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_RISCV,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_RISCV,
             options: std::ptr::null_mut(),
         })
     }
@@ -1023,8 +1020,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn riscv_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_RISCV,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_RISCV,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -1045,8 +1042,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn arm_thumb(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_ARMTHUMB,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_ARMTHUMB,
             options: std::ptr::null_mut(),
         })
     }
@@ -1062,8 +1059,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn arm_thumb_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_ARMTHUMB,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_ARMTHUMB,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
@@ -1084,8 +1081,8 @@ impl Filters {
     /// ```
     #[inline]
     pub fn sparc(&mut self) -> &mut Filters {
-        self.push(liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_SPARC,
+        self.push(sys::lzma_filter {
+            id: sys::LZMA_FILTER_SPARC,
             options: std::ptr::null_mut(),
         })
     }
@@ -1101,15 +1098,15 @@ impl Filters {
     /// ```
     #[inline]
     pub fn sparc_properties(&mut self, properties: &[u8]) -> Result<&mut Filters, Error> {
-        let filter = liblzma_sys::lzma_filter {
-            id: liblzma_sys::LZMA_FILTER_SPARC,
+        let filter = sys::lzma_filter {
+            id: sys::LZMA_FILTER_SPARC,
             options: std::ptr::null_mut(),
         };
         self.push_with_properties(filter, properties)
     }
 
     #[inline]
-    fn push(&mut self, filter: liblzma_sys::lzma_filter) -> &mut Filters {
+    fn push(&mut self, filter: sys::lzma_filter) -> &mut Filters {
         let pos = self.inner.len() - 1;
         self.inner.insert(pos, filter);
         self
@@ -1118,11 +1115,11 @@ impl Filters {
     #[inline]
     fn push_with_properties(
         &mut self,
-        mut filter: liblzma_sys::lzma_filter,
+        mut filter: sys::lzma_filter,
         properties: &[u8],
     ) -> Result<&mut Filters, Error> {
         cvt(unsafe {
-            liblzma_sys::lzma_properties_decode(
+            sys::lzma_properties_decode(
                 &mut filter,
                 std::ptr::null(),
                 properties.as_ptr(),
@@ -1150,7 +1147,7 @@ impl Filters {
     #[cfg(feature = "parallel")]
     #[inline]
     pub fn mt_block_size(&self) -> u64 {
-        unsafe { liblzma_sys::lzma_mt_block_size(self.inner.as_ptr()) }
+        unsafe { sys::lzma_mt_block_size(self.inner.as_ptr()) }
     }
 }
 
@@ -1249,7 +1246,17 @@ impl MtStreamBuilder {
     /// Configures the integrity check type
     #[inline]
     pub fn check(&mut self, check: Check) -> &mut Self {
-        self.raw.check = check as liblzma_sys::lzma_check;
+        self.raw.check = check as sys::lzma_check;
+        self
+    }
+
+    /// Configure decoder flags for multithreaded decoding.
+    ///
+    /// This accepts the same flags as [`Stream::new_stream_decoder`], such as
+    /// [`IGNORE_CHECK`] and [`CONCATENATED`].
+    #[inline]
+    pub fn flags(&mut self, flags: u32) -> &mut Self {
+        self.raw.flags = flags;
         self
     }
 
@@ -1270,14 +1277,14 @@ impl MtStreamBuilder {
     /// Calculate approximate memory usage of multithreaded .xz encoder
     #[inline]
     pub fn memusage(&self) -> u64 {
-        unsafe { liblzma_sys::lzma_stream_encoder_mt_memusage(&self.raw) }
+        unsafe { sys::lzma_stream_encoder_mt_memusage(&self.raw) }
     }
 
     /// Initialize multithreaded .xz stream encoder.
     #[inline]
     pub fn encoder(&self) -> Result<Stream, Error> {
         let mut init = unsafe { Stream::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_stream_encoder_mt(&mut init.raw, &self.raw) })?;
+        cvt(unsafe { sys::lzma_stream_encoder_mt(&mut init.raw, &self.raw) })?;
         Ok(init)
     }
 
@@ -1285,25 +1292,42 @@ impl MtStreamBuilder {
     #[inline]
     pub fn decoder(&self) -> Result<Stream, Error> {
         let mut init = unsafe { Stream::zeroed() };
-        cvt(unsafe { liblzma_sys::lzma_stream_decoder_mt(&mut init.raw, &self.raw) })?;
+        cvt(unsafe { sys::lzma_stream_decoder_mt(&mut init.raw, &self.raw) })?;
         Ok(init)
     }
 }
 
-fn cvt(rc: liblzma_sys::lzma_ret) -> Result<Status, Error> {
+/// Default soft memory limit enabling threaded decoding, mirroring xz's
+/// `--memlimit-mt-decompress` default: 1/4 of physical memory (assuming
+/// 128 MiB when the amount is unknown), capped at 1400 MiB on 32-bit
+/// systems. With the `lzma_mt` default of 0, every block falls back to the
+/// single-threaded direct mode.
+#[cfg(feature = "parallel")]
+pub(crate) fn default_memlimit_threading() -> u64 {
+    let mut total = unsafe { sys::lzma_physmem() };
+    if total == 0 {
+        total = 128 << 20;
+    }
+    let limit = total / 4;
+    #[cfg(target_pointer_width = "32")]
+    let limit = limit.min(1400 << 20);
+    limit
+}
+
+fn cvt(rc: sys::lzma_ret) -> Result<Status, Error> {
     match rc {
-        liblzma_sys::LZMA_OK => Ok(Status::Ok),
-        liblzma_sys::LZMA_STREAM_END => Ok(Status::StreamEnd),
-        liblzma_sys::LZMA_NO_CHECK => Err(Error::NoCheck),
-        liblzma_sys::LZMA_UNSUPPORTED_CHECK => Err(Error::UnsupportedCheck),
-        liblzma_sys::LZMA_GET_CHECK => Ok(Status::GetCheck),
-        liblzma_sys::LZMA_MEM_ERROR => Err(Error::Mem),
-        liblzma_sys::LZMA_MEMLIMIT_ERROR => Err(Error::MemLimit),
-        liblzma_sys::LZMA_FORMAT_ERROR => Err(Error::Format),
-        liblzma_sys::LZMA_OPTIONS_ERROR => Err(Error::Options),
-        liblzma_sys::LZMA_DATA_ERROR => Err(Error::Data),
-        liblzma_sys::LZMA_BUF_ERROR => Ok(Status::MemNeeded),
-        liblzma_sys::LZMA_PROG_ERROR => Err(Error::Program),
+        sys::LZMA_OK => Ok(Status::Ok),
+        sys::LZMA_STREAM_END => Ok(Status::StreamEnd),
+        sys::LZMA_NO_CHECK => Err(Error::NoCheck),
+        sys::LZMA_UNSUPPORTED_CHECK => Err(Error::UnsupportedCheck),
+        sys::LZMA_GET_CHECK => Ok(Status::GetCheck),
+        sys::LZMA_MEM_ERROR => Err(Error::Mem),
+        sys::LZMA_MEMLIMIT_ERROR => Err(Error::MemLimit),
+        sys::LZMA_FORMAT_ERROR => Err(Error::Format),
+        sys::LZMA_OPTIONS_ERROR => Err(Error::Options),
+        sys::LZMA_DATA_ERROR => Err(Error::Data),
+        sys::LZMA_BUF_ERROR => Ok(Status::MemNeeded),
+        sys::LZMA_PROG_ERROR => Err(Error::Program),
         c => panic!("unknown return code: {}", c),
     }
 }
@@ -1349,7 +1373,7 @@ impl Drop for Stream {
     #[inline]
     fn drop(&mut self) {
         unsafe {
-            liblzma_sys::lzma_end(&mut self.raw);
+            sys::lzma_end(&mut self.raw);
         }
     }
 }

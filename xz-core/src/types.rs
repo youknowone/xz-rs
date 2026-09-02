@@ -25,8 +25,8 @@ pub type probability = u16;
 #[derive(Copy, Clone)]
 #[repr(C)]
 pub struct lzma_allocator {
-    pub alloc: Option<unsafe fn(*mut c_void, size_t, size_t) -> *mut c_void>,
-    pub free: Option<unsafe fn(*mut c_void, *mut c_void) -> ()>,
+    pub alloc: Option<unsafe extern "C" fn(*mut c_void, size_t, size_t) -> *mut c_void>,
+    pub free: Option<unsafe extern "C" fn(*mut c_void, *mut c_void)>,
     pub opaque: *mut c_void,
 }
 #[derive(Copy, Clone)]
@@ -79,6 +79,9 @@ pub struct lzma_stream {
     pub next_out: *mut u8,
     pub avail_out: size_t,
     pub total_out: u64,
+    // Only xz-sys uses the allocator; without custom_allocator the field
+    // is omitted for a leaner build, diverging from the C lzma_stream
+    // layout on purpose.
     #[cfg(feature = "custom_allocator")]
     pub allocator: *const lzma_allocator,
     pub internal: *mut lzma_internal,
@@ -178,8 +181,10 @@ pub const LZMA_PB_MAX: u32 = 4;
 pub const LZMA_DELTA_DIST_MAX: u32 = 256;
 pub const LZMA_BACKWARD_SIZE_MIN: u32 = 4;
 pub const LZMA_BACKWARD_SIZE_MAX: u64 = 1 << 34;
-pub const UINTPTR_MAX: c_ulong = uintptr_t::MAX as c_ulong;
-pub const SIZE_MAX: c_ulong = UINTPTR_MAX;
+// Match C's UINTPTR_MAX and SIZE_MAX macros. On LLP64 targets, size_t and
+// uintptr_t are wider than unsigned long.
+pub const UINTPTR_MAX: uintptr_t = uintptr_t::MAX;
+pub const SIZE_MAX: size_t = size_t::MAX;
 pub const INDEX_INDICATOR: u8 = 0;
 pub const UNPADDED_SIZE_MIN: c_ulonglong = 5;
 pub const UNPADDED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX & !3;
@@ -223,9 +228,10 @@ pub const HASH_3_SIZE: c_uint = 1u32 << 16;
 pub const LZMA_CHECK_SIZE_MAX: u32 = 64;
 pub const LZMA_STREAM_FLAGS_SIZE: u32 = 2;
 pub const LZMA_PRESET_EXTREME: c_uint = 1u32 << 31;
-pub const COMPRESSED_SIZE_MAX: c_ulonglong = LZMA_VLI_MAX
+pub const COMPRESSED_SIZE_MAX: c_ulonglong = (LZMA_VLI_MAX
     .wrapping_sub(LZMA_BLOCK_HEADER_SIZE_MAX as u64)
-    .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64);
+    .wrapping_sub(LZMA_CHECK_SIZE_MAX as u64))
+    & !3u64;
 pub type worker_state = c_uint;
 pub type lzma_index_iter_mode = c_uint;
 pub const THR_IDLE: worker_state = 0;
@@ -616,33 +622,205 @@ pub unsafe fn mf_skip_raw(mf: *mut lzma_mf, amount: u32, skip: unsafe fn(*mut lz
         (*mf).read_ahead = (*mf).read_ahead.wrapping_add(amount);
     }
 }
+// Buffers compared with lzma_memcmplen must allocate and zero this many
+// extra tail bytes: the fast paths below may read up to this far past
+// `limit`. Each cfg here is repeated verbatim on the matching branch of
+// lzma_memcmplen, and every branch there asserts at compile time which
+// value it needs, so editing one side without the other fails the build
+// instead of silently reading out of bounds.
+//
+// The architecture lists follow TUKLIB_FAST_UNALIGNED_ACCESS, which C
+// enables unconditionally on x86, x86-64, and PowerPC. ARM64 is included
+// because unaligned access works on every ARM64 target Rust supports.
+// 32-bit ARM, RISC-V, and LoongArch stay on the byte-at-a-time branch:
+// C decides those from compiler feature macros that cfg cannot observe.
+
+// 64-bit word compares.
+#[cfg(all(
+    target_pointer_width = "64",
+    any(
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "powerpc64"
+    )
+))]
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 8;
+
+// SSE2 128-bit compares. x86-64 uses the 64-bit word branch above instead,
+// like in C, so this is reached on 32-bit x86 and on x32.
+#[cfg(all(
+    any(
+        target_arch = "x86",
+        all(target_arch = "x86_64", target_pointer_width = "32")
+    ),
+    target_feature = "sse2"
+))]
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 16;
+
+// 32-bit word compares.
+#[cfg(any(
+    all(target_arch = "x86", not(target_feature = "sse2")),
+    target_arch = "powerpc"
+))]
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 4;
+
+// Byte at a time; reads nothing past `limit`.
+#[cfg(not(any(
+    all(
+        target_pointer_width = "64",
+        any(
+            target_arch = "x86_64",
+            target_arch = "aarch64",
+            target_arch = "powerpc64"
+        )
+    ),
+    all(
+        any(
+            target_arch = "x86",
+            all(target_arch = "x86_64", target_pointer_width = "32")
+        ),
+        target_feature = "sse2"
+    ),
+    any(
+        all(target_arch = "x86", not(target_feature = "sse2")),
+        target_arch = "powerpc"
+    )
+)))]
+pub const LZMA_MEMCMPLEN_EXTRA: u32 = 0;
+
 #[inline(always)]
 pub unsafe fn lzma_memcmplen(buf1: *const u8, buf2: *const u8, mut len: u32, limit: u32) -> u32 {
     debug_assert!(len <= limit);
     debug_assert!(limit <= u32::MAX / 2);
 
     #[cfg(all(
-        target_endian = "little",
-        any(target_arch = "aarch64", target_arch = "x86_64")
+        target_pointer_width = "64",
+        any(
+            target_arch = "x86_64",
+            target_arch = "aarch64",
+            target_arch = "powerpc64"
+        )
     ))]
     {
+        const _: () = assert!(LZMA_MEMCMPLEN_EXTRA == 8);
         while len < limit {
             let lhs = core::ptr::read_unaligned(buf1.add(len as usize) as *const u64);
             let rhs = core::ptr::read_unaligned(buf2.add(len as usize) as *const u64);
-            let diff = lhs.wrapping_sub(rhs);
-            if diff != 0 {
-                return core::cmp::min(len + (diff.trailing_zeros() >> 3), limit);
+            // Little endian subtracts because sub+jnz fuses on more
+            // processors than xor+jnz; big endian must xor so that the
+            // first differing byte is the most significant one.
+            let x = if cfg!(target_endian = "little") {
+                lhs.wrapping_sub(rhs)
+            } else {
+                lhs ^ rhs
+            };
+            if x != 0 {
+                let bits = if cfg!(target_endian = "little") {
+                    x.trailing_zeros()
+                } else {
+                    x.leading_zeros()
+                };
+                return core::cmp::min(len + (bits >> 3), limit);
             }
             len += 8;
         }
         limit
     }
 
-    #[cfg(not(all(
-        target_endian = "little",
-        any(target_arch = "aarch64", target_arch = "x86_64")
+    // SSE2 version for 32-bit x86; on x86-64 the version above is used
+    // instead, like in C memcmplen.h.
+    #[cfg(all(
+        any(
+            target_arch = "x86",
+            all(target_arch = "x86_64", target_pointer_width = "32")
+        ),
+        target_feature = "sse2"
+    ))]
+    {
+        const _: () = assert!(LZMA_MEMCMPLEN_EXTRA == 16);
+        #[cfg(target_arch = "x86")]
+        use core::arch::x86::{__m128i, _mm_cmpeq_epi8, _mm_loadu_si128, _mm_movemask_epi8};
+        #[cfg(target_arch = "x86_64")]
+        use core::arch::x86_64::{__m128i, _mm_cmpeq_epi8, _mm_loadu_si128, _mm_movemask_epi8};
+        while len < limit {
+            let x: u32 = 0xffff
+                ^ _mm_movemask_epi8(_mm_cmpeq_epi8(
+                    _mm_loadu_si128(buf1.add(len as usize) as *const __m128i),
+                    _mm_loadu_si128(buf2.add(len as usize) as *const __m128i),
+                )) as u32;
+            if x != 0 {
+                len += x.trailing_zeros();
+                return core::cmp::min(len, limit);
+            }
+            len += 16;
+        }
+        limit
+    }
+
+    // Generic 32-bit word compares for targets with fast unaligned access
+    // but no 64-bit or SSE2 branch above.
+    #[cfg(any(
+        all(target_arch = "x86", not(target_feature = "sse2")),
+        target_arch = "powerpc"
+    ))]
+    {
+        const _: () = assert!(LZMA_MEMCMPLEN_EXTRA == 4);
+        while len < limit {
+            let lhs = core::ptr::read_unaligned(buf1.add(len as usize) as *const u32);
+            let rhs = core::ptr::read_unaligned(buf2.add(len as usize) as *const u32);
+            let mut x = if cfg!(target_endian = "little") {
+                lhs.wrapping_sub(rhs)
+            } else {
+                lhs ^ rhs
+            };
+            if x != 0 {
+                if cfg!(target_endian = "little") {
+                    if x & 0xFFFF == 0 {
+                        len += 2;
+                        x >>= 16;
+                    }
+                    if x & 0xFF == 0 {
+                        len += 1;
+                    }
+                } else {
+                    if x & 0xFFFF_0000 == 0 {
+                        len += 2;
+                        x <<= 16;
+                    }
+                    if x & 0xFF00_0000 == 0 {
+                        len += 1;
+                    }
+                }
+                return core::cmp::min(len, limit);
+            }
+            len += 4;
+        }
+        limit
+    }
+
+    #[cfg(not(any(
+        all(
+            target_pointer_width = "64",
+            any(
+                target_arch = "x86_64",
+                target_arch = "aarch64",
+                target_arch = "powerpc64"
+            )
+        ),
+        all(
+            any(
+                target_arch = "x86",
+                all(target_arch = "x86_64", target_pointer_width = "32")
+            ),
+            target_feature = "sse2"
+        ),
+        any(
+            all(target_arch = "x86", not(target_feature = "sse2")),
+            target_arch = "powerpc"
+        )
     )))]
     {
+        const _: () = assert!(LZMA_MEMCMPLEN_EXTRA == 0);
         while len < limit && *buf1.add(len as usize) == *buf2.add(len as usize) {
             len += 1;
         }
@@ -857,6 +1035,8 @@ pub use crate::common::filter_common::{
 };
 pub use crate::common::filter_decoder::{lzma_raw_decoder_init, lzma_raw_decoder_memusage};
 pub use crate::common::filter_encoder::{lzma_raw_encoder_init, lzma_raw_encoder_memusage};
+pub use crate::common::hardware_cputhreads::lzma_cputhreads;
+pub use crate::common::hardware_physmem::lzma_physmem;
 pub use crate::common::index::{
     lzma_index_append, lzma_index_end, lzma_index_init, lzma_index_memusage,
     lzma_index_padding_size, lzma_index_size,
@@ -879,14 +1059,10 @@ pub use crate::common::stream_flags_encoder::{
     lzma_stream_footer_encode, lzma_stream_header_encode,
 };
 pub use crate::common::threading::{
-    __darwin_time_t, _CLOCK_MONOTONIC, _CLOCK_MONOTONIC_RAW, _CLOCK_MONOTONIC_RAW_APPROX,
-    _CLOCK_PROCESS_CPUTIME_ID, _CLOCK_REALTIME, _CLOCK_THREAD_CPUTIME_ID, _CLOCK_UPTIME_RAW,
-    _CLOCK_UPTIME_RAW_APPROX, MYTHREAD_RET_VALUE, SIG_SETMASK, clockid_t, mythread, mythread_cond,
-    mythread_cond_destroy, mythread_cond_init, mythread_cond_signal, mythread_cond_timedwait,
-    mythread_cond_wait, mythread_condtime, mythread_condtime_set, mythread_create, mythread_join,
-    mythread_mutex, mythread_mutex_destroy, mythread_mutex_init, mythread_mutex_lock,
-    mythread_mutex_unlock, mythread_sigmask, pthread_attr_t, pthread_cond_t, pthread_condattr_t,
-    pthread_mutex_t, pthread_mutexattr_t, pthread_t, sigset_t, time_t, timespec,
+    MYTHREAD_RET_VALUE, mythread, mythread_cond, mythread_cond_destroy, mythread_cond_init,
+    mythread_cond_signal, mythread_cond_timedwait, mythread_cond_wait, mythread_condtime,
+    mythread_condtime_set, mythread_create, mythread_join, mythread_mutex, mythread_mutex_destroy,
+    mythread_mutex_init, mythread_mutex_lock, mythread_mutex_unlock,
 };
 pub use crate::common::vli_decoder::lzma_vli_decode;
 pub use crate::common::vli_encoder::lzma_vli_encode;
@@ -915,5 +1091,16 @@ pub unsafe fn memchr(s: *const c_void, c: c_int, n: size_t) -> *mut c_void {
     match ::memchr::memchr(needle, bytes) {
         Some(index) => (s as *const u8).add(index) as *mut c_void,
         None => core::ptr::null_mut(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{SIZE_MAX, UINTPTR_MAX, size_t, uintptr_t};
+
+    #[test]
+    fn c_size_bounds_use_pointer_width_types() {
+        assert_eq!(SIZE_MAX, size_t::MAX);
+        assert_eq!(UINTPTR_MAX, uintptr_t::MAX);
     }
 }

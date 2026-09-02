@@ -2,7 +2,7 @@ use crate::common::stream_flags_common::{lzma_footer_magic, lzma_header_magic};
 use crate::types::*;
 fn stream_flags_encode(options: *const lzma_stream_flags, out: &mut [u8; 2]) -> bool {
     unsafe {
-        if (*options).check > LZMA_CHECK_ID_MAX {
+        if (*options).check as c_uint > LZMA_CHECK_ID_MAX as c_uint {
             return true;
         }
         out[0] = 0;

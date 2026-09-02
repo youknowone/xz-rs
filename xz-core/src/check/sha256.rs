@@ -3,6 +3,11 @@ use crate::types::*;
 fn rotr_32(num: u32, amount: c_uint) -> u32 {
     num >> amount | num << 32u32.wrapping_sub(amount)
 }
+#[inline]
+unsafe fn read_be32_word(data: *const u32, index: usize) -> u32 {
+    let data = (data as *const u8).add(index * 4);
+    u32::from_be_bytes([*data, *data.add(1), *data.add(2), *data.add(3)])
+}
 static SHA256_K: [u32; 64] = [
     0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
     0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
@@ -21,10 +26,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         ::core::ptr::addr_of_mut!(T) as *mut u8,
         core::mem::size_of::<[u32; 8]>(),
     );
-    W[0] = (*data & 0xff) << 24
-        | (*data & 0xff00) << 8
-        | (*data & 0xff0000) >> 8
-        | (*data & 0xff000000) >> 24;
+    W[0] = read_be32_word(data, 0);
     T[7] = T[7].wrapping_add(
         rotr_32(T[4] ^ rotr_32(T[4] ^ rotr_32(T[4], 14), 5), 6)
             .wrapping_add(T[6] ^ T[4] & (T[5] ^ T[6]))
@@ -36,10 +38,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[0] ^ rotr_32(T[0] ^ rotr_32(T[0], 9), 11), 2)
             .wrapping_add((T[0] & (T[1] ^ T[2])).wrapping_add(T[1] & T[2])),
     );
-    W[1] = (*data.offset(1) & 0xff) << 24
-        | (*data.offset(1) & 0xff00) << 8
-        | (*data.offset(1) & 0xff0000) >> 8
-        | (*data.offset(1) & 0xff000000) >> 24;
+    W[1] = read_be32_word(data, 1);
     T[6] = T[6].wrapping_add(
         rotr_32(T[3] ^ rotr_32(T[3] ^ rotr_32(T[3], 14), 5), 6)
             .wrapping_add(T[5] ^ T[3] & (T[4] ^ T[5]))
@@ -51,10 +50,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[7] ^ rotr_32(T[7] ^ rotr_32(T[7], 9), 11), 2)
             .wrapping_add((T[7] & (T[0] ^ T[1])).wrapping_add(T[0] & T[1])),
     );
-    W[2] = (*data.offset(2) & 0xff) << 24
-        | (*data.offset(2) & 0xff00) << 8
-        | (*data.offset(2) & 0xff0000) >> 8
-        | (*data.offset(2) & 0xff000000) >> 24;
+    W[2] = read_be32_word(data, 2);
     T[5] = T[5].wrapping_add(
         rotr_32(T[2] ^ rotr_32(T[2] ^ rotr_32(T[2], 14), 5), 6)
             .wrapping_add(T[4] ^ T[2] & (T[3] ^ T[4]))
@@ -66,10 +62,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[6] ^ rotr_32(T[6] ^ rotr_32(T[6], 9), 11), 2)
             .wrapping_add((T[6] & (T[7] ^ T[0])).wrapping_add(T[7] & T[0])),
     );
-    W[3] = (*data.offset(3) & 0xff) << 24
-        | (*data.offset(3) & 0xff00) << 8
-        | (*data.offset(3) & 0xff0000) >> 8
-        | (*data.offset(3) & 0xff000000) >> 24;
+    W[3] = read_be32_word(data, 3);
     T[4] = T[4].wrapping_add(
         rotr_32(T[1] ^ rotr_32(T[1] ^ rotr_32(T[1], 14), 5), 6)
             .wrapping_add(T[3] ^ T[1] & (T[2] ^ T[3]))
@@ -81,10 +74,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[5] ^ rotr_32(T[5] ^ rotr_32(T[5], 9), 11), 2)
             .wrapping_add((T[5] & (T[6] ^ T[7])).wrapping_add(T[6] & T[7])),
     );
-    W[4] = (*data.offset(4) & 0xff) << 24
-        | (*data.offset(4) & 0xff00) << 8
-        | (*data.offset(4) & 0xff0000) >> 8
-        | (*data.offset(4) & 0xff000000) >> 24;
+    W[4] = read_be32_word(data, 4);
     T[3] = T[3].wrapping_add(
         rotr_32(T[0] ^ rotr_32(T[0] ^ rotr_32(T[0], 14), 5), 6)
             .wrapping_add(T[2] ^ T[0] & (T[1] ^ T[2]))
@@ -96,10 +86,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[4] ^ rotr_32(T[4] ^ rotr_32(T[4], 9), 11), 2)
             .wrapping_add((T[4] & (T[5] ^ T[6])).wrapping_add(T[5] & T[6])),
     );
-    W[5] = (*data.offset(5) & 0xff) << 24
-        | (*data.offset(5) & 0xff00) << 8
-        | (*data.offset(5) & 0xff0000) >> 8
-        | (*data.offset(5) & 0xff000000) >> 24;
+    W[5] = read_be32_word(data, 5);
     T[2] = T[2].wrapping_add(
         rotr_32(T[7] ^ rotr_32(T[7] ^ rotr_32(T[7], 14), 5), 6)
             .wrapping_add(T[1] ^ T[7] & (T[0] ^ T[1]))
@@ -111,10 +98,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[3] ^ rotr_32(T[3] ^ rotr_32(T[3], 9), 11), 2)
             .wrapping_add((T[3] & (T[4] ^ T[5])).wrapping_add(T[4] & T[5])),
     );
-    W[6] = (*data.offset(6) & 0xff) << 24
-        | (*data.offset(6) & 0xff00) << 8
-        | (*data.offset(6) & 0xff0000) >> 8
-        | (*data.offset(6) & 0xff000000) >> 24;
+    W[6] = read_be32_word(data, 6);
     T[1] = T[1].wrapping_add(
         rotr_32(T[6] ^ rotr_32(T[6] ^ rotr_32(T[6], 14), 5), 6)
             .wrapping_add(T[0] ^ T[6] & (T[7] ^ T[0]))
@@ -126,10 +110,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[2] ^ rotr_32(T[2] ^ rotr_32(T[2], 9), 11), 2)
             .wrapping_add((T[2] & (T[3] ^ T[4])).wrapping_add(T[3] & T[4])),
     );
-    W[7] = (*data.offset(7) & 0xff) << 24
-        | (*data.offset(7) & 0xff00) << 8
-        | (*data.offset(7) & 0xff0000) >> 8
-        | (*data.offset(7) & 0xff000000) >> 24;
+    W[7] = read_be32_word(data, 7);
     T[0] = T[0].wrapping_add(
         rotr_32(T[5] ^ rotr_32(T[5] ^ rotr_32(T[5], 14), 5), 6)
             .wrapping_add(T[7] ^ T[5] & (T[6] ^ T[7]))
@@ -141,10 +122,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[1] ^ rotr_32(T[1] ^ rotr_32(T[1], 9), 11), 2)
             .wrapping_add((T[1] & (T[2] ^ T[3])).wrapping_add(T[2] & T[3])),
     );
-    W[8] = (*data.offset(8) & 0xff) << 24
-        | (*data.offset(8) & 0xff00) << 8
-        | (*data.offset(8) & 0xff0000) >> 8
-        | (*data.offset(8) & 0xff000000) >> 24;
+    W[8] = read_be32_word(data, 8);
     T[7] = T[7].wrapping_add(
         rotr_32(T[4] ^ rotr_32(T[4] ^ rotr_32(T[4], 14), 5), 6)
             .wrapping_add(T[6] ^ T[4] & (T[5] ^ T[6]))
@@ -156,10 +134,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[0] ^ rotr_32(T[0] ^ rotr_32(T[0], 9), 11), 2)
             .wrapping_add((T[0] & (T[1] ^ T[2])).wrapping_add(T[1] & T[2])),
     );
-    W[9] = (*data.offset(9) & 0xff) << 24
-        | (*data.offset(9) & 0xff00) << 8
-        | (*data.offset(9) & 0xff0000) >> 8
-        | (*data.offset(9) & 0xff000000) >> 24;
+    W[9] = read_be32_word(data, 9);
     T[6] = T[6].wrapping_add(
         rotr_32(T[3] ^ rotr_32(T[3] ^ rotr_32(T[3], 14), 5), 6)
             .wrapping_add(T[5] ^ T[3] & (T[4] ^ T[5]))
@@ -171,10 +146,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[7] ^ rotr_32(T[7] ^ rotr_32(T[7], 9), 11), 2)
             .wrapping_add((T[7] & (T[0] ^ T[1])).wrapping_add(T[0] & T[1])),
     );
-    W[10] = (*data.offset(10) & 0xff) << 24
-        | (*data.offset(10) & 0xff00) << 8
-        | (*data.offset(10) & 0xff0000) >> 8
-        | (*data.offset(10) & 0xff000000) >> 24;
+    W[10] = read_be32_word(data, 10);
     T[5] = T[5].wrapping_add(
         rotr_32(T[2] ^ rotr_32(T[2] ^ rotr_32(T[2], 14), 5), 6)
             .wrapping_add(T[4] ^ T[2] & (T[3] ^ T[4]))
@@ -186,10 +158,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[6] ^ rotr_32(T[6] ^ rotr_32(T[6], 9), 11), 2)
             .wrapping_add((T[6] & (T[7] ^ T[0])).wrapping_add(T[7] & T[0])),
     );
-    W[11] = (*data.offset(11) & 0xff) << 24
-        | (*data.offset(11) & 0xff00) << 8
-        | (*data.offset(11) & 0xff0000) >> 8
-        | (*data.offset(11) & 0xff000000) >> 24;
+    W[11] = read_be32_word(data, 11);
     T[4] = T[4].wrapping_add(
         rotr_32(T[1] ^ rotr_32(T[1] ^ rotr_32(T[1], 14), 5), 6)
             .wrapping_add(T[3] ^ T[1] & (T[2] ^ T[3]))
@@ -201,10 +170,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[5] ^ rotr_32(T[5] ^ rotr_32(T[5], 9), 11), 2)
             .wrapping_add((T[5] & (T[6] ^ T[7])).wrapping_add(T[6] & T[7])),
     );
-    W[12] = (*data.offset(12) & 0xff) << 24
-        | (*data.offset(12) & 0xff00) << 8
-        | (*data.offset(12) & 0xff0000) >> 8
-        | (*data.offset(12) & 0xff000000) >> 24;
+    W[12] = read_be32_word(data, 12);
     T[3] = T[3].wrapping_add(
         rotr_32(T[0] ^ rotr_32(T[0] ^ rotr_32(T[0], 14), 5), 6)
             .wrapping_add(T[2] ^ T[0] & (T[1] ^ T[2]))
@@ -216,10 +182,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[4] ^ rotr_32(T[4] ^ rotr_32(T[4], 9), 11), 2)
             .wrapping_add((T[4] & (T[5] ^ T[6])).wrapping_add(T[5] & T[6])),
     );
-    W[13] = (*data.offset(13) & 0xff) << 24
-        | (*data.offset(13) & 0xff00) << 8
-        | (*data.offset(13) & 0xff0000) >> 8
-        | (*data.offset(13) & 0xff000000) >> 24;
+    W[13] = read_be32_word(data, 13);
     T[2] = T[2].wrapping_add(
         rotr_32(T[7] ^ rotr_32(T[7] ^ rotr_32(T[7], 14), 5), 6)
             .wrapping_add(T[1] ^ T[7] & (T[0] ^ T[1]))
@@ -231,10 +194,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[3] ^ rotr_32(T[3] ^ rotr_32(T[3], 9), 11), 2)
             .wrapping_add((T[3] & (T[4] ^ T[5])).wrapping_add(T[4] & T[5])),
     );
-    W[14] = (*data.offset(14) & 0xff) << 24
-        | (*data.offset(14) & 0xff00) << 8
-        | (*data.offset(14) & 0xff0000) >> 8
-        | (*data.offset(14) & 0xff000000) >> 24;
+    W[14] = read_be32_word(data, 14);
     T[1] = T[1].wrapping_add(
         rotr_32(T[6] ^ rotr_32(T[6] ^ rotr_32(T[6], 14), 5), 6)
             .wrapping_add(T[0] ^ T[6] & (T[7] ^ T[0]))
@@ -246,10 +206,7 @@ unsafe fn transform(state: *mut u32, data: *const u32) {
         rotr_32(T[2] ^ rotr_32(T[2] ^ rotr_32(T[2], 9), 11), 2)
             .wrapping_add((T[2] & (T[3] ^ T[4])).wrapping_add(T[3] & T[4])),
     );
-    W[15] = (*data.offset(15) & 0xff) << 24
-        | (*data.offset(15) & 0xff00) << 8
-        | (*data.offset(15) & 0xff0000) >> 8
-        | (*data.offset(15) & 0xff000000) >> 24;
+    W[15] = read_be32_word(data, 15);
     T[0] = T[0].wrapping_add(
         rotr_32(T[5] ^ rotr_32(T[5] ^ rotr_32(T[5], 14), 5), 6)
             .wrapping_add(T[7] ^ T[5] & (T[6] ^ T[7]))
@@ -581,21 +538,21 @@ pub unsafe fn lzma_sha256_finish(check: *mut lzma_check_state) {
         pos += 1;
     }
     (*check).state.sha256.size = (*check).state.sha256.size.wrapping_mul(8);
-    (*check).buffer.u64_0[7] = ((*check).state.sha256.size & 0xff as u64) << 56
-        | ((*check).state.sha256.size & 0xff00 as u64) << 40
-        | ((*check).state.sha256.size & 0xff0000 as u64) << 24
-        | ((*check).state.sha256.size & 0xff000000 as u64) << 8
-        | ((*check).state.sha256.size & 0xff00000000 as u64) >> 8
-        | ((*check).state.sha256.size & 0xff0000000000 as u64) >> 24
-        | ((*check).state.sha256.size & 0xff000000000000 as u64) >> 40
-        | ((*check).state.sha256.size & 0xff00000000000000 as u64) >> 56;
+    let size_bytes = (*check).state.sha256.size.to_be_bytes();
+    core::ptr::copy_nonoverlapping(
+        size_bytes.as_ptr(),
+        (::core::ptr::addr_of_mut!((*check).buffer.u8_0) as *mut u8).add(64 - 8),
+        size_bytes.len(),
+    );
     process(check);
     let mut i: size_t = 0;
     while i < 8 {
-        (*check).buffer.u32_0[i as usize] = ((*check).state.sha256.state[i as usize] & 0xff) << 24
-            | ((*check).state.sha256.state[i as usize] & 0xff00) << 8
-            | ((*check).state.sha256.state[i as usize] & 0xff0000) >> 8
-            | ((*check).state.sha256.state[i as usize] & 0xff000000) >> 24;
+        let bytes = (*check).state.sha256.state[i as usize].to_be_bytes();
+        core::ptr::copy_nonoverlapping(
+            bytes.as_ptr(),
+            (::core::ptr::addr_of_mut!((*check).buffer.u8_0) as *mut u8).add(i as usize * 4),
+            bytes.len(),
+        );
         i += 1;
     }
 }
