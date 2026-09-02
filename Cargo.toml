@@ -53,7 +53,9 @@ wasm-bindgen-test = "0.3"
 default = ["xz-core"]
 xz-core = ["dep:xz-core"]
 xz-sys = ["dep:xz-sys"]
-liblzma-sys = ["dep:liblzma-sys"]
+# The xz crate uses lzma_index and LZMA_STREAM_HEADER_SIZE, which
+# liblzma-sys only exposes from its bindgen-generated bindings.
+liblzma-sys = ["dep:liblzma-sys", "liblzma-sys/bindgen"]
 static = ["liblzma-sys?/static"]
 parallel = ["xz-sys?/parallel", "liblzma-sys?/parallel", "num_cpus"]
 bindgen = ["liblzma-sys?/bindgen"] # only affects liblzma-sys
