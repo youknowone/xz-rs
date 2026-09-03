@@ -409,16 +409,18 @@ pub unsafe fn lzma_properties_size(size: &mut u32, filter: &lzma_filter) -> lzma
         LZMA_OK
     }
 }
+/// `props` must be exactly the size [`lzma_properties_size`] reports for this
+/// filter; the per-filter encoders write that many bytes without a length.
+///
 /// # Safety
-/// Same `filter.options` contract as [`lzma_properties_size`], and `props`
-/// must be writable for the size that call reports.
-pub unsafe fn lzma_properties_encode(filter: &lzma_filter, props: *mut u8) -> lzma_ret {
+/// Same `filter.options` contract as [`lzma_properties_size`].
+pub unsafe fn lzma_properties_encode(filter: &lzma_filter, props: &mut [u8]) -> lzma_ret {
     let fe: *const lzma_filter_encoder = encoder_find(filter.id) as *const lzma_filter_encoder;
     if fe.is_null() {
         return LZMA_PROG_ERROR;
     }
     if let Some(props_encode) = (*fe).props_encode {
-        props_encode(filter.options, props)
+        props_encode(filter.options, props.as_mut_ptr())
     } else {
         LZMA_OK
     }

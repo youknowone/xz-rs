@@ -225,9 +225,13 @@ unsafe fn worker_encode(
     }
     match ret {
         1 => {
+            let outbuf = (*thr).outbuf;
             ret = lzma_block_header_encode(
                 &(*thr).block_options,
-                ::core::ptr::addr_of_mut!((*(*thr).outbuf).buf) as *mut u8,
+                c_slice_mut(
+                    ::core::ptr::addr_of_mut!((*outbuf).buf) as *mut u8,
+                    (*outbuf).allocated,
+                ),
             );
             if ret != LZMA_OK {
                 worker_error(thr, ret);

@@ -112,10 +112,8 @@ unsafe fn stream_encode(
                         }
                     }
                     (*coder).block_encoder_is_initialized = false;
-                    if lzma_block_header_encode(
-                        &(*coder).block_options,
-                        ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
-                    ) != LZMA_OK
+                    if lzma_block_header_encode(&(*coder).block_options, &mut (*coder).buffer)
+                        != LZMA_OK
                     {
                         return LZMA_PROG_ERROR;
                     }

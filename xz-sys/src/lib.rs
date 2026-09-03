@@ -292,7 +292,12 @@ pub unsafe extern "C" fn lzma_vli_encode(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> lzma_ret {
-    xz_core::common::vli_encoder::lzma_vli_encode(vli, vli_pos, out, out_pos, out_size)
+    xz_core::common::vli_encoder::lzma_vli_encode(
+        vli,
+        vli_pos.as_mut(),
+        c_slice_mut(out, out_size),
+        &mut *out_pos,
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -303,7 +308,12 @@ pub unsafe extern "C" fn lzma_vli_decode(
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
-    xz_core::common::vli_decoder::lzma_vli_decode(vli, vli_pos, input, in_pos, in_size)
+    xz_core::common::vli_decoder::lzma_vli_decode(
+        &mut *vli,
+        vli_pos.as_mut(),
+        c_slice(input, in_size),
+        &mut *in_pos,
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -323,13 +333,14 @@ pub unsafe extern "C" fn lzma_check_size(check: lzma_check) -> u32 {
     xz_core::check::check::lzma_check_size(check)
 }
 
-/// xz-core takes the buffer as a slice. C hands over a pointer and a size,
-/// and allows the pointer to be NULL when the size is zero, which
-/// `from_raw_parts` does not.
+/// xz-core takes buffers as slices. C hands over a pointer and a size, and
+/// allows the pointer to be NULL when the size is zero, which `from_raw_parts`
+/// does not. This is the boundary where that contract stops being checkable,
+/// so it is reconstructed here rather than carried into xz-core.
 ///
 /// # Safety
 /// `buf` must be readable for `size` bytes, or `size` must be zero.
-unsafe fn crc_slice<'a>(buf: *const u8, size: size_t) -> &'a [u8] {
+unsafe fn c_slice<'a>(buf: *const u8, size: size_t) -> &'a [u8] {
     if size == 0 {
         &[]
     } else {
@@ -337,14 +348,26 @@ unsafe fn crc_slice<'a>(buf: *const u8, size: size_t) -> &'a [u8] {
     }
 }
 
+/// Mutable form of [`c_slice`].
+///
+/// # Safety
+/// `buf` must be writable for `size` bytes, or `size` must be zero.
+unsafe fn c_slice_mut<'a>(buf: *mut u8, size: size_t) -> &'a mut [u8] {
+    if size == 0 {
+        &mut []
+    } else {
+        core::slice::from_raw_parts_mut(buf, size)
+    }
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
-    xz_core::check::crc32_fast::crc32(crc_slice(buf, size), crc)
+    xz_core::check::crc32_fast::crc32(c_slice(buf, size), crc)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
-    xz_core::check::crc64_fast::crc64(crc_slice(buf, size), crc)
+    xz_core::check::crc64_fast::crc64(c_slice(buf, size), crc)
 }
 
 /*********************
@@ -641,7 +664,18 @@ pub unsafe extern "C" fn lzma_properties_encode(
     filter: *const lzma_filter,
     props: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::filter_encoder::lzma_properties_encode(&*filter.cast(), props)
+    // C gives `props` no length; the caller is required to have sized it with
+    // lzma_properties_size, so that is what reconstructs the slice here.
+    let filter = &*filter.cast();
+    let mut props_size: u32 = 0;
+    let ret = xz_core::common::filter_encoder::lzma_properties_size(&mut props_size, filter);
+    if ret != LZMA_OK {
+        return ret;
+    }
+    xz_core::common::filter_encoder::lzma_properties_encode(
+        filter,
+        c_slice_mut(props, props_size as size_t),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -654,8 +688,7 @@ pub unsafe extern "C" fn lzma_properties_decode(
     xz_core::common::filter_decoder::lzma_properties_decode(
         &mut *filter.cast(),
         normalize_c_allocator(allocator).cast(),
-        props,
-        props_size,
+        c_slice(props, props_size),
     )
 }
 
@@ -856,7 +889,12 @@ pub unsafe extern "C" fn lzma_block_header_encode(
     block: *const lzma_block,
     out: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::block_header_encoder::lzma_block_header_encode(&*block.cast(), out)
+    // C gives `out` no length; the Block Header is header_size bytes.
+    let block: &xz_core::types::lzma_block = &*block.cast();
+    xz_core::common::block_header_encoder::lzma_block_header_encode(
+        block,
+        c_slice_mut(out, block.header_size as size_t),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -865,10 +903,17 @@ pub unsafe extern "C" fn lzma_block_header_decode(
     allocator: *const lzma_allocator,
     input: *const u8,
 ) -> lzma_ret {
+    // C gives `input` no length; the Block Header is header_size bytes. The
+    // null tests stay here because a C caller can still pass NULL.
+    if block.is_null() || input.is_null() {
+        return LZMA_PROG_ERROR;
+    }
+    let block: &mut xz_core::types::lzma_block = &mut *block.cast();
+    let header_size = block.header_size as size_t;
     xz_core::common::block_header_decoder::lzma_block_header_decode(
-        block.cast(),
+        block,
         normalize_c_allocator(allocator).cast(),
-        input,
+        c_slice(input, header_size),
     )
 }
 
@@ -1207,9 +1252,8 @@ pub unsafe extern "C" fn lzma_filter_flags_encode(
 ) -> lzma_ret {
     xz_core::common::filter_flags_encoder::lzma_filter_flags_encode(
         &*filter.cast(),
-        out,
-        out_pos,
-        out_size,
+        c_slice_mut(out, out_size),
+        &mut *out_pos,
     )
 }
 
@@ -1224,9 +1268,8 @@ pub unsafe extern "C" fn lzma_filter_flags_decode(
     xz_core::common::filter_flags_decoder::lzma_filter_flags_decode(
         &mut *filter.cast(),
         normalize_c_allocator(allocator).cast(),
-        input,
-        in_pos,
-        in_size,
+        c_slice(input, in_size),
+        &mut *in_pos,
     )
 }
 

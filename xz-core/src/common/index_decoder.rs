@@ -53,11 +53,10 @@ unsafe fn index_decode(
 
                 SEQ_COUNT => {
                     ret = lzma_vli_decode(
-                        ::core::ptr::addr_of_mut!((*coder).count),
-                        ::core::ptr::addr_of_mut!((*coder).pos),
-                        input,
-                        in_pos,
-                        in_size,
+                        &mut (*coder).count,
+                        Some(&mut (*coder).pos),
+                        c_slice(input, in_size),
+                        &mut *in_pos,
                     );
                     if ret != LZMA_STREAM_END {
                         return goto_out(coder, input, in_start, in_pos, ret);
@@ -86,17 +85,16 @@ unsafe fn index_decode(
 
                 SEQ_UNPADDED | SEQ_UNCOMPRESSED => {
                     let size = if (*coder).sequence == SEQ_UNPADDED {
-                        ::core::ptr::addr_of_mut!((*coder).unpadded_size)
+                        &mut (*coder).unpadded_size
                     } else {
-                        ::core::ptr::addr_of_mut!((*coder).uncompressed_size)
+                        &mut (*coder).uncompressed_size
                     };
 
                     ret = lzma_vli_decode(
                         size,
-                        ::core::ptr::addr_of_mut!((*coder).pos),
-                        input,
-                        in_pos,
-                        in_size,
+                        Some(&mut (*coder).pos),
+                        c_slice(input, in_size),
+                        &mut *in_pos,
                     );
                     if ret != LZMA_STREAM_END {
                         return goto_out(coder, input, in_start, in_pos, ret);

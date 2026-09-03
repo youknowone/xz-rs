@@ -127,9 +127,9 @@ unsafe fn stream_decode(
                 let filters_ptr = filters.as_mut_ptr() as *mut lzma_filter;
                 (*coder).block_options.filters = filters_ptr;
                 let ret: lzma_ret = lzma_block_header_decode(
-                    ::core::ptr::addr_of_mut!((*coder).block_options),
+                    &mut (*coder).block_options,
                     allocator,
-                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    &(*coder).buffer,
                 );
                 if ret != LZMA_OK {
                     lzma_filters_free(filters_ptr, allocator);

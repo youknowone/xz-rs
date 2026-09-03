@@ -332,13 +332,12 @@ pub unsafe fn lzma_raw_decoder_memusage(filters: *const lzma_filter) -> u64 {
     )
 }
 /// # Safety
-/// `props` must be readable for `props_size` bytes. On success `filter.options`
-/// owns an allocation from `allocator` that the caller must free.
+/// On success `filter.options` owns an allocation from `allocator` that the
+/// caller must free.
 pub unsafe fn lzma_properties_decode(
     filter: &mut lzma_filter,
     allocator: *const lzma_allocator,
-    props: *const u8,
-    props_size: size_t,
+    props: &[u8],
 ) -> lzma_ret {
     filter.options = core::ptr::null_mut();
     let fd: *const lzma_filter_decoder = decoder_find(filter.id) as *const lzma_filter_decoder;
@@ -346,8 +345,13 @@ pub unsafe fn lzma_properties_decode(
         return LZMA_OPTIONS_ERROR;
     }
     if let Some(props_decode) = (*fd).props_decode {
-        props_decode(&raw mut filter.options, allocator, props, props_size)
-    } else if props_size == 0 {
+        props_decode(
+            &raw mut filter.options,
+            allocator,
+            props.as_ptr(),
+            props.len(),
+        )
+    } else if props.is_empty() {
         LZMA_OK
     } else {
         LZMA_OPTIONS_ERROR

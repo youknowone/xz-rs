@@ -43,10 +43,9 @@ unsafe fn index_encode(
                 let count: lzma_vli = lzma_index_block_count(&*(*coder).index) as lzma_vli;
                 ret = lzma_vli_encode(
                     count,
-                    ::core::ptr::addr_of_mut!((*coder).pos),
-                    out,
-                    out_pos,
-                    out_size,
+                    Some(&mut (*coder).pos),
+                    c_slice_mut(out, out_size),
+                    &mut *out_pos,
                 );
                 if ret != LZMA_STREAM_END {
                     break;
@@ -89,10 +88,9 @@ unsafe fn index_encode(
             };
             ret = lzma_vli_encode(
                 size,
-                ::core::ptr::addr_of_mut!((*coder).pos),
-                out,
-                out_pos,
-                out_size,
+                Some(&mut (*coder).pos),
+                c_slice_mut(out, out_size),
+                &mut *out_pos,
             );
             if ret != LZMA_STREAM_END {
                 break;

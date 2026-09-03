@@ -931,14 +931,45 @@ pub fn is_backward_size_valid(options: &lzma_stream_flags) -> bool {
 pub fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
     vli_ceil4(index_size_unpadded(count, index_list_size))
 }
-pub fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
-    (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
+/// Borrow a C buffer as a slice.
+///
+/// The transpiled coder interface passes a pointer and a size, and allows the
+/// pointer to be NULL as long as the size is zero. `from_raw_parts` requires a
+/// non-null, aligned pointer even for an empty slice, so the zero case gets an
+/// empty slice of its own.
+///
+/// # Safety
+/// `ptr` must be readable for `len` bytes, or `len` must be zero.
+#[inline]
+pub(crate) unsafe fn c_slice<'a>(ptr: *const u8, len: size_t) -> &'a [u8] {
+    if len == 0 {
+        &[]
+    } else {
+        core::slice::from_raw_parts(ptr, len)
+    }
 }
-/// Estimate form, for sizes that come from caller options or from a Block
-/// header rather than from a buffer that was actually allocated. Those are
-/// lzma_vli-wide and truncate to a few hundred bytes if they are narrowed to
-/// size_t on a 32-bit target, which turns a memlimit rejection into an accept.
-pub fn lzma_outq_outbuf_memusage64(buf_size: u64) -> u64 {
+
+/// Mutable form of [`c_slice`].
+///
+/// # Safety
+/// `ptr` must be writable for `len` bytes, or `len` must be zero.
+#[inline]
+pub(crate) unsafe fn c_slice_mut<'a>(ptr: *mut u8, len: size_t) -> &'a mut [u8] {
+    if len == 0 {
+        &mut []
+    } else {
+        core::slice::from_raw_parts_mut(ptr, len)
+    }
+}
+
+/// Memory one output buffer of `buf_size` bytes costs, header included.
+///
+/// The argument is 64-bit because callers reach this both with a size_t from a
+/// buffer that was allocated and with an lzma_vli from caller options or a
+/// Block header. C takes a size_t for both, so on a 32-bit target the second
+/// kind truncates to a few hundred bytes, turning a memlimit rejection into an
+/// accept.
+pub(crate) fn lzma_outq_outbuf_memusage(buf_size: u64) -> u64 {
     (core::mem::size_of::<lzma_outbuf>() as u64).saturating_add(buf_size)
 }
 #[inline]

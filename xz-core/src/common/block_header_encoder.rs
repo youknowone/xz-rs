@@ -41,44 +41,43 @@ pub unsafe fn lzma_block_header_size(block: &mut lzma_block) -> lzma_ret {
     block.header_size = (size + 3) & !(3);
     LZMA_OK
 }
+/// Encode the Block Header into the first `block.header_size` bytes of `out`.
+/// Call [`lzma_block_header_size`] first; a shorter `out` is rejected rather
+/// than overrun.
+///
 /// # Safety
-/// Same filter-array contract as [`lzma_block_header_size`], and `out` must be
-/// writable for `block.header_size` bytes.
-pub unsafe fn lzma_block_header_encode(block: &lzma_block, out: *mut u8) -> lzma_ret {
+/// Same filter-array contract as [`lzma_block_header_size`].
+pub unsafe fn lzma_block_header_encode(block: &lzma_block, out: &mut [u8]) -> lzma_ret {
     if lzma_block_unpadded_size(block) == 0
         || !(block.uncompressed_size <= LZMA_VLI_MAX || block.uncompressed_size == LZMA_VLI_UNKNOWN)
     {
         return LZMA_PROG_ERROR;
     }
-    let out_size: size_t = (block.header_size - 4) as size_t;
-    *out = (out_size / 4) as u8;
-    *out.offset(1) = 0;
+    let header_size = block.header_size as size_t;
+    let out_size: size_t = header_size - 4;
+    let Some(out) = out.get_mut(..header_size) else {
+        return LZMA_PROG_ERROR;
+    };
+    let (out, crc_out) = out.split_at_mut(out_size);
+    let Some(crc_out) = crc_out.first_chunk_mut::<4>() else {
+        return LZMA_PROG_ERROR;
+    };
+    out[0] = (out_size / 4) as u8;
+    out[1] = 0;
     let mut out_pos: size_t = 2;
     if block.compressed_size != LZMA_VLI_UNKNOWN {
-        let ret_: lzma_ret = lzma_vli_encode(
-            block.compressed_size,
-            core::ptr::null_mut(),
-            out,
-            ::core::ptr::addr_of_mut!(out_pos),
-            out_size,
-        );
+        let ret_: lzma_ret = lzma_vli_encode(block.compressed_size, None, out, &mut out_pos);
         if ret_ != LZMA_OK {
             return ret_;
         }
-        *out.offset(1) |= 0x40;
+        out[1] |= 0x40;
     }
     if block.uncompressed_size != LZMA_VLI_UNKNOWN {
-        let ret__0: lzma_ret = lzma_vli_encode(
-            block.uncompressed_size,
-            core::ptr::null_mut(),
-            out,
-            ::core::ptr::addr_of_mut!(out_pos),
-            out_size,
-        );
+        let ret__0: lzma_ret = lzma_vli_encode(block.uncompressed_size, None, out, &mut out_pos);
         if ret__0 != LZMA_OK {
             return ret__0;
         }
-        *out.offset(1) |= 0x80;
+        out[1] |= 0x80;
     }
     if block.filters.is_null() || (*block.filters).id == LZMA_VLI_UNKNOWN {
         return LZMA_PROG_ERROR;
@@ -88,12 +87,8 @@ pub unsafe fn lzma_block_header_encode(block: &lzma_block, out: *mut u8) -> lzma
         if filter_count == LZMA_FILTERS_MAX as size_t {
             return LZMA_PROG_ERROR;
         }
-        let ret__1: lzma_ret = lzma_filter_flags_encode(
-            &*block.filters.add(filter_count),
-            out,
-            ::core::ptr::addr_of_mut!(out_pos),
-            out_size,
-        );
+        let ret__1: lzma_ret =
+            lzma_filter_flags_encode(&*block.filters.add(filter_count), out, &mut out_pos);
         if ret__1 != LZMA_OK {
             return ret__1;
         }
@@ -102,11 +97,8 @@ pub unsafe fn lzma_block_header_encode(block: &lzma_block, out: *mut u8) -> lzma
             break;
         }
     }
-    *out.offset(1) |= (filter_count - 1) as u8;
-    core::ptr::write_bytes(out.add(out_pos) as *mut u8, 0 as u8, out_size - out_pos);
-    write32le(
-        &mut *out.add(out_size).cast::<[u8; 4]>(),
-        lzma_crc32(out, out_size, 0),
-    );
+    out[1] |= (filter_count - 1) as u8;
+    out[out_pos..].fill(0);
+    write32le(crc_out, crc32(out, 0));
     LZMA_OK
 }

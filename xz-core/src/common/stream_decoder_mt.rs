@@ -599,11 +599,8 @@ unsafe fn decode_block_header(
     (*coder).block_options.version = 1;
     (*coder).block_options.filters =
         ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter;
-    let ret_: lzma_ret = lzma_block_header_decode(
-        ::core::ptr::addr_of_mut!((*coder).block_options),
-        allocator,
-        ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
-    );
+    let ret_: lzma_ret =
+        lzma_block_header_decode(&mut (*coder).block_options, allocator, &(*coder).buffer);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -669,8 +666,8 @@ unsafe fn stream_decode_mt_block_init(
         return None;
     }
     (*coder).mem_next_in = comp_blk_size(coder) as u64;
-    let mem_buffers: u64 = (*coder).mem_next_in
-        + lzma_outq_outbuf_memusage64((*coder).block_options.uncompressed_size);
+    let mem_buffers: u64 =
+        (*coder).mem_next_in + lzma_outq_outbuf_memusage((*coder).block_options.uncompressed_size);
     if (UINT64_MAX).wrapping_sub(mem_buffers) < (*coder).mem_next_filters {
         (*coder).sequence = SEQ_BLOCK_DIRECT_INIT;
         return None;

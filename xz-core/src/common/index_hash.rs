@@ -159,11 +159,10 @@ pub unsafe fn lzma_index_hash_decode(
             }
             1 => {
                 ret = lzma_vli_decode(
-                    ::core::ptr::addr_of_mut!((*index_hash).remaining),
-                    ::core::ptr::addr_of_mut!((*index_hash).pos),
-                    input,
-                    in_pos,
-                    in_size,
+                    &mut (*index_hash).remaining,
+                    Some(&mut (*index_hash).pos),
+                    c_slice(input, in_size),
+                    &mut *in_pos,
                 );
                 if ret != LZMA_STREAM_END {
                     break;
@@ -181,17 +180,16 @@ pub unsafe fn lzma_index_hash_decode(
                 continue;
             }
             2 | 3 => {
-                let size: *mut lzma_vli = if (*index_hash).sequence == SEQ_UNPADDED {
-                    ::core::ptr::addr_of_mut!((*index_hash).unpadded_size)
+                let size = if (*index_hash).sequence == SEQ_UNPADDED {
+                    &mut (*index_hash).unpadded_size
                 } else {
-                    ::core::ptr::addr_of_mut!((*index_hash).uncompressed_size)
+                    &mut (*index_hash).uncompressed_size
                 };
                 ret = lzma_vli_decode(
                     size,
-                    ::core::ptr::addr_of_mut!((*index_hash).pos),
-                    input,
-                    in_pos,
-                    in_size,
+                    Some(&mut (*index_hash).pos),
+                    c_slice(input, in_size),
+                    &mut *in_pos,
                 );
                 if ret != LZMA_STREAM_END {
                     break;

@@ -87,7 +87,9 @@ unsafe fn block_encode_uncompressed(
         (*block).filters = filters_orig;
         return LZMA_BUF_ERROR;
     }
-    if lzma_block_header_encode(&*block, out.add(*out_pos)) != LZMA_OK {
+    if lzma_block_header_encode(&*block, c_slice_mut(out.add(*out_pos), out_size - *out_pos))
+        != LZMA_OK
+    {
         (*block).filters = filters_orig;
         return LZMA_PROG_ERROR;
     }
@@ -179,7 +181,10 @@ unsafe fn block_encode_normal(
     if ret == LZMA_STREAM_END {
         (*block).compressed_size =
             (*out_pos - (out_start + (*block).header_size as size_t)) as lzma_vli;
-        ret = lzma_block_header_encode(&*block, out.add(out_start));
+        ret = lzma_block_header_encode(
+            &*block,
+            c_slice_mut(out.add(out_start), out_size - out_start),
+        );
         if ret != LZMA_OK {
             ret = LZMA_PROG_ERROR;
         }
