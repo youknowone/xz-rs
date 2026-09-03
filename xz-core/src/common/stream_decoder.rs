@@ -231,14 +231,12 @@ unsafe fn stream_decode(
                         ret
                     };
                 }
-                let mut footer_flags = footer_flags.assume_init();
-                if lzma_index_hash_size((*coder).index_hash) != footer_flags.backward_size {
+                let footer_flags = footer_flags.assume_init();
+                if lzma_index_hash_size(&*(*coder).index_hash) != footer_flags.backward_size {
                     return LZMA_DATA_ERROR;
                 }
-                let ret: lzma_ret = lzma_stream_flags_compare(
-                    ::core::ptr::addr_of_mut!((*coder).stream_flags),
-                    ::core::ptr::addr_of_mut!(footer_flags),
-                );
+                let ret: lzma_ret =
+                    lzma_stream_flags_compare(&(*coder).stream_flags, &footer_flags);
                 if ret != LZMA_OK {
                     return ret;
                 }

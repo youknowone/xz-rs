@@ -267,7 +267,7 @@ pub unsafe extern "C" fn lzma_get_progress(
     progress_out: *mut u64,
 ) {
     normalize_c_stream_allocator(strm);
-    xz_core::common::common::lzma_get_progress(strm.cast(), progress_in, progress_out)
+    xz_core::common::common::lzma_get_progress(strm.cast(), &mut *progress_in, &mut *progress_out)
 }
 
 #[unsafe(no_mangle)]
@@ -619,7 +619,7 @@ pub unsafe extern "C" fn lzma_properties_size(
     size: *mut u32,
     filter: *const lzma_filter,
 ) -> lzma_ret {
-    xz_core::common::filter_encoder::lzma_properties_size(size, filter.cast())
+    xz_core::common::filter_encoder::lzma_properties_size(&mut *size, &*filter.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -627,7 +627,7 @@ pub unsafe extern "C" fn lzma_properties_encode(
     filter: *const lzma_filter,
     props: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::filter_encoder::lzma_properties_encode(filter.cast(), props)
+    xz_core::common::filter_encoder::lzma_properties_encode(&*filter.cast(), props)
 }
 
 #[unsafe(no_mangle)]
@@ -638,7 +638,7 @@ pub unsafe extern "C" fn lzma_properties_decode(
     props_size: size_t,
 ) -> lzma_ret {
     xz_core::common::filter_decoder::lzma_properties_decode(
-        filter.cast(),
+        &mut *filter.cast(),
         normalize_c_allocator(allocator).cast(),
         props,
         props_size,
@@ -657,7 +657,7 @@ pub unsafe extern "C" fn lzma_lzma_preset(
     options: *mut lzma_options_lzma,
     preset: u32,
 ) -> lzma_bool {
-    xz_core::lzma::lzma_encoder_presets::lzma_lzma_preset(options.cast(), preset)
+    xz_core::lzma::lzma_encoder_presets::lzma_lzma_preset(&mut *options.cast(), preset)
 }
 
 #[unsafe(no_mangle)]
@@ -784,7 +784,7 @@ pub unsafe extern "C" fn lzma_stream_flags_compare(
     a: *const lzma_stream_flags,
     b: *const lzma_stream_flags,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_common::lzma_stream_flags_compare(a.cast(), b.cast())
+    xz_core::common::stream_flags_common::lzma_stream_flags_compare(&*a.cast(), &*b.cast())
 }
 
 /* `lzma/hardware.h` */
@@ -822,7 +822,7 @@ pub unsafe extern "C" fn lzma_index_buffer_decode(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_uncompressed_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_uncompressed_size(i.cast())
+    xz_core::common::index::lzma_index_uncompressed_size(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -834,7 +834,7 @@ pub unsafe extern "C" fn lzma_index_end(i: *mut lzma_index, allocator: *const lz
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret {
-    xz_core::common::block_header_encoder::lzma_block_header_size(block.cast())
+    xz_core::common::block_header_encoder::lzma_block_header_size(&mut *block.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -842,7 +842,7 @@ pub unsafe extern "C" fn lzma_block_header_encode(
     block: *const lzma_block,
     out: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::block_header_encoder::lzma_block_header_encode(block.cast(), out)
+    xz_core::common::block_header_encoder::lzma_block_header_encode(&*block.cast(), out)
 }
 
 #[unsafe(no_mangle)]
@@ -971,7 +971,7 @@ pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u6
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
-    xz_core::common::index::lzma_index_memused(i.cast())
+    xz_core::common::index::lzma_index_memused(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -1004,7 +1004,7 @@ pub unsafe extern "C" fn lzma_index_stream_flags(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_checks(i: *const lzma_index) -> u32 {
-    xz_core::common::index::lzma_index_checks(i.cast())
+    xz_core::common::index::lzma_index_checks(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -1017,42 +1017,42 @@ pub unsafe extern "C" fn lzma_index_stream_padding(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_stream_count(i.cast())
+    xz_core::common::index::lzma_index_stream_count(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_block_count(i.cast())
+    xz_core::common::index::lzma_index_block_count(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_size(i.cast())
+    xz_core::common::index::lzma_index_size(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_stream_size(i.cast())
+    xz_core::common::index::lzma_index_stream_size(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_total_size(i.cast())
+    xz_core::common::index::lzma_index_total_size(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_file_size(i.cast())
+    xz_core::common::index::lzma_index_file_size(&*i.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *const lzma_index) {
-    xz_core::common::index::lzma_index_iter_init(iter.cast(), i.cast())
+    xz_core::common::index::lzma_index_iter_init(&mut *iter.cast(), &*i.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_iter_rewind(iter: *mut lzma_index_iter) {
-    xz_core::common::index::lzma_index_iter_rewind(iter.cast())
+    xz_core::common::index::lzma_index_iter_rewind(&mut *iter.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -1060,7 +1060,7 @@ pub unsafe extern "C" fn lzma_index_iter_next(
     iter: *mut lzma_index_iter,
     mode: lzma_index_iter_mode,
 ) -> lzma_bool {
-    xz_core::common::index::lzma_index_iter_next(iter.cast(), mode)
+    xz_core::common::index::lzma_index_iter_next(&mut *iter.cast(), mode)
 }
 
 #[unsafe(no_mangle)]
@@ -1068,7 +1068,7 @@ pub unsafe extern "C" fn lzma_index_iter_locate(
     iter: *mut lzma_index_iter,
     target: lzma_vli,
 ) -> lzma_bool {
-    xz_core::common::index::lzma_index_iter_locate(iter.cast(), target)
+    xz_core::common::index::lzma_index_iter_locate(&mut *iter.cast(), target)
 }
 
 #[unsafe(no_mangle)]
@@ -1171,7 +1171,7 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
-    xz_core::common::index_hash::lzma_index_hash_size(index_hash.cast())
+    xz_core::common::index_hash::lzma_index_hash_size(&*index_hash.cast())
 }
 
 /* `lzma/filter.h`: filter flags / string conversion */
@@ -1181,7 +1181,7 @@ pub unsafe extern "C" fn lzma_filter_flags_size(
     size: *mut u32,
     filter: *const lzma_filter,
 ) -> lzma_ret {
-    xz_core::common::filter_flags_encoder::lzma_filter_flags_size(size, filter.cast())
+    xz_core::common::filter_flags_encoder::lzma_filter_flags_size(&mut *size, &*filter.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -1192,7 +1192,7 @@ pub unsafe extern "C" fn lzma_filter_flags_encode(
     out_size: size_t,
 ) -> lzma_ret {
     xz_core::common::filter_flags_encoder::lzma_filter_flags_encode(
-        filter.cast(),
+        &*filter.cast(),
         out,
         out_pos,
         out_size,
@@ -1208,7 +1208,7 @@ pub unsafe extern "C" fn lzma_filter_flags_decode(
     in_size: size_t,
 ) -> lzma_ret {
     xz_core::common::filter_flags_decoder::lzma_filter_flags_decode(
-        filter.cast(),
+        &mut *filter.cast(),
         normalize_c_allocator(allocator).cast(),
         input,
         in_pos,

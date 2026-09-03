@@ -390,29 +390,35 @@ pub unsafe fn lzma_mt_block_size(filters: *const lzma_filter) -> u64 {
     }
     if max == 0 { UINT64_MAX } else { max }
 }
-pub unsafe fn lzma_properties_size(size: *mut u32, filter: *const lzma_filter) -> lzma_ret {
-    let fe: *const lzma_filter_encoder = encoder_find((*filter).id) as *const lzma_filter_encoder;
+/// # Safety
+/// `filter.options` is handed to the filter's own property encoder, which
+/// reads it as the options struct `filter.id` names.
+pub unsafe fn lzma_properties_size(size: &mut u32, filter: &lzma_filter) -> lzma_ret {
+    let fe: *const lzma_filter_encoder = encoder_find(filter.id) as *const lzma_filter_encoder;
     if fe.is_null() {
-        return if (*filter).id <= LZMA_VLI_MAX {
+        return if filter.id <= LZMA_VLI_MAX {
             LZMA_OPTIONS_ERROR
         } else {
             LZMA_PROG_ERROR
         };
     }
     if let Some(props_size_get) = (*fe).props_size_get {
-        props_size_get(size, (*filter).options)
+        props_size_get(size, filter.options)
     } else {
         *size = (*fe).props_size_fixed;
         LZMA_OK
     }
 }
-pub unsafe fn lzma_properties_encode(filter: *const lzma_filter, props: *mut u8) -> lzma_ret {
-    let fe: *const lzma_filter_encoder = encoder_find((*filter).id) as *const lzma_filter_encoder;
+/// # Safety
+/// Same `filter.options` contract as [`lzma_properties_size`], and `props`
+/// must be writable for the size that call reports.
+pub unsafe fn lzma_properties_encode(filter: &lzma_filter, props: *mut u8) -> lzma_ret {
+    let fe: *const lzma_filter_encoder = encoder_find(filter.id) as *const lzma_filter_encoder;
     if fe.is_null() {
         return LZMA_PROG_ERROR;
     }
     if let Some(props_encode) = (*fe).props_encode {
-        props_encode((*filter).options, props)
+        props_encode(filter.options, props)
     } else {
         LZMA_OK
     }

@@ -77,7 +77,7 @@ unsafe fn block_encode_uncompressed(
     filters[1].id = LZMA_VLI_UNKNOWN;
     let filters_orig: *mut lzma_filter = (*block).filters;
     (*block).filters = ::core::ptr::addr_of_mut!(filters) as *mut lzma_filter;
-    if lzma_block_header_size(block) != LZMA_OK {
+    if lzma_block_header_size(&mut *block) != LZMA_OK {
         (*block).filters = filters_orig;
         return LZMA_PROG_ERROR;
     }
@@ -87,7 +87,7 @@ unsafe fn block_encode_uncompressed(
         (*block).filters = filters_orig;
         return LZMA_BUF_ERROR;
     }
-    if lzma_block_header_encode(block, out.add(*out_pos)) != LZMA_OK {
+    if lzma_block_header_encode(&*block, out.add(*out_pos)) != LZMA_OK {
         (*block).filters = filters_orig;
         return LZMA_PROG_ERROR;
     }
@@ -129,7 +129,7 @@ unsafe fn block_encode_normal(
     out_pos: *mut size_t,
     mut out_size: size_t,
 ) -> lzma_ret {
-    let ret_: lzma_ret = lzma_block_header_size(block);
+    let ret_: lzma_ret = lzma_block_header_size(&mut *block);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -179,7 +179,7 @@ unsafe fn block_encode_normal(
     if ret == LZMA_STREAM_END {
         (*block).compressed_size =
             (*out_pos - (out_start + (*block).header_size as size_t)) as lzma_vli;
-        ret = lzma_block_header_encode(block, out.add(out_start));
+        ret = lzma_block_header_encode(&*block, out.add(out_start));
         if ret != LZMA_OK {
             ret = LZMA_PROG_ERROR;
         }

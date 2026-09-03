@@ -1196,13 +1196,11 @@ unsafe fn stream_decode_mt(
                         ret_6
                     };
                 }
-                if lzma_index_hash_size((*coder).index_hash) != footer_flags.backward_size {
+                if lzma_index_hash_size(&*(*coder).index_hash) != footer_flags.backward_size {
                     return LZMA_DATA_ERROR;
                 }
-                let ret__6: lzma_ret = lzma_stream_flags_compare(
-                    ::core::ptr::addr_of_mut!((*coder).stream_flags),
-                    ::core::ptr::addr_of_mut!(footer_flags),
-                );
+                let ret__6: lzma_ret =
+                    lzma_stream_flags_compare(&(*coder).stream_flags, &footer_flags);
                 if ret__6 != LZMA_OK {
                     return ret__6;
                 }
@@ -1386,8 +1384,8 @@ unsafe fn stream_decoder_mt_memconfig(
 }
 unsafe fn stream_decoder_mt_get_progress(
     coder_ptr: *mut c_void,
-    progress_in: *mut u64,
-    progress_out: *mut u64,
+    progress_in: &mut u64,
+    progress_out: &mut u64,
 ) {
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut mythread_i_1862: c_uint = 0;
@@ -1501,7 +1499,7 @@ unsafe fn stream_decoder_mt_init(
                 as unsafe fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
         );
         (*next).get_progress = Some(
-            stream_decoder_mt_get_progress as unsafe fn(*mut c_void, *mut u64, *mut u64) -> (),
+            stream_decoder_mt_get_progress as unsafe fn(*mut c_void, &mut u64, &mut u64) -> (),
         );
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
         core::ptr::write_bytes(

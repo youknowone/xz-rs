@@ -79,13 +79,8 @@ pub unsafe fn lzma_index_hash_end(
 ) {
     crate::alloc::internal_free(index_hash, allocator);
 }
-pub unsafe fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
-    unsafe {
-        index_size(
-            (*index_hash).blocks.count,
-            (*index_hash).blocks.index_list_size,
-        )
-    }
+pub fn lzma_index_hash_size(index_hash: &lzma_index_hash) -> lzma_vli {
+    index_size(index_hash.blocks.count, index_hash.blocks.index_list_size)
 }
 unsafe fn hash_append(
     info: *mut lzma_index_hash_info,

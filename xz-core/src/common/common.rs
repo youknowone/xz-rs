@@ -302,18 +302,17 @@ pub unsafe fn lzma_end(strm: *mut lzma_stream) {
         (*strm).internal = core::ptr::null_mut();
     }
 }
+/// # Safety
+/// `strm` may be NULL or zeroed, but if `internal` is set it must be the
+/// coder `lzma_strm_init` installed.
 pub unsafe fn lzma_get_progress(
     strm: *mut lzma_stream,
-    progress_in: *mut u64,
-    progress_out: *mut u64,
+    progress_in: &mut u64,
+    progress_out: &mut u64,
 ) {
     if strm.is_null() || (*strm).internal.is_null() {
-        if !progress_in.is_null() {
-            *progress_in = 0;
-        }
-        if !progress_out.is_null() {
-            *progress_out = 0;
-        }
+        *progress_in = 0;
+        *progress_out = 0;
         return;
     }
 

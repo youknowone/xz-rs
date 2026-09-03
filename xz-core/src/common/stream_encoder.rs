@@ -32,7 +32,7 @@ unsafe fn block_encoder_init(
 ) -> lzma_ret {
     (*coder).block_options.compressed_size = LZMA_VLI_UNKNOWN;
     (*coder).block_options.uncompressed_size = LZMA_VLI_UNKNOWN;
-    let ret_: lzma_ret = lzma_block_header_size(::core::ptr::addr_of_mut!((*coder).block_options));
+    let ret_: lzma_ret = lzma_block_header_size(&mut (*coder).block_options);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -113,7 +113,7 @@ unsafe fn stream_encode(
                     }
                     (*coder).block_encoder_is_initialized = false;
                     if lzma_block_header_encode(
-                        ::core::ptr::addr_of_mut!((*coder).block_options),
+                        &(*coder).block_options,
                         ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
                     ) != LZMA_OK
                     {
@@ -176,7 +176,7 @@ unsafe fn stream_encode(
                 // the encoder never reads. LZMA_RESERVED_ENUM is 0.
                 let mut stream_flags = MaybeUninit::<lzma_stream_flags>::zeroed().assume_init();
                 stream_flags.version = 0;
-                stream_flags.backward_size = lzma_index_size((*coder).index);
+                stream_flags.backward_size = lzma_index_size(&*(*coder).index);
                 stream_flags.check = (*coder).block_options.check;
                 if lzma_stream_footer_encode(
                     &stream_flags,

@@ -29,10 +29,8 @@ use xz_core::alloc::{c_allocator, rust_allocator};
 use xz_core::check::{crc32_fast::lzma_crc32, crc64_fast::lzma_crc64};
 #[cfg(feature = "xz-core")]
 use xz_core::common::{
-    easy_buffer_encoder::lzma_easy_buffer_encode,
-    index::{lzma_index_end, lzma_index_uncompressed_size},
-    index_decoder::lzma_index_buffer_decode,
-    stream_buffer_decoder::lzma_stream_buffer_decode,
+    easy_buffer_encoder::lzma_easy_buffer_encode, index::lzma_index_end,
+    index_decoder::lzma_index_buffer_decode, stream_buffer_decoder::lzma_stream_buffer_decode,
     stream_buffer_encoder::lzma_stream_buffer_bound,
 };
 #[cfg(feature = "xz-core")]
@@ -623,6 +621,13 @@ unsafe fn backend_decode(compressed: &[u8], out_size: usize) -> Vec<u8> {
     );
     out.truncate(out_pos);
     out
+}
+
+/// xz-core takes the Index by reference; the other two backends take a bare
+/// pointer. This keeps one shape for the shared code below.
+#[cfg(feature = "xz-core")]
+unsafe fn lzma_index_uncompressed_size(i: *const BackendIndex) -> u64 {
+    unsafe { xz_core::common::index::lzma_index_uncompressed_size(&*i) }
 }
 
 /// xz-core states the twelve-byte Stream Footer in the type; the other two

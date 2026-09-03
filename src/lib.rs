@@ -73,7 +73,7 @@ pub(crate) mod sys {
         easy_encoder::lzma_easy_encoder,
         filter_decoder::{lzma_properties_decode, lzma_raw_decoder},
         filter_encoder::lzma_raw_encoder,
-        index::{lzma_index_end, lzma_index_uncompressed_size},
+        index::lzma_index_end,
         index_decoder::lzma_index_buffer_decode,
         lzip_decoder::lzma_lzip_decoder,
         stream_decoder::lzma_stream_decoder,
@@ -92,6 +92,13 @@ pub(crate) mod sys {
         lzma_lzma_preset, LZMA_PRESET_LEVEL_MASK,
     };
     pub(crate) use xz_core::types::*;
+
+    /// xz-core takes the Index by reference. The other two backends take a bare
+    /// pointer, so this restores the shape the rest of the crate shares across
+    /// backends.
+    pub(crate) unsafe fn lzma_index_uncompressed_size(i: *const lzma_index) -> lzma_vli {
+        xz_core::common::index::lzma_index_uncompressed_size(&*i)
+    }
 
     /// xz-core states the twelve-byte Stream Footer in the type. The other two
     /// backends take a bare pointer, so this restores the shape the rest of the

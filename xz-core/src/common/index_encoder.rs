@@ -40,7 +40,7 @@ unsafe fn index_encode(
                 continue;
             }
             1 => {
-                let count: lzma_vli = lzma_index_block_count((*coder).index) as lzma_vli;
+                let count: lzma_vli = lzma_index_block_count(&*(*coder).index) as lzma_vli;
                 ret = lzma_vli_encode(
                     count,
                     ::core::ptr::addr_of_mut!((*coder).pos),
@@ -57,12 +57,8 @@ unsafe fn index_encode(
                 continue;
             }
             4 => {
-                if lzma_index_iter_next(
-                    ::core::ptr::addr_of_mut!((*coder).iter),
-                    LZMA_INDEX_ITER_BLOCK,
-                ) != 0
-                {
-                    (*coder).pos = lzma_index_padding_size((*coder).index) as size_t;
+                if lzma_index_iter_next(&mut (*coder).iter, LZMA_INDEX_ITER_BLOCK) != 0 {
+                    (*coder).pos = lzma_index_padding_size(&*(*coder).index) as size_t;
                     (*coder).sequence = SEQ_PADDING;
                     continue;
                 } else {
@@ -129,7 +125,7 @@ unsafe fn index_encoder_end(coder: *mut c_void, allocator: *const lzma_allocator
     crate::alloc::internal_free(coder as *mut lzma_index_coder, allocator);
 }
 unsafe fn index_encoder_reset(coder: *mut lzma_index_coder, i: *const lzma_index) {
-    lzma_index_iter_init(::core::ptr::addr_of_mut!((*coder).iter), i);
+    lzma_index_iter_init(&mut (*coder).iter, &*i);
     (*coder).sequence = SEQ_INDICATOR;
     (*coder).index = i;
     (*coder).pos = 0;
@@ -225,7 +221,7 @@ pub unsafe fn lzma_index_buffer_encode(
     if i.is_null() || out.is_null() || out_pos.is_null() || *out_pos > out_size {
         return LZMA_PROG_ERROR;
     }
-    if ((out_size - *out_pos) as lzma_vli) < lzma_index_size(i) {
+    if ((out_size - *out_pos) as lzma_vli) < lzma_index_size(&*i) {
         return LZMA_BUF_ERROR;
     }
     let mut coder: lzma_index_coder = lzma_index_coder {
