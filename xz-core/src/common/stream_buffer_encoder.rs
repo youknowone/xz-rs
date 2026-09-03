@@ -60,10 +60,8 @@ pub unsafe fn lzma_stream_buffer_encode(
         reserved_int1: 0,
         reserved_int2: 0,
     };
-    if lzma_stream_header_encode(
-        ::core::ptr::addr_of_mut!(stream_flags),
-        out.offset(out_pos as isize),
-    ) != LZMA_OK
+    if lzma_stream_header_encode(::core::ptr::addr_of_mut!(stream_flags), out.add(out_pos))
+        != LZMA_OK
     {
         return LZMA_PROG_ERROR;
     }
@@ -135,10 +133,8 @@ pub unsafe fn lzma_stream_buffer_encode(
     if ret != LZMA_OK {
         return ret;
     }
-    if lzma_stream_footer_encode(
-        ::core::ptr::addr_of_mut!(stream_flags),
-        out.offset(out_pos as isize),
-    ) != LZMA_OK
+    if lzma_stream_footer_encode(::core::ptr::addr_of_mut!(stream_flags), out.add(out_pos))
+        != LZMA_OK
     {
         return LZMA_PROG_ERROR;
     }

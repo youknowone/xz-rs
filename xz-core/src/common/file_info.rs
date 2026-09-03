@@ -225,8 +225,7 @@ unsafe fn file_info_decode(
                 (*coder).temp_size -= LZMA_STREAM_HEADER_SIZE as size_t;
                 let ret: lzma_ret = hide_format_error(lzma_stream_footer_decode(
                     ::core::ptr::addr_of_mut!((*coder).footer_flags),
-                    (::core::ptr::addr_of_mut!((*coder).temp) as *mut u8)
-                        .offset((*coder).temp_size as isize),
+                    (::core::ptr::addr_of_mut!((*coder).temp) as *mut u8).add((*coder).temp_size),
                 ));
                 if ret != LZMA_OK {
                     return ret;
@@ -340,8 +339,7 @@ unsafe fn file_info_decode(
                 (*coder).temp_pos = (*coder).temp_size;
                 let ret: lzma_ret = hide_format_error(lzma_stream_header_decode(
                     ::core::ptr::addr_of_mut!((*coder).header_flags),
-                    (::core::ptr::addr_of_mut!((*coder).temp) as *mut u8)
-                        .offset((*coder).temp_size as isize),
+                    (::core::ptr::addr_of_mut!((*coder).temp) as *mut u8).add((*coder).temp_size),
                 ));
                 if ret != LZMA_OK {
                     return ret;

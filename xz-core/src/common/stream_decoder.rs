@@ -98,12 +98,11 @@ unsafe fn stream_decode(
                     return LZMA_OK;
                 }
                 if (*coder).pos == 0 {
-                    if *input.offset(*in_pos as isize) == INDEX_INDICATOR {
+                    if *input.add(*in_pos) == INDEX_INDICATOR {
                         (*coder).sequence = SEQ_INDEX;
                         continue;
                     }
-                    (*coder).block_options.header_size =
-                        ((*input.offset(*in_pos as isize) as u32) + 1) * 4;
+                    (*coder).block_options.header_size = ((*input.add(*in_pos) as u32) + 1) * 4;
                 }
 
                 lzma_bufcpy(
@@ -261,7 +260,7 @@ unsafe fn stream_decode(
                             LZMA_DATA_ERROR
                         };
                     }
-                    if *input.offset(*in_pos as isize) != 0 {
+                    if *input.add(*in_pos) != 0 {
                         break;
                     }
                     *in_pos += 1;

@@ -35,12 +35,8 @@ pub unsafe fn lzma_filter_flags_decode(
     if ((in_size - *in_pos) as lzma_vli) < props_size {
         return LZMA_DATA_ERROR;
     }
-    let ret: lzma_ret = lzma_properties_decode(
-        filter,
-        allocator,
-        input.offset(*in_pos as isize),
-        props_size as size_t,
-    );
+    let ret: lzma_ret =
+        lzma_properties_decode(filter, allocator, input.add(*in_pos), props_size as size_t);
     *in_pos = (*in_pos as lzma_vli + props_size) as size_t;
     ret
 }

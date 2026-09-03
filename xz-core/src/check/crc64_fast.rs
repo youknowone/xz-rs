@@ -1065,7 +1065,7 @@ pub(crate) unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mu
             buf = buf.offset(1);
             size -= 1;
         }
-        let limit8 = buf.offset((size & !7) as isize);
+        let limit8 = buf.add(size & !7);
         while buf < limit8 {
             crc = crc64_step4(table0, table1, table2, table3, buf, crc);
             buf = buf.offset(4);

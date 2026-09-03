@@ -23,15 +23,13 @@ pub unsafe fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret {
         return LZMA_PROG_ERROR;
     }
     let mut i: size_t = 0;
-    while (*(*block).filters.offset(i as isize)).id != LZMA_VLI_UNKNOWN {
+    while (*(*block).filters.add(i)).id != LZMA_VLI_UNKNOWN {
         if i == LZMA_FILTERS_MAX as size_t {
             return LZMA_PROG_ERROR;
         }
         let mut add_1: u32 = 0;
-        let ret_: lzma_ret = lzma_filter_flags_size(
-            ::core::ptr::addr_of_mut!(add_1),
-            (*block).filters.offset(i as isize),
-        );
+        let ret_: lzma_ret =
+            lzma_filter_flags_size(::core::ptr::addr_of_mut!(add_1), (*block).filters.add(i));
         if ret_ != LZMA_OK {
             return ret_;
         }
@@ -87,7 +85,7 @@ pub unsafe fn lzma_block_header_encode(block: *const lzma_block, out: *mut u8) -
             return LZMA_PROG_ERROR;
         }
         let ret__1: lzma_ret = lzma_filter_flags_encode(
-            (*block).filters.offset(filter_count as isize),
+            (*block).filters.add(filter_count),
             out,
             ::core::ptr::addr_of_mut!(out_pos),
             out_size,
@@ -96,16 +94,12 @@ pub unsafe fn lzma_block_header_encode(block: *const lzma_block, out: *mut u8) -
             return ret__1;
         }
         filter_count += 1;
-        if (*(*block).filters.offset(filter_count as isize)).id == LZMA_VLI_UNKNOWN {
+        if (*(*block).filters.add(filter_count)).id == LZMA_VLI_UNKNOWN {
             break;
         }
     }
     *out.offset(1) |= (filter_count - 1) as u8;
-    core::ptr::write_bytes(
-        out.offset(out_pos as isize) as *mut u8,
-        0 as u8,
-        out_size - out_pos,
-    );
+    core::ptr::write_bytes(out.add(out_pos) as *mut u8, 0 as u8, out_size - out_pos);
     write32le(
         &mut *out.add(out_size).cast::<[u8; 4]>(),
         lzma_crc32(out, out_size, 0),

@@ -509,7 +509,7 @@ unsafe fn read_output_and_wait(
                 if !input_is_possible.is_null()
                     && (*coder).memlimit_threading - (*coder).mem_in_use - (*coder).outq.mem_in_use
                         >= (*coder).mem_next_block
-                    && lzma_outq_has_buf(::core::ptr::addr_of_mut!((*coder).outq))
+                    && lzma_outq_has_buf(&(*coder).outq)
                     && ((*coder).threads_initialized < (*coder).threads_max
                         || !(*coder).threads_free.is_null())
                 {
@@ -519,7 +519,7 @@ unsafe fn read_output_and_wait(
                     if !waiting_allowed {
                         break;
                     }
-                    if lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                    if lzma_outq_is_empty(&(*coder).outq) {
                         break;
                     }
                     if lzma_outq_is_readable(::core::ptr::addr_of_mut!((*coder).outq)) {
@@ -579,10 +579,10 @@ unsafe fn decode_block_header(
         return LZMA_OK;
     }
     if (*coder).pos == 0 {
-        if *in_0.offset(*in_pos as isize) == INDEX_INDICATOR {
+        if *in_0.add(*in_pos) == INDEX_INDICATOR {
             return LZMA_RET_INTERNAL2;
         }
-        (*coder).block_options.header_size = ((*in_0.offset(*in_pos as isize) as u32) + 1) * 4;
+        (*coder).block_options.header_size = ((*in_0.add(*in_pos) as u32) + 1) * 4;
     }
     lzma_bufcpy(
         in_0,
@@ -657,7 +657,7 @@ unsafe fn stream_decode_mt_block_init(
         if ret != LZMA_OK {
             return Some(ret);
         }
-        if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+        if !lzma_outq_is_empty(&(*coder).outq) {
             return Some(LZMA_OK);
         }
         return Some(LZMA_MEMLIMIT_ERROR);
@@ -957,7 +957,7 @@ unsafe fn stream_decode_mt(
                 if ret__3 != LZMA_OK {
                     return ret__3;
                 }
-                if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                if !lzma_outq_is_empty(&(*coder).outq) {
                     return LZMA_OK;
                 }
                 lzma_outq_clear_cache(::core::ptr::addr_of_mut!((*coder).outq), allocator);
@@ -997,7 +997,7 @@ unsafe fn stream_decode_mt(
                 if ret__5 != LZMA_OK {
                     return ret__5;
                 }
-                if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                if !lzma_outq_is_empty(&(*coder).outq) {
                     return LZMA_OK;
                 }
                 (*coder).sequence = SEQ_INDEX_DECODE;
@@ -1028,7 +1028,7 @@ unsafe fn stream_decode_mt(
                     if ret__8 != LZMA_OK {
                         return ret__8;
                     }
-                    if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                    if !lzma_outq_is_empty(&(*coder).outq) {
                         return LZMA_OK;
                     }
                 }
@@ -1227,7 +1227,7 @@ unsafe fn stream_decode_mt(
                             LZMA_DATA_ERROR
                         };
                     }
-                    if *in_0.offset(*in_pos as isize) != 0 {
+                    if *in_0.add(*in_pos) != 0 {
                         break;
                     }
                     *in_pos += 1;
@@ -1408,20 +1408,20 @@ unsafe fn stream_decoder_mt_get_progress(
                 let mut mythread_i_1867: c_uint = 0;
                 while if mythread_i_1867 != 0 {
                     mythread_mutex_unlock(::core::ptr::addr_of_mut!(
-                        (*(*coder).threads.offset(i as isize)).mutex
+                        (*(*coder).threads.add(i)).mutex
                     ));
                     0
                 } else {
                     mythread_mutex_lock(::core::ptr::addr_of_mut!(
-                        (*(*coder).threads.offset(i as isize)).mutex
+                        (*(*coder).threads.add(i)).mutex
                     ));
                     1
                 } != 0
                 {
                     let mut mythread_j_1867: c_uint = 0;
                     while mythread_j_1867 == 0 {
-                        *progress_in += (*(*coder).threads.offset(i as isize)).progress_in as u64;
-                        *progress_out += (*(*coder).threads.offset(i as isize)).progress_out as u64;
+                        *progress_in += (*(*coder).threads.add(i)).progress_in as u64;
+                        *progress_out += (*(*coder).threads.add(i)).progress_out as u64;
                         mythread_j_1867 = 1;
                     }
                     mythread_i_1867 = 1;

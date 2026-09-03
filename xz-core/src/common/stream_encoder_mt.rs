@@ -532,7 +532,7 @@ unsafe fn initialize_new_thread(
     LZMA_MEM_ERROR
 }
 unsafe fn get_thread(coder: *mut lzma_stream_coder, allocator: *const lzma_allocator) -> lzma_ret {
-    if !lzma_outq_has_buf(::core::ptr::addr_of_mut!((*coder).outq)) {
+    if !lzma_outq_has_buf(&(*coder).outq) {
         return LZMA_OK;
     }
     let ret_: lzma_ret = lzma_outq_prealloc_buf(
@@ -720,7 +720,7 @@ unsafe fn wait_for_work(
         while mythread_j_689 == 0 {
             while (!has_input
                 || (*coder).threads_free.is_null()
-                || !lzma_outq_has_buf(::core::ptr::addr_of_mut!((*coder).outq)))
+                || !lzma_outq_has_buf(&(*coder).outq))
                 && !lzma_outq_is_readable(::core::ptr::addr_of_mut!((*coder).outq))
                 && (*coder).thread_error == LZMA_OK
                 && !timed_out
@@ -817,7 +817,7 @@ unsafe fn stream_encode_mt_blocks(
             if action == LZMA_FULL_BARRIER {
                 return LZMA_STREAM_END;
             }
-            if lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+            if lzma_outq_is_empty(&(*coder).outq) {
                 if action == LZMA_FINISH {
                     break;
                 }
@@ -1069,20 +1069,20 @@ unsafe fn get_progress(coder_ptr: *mut c_void, progress_in: *mut u64, progress_o
                 let mut mythread_i_1015: c_uint = 0;
                 while if mythread_i_1015 != 0 {
                     mythread_mutex_unlock(::core::ptr::addr_of_mut!(
-                        (*(*coder).threads.offset(i as isize)).mutex
+                        (*(*coder).threads.add(i)).mutex
                     ));
                     0
                 } else {
                     mythread_mutex_lock(::core::ptr::addr_of_mut!(
-                        (*(*coder).threads.offset(i as isize)).mutex
+                        (*(*coder).threads.add(i)).mutex
                     ));
                     1
                 } != 0
                 {
                     let mut mythread_j_1015: c_uint = 0;
                     while mythread_j_1015 == 0 {
-                        *progress_in += (*(*coder).threads.offset(i as isize)).progress_in;
-                        *progress_out += (*(*coder).threads.offset(i as isize)).progress_out;
+                        *progress_in += (*(*coder).threads.add(i)).progress_in;
+                        *progress_out += (*(*coder).threads.add(i)).progress_out;
                         mythread_j_1015 = 1;
                     }
                     mythread_i_1015 = 1;

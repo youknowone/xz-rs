@@ -25,7 +25,7 @@ pub unsafe fn lzma_vli_decode(
         }
     }
     loop {
-        let byte: u8 = *input.offset(*in_pos as isize);
+        let byte: u8 = *input.add(*in_pos);
         *in_pos += 1;
         *vli += ((byte & 0x7f) as lzma_vli) << (*vli_pos * 7);
         *vli_pos += 1;

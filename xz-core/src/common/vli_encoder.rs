@@ -21,7 +21,7 @@ pub unsafe fn lzma_vli_encode(
     vli >>= *vli_pos * 7;
     while vli >= 0x80 {
         *vli_pos += 1;
-        *out.offset(*out_pos as isize) = vli as u8 | 0x80;
+        *out.add(*out_pos) = vli as u8 | 0x80;
         vli >>= 7;
         *out_pos += 1;
         if *out_pos == out_size {
@@ -32,7 +32,7 @@ pub unsafe fn lzma_vli_encode(
             };
         }
     }
-    *out.offset(*out_pos as isize) = vli as u8;
+    *out.add(*out_pos) = vli as u8;
     *out_pos += 1;
     *vli_pos += 1;
     if vli_pos == ::core::ptr::addr_of_mut!(vli_pos_internal) {

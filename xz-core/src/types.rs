@@ -70,7 +70,7 @@ pub struct lzma_options_lzma {
     pub reserved_ptr1: *mut c_void,
     pub reserved_ptr2: *mut c_void,
 }
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 #[repr(C)]
 pub struct lzma_stream {
     pub next_in: *const u8,
@@ -595,12 +595,12 @@ pub fn index_size_unpadded(count: lzma_vli, index_list_size: lzma_vli) -> lzma_v
         .wrapping_add(4)
 }
 #[inline]
-pub fn lzma_outq_has_buf(outq: *const lzma_outq) -> bool {
-    unsafe { (*outq).bufs_in_use < (*outq).bufs_limit }
+pub fn lzma_outq_has_buf(outq: &lzma_outq) -> bool {
+    outq.bufs_in_use < outq.bufs_limit
 }
 #[inline]
-pub fn lzma_outq_is_empty(outq: *const lzma_outq) -> bool {
-    unsafe { (*outq).bufs_in_use == 0 }
+pub fn lzma_outq_is_empty(outq: &lzma_outq) -> bool {
+    outq.bufs_in_use == 0
 }
 #[inline]
 pub unsafe fn mf_ptr(mf: *const lzma_mf) -> *const u8 {
@@ -891,16 +891,14 @@ pub unsafe fn literal_init(probs: *mut probability, lc: u32, lp: u32) {
     let coders: size_t = (LITERAL_CODER_SIZE << lc.wrapping_add(lp)) as size_t;
     let mut i: size_t = 0;
     while i < coders {
-        *probs.offset(i as isize) = (RC_BIT_MODEL_TOTAL >> 1) as probability;
+        *probs.add(i) = (RC_BIT_MODEL_TOTAL >> 1) as probability;
         i += 1;
     }
 }
-pub fn is_backward_size_valid(options: *const lzma_stream_flags) -> bool {
-    unsafe {
-        (*options).backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
-            && (*options).backward_size <= LZMA_BACKWARD_SIZE_MAX
-            && (*options).backward_size & 3 == 0
-    }
+pub fn is_backward_size_valid(options: &lzma_stream_flags) -> bool {
+    options.backward_size >= LZMA_BACKWARD_SIZE_MIN as lzma_vli
+        && options.backward_size <= LZMA_BACKWARD_SIZE_MAX
+        && options.backward_size & 3 == 0
 }
 #[inline]
 pub fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {

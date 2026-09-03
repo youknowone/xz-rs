@@ -45,7 +45,7 @@ pub unsafe fn lzma_stream_footer_decode(
 ) -> lzma_ret {
     if memcmp(
         input
-            .offset((core::mem::size_of::<u32>() * 2) as isize)
+            .add(core::mem::size_of::<u32>() * 2)
             .offset(LZMA_STREAM_FLAGS_SIZE as isize) as *const c_void,
         ::core::ptr::addr_of!(lzma_footer_magic) as *const c_void,
         core::mem::size_of::<[u8; 2]>(),

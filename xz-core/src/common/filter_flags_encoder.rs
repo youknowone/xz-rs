@@ -43,7 +43,7 @@ pub unsafe fn lzma_filter_flags_encode(
     if out_size - *out_pos < props_size as size_t {
         return LZMA_PROG_ERROR;
     }
-    let ret__2: lzma_ret = lzma_properties_encode(filter, out.offset(*out_pos as isize));
+    let ret__2: lzma_ret = lzma_properties_encode(filter, out.add(*out_pos));
     if ret__2 != LZMA_OK {
         return ret__2;
     }

@@ -42,7 +42,7 @@ pub unsafe fn lzma_stream_footer_encode(
     if (*options).version != 0 {
         return LZMA_OPTIONS_ERROR;
     }
-    if !is_backward_size_valid(options) {
+    if !is_backward_size_valid(&*options) {
         return LZMA_PROG_ERROR;
     }
     write32le(

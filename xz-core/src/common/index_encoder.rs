@@ -34,7 +34,7 @@ unsafe fn index_encode(
     while *out_pos < out_size {
         match (*coder).sequence {
             0 => {
-                *out.offset(*out_pos as isize) = INDEX_INDICATOR;
+                *out.add(*out_pos) = INDEX_INDICATOR;
                 *out_pos += 1;
                 (*coder).sequence = SEQ_COUNT;
                 continue;
@@ -73,15 +73,12 @@ unsafe fn index_encode(
             5 => {
                 if (*coder).pos > 0 {
                     (*coder).pos -= 1;
-                    *out.offset(*out_pos as isize) = 0;
+                    *out.add(*out_pos) = 0;
                     *out_pos += 1;
                     continue;
                 } else {
-                    (*coder).crc32 = lzma_crc32(
-                        out.offset(out_start as isize),
-                        *out_pos - out_start,
-                        (*coder).crc32,
-                    );
+                    (*coder).crc32 =
+                        lzma_crc32(out.add(out_start), *out_pos - out_start, (*coder).crc32);
                     (*coder).sequence = SEQ_CRC32;
                 }
             }
@@ -112,8 +109,7 @@ unsafe fn index_encode(
                 if *out_pos == out_size {
                     return LZMA_OK;
                 }
-                *out.offset(*out_pos as isize) =
-                    ((*coder).crc32 >> ((*coder).pos * 8) & 0xff) as u8;
+                *out.add(*out_pos) = ((*coder).crc32 >> ((*coder).pos * 8) & 0xff) as u8;
                 *out_pos += 1;
                 (*coder).pos += 1;
                 if (*coder).pos >= 4 {
@@ -125,7 +121,7 @@ unsafe fn index_encode(
     }
     let out_used: size_t = *out_pos - out_start;
     if out_used > 0 {
-        (*coder).crc32 = lzma_crc32(out.offset(out_start as isize), out_used, (*coder).crc32);
+        (*coder).crc32 = lzma_crc32(out.add(out_start), out_used, (*coder).crc32);
     }
     ret
 }

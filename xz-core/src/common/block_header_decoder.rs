@@ -10,8 +10,8 @@ pub unsafe fn lzma_block_header_decode(
     }
     let mut i: size_t = 0;
     while i <= LZMA_FILTERS_MAX as size_t {
-        (*(*block).filters.offset(i as isize)).id = LZMA_VLI_UNKNOWN;
-        (*(*block).filters.offset(i as isize)).options = core::ptr::null_mut();
+        (*(*block).filters.add(i)).id = LZMA_VLI_UNKNOWN;
+        (*(*block).filters.add(i)).options = core::ptr::null_mut();
         i += 1;
     }
     if (*block).version > 1 {
@@ -66,7 +66,7 @@ pub unsafe fn lzma_block_header_decode(
     let mut i_0: size_t = 0;
     while i_0 < filter_count {
         let ret: lzma_ret = lzma_filter_flags_decode(
-            (*block).filters.offset(i_0 as isize) as *mut lzma_filter,
+            (*block).filters.add(i_0) as *mut lzma_filter,
             allocator,
             input,
             ::core::ptr::addr_of_mut!(in_pos),
@@ -79,7 +79,7 @@ pub unsafe fn lzma_block_header_decode(
         i_0 += 1;
     }
     while in_pos < in_size {
-        if *input.offset(in_pos as isize) != 0 {
+        if *input.add(in_pos) != 0 {
             lzma_filters_free((*block).filters, allocator);
             return LZMA_OPTIONS_ERROR;
         }
