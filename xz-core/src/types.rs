@@ -934,6 +934,13 @@ pub fn index_size(count: lzma_vli, index_list_size: lzma_vli) -> lzma_vli {
 pub fn lzma_outq_outbuf_memusage(buf_size: size_t) -> u64 {
     (core::mem::size_of::<lzma_outbuf>()).wrapping_add(buf_size as usize) as u64
 }
+/// Estimate form, for sizes that come from caller options or from a Block
+/// header rather than from a buffer that was actually allocated. Those are
+/// lzma_vli-wide and truncate to a few hundred bytes if they are narrowed to
+/// size_t on a 32-bit target, which turns a memlimit rejection into an accept.
+pub fn lzma_outq_outbuf_memusage64(buf_size: u64) -> u64 {
+    (core::mem::size_of::<lzma_outbuf>() as u64).saturating_add(buf_size)
+}
 #[inline]
 pub unsafe fn aligned_read32ne(buf: *const u8) -> u32 {
     *(buf as *const u32)

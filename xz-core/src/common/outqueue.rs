@@ -4,7 +4,7 @@ pub fn lzma_outq_memusage(buf_size_max: u64, threads: u32) -> u64 {
     if threads > LZMA_THREADS_MAX || buf_size_max > limit {
         return UINT64_MAX;
     }
-    (2u32 * threads) as u64 * lzma_outq_outbuf_memusage(buf_size_max as size_t)
+    (2u32 * threads) as u64 * lzma_outq_outbuf_memusage64(buf_size_max)
 }
 unsafe fn move_head_to_cache(outq: *mut lzma_outq, allocator: *const lzma_allocator) {
     let buf: *mut lzma_outbuf = (*outq).head;

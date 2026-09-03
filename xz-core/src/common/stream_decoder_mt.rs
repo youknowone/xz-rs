@@ -670,7 +670,7 @@ unsafe fn stream_decode_mt_block_init(
     }
     (*coder).mem_next_in = comp_blk_size(coder) as u64;
     let mem_buffers: u64 = (*coder).mem_next_in
-        + lzma_outq_outbuf_memusage((*coder).block_options.uncompressed_size as size_t) as u64;
+        + lzma_outq_outbuf_memusage64((*coder).block_options.uncompressed_size);
     if (UINT64_MAX).wrapping_sub(mem_buffers) < (*coder).mem_next_filters {
         (*coder).sequence = SEQ_BLOCK_DIRECT_INIT;
         return None;
