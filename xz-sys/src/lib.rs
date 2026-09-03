@@ -733,11 +733,17 @@ pub unsafe extern "C" fn lzma_bcj_x86_decode(
 /* `lzma/stream_flags.h` */
 
 #[unsafe(no_mangle)]
+// The four Stream Header/Footer entry points read or write exactly
+// LZMA_STREAM_HEADER_SIZE bytes. xz-core states that in the type; at this ABI
+// boundary it is the caller's promise, as it is in C.
 pub unsafe extern "C" fn lzma_stream_header_encode(
     options: *const lzma_stream_flags,
     out: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_encoder::lzma_stream_header_encode(options.cast(), out)
+    xz_core::common::stream_flags_encoder::lzma_stream_header_encode(
+        &*options.cast(),
+        &mut *out.cast(),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -745,7 +751,10 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     options: *const lzma_stream_flags,
     out: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_encoder::lzma_stream_footer_encode(options.cast(), out)
+    xz_core::common::stream_flags_encoder::lzma_stream_footer_encode(
+        &*options.cast(),
+        &mut *out.cast(),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -753,7 +762,10 @@ pub unsafe extern "C" fn lzma_stream_header_decode(
     options: *mut lzma_stream_flags,
     input: *const u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_decoder::lzma_stream_header_decode(options.cast(), input)
+    xz_core::common::stream_flags_decoder::lzma_stream_header_decode(
+        &mut *options.cast(),
+        &*input.cast(),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -761,7 +773,10 @@ pub unsafe extern "C" fn lzma_stream_footer_decode(
     options: *mut lzma_stream_flags,
     input: *const u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_decoder::lzma_stream_footer_decode(options.cast(), input)
+    xz_core::common::stream_flags_decoder::lzma_stream_footer_decode(
+        &mut *options.cast(),
+        &*input.cast(),
+    )
 }
 
 #[unsafe(no_mangle)]

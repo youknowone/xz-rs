@@ -160,6 +160,9 @@ pub const LZMA_CONCATENATED: c_uint = 0x8;
 pub const LZMA_IGNORE_CHECK: c_uint = 0x10;
 pub const LZMA_FAIL_FAST: c_uint = 0x20;
 pub const LZMA_STREAM_HEADER_SIZE: u32 = 12;
+/// [`LZMA_STREAM_HEADER_SIZE`] as a `usize`, for use as a const generic
+/// argument.
+pub const STREAM_HEADER_SIZE: usize = LZMA_STREAM_HEADER_SIZE as usize;
 pub const LZMA_BLOCK_HEADER_SIZE_MAX: u32 = 1024;
 pub const LZMA_DICT_SIZE_MIN: c_uint = 4096;
 pub const STATE_LIT_LIT: lzma_lzma_state = 0;
@@ -576,6 +579,30 @@ pub struct lzma_lzma1_encoder_s {
     pub opts: [lzma_optimal; OPTS as usize],
 }
 pub type lzma_lzma1_encoder = lzma_lzma1_encoder_s;
+/// Fixed-size windows into a fixed-size buffer at compile-time offsets.
+///
+/// `OFF + M <= N` is proved when the method is instantiated, so the access has
+/// no bound check and no panic path: the cast is discharged by the const
+/// assertion rather than by a runtime test. `N` comes from the receiver, so a
+/// caller names only the offset and the length.
+pub trait FixedBuf<const N: usize> {
+    fn subarray<const OFF: usize, const M: usize>(&self) -> &[u8; M];
+    fn subarray_mut<const OFF: usize, const M: usize>(&mut self) -> &mut [u8; M];
+}
+
+impl<const N: usize> FixedBuf<N> for [u8; N] {
+    #[inline]
+    fn subarray<const OFF: usize, const M: usize>(&self) -> &[u8; M] {
+        const { assert!(OFF + M <= N) };
+        unsafe { &*self.as_ptr().add(OFF).cast::<[u8; M]>() }
+    }
+    #[inline]
+    fn subarray_mut<const OFF: usize, const M: usize>(&mut self) -> &mut [u8; M] {
+        const { assert!(OFF + M <= N) };
+        unsafe { &mut *self.as_mut_ptr().add(OFF).cast::<[u8; M]>() }
+    }
+}
+
 #[inline]
 pub fn read32le(buf: &[u8; 4]) -> u32 {
     u32::from_le_bytes(*buf)
@@ -1015,7 +1042,8 @@ pub(crate) struct lzma_simple_coder {
 pub use crate::check::check::{
     lzma_check_finish, lzma_check_init, lzma_check_is_supported, lzma_check_size, lzma_check_update,
 };
-pub use crate::check::crc32_fast::lzma_crc32;
+pub use crate::check::crc32_fast::{crc32, lzma_crc32};
+pub use crate::check::crc64_fast::crc64;
 pub(crate) use crate::common::block_decoder::lzma_block_decoder_init;
 pub(crate) use crate::common::block_encoder::lzma_block_encoder_init;
 pub use crate::common::block_header_decoder::lzma_block_header_decode;

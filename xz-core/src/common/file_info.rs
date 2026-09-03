@@ -173,8 +173,8 @@ unsafe fn file_info_decode(
                     return LZMA_OK;
                 }
                 let ret: lzma_ret = lzma_stream_header_decode(
-                    ::core::ptr::addr_of_mut!((*coder).first_header_flags),
-                    ::core::ptr::addr_of_mut!((*coder).temp) as *mut u8,
+                    &mut (*coder).first_header_flags,
+                    (*coder).temp.subarray::<0, STREAM_HEADER_SIZE>(),
                 );
                 if ret != LZMA_OK {
                     return ret;
@@ -223,9 +223,16 @@ unsafe fn file_info_decode(
                 }
                 (*coder).file_target_pos -= LZMA_STREAM_HEADER_SIZE as u64;
                 (*coder).temp_size -= LZMA_STREAM_HEADER_SIZE as size_t;
+                let Some(footer) = (*coder)
+                    .temp
+                    .get((*coder).temp_size..)
+                    .and_then(|t| t.first_chunk())
+                else {
+                    return LZMA_PROG_ERROR;
+                };
                 let ret: lzma_ret = hide_format_error(lzma_stream_footer_decode(
-                    ::core::ptr::addr_of_mut!((*coder).footer_flags),
-                    (::core::ptr::addr_of_mut!((*coder).temp) as *mut u8).add((*coder).temp_size),
+                    &mut (*coder).footer_flags,
+                    footer,
                 ));
                 if ret != LZMA_OK {
                     return ret;
@@ -337,9 +344,16 @@ unsafe fn file_info_decode(
                 (*coder).file_target_pos -= LZMA_STREAM_HEADER_SIZE as u64;
                 (*coder).temp_size -= LZMA_STREAM_HEADER_SIZE as size_t;
                 (*coder).temp_pos = (*coder).temp_size;
+                let Some(header) = (*coder)
+                    .temp
+                    .get((*coder).temp_size..)
+                    .and_then(|t| t.first_chunk())
+                else {
+                    return LZMA_PROG_ERROR;
+                };
                 let ret: lzma_ret = hide_format_error(lzma_stream_header_decode(
-                    ::core::ptr::addr_of_mut!((*coder).header_flags),
-                    (::core::ptr::addr_of_mut!((*coder).temp) as *mut u8).add((*coder).temp_size),
+                    &mut (*coder).header_flags,
+                    header,
                 ));
                 if ret != LZMA_OK {
                     return ret;

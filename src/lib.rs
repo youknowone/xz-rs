@@ -78,7 +78,6 @@ pub(crate) mod sys {
         lzip_decoder::lzma_lzip_decoder,
         stream_decoder::lzma_stream_decoder,
         stream_encoder::lzma_stream_encoder,
-        stream_flags_decoder::lzma_stream_footer_decode,
         string_conversion::LZMA_PRESET_DEFAULT,
     };
     #[cfg(feature = "parallel")]
@@ -93,6 +92,19 @@ pub(crate) mod sys {
         lzma_lzma_preset, LZMA_PRESET_LEVEL_MASK,
     };
     pub(crate) use xz_core::types::*;
+
+    /// xz-core states the twelve-byte Stream Footer in the type. The other two
+    /// backends take a bare pointer, so this restores the shape the rest of the
+    /// crate shares across backends.
+    pub(crate) unsafe fn lzma_stream_footer_decode(
+        options: *mut lzma_stream_flags,
+        input: *const u8,
+    ) -> lzma_ret {
+        xz_core::common::stream_flags_decoder::lzma_stream_footer_decode(
+            &mut *options,
+            &*input.cast(),
+        )
+    }
 }
 
 #[cfg(feature = "xz-sys")]

@@ -878,11 +878,7 @@ unsafe fn stream_encode_mt_index(
         return ret;
     }
     (*coder).stream_flags.backward_size = lzma_index_size((*coder).index);
-    if lzma_stream_footer_encode(
-        ::core::ptr::addr_of_mut!((*coder).stream_flags),
-        ::core::ptr::addr_of_mut!((*coder).header) as *mut u8,
-    ) != LZMA_OK
-    {
+    if lzma_stream_footer_encode(&(*coder).stream_flags, &mut (*coder).header) != LZMA_OK {
         return LZMA_PROG_ERROR;
     }
     (*coder).sequence = SEQ_STREAM_FOOTER;
@@ -1318,10 +1314,7 @@ unsafe fn stream_encoder_mt_init(
     }
     (*coder).stream_flags.version = 0;
     (*coder).stream_flags.check = (*options).check;
-    let ret__3: lzma_ret = lzma_stream_header_encode(
-        ::core::ptr::addr_of_mut!((*coder).stream_flags),
-        ::core::ptr::addr_of_mut!((*coder).header) as *mut u8,
-    );
+    let ret__3: lzma_ret = lzma_stream_header_encode(&(*coder).stream_flags, &mut (*coder).header);
     if ret__3 != LZMA_OK {
         return ret__3;
     }

@@ -1091,6 +1091,11 @@ pub(crate) unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mu
     }
     !crc
 }
+/// Slice-taking form. See [`crate::check::crc32_fast::crc32`].
+pub fn crc64(buf: &[u8], crc: u64) -> u64 {
+    unsafe { lzma_crc64(buf.as_ptr(), buf.len(), crc) }
+}
+
 pub unsafe fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {

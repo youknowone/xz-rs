@@ -171,14 +171,16 @@ unsafe fn stream_encode(
                 if ret_0 != LZMA_STREAM_END {
                     return ret_0;
                 }
-                let mut stream_flags = MaybeUninit::<lzma_stream_flags>::uninit();
-                let stream_flags = stream_flags.as_mut_ptr();
-                (*stream_flags).version = 0;
-                (*stream_flags).backward_size = lzma_index_size((*coder).index);
-                (*stream_flags).check = (*coder).block_options.check;
+                // Zeroed rather than uninit: a reference to the struct is
+                // only valid if every field is, including the reserved enums
+                // the encoder never reads. LZMA_RESERVED_ENUM is 0.
+                let mut stream_flags = MaybeUninit::<lzma_stream_flags>::zeroed().assume_init();
+                stream_flags.version = 0;
+                stream_flags.backward_size = lzma_index_size((*coder).index);
+                stream_flags.check = (*coder).block_options.check;
                 if lzma_stream_footer_encode(
-                    stream_flags,
-                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    &stream_flags,
+                    (*coder).buffer.subarray_mut::<0, STREAM_HEADER_SIZE>(),
                 ) != LZMA_OK
                 {
                     return LZMA_PROG_ERROR;
@@ -387,13 +389,14 @@ unsafe fn stream_encoder_init(
     if (*coder).index.is_null() {
         return LZMA_MEM_ERROR;
     }
-    let mut stream_flags = MaybeUninit::<lzma_stream_flags>::uninit();
-    let stream_flags = stream_flags.as_mut_ptr();
-    (*stream_flags).version = 0;
-    (*stream_flags).check = check;
+    // See the footer path: a reference needs every field valid, and
+    // LZMA_RESERVED_ENUM is 0.
+    let mut stream_flags = MaybeUninit::<lzma_stream_flags>::zeroed().assume_init();
+    stream_flags.version = 0;
+    stream_flags.check = check;
     let ret_: lzma_ret = lzma_stream_header_encode(
-        stream_flags,
-        ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+        &stream_flags,
+        (*coder).buffer.subarray_mut::<0, STREAM_HEADER_SIZE>(),
     );
     if ret_ != LZMA_OK {
         return ret_;

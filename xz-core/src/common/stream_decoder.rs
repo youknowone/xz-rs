@@ -67,8 +67,8 @@ unsafe fn stream_decode(
                 }
                 (*coder).pos = 0;
                 let ret: lzma_ret = lzma_stream_header_decode(
-                    ::core::ptr::addr_of_mut!((*coder).stream_flags),
-                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    &mut (*coder).stream_flags,
+                    (*coder).buffer.subarray::<0, STREAM_HEADER_SIZE>(),
                 );
                 if ret != LZMA_OK {
                     return if ret == LZMA_FORMAT_ERROR && !(*coder).first_stream {
@@ -221,8 +221,8 @@ unsafe fn stream_decode(
                 (*coder).pos = 0;
                 let mut footer_flags = MaybeUninit::<lzma_stream_flags>::zeroed();
                 let ret: lzma_ret = lzma_stream_footer_decode(
-                    footer_flags.as_mut_ptr(),
-                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    footer_flags.assume_init_mut(),
+                    (*coder).buffer.subarray::<0, STREAM_HEADER_SIZE>(),
                 );
                 if ret != LZMA_OK {
                     return if ret == LZMA_FORMAT_ERROR {
