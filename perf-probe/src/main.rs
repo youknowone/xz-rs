@@ -34,7 +34,6 @@ use xz_core::common::{
     index_decoder::lzma_index_buffer_decode,
     stream_buffer_decoder::lzma_stream_buffer_decode,
     stream_buffer_encoder::lzma_stream_buffer_bound,
-    stream_flags_decoder::lzma_stream_footer_decode,
 };
 #[cfg(feature = "xz-core")]
 use xz_core::types::{
@@ -624,6 +623,21 @@ unsafe fn backend_decode(compressed: &[u8], out_size: usize) -> Vec<u8> {
     );
     out.truncate(out_pos);
     out
+}
+
+/// xz-core states the twelve-byte Stream Footer in the type; the other two
+/// backends take a bare pointer. This keeps one shape for the shared code below.
+#[cfg(feature = "xz-core")]
+unsafe fn lzma_stream_footer_decode(
+    options: *mut BackendStreamFlags,
+    input: *const u8,
+) -> xz_core::types::lzma_ret {
+    unsafe {
+        xz_core::common::stream_flags_decoder::lzma_stream_footer_decode(
+            &mut *options,
+            &*input.cast(),
+        )
+    }
 }
 
 unsafe fn backend_uncompressed_size(compressed: &[u8]) -> u64 {
