@@ -100,6 +100,23 @@ jobs:
       run: rustup update stable && rustup default stable && rustup component add rustfmt
     - run: cargo fmt -- --check
 
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        submodules: true
+    - name: Install Rust
+      run: rustup update stable && rustup default stable && rustup component add clippy
+    # xz-core denies the soundness lints it used to hide behind `allow(clippy::all)`.
+    # Both feature combinations are checked because some code is gated on
+    # custom_allocator.
+    - run: |
+        cargo clippy -p xz-core --lib --all-targets
+        cargo clippy -p xz-core --lib --all-targets --features custom_allocator
+        cargo clippy -p xz-sys --lib --all-targets
+
   fuzz-smoke:
     name: Fuzz smoke
     runs-on: ubuntu-latest
