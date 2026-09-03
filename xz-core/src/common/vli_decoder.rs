@@ -34,8 +34,10 @@ pub fn lzma_vli_decode(
             return LZMA_BUF_ERROR;
         }
     }
-    loop {
-        let byte: u8 = input[*in_pos];
+    // The checks above guarantee the first read is in range, so `get` decides
+    // the same thing the trailing `*in_pos >= in_size` test did, without
+    // leaving a panicking index in the loop.
+    while let Some(&byte) = input.get(*in_pos) {
         *in_pos += 1;
         *vli += ((byte & 0x7f) as lzma_vli) << (*vli_pos * 7);
         *vli_pos += 1;
@@ -51,9 +53,6 @@ pub fn lzma_vli_decode(
         }
         if *vli_pos == LZMA_VLI_BYTES_MAX as size_t {
             return LZMA_DATA_ERROR;
-        }
-        if *in_pos >= in_size {
-            break;
         }
     }
     if single_call {

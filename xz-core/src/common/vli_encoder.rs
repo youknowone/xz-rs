@@ -29,9 +29,15 @@ pub fn lzma_vli_encode(
         return LZMA_PROG_ERROR;
     }
     vli >>= *vli_pos * 7;
+    // The checks above keep `*out_pos` inside `out` on entry, and the loop
+    // returns as soon as it reaches the end, so neither `get_mut` can fail.
+    // Reporting a short buffer beats leaving a panicking index in the loop.
     while vli >= 0x80 {
+        let Some(slot) = out.get_mut(*out_pos) else {
+            return LZMA_PROG_ERROR;
+        };
+        *slot = vli as u8 | 0x80;
         *vli_pos += 1;
-        out[*out_pos] = vli as u8 | 0x80;
         vli >>= 7;
         *out_pos += 1;
         if *out_pos == out_size {
@@ -42,7 +48,10 @@ pub fn lzma_vli_encode(
             };
         }
     }
-    out[*out_pos] = vli as u8;
+    let Some(slot) = out.get_mut(*out_pos) else {
+        return LZMA_PROG_ERROR;
+    };
+    *slot = vli as u8;
     *out_pos += 1;
     *vli_pos += 1;
     if single_call {
