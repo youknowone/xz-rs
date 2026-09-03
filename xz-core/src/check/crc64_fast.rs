@@ -1093,16 +1093,32 @@ pub(crate) unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mu
 }
 /// Slice-taking form. See [`crate::check::crc32_fast::crc32`].
 pub fn crc64(buf: &[u8], crc: u64) -> u64 {
-    unsafe { lzma_crc64(buf.as_ptr(), buf.len(), crc) }
-}
-
-pub unsafe fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
     #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
     {
         if crate::check::crc_x86_clmul::is_arch_extension_supported() {
-            return crate::check::crc_x86_clmul::crc64_arch_optimized(buf, size, crc);
+            // SAFETY: the CLMUL and SSSE3 extensions are what the detection
+            // above tests for, and the pointer and length come from one slice.
+            return unsafe {
+                crate::check::crc_x86_clmul::crc64_arch_optimized(buf.as_ptr(), buf.len(), crc)
+            };
         }
     }
 
-    lzma_crc64_generic(buf, size, crc)
+    // SAFETY: the pointer and length come from one slice.
+    unsafe { lzma_crc64_generic(buf.as_ptr(), buf.len(), crc) }
+}
+
+/// Pointer-and-length form, for the transpiled call sites that hold a C
+/// buffer-and-size pair. [`crc64`] is the form this crate offers outside it;
+/// the C ABI entry point lives in `xz-sys`.
+///
+/// # Safety
+/// `buf` must be readable for `size` bytes, or `size` must be zero.
+pub(crate) unsafe fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
+    let buf = if size == 0 {
+        &[][..]
+    } else {
+        core::slice::from_raw_parts(buf, size)
+    };
+    crc64(buf, crc)
 }

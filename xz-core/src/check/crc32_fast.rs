@@ -563,7 +563,13 @@ pub fn crc32(buf: &[u8], crc: u32) -> u32 {
     lzma_crc32_generic(buf, crc)
 }
 
-pub unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
+/// Pointer-and-length form, for the transpiled call sites that hold a C
+/// buffer-and-size pair. [`crc32`] is the form this crate offers outside it;
+/// the C ABI entry point lives in `xz-sys`.
+///
+/// # Safety
+/// `buf` must be readable for `size` bytes, or `size` must be zero.
+pub(crate) unsafe fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
     let buf = if size == 0 {
         &[][..]
     } else {

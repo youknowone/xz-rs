@@ -26,8 +26,6 @@ use liblzma_sys::{
 #[cfg(feature = "xz-core-custom-allocator")]
 use xz_core::alloc::{c_allocator, rust_allocator};
 #[cfg(feature = "xz-core")]
-use xz_core::check::{crc32_fast::lzma_crc32, crc64_fast::lzma_crc64};
-#[cfg(feature = "xz-core")]
 use xz_core::common::{
     easy_buffer_encoder::lzma_easy_buffer_encode, index::lzma_index_end,
     index_decoder::lzma_index_buffer_decode, stream_buffer_decoder::lzma_stream_buffer_decode,
@@ -621,6 +619,18 @@ unsafe fn backend_decode(compressed: &[u8], out_size: usize) -> Vec<u8> {
     );
     out.truncate(out_pos);
     out
+}
+
+/// xz-core takes the buffer as a slice; the other two backends take a pointer
+/// and a size. These keep one shape for the shared code below.
+#[cfg(feature = "xz-core")]
+unsafe fn lzma_crc32(buf: *const u8, size: usize, crc: u32) -> u32 {
+    xz_core::check::crc32_fast::crc32(unsafe { core::slice::from_raw_parts(buf, size) }, crc)
+}
+
+#[cfg(feature = "xz-core")]
+unsafe fn lzma_crc64(buf: *const u8, size: usize, crc: u64) -> u64 {
+    xz_core::check::crc64_fast::crc64(unsafe { core::slice::from_raw_parts(buf, size) }, crc)
 }
 
 /// xz-core takes the Index by reference; the other two backends take a bare

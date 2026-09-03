@@ -323,14 +323,28 @@ pub unsafe extern "C" fn lzma_check_size(check: lzma_check) -> u32 {
     xz_core::check::check::lzma_check_size(check)
 }
 
+/// xz-core takes the buffer as a slice. C hands over a pointer and a size,
+/// and allows the pointer to be NULL when the size is zero, which
+/// `from_raw_parts` does not.
+///
+/// # Safety
+/// `buf` must be readable for `size` bytes, or `size` must be zero.
+unsafe fn crc_slice<'a>(buf: *const u8, size: size_t) -> &'a [u8] {
+    if size == 0 {
+        &[]
+    } else {
+        core::slice::from_raw_parts(buf, size)
+    }
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
-    xz_core::check::crc32_fast::lzma_crc32(buf, size, crc)
+    xz_core::check::crc32_fast::crc32(crc_slice(buf, size), crc)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
-    xz_core::check::crc64_fast::lzma_crc64(buf, size, crc)
+    xz_core::check::crc64_fast::crc64(crc_slice(buf, size), crc)
 }
 
 /*********************

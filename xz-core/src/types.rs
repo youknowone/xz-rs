@@ -1049,7 +1049,8 @@ pub(crate) struct lzma_simple_coder {
 pub use crate::check::check::{
     lzma_check_finish, lzma_check_init, lzma_check_is_supported, lzma_check_size, lzma_check_update,
 };
-pub use crate::check::crc32_fast::{crc32, lzma_crc32};
+pub use crate::check::crc32_fast::crc32;
+pub(crate) use crate::check::crc32_fast::lzma_crc32;
 pub use crate::check::crc64_fast::crc64;
 pub(crate) use crate::common::block_decoder::lzma_block_decoder_init;
 pub(crate) use crate::common::block_encoder::lzma_block_encoder_init;
