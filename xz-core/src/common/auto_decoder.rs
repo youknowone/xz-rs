@@ -1,4 +1,5 @@
 use crate::common::alone_decoder::lzma_alone_decoder_init;
+use crate::common::lzip_decoder::lzma_lzip_decoder_init;
 use crate::types::*;
 pub type auto_decoder_seq = c_uint;
 pub const SEQ_FINISH: auto_decoder_seq = 2;
@@ -30,8 +31,18 @@ unsafe fn auto_decode(
                 return LZMA_OK;
             }
             (*coder).sequence = SEQ_CODE;
-            if *input.offset(*in_pos as isize) == 0xfd {
+            if *input.add(*in_pos) == 0xfd {
                 let ret: lzma_ret = lzma_stream_decoder_init(
+                    ::core::ptr::addr_of_mut!((*coder).next),
+                    allocator,
+                    (*coder).memlimit,
+                    (*coder).flags,
+                );
+                if ret != LZMA_OK {
+                    return ret;
+                }
+            } else if *input.add(*in_pos) == 0x4c {
+                let ret: lzma_ret = lzma_lzip_decoder_init(
                     ::core::ptr::addr_of_mut!((*coder).next),
                     allocator,
                     (*coder).memlimit,
@@ -101,7 +112,7 @@ unsafe fn auto_decoder_get_check(coder_ptr: *const c_void) -> lzma_check {
         None => LZMA_CHECK_NONE,
     }
 }
-pub unsafe fn lzma_auto_decoder(strm: *mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret {
+pub unsafe fn lzma_auto_decoder(strm: &mut lzma_stream, memlimit: u64, flags: u32) -> lzma_ret {
     let ret: lzma_ret = lzma_strm_init(strm);
     if ret != LZMA_OK {
         return ret;

@@ -213,6 +213,10 @@ fn update_short_rep_state(state: lzma_lzma_state) -> lzma_lzma_state {
     }
 }
 #[inline]
+fn position_add(position: u32, offset: u32) -> u32 {
+    position.wrapping_add(offset)
+}
+#[inline]
 unsafe fn not_equal_16(a: *const u8, b: *const u8) -> bool {
     core::ptr::read_unaligned(a as *const u16) != core::ptr::read_unaligned(b as *const u16)
 }
@@ -713,7 +717,7 @@ unsafe fn helper2(
         let len_test: u32 = (lzma_memcmplen(buf, buf_back, 1, limit) as u32) - 1;
         if len_test >= 2 {
             let state_2: lzma_lzma_state = update_literal_state(state);
-            let pos_state_next: u32 = (position + 1) & (*coder).pos_mask;
+            let pos_state_next: u32 = position_add(position, 1) & (*coder).pos_mask;
             let next_rep_match_price: u32 = cur_and_1_price
                 + rc_bit_1_price(match_prob(coder, state_2, pos_state_next)) as u32
                 + rc_bit_1_price(is_rep_prob(coder, state_2)) as u32;
@@ -891,7 +895,8 @@ unsafe fn consider_literal_after_rep(
 ) {
     let mut state_2: lzma_lzma_state = state;
     state_2 = update_long_rep_state(state_2);
-    let mut pos_state_next: u32 = (position + len_test) & (*coder).pos_mask;
+    let literal_pos = position_add(position, len_test);
+    let mut pos_state_next: u32 = literal_pos & (*coder).pos_mask;
     let cur_and_len_literal_price: u32 = price
         + get_len_price(
             ::core::ptr::addr_of_mut!((*coder).rep_len_encoder),
@@ -901,14 +906,14 @@ unsafe fn consider_literal_after_rep(
         + rc_bit_0_price(match_prob(coder, state_2, pos_state_next)) as u32
         + get_literal_price(
             coder,
-            position + len_test,
+            literal_pos,
             *buf.offset((len_test - 1) as isize) as u32,
             true,
             *buf_back.offset(len_test as isize) as u32,
             *buf.offset(len_test as isize) as u32,
         ) as u32;
     state_2 = update_literal_state(state_2);
-    pos_state_next = (position + len_test + 1) & (*coder).pos_mask;
+    pos_state_next = position_add(literal_pos, 1) & (*coder).pos_mask;
     let next_rep_match_price: u32 = cur_and_len_literal_price
         + rc_bit_1_price(match_prob(coder, state_2, pos_state_next)) as u32
         + rc_bit_1_price(is_rep_prob(coder, state_2)) as u32;
@@ -948,12 +953,13 @@ unsafe fn consider_literal_after_match(
 ) {
     let mut state_2: lzma_lzma_state = state;
     state_2 = update_match_state(state_2);
-    let mut pos_state_next: u32 = (position + len_test) & (*coder).pos_mask;
+    let literal_pos = position_add(position, len_test);
+    let mut pos_state_next: u32 = literal_pos & (*coder).pos_mask;
     let cur_and_len_literal_price: u32 = cur_and_len_price
         + rc_bit_0_price(match_prob(coder, state_2, pos_state_next)) as u32
         + get_literal_price(
             coder,
-            position + len_test,
+            literal_pos,
             *buf.offset((len_test - 1) as isize) as u32,
             true,
             *buf_back.offset(len_test as isize) as u32,
@@ -1027,7 +1033,7 @@ pub unsafe fn lzma_lzma_optimum_normal(
             ::core::ptr::addr_of_mut!(reps) as *mut u32,
             mf_ptr(mf).offset(-1),
             len_end,
-            position + cur,
+            position_add(position, cur),
             cur,
             (*mf).nice_len,
             if mf_avail(mf) + 1 < ((1 << 12) - 1) as u32 - cur {
@@ -1039,4 +1045,15 @@ pub unsafe fn lzma_lzma_optimum_normal(
         cur += 1;
     }
     backward(coder, len_res, back_res, cur);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::position_add;
+
+    #[test]
+    fn position_add_wraps_like_uint32_t() {
+        assert_eq!(position_add(u32::MAX, 1), 0);
+        assert_eq!(position_add(u32::MAX - 3, 7), 3);
+    }
 }

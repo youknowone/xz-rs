@@ -1042,7 +1042,7 @@ unsafe fn crc64_step4(
     buf: *const u8,
     crc: u64,
 ) -> u64 {
-    let tmp = crc as u32 ^ aligned_read32ne(buf);
+    let tmp = crc as u32 ^ u32::from_le(aligned_read32ne(buf));
     *table3.add((tmp & 0xff) as usize)
         ^ *table2.add((tmp >> 8 & 0xff) as usize)
         ^ crc >> 32
@@ -1053,7 +1053,7 @@ unsafe fn crc64_step4(
 // Keep this loop pointer-based: the slice version left slice_index_fail
 // slow paths in optimized code for the large contiguous-buffer workload.
 #[inline(always)]
-unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
+pub(crate) unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64) -> u64 {
     let table0 = lzma_crc64_table[0].as_ptr();
     let table1 = lzma_crc64_table[1].as_ptr();
     let table2 = lzma_crc64_table[2].as_ptr();
@@ -1065,7 +1065,7 @@ unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64)
             buf = buf.offset(1);
             size -= 1;
         }
-        let limit8 = buf.offset((size & !7) as isize);
+        let limit8 = buf.add(size & !7);
         while buf < limit8 {
             crc = crc64_step4(table0, table1, table2, table3, buf, crc);
             buf = buf.offset(4);
@@ -1091,6 +1091,32 @@ unsafe fn lzma_crc64_generic(mut buf: *const u8, mut size: size_t, mut crc: u64)
     }
     !crc
 }
-pub unsafe fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
-    lzma_crc64_generic(buf, size, crc)
+/// Slice-taking form. See [`crate::check::crc32_fast::crc32`].
+pub fn crc64(buf: &[u8], crc: u64) -> u64 {
+    #[cfg(any(target_arch = "x86", target_arch = "x86_64"))]
+    {
+        if crate::check::crc_x86_clmul::is_arch_extension_supported() {
+            // SAFETY: the CLMUL and SSSE3 extensions are what the detection
+            // above tests for, and the pointer and length come from one slice.
+            return unsafe {
+                crate::check::crc_x86_clmul::crc64_arch_optimized(buf.as_ptr(), buf.len(), crc)
+            };
+        }
+    }
+
+    // SAFETY: the pointer and length come from one slice.
+    unsafe { lzma_crc64_generic(buf.as_ptr(), buf.len(), crc) }
+}
+
+/// Pointer-and-length form, for the transpiled call sites that hold a C
+/// buffer-and-size pair. [`crc64`] is the form this crate offers outside it;
+/// the C ABI entry point lives in `xz-sys`.
+///
+/// TODO: remove once the coder `code` functions take their buffers as
+/// slices; every caller then has a slice and calls [`crc64`] directly.
+///
+/// # Safety
+/// `buf` must be readable for `size` bytes, or `size` must be zero.
+pub(crate) unsafe fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
+    crc64(crate::types::c_slice(buf, size), crc)
 }

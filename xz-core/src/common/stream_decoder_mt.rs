@@ -509,7 +509,7 @@ unsafe fn read_output_and_wait(
                 if !input_is_possible.is_null()
                     && (*coder).memlimit_threading - (*coder).mem_in_use - (*coder).outq.mem_in_use
                         >= (*coder).mem_next_block
-                    && lzma_outq_has_buf(::core::ptr::addr_of_mut!((*coder).outq))
+                    && lzma_outq_has_buf(&(*coder).outq)
                     && ((*coder).threads_initialized < (*coder).threads_max
                         || !(*coder).threads_free.is_null())
                 {
@@ -519,7 +519,7 @@ unsafe fn read_output_and_wait(
                     if !waiting_allowed {
                         break;
                     }
-                    if lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                    if lzma_outq_is_empty(&(*coder).outq) {
                         break;
                     }
                     if lzma_outq_is_readable(::core::ptr::addr_of_mut!((*coder).outq)) {
@@ -579,10 +579,10 @@ unsafe fn decode_block_header(
         return LZMA_OK;
     }
     if (*coder).pos == 0 {
-        if *in_0.offset(*in_pos as isize) == INDEX_INDICATOR {
+        if *in_0.add(*in_pos) == INDEX_INDICATOR {
             return LZMA_RET_INTERNAL2;
         }
-        (*coder).block_options.header_size = ((*in_0.offset(*in_pos as isize) as u32) + 1) * 4;
+        (*coder).block_options.header_size = ((*in_0.add(*in_pos) as u32) + 1) * 4;
     }
     lzma_bufcpy(
         in_0,
@@ -599,11 +599,8 @@ unsafe fn decode_block_header(
     (*coder).block_options.version = 1;
     (*coder).block_options.filters =
         ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter;
-    let ret_: lzma_ret = lzma_block_header_decode(
-        ::core::ptr::addr_of_mut!((*coder).block_options),
-        allocator,
-        ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
-    );
+    let ret_: lzma_ret =
+        lzma_block_header_decode(&mut (*coder).block_options, allocator, &(*coder).buffer);
     if ret_ != LZMA_OK {
         return ret_;
     }
@@ -617,7 +614,7 @@ fn comp_blk_size(coder: *const lzma_stream_coder) -> size_t {
     }
 }
 fn is_direct_mode_needed(size: lzma_vli) -> bool {
-    size == LZMA_VLI_UNKNOWN || size > SIZE_MAX.wrapping_div(3 as c_ulong) as lzma_vli
+    size == LZMA_VLI_UNKNOWN || size > SIZE_MAX.wrapping_div(3 as size_t) as lzma_vli
 }
 unsafe fn stream_decoder_reset(
     coder: *mut lzma_stream_coder,
@@ -657,7 +654,7 @@ unsafe fn stream_decode_mt_block_init(
         if ret != LZMA_OK {
             return Some(ret);
         }
-        if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+        if !lzma_outq_is_empty(&(*coder).outq) {
             return Some(LZMA_OK);
         }
         return Some(LZMA_MEMLIMIT_ERROR);
@@ -669,8 +666,8 @@ unsafe fn stream_decode_mt_block_init(
         return None;
     }
     (*coder).mem_next_in = comp_blk_size(coder) as u64;
-    let mem_buffers: u64 = (*coder).mem_next_in
-        + lzma_outq_outbuf_memusage((*coder).block_options.uncompressed_size as size_t) as u64;
+    let mem_buffers: u64 =
+        (*coder).mem_next_in + lzma_outq_outbuf_memusage((*coder).block_options.uncompressed_size);
     if (UINT64_MAX).wrapping_sub(mem_buffers) < (*coder).mem_next_filters {
         (*coder).sequence = SEQ_BLOCK_DIRECT_INIT;
         return None;
@@ -880,16 +877,7 @@ unsafe fn stream_decode_mt(
     action: lzma_action,
 ) -> lzma_ret {
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
-    let mut wait_abs: mythread_condtime = mythread_condtime {
-        #[cfg(not(windows))]
-        tv_sec: 0,
-        #[cfg(not(windows))]
-        tv_nsec: 0,
-        #[cfg(windows)]
-        start: 0,
-        #[cfg(windows)]
-        timeout: 0,
-    };
+    let mut wait_abs: mythread_condtime = unsafe { core::mem::zeroed() };
     let mut has_blocked: bool = false;
     let waiting_allowed: bool =
         action == LZMA_FINISH || *in_pos == in_size && !(*coder).out_was_filled;
@@ -913,8 +901,8 @@ unsafe fn stream_decode_mt(
                 }
                 (*coder).pos = 0;
                 let ret: lzma_ret = lzma_stream_header_decode(
-                    ::core::ptr::addr_of_mut!((*coder).stream_flags),
-                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    &mut (*coder).stream_flags,
+                    (*coder).buffer.subarray::<0, STREAM_HEADER_SIZE>(),
                 );
                 if ret != LZMA_OK {
                     return if ret == LZMA_FORMAT_ERROR && !(*coder).first_stream {
@@ -966,7 +954,7 @@ unsafe fn stream_decode_mt(
                 if ret__3 != LZMA_OK {
                     return ret__3;
                 }
-                if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                if !lzma_outq_is_empty(&(*coder).outq) {
                     return LZMA_OK;
                 }
                 lzma_outq_clear_cache(::core::ptr::addr_of_mut!((*coder).outq), allocator);
@@ -1006,7 +994,7 @@ unsafe fn stream_decode_mt(
                 if ret__5 != LZMA_OK {
                     return ret__5;
                 }
-                if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                if !lzma_outq_is_empty(&(*coder).outq) {
                     return LZMA_OK;
                 }
                 (*coder).sequence = SEQ_INDEX_DECODE;
@@ -1037,7 +1025,7 @@ unsafe fn stream_decode_mt(
                     if ret__8 != LZMA_OK {
                         return ret__8;
                     }
-                    if !lzma_outq_is_empty(::core::ptr::addr_of_mut!((*coder).outq)) {
+                    if !lzma_outq_is_empty(&(*coder).outq) {
                         return LZMA_OK;
                     }
                 }
@@ -1195,8 +1183,8 @@ unsafe fn stream_decode_mt(
                     reserved_int2: 0,
                 };
                 let ret_6: lzma_ret = lzma_stream_footer_decode(
-                    ::core::ptr::addr_of_mut!(footer_flags),
-                    ::core::ptr::addr_of_mut!((*coder).buffer) as *mut u8,
+                    &mut footer_flags,
+                    (*coder).buffer.subarray::<0, STREAM_HEADER_SIZE>(),
                 );
                 if ret_6 != LZMA_OK {
                     return if ret_6 == LZMA_FORMAT_ERROR {
@@ -1205,13 +1193,11 @@ unsafe fn stream_decode_mt(
                         ret_6
                     };
                 }
-                if lzma_index_hash_size((*coder).index_hash) != footer_flags.backward_size {
+                if lzma_index_hash_size(c_ref((*coder).index_hash)) != footer_flags.backward_size {
                     return LZMA_DATA_ERROR;
                 }
-                let ret__6: lzma_ret = lzma_stream_flags_compare(
-                    ::core::ptr::addr_of_mut!((*coder).stream_flags),
-                    ::core::ptr::addr_of_mut!(footer_flags),
-                );
+                let ret__6: lzma_ret =
+                    lzma_stream_flags_compare(&(*coder).stream_flags, &footer_flags);
                 if ret__6 != LZMA_OK {
                     return ret__6;
                 }
@@ -1236,7 +1222,7 @@ unsafe fn stream_decode_mt(
                             LZMA_DATA_ERROR
                         };
                     }
-                    if *in_0.offset(*in_pos as isize) != 0 {
+                    if *in_0.add(*in_pos) != 0 {
                         break;
                     }
                     *in_pos += 1;
@@ -1335,6 +1321,9 @@ unsafe fn stream_decode_mt(
     }
 }
 unsafe fn stream_decoder_mt_end(coder_ptr: *mut c_void, allocator: *const lzma_allocator) {
+    // stream_decoder_mt_end() in stream_decoder_mt.c likewise frees the coder
+    // without destroying coder->mutex and coder->cond. Kept that way to stay
+    // identical to the C original.
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     threads_end(coder, allocator);
     lzma_outq_end(::core::ptr::addr_of_mut!((*coder).outq), allocator);
@@ -1392,8 +1381,8 @@ unsafe fn stream_decoder_mt_memconfig(
 }
 unsafe fn stream_decoder_mt_get_progress(
     coder_ptr: *mut c_void,
-    progress_in: *mut u64,
-    progress_out: *mut u64,
+    progress_in: &mut u64,
+    progress_out: &mut u64,
 ) {
     let coder: *mut lzma_stream_coder = coder_ptr as *mut lzma_stream_coder;
     let mut mythread_i_1862: c_uint = 0;
@@ -1414,20 +1403,20 @@ unsafe fn stream_decoder_mt_get_progress(
                 let mut mythread_i_1867: c_uint = 0;
                 while if mythread_i_1867 != 0 {
                     mythread_mutex_unlock(::core::ptr::addr_of_mut!(
-                        (*(*coder).threads.offset(i as isize)).mutex
+                        (*(*coder).threads.add(i)).mutex
                     ));
                     0
                 } else {
                     mythread_mutex_lock(::core::ptr::addr_of_mut!(
-                        (*(*coder).threads.offset(i as isize)).mutex
+                        (*(*coder).threads.add(i)).mutex
                     ));
                     1
                 } != 0
                 {
                     let mut mythread_j_1867: c_uint = 0;
                     while mythread_j_1867 == 0 {
-                        *progress_in += (*(*coder).threads.offset(i as isize)).progress_in as u64;
-                        *progress_out += (*(*coder).threads.offset(i as isize)).progress_out as u64;
+                        *progress_in += (*(*coder).threads.add(i)).progress_in as u64;
+                        *progress_out += (*(*coder).threads.add(i)).progress_out as u64;
                         mythread_j_1867 = 1;
                     }
                     mythread_i_1867 = 1;
@@ -1507,7 +1496,7 @@ unsafe fn stream_decoder_mt_init(
                 as unsafe fn(*mut c_void, *mut u64, *mut u64, u64) -> lzma_ret,
         );
         (*next).get_progress = Some(
-            stream_decoder_mt_get_progress as unsafe fn(*mut c_void, *mut u64, *mut u64) -> (),
+            stream_decoder_mt_get_progress as unsafe fn(*mut c_void, &mut u64, &mut u64) -> (),
         );
         (*coder).filters[0].id = LZMA_VLI_UNKNOWN;
         core::ptr::write_bytes(
@@ -1532,6 +1521,9 @@ unsafe fn stream_decoder_mt_init(
         (*coder).threads = core::ptr::null_mut();
         (*coder).threads_free = core::ptr::null_mut();
         (*coder).threads_initialized = 0;
+        // threads_end frees `threads` with `threads_max` as the element
+        // count, so it must not be read uninitialized on the first init.
+        (*coder).threads_max = 0;
     }
     lzma_filters_free(
         ::core::ptr::addr_of_mut!((*coder).filters) as *mut lzma_filter,
@@ -1581,7 +1573,7 @@ unsafe fn stream_decoder_mt_init(
     }
     stream_decoder_reset(coder, allocator)
 }
-pub unsafe fn lzma_stream_decoder_mt(strm: *mut lzma_stream, options: *const lzma_mt) -> lzma_ret {
+pub unsafe fn lzma_stream_decoder_mt(strm: &mut lzma_stream, options: *const lzma_mt) -> lzma_ret {
     let ret_: lzma_ret = lzma_strm_init(strm);
     if ret_ != LZMA_OK {
         return ret_;

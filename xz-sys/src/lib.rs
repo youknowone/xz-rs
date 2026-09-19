@@ -62,14 +62,53 @@ pub use xz_core::types::lzma_mt;
 pub use xz_core::types::lzma_options_lzma;
 pub use xz_core::types::lzma_stream;
 pub use xz_core::types::lzma_stream_flags;
+pub use xz_core::types::{
+    LZMA_INDEX_ITER_ANY, LZMA_INDEX_ITER_BLOCK, LZMA_INDEX_ITER_NONEMPTY_BLOCK,
+    LZMA_INDEX_ITER_STREAM,
+};
 
 fn normalize_c_allocator(allocator: *const lzma_allocator) -> *const lzma_allocator {
     xz_core::alloc::allocator_or_c(allocator.cast()).cast()
 }
 
-unsafe fn normalize_c_stream_allocator(strm: *mut lzma_stream) {
-    if !strm.is_null() && (*strm).allocator.is_null() {
-        (*strm).allocator = xz_core::alloc::c_allocator_ptr().cast();
+/// xz-core takes the stream by reference. C hands over a pointer, and every
+/// call that documents a NULL `strm` answers it differently, so the test is
+/// here and each caller turns `None` into that call's documented answer.
+///
+/// A C caller may also leave `allocator` NULL to mean malloc/free, which is
+/// the other contract xz-core does not carry.
+unsafe fn c_stream<'a>(strm: *mut lzma_stream) -> Option<&'a mut lzma_stream> {
+    let strm = unsafe { strm.as_mut()? };
+    if strm.allocator.is_null() {
+        strm.allocator = xz_core::alloc::c_allocator_ptr().cast();
+    }
+    Some(strm)
+}
+
+/// Turns a pointer the C API never NULL-tests into a reference. Without
+/// `extra-safety` this is the same unchecked dereference C performs. With it,
+/// NULL panics, which aborts across the C ABI instead of being undefined.
+#[inline(always)]
+unsafe fn c_ref<'a, T>(ptr: *const T) -> &'a T {
+    #[cfg(feature = "extra-safety")]
+    {
+        unsafe { ptr.as_ref() }.expect("NULL pointer passed to xz-sys")
+    }
+    #[cfg(not(feature = "extra-safety"))]
+    {
+        unsafe { &*ptr }
+    }
+}
+
+#[inline(always)]
+unsafe fn c_mut<'a, T>(ptr: *mut T) -> &'a mut T {
+    #[cfg(feature = "extra-safety")]
+    {
+        unsafe { ptr.as_mut() }.expect("NULL pointer passed to xz-sys")
+    }
+    #[cfg(not(feature = "extra-safety"))]
+    {
+        unsafe { &mut *ptr }
     }
 }
 
@@ -90,7 +129,7 @@ pub struct lzma_options_delta {
     pub reserved_ptr2: *mut c_void,
 }
 
-pub enum lzma_internal {}
+pub use xz_core::common::common_types::lzma_internal_s as lzma_internal;
 
 /******************
  * Basic Features *
@@ -212,26 +251,35 @@ pub unsafe extern "C" fn lzma_version_string() -> *const c_char {
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_code(strm: *mut lzma_stream, action: lzma_action) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::common::lzma_code(strm.cast(), action)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::common::lzma_code(strm, action)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_end(strm: *mut lzma_stream) {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::common::lzma_end(strm.cast())
+    // C documents lzma_end(NULL) as doing nothing.
+    if let Some(strm) = c_stream(strm) {
+        xz_core::common::common::lzma_end(strm);
+    }
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_memlimit_get(strm: *const lzma_stream) -> u64 {
-    normalize_c_stream_allocator(strm as *mut lzma_stream);
-    xz_core::common::common::lzma_memlimit_get(strm.cast())
+    // Read-only accessor: never allocates, so the allocator is left as-is.
+    match strm.as_ref() {
+        Some(strm) => xz_core::common::common::lzma_memlimit_get(strm),
+        None => 0,
+    }
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_memlimit_set(strm: *mut lzma_stream, new_memlimit: u64) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::common::lzma_memlimit_set(strm.cast(), new_memlimit)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::common::lzma_memlimit_set(strm, new_memlimit)
 }
 
 /* `lzma/base.h`: allocation helpers */
@@ -262,20 +310,35 @@ pub unsafe extern "C" fn lzma_get_progress(
     progress_in: *mut u64,
     progress_out: *mut u64,
 ) {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::common::lzma_get_progress(strm.cast(), progress_in, progress_out)
+    let (progress_in, progress_out) = (c_mut(progress_in), c_mut(progress_out));
+    match c_stream(strm) {
+        Some(strm) => {
+            xz_core::common::common::lzma_get_progress(strm, progress_in, progress_out);
+        }
+        // A stream that was never initialised has made no progress.
+        None => {
+            *progress_in = 0;
+            *progress_out = 0;
+        }
+    }
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_memusage(strm: *const lzma_stream) -> u64 {
-    normalize_c_stream_allocator(strm as *mut lzma_stream);
-    xz_core::common::common::lzma_memusage(strm.cast())
+    // Read-only accessor: never allocates, so the allocator is left as-is.
+    match strm.as_ref() {
+        Some(strm) => xz_core::common::common::lzma_memusage(strm),
+        None => 0,
+    }
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_get_check(strm: *const lzma_stream) -> lzma_check {
-    normalize_c_stream_allocator(strm as *mut lzma_stream);
-    xz_core::common::common::lzma_get_check(strm.cast())
+    // Read-only accessor: never allocates, so the allocator is left as-is.
+    match strm.as_ref() {
+        Some(strm) => xz_core::common::common::lzma_get_check(strm),
+        None => LZMA_CHECK_NONE,
+    }
 }
 
 /* `lzma/vli.h` */
@@ -288,7 +351,12 @@ pub unsafe extern "C" fn lzma_vli_encode(
     out_pos: *mut size_t,
     out_size: size_t,
 ) -> lzma_ret {
-    xz_core::common::vli_encoder::lzma_vli_encode(vli, vli_pos, out, out_pos, out_size)
+    xz_core::common::vli_encoder::lzma_vli_encode(
+        vli,
+        vli_pos.as_mut(),
+        c_slice_mut(out, out_size),
+        c_mut(out_pos),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -299,7 +367,12 @@ pub unsafe extern "C" fn lzma_vli_decode(
     in_pos: *mut size_t,
     in_size: size_t,
 ) -> lzma_ret {
-    xz_core::common::vli_decoder::lzma_vli_decode(vli, vli_pos, input, in_pos, in_size)
+    xz_core::common::vli_decoder::lzma_vli_decode(
+        c_mut(vli),
+        vli_pos.as_mut(),
+        c_slice(input, in_size),
+        c_mut(in_pos),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -319,14 +392,41 @@ pub unsafe extern "C" fn lzma_check_size(check: lzma_check) -> u32 {
     xz_core::check::check::lzma_check_size(check)
 }
 
+/// xz-core takes buffers as slices. C hands over a pointer and a size, and
+/// allows the pointer to be NULL when the size is zero, which `from_raw_parts`
+/// does not. This is the boundary where that contract stops being checkable,
+/// so it is reconstructed here rather than carried into xz-core.
+///
+/// # Safety
+/// `buf` must be readable for `size` bytes, or `size` must be zero.
+unsafe fn c_slice<'a>(buf: *const u8, size: size_t) -> &'a [u8] {
+    if size == 0 {
+        &[]
+    } else {
+        core::slice::from_raw_parts(buf, size)
+    }
+}
+
+/// Mutable form of [`c_slice`].
+///
+/// # Safety
+/// `buf` must be writable for `size` bytes, or `size` must be zero.
+unsafe fn c_slice_mut<'a>(buf: *mut u8, size: size_t) -> &'a mut [u8] {
+    if size == 0 {
+        &mut []
+    } else {
+        core::slice::from_raw_parts_mut(buf, size)
+    }
+}
+
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_crc32(buf: *const u8, size: size_t, crc: u32) -> u32 {
-    xz_core::check::crc32_fast::lzma_crc32(buf, size, crc)
+    xz_core::check::crc32_fast::crc32(c_slice(buf, size), crc)
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_crc64(buf: *const u8, size: size_t, crc: u64) -> u64 {
-    xz_core::check::crc64_fast::lzma_crc64(buf, size, crc)
+    xz_core::check::crc64_fast::crc64(c_slice(buf, size), crc)
 }
 
 /*********************
@@ -351,8 +451,10 @@ pub unsafe extern "C" fn lzma_easy_encoder(
     preset: u32,
     check: lzma_check,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::easy_encoder::lzma_easy_encoder(strm.cast(), preset, check)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::easy_encoder::lzma_easy_encoder(strm, preset, check)
 }
 
 #[unsafe(no_mangle)]
@@ -386,8 +488,10 @@ pub unsafe extern "C" fn lzma_stream_encoder(
     filters: *const lzma_filter,
     check: lzma_check,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::stream_encoder::lzma_stream_encoder(strm.cast(), filters.cast(), check)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::stream_encoder::lzma_stream_encoder(strm, filters.cast(), check)
 }
 
 #[unsafe(no_mangle)]
@@ -396,8 +500,10 @@ pub unsafe extern "C" fn lzma_stream_decoder(
     memlimit: u64,
     flags: u32,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::stream_decoder::lzma_stream_decoder(strm.cast(), memlimit, flags)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::stream_decoder::lzma_stream_decoder(strm, memlimit, flags)
 }
 
 /* `lzma/container.h`: auto decoder */
@@ -408,8 +514,10 @@ pub unsafe extern "C" fn lzma_auto_decoder(
     memlimit: u64,
     flags: u32,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::auto_decoder::lzma_auto_decoder(strm.cast(), memlimit, flags)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::auto_decoder::lzma_auto_decoder(strm, memlimit, flags)
 }
 
 /* `lzma/container.h`: alone encoder / decoder */
@@ -419,14 +527,18 @@ pub unsafe extern "C" fn lzma_alone_encoder(
     strm: *mut lzma_stream,
     options: *const lzma_options_lzma,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::alone_encoder::lzma_alone_encoder(strm.cast(), options.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::alone_encoder::lzma_alone_encoder(strm, options.cast())
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_alone_decoder(strm: *mut lzma_stream, memlimit: u64) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::alone_decoder::lzma_alone_decoder(strm.cast(), memlimit)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::alone_decoder::lzma_alone_decoder(strm, memlimit)
 }
 
 /* `lzma/container.h`: lzip decoder */
@@ -437,8 +549,10 @@ pub unsafe extern "C" fn lzma_lzip_decoder(
     memlimit: u64,
     flags: u32,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::lzip_decoder::lzma_lzip_decoder(strm.cast(), memlimit, flags)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::lzip_decoder::lzma_lzip_decoder(strm, memlimit, flags)
 }
 
 /* `lzma/container.h`: stream buffer */
@@ -540,8 +654,10 @@ pub unsafe extern "C" fn lzma_raw_encoder(
     strm: *mut lzma_stream,
     filters: *const lzma_filter,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::filter_encoder::lzma_raw_encoder(strm.cast(), filters.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::filter_encoder::lzma_raw_encoder(strm, filters.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -549,8 +665,10 @@ pub unsafe extern "C" fn lzma_raw_decoder(
     strm: *mut lzma_stream,
     filters: *const lzma_filter,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::filter_decoder::lzma_raw_decoder(strm.cast(), filters.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::filter_decoder::lzma_raw_decoder(strm, filters.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -558,8 +676,10 @@ pub unsafe extern "C" fn lzma_filters_update(
     strm: *mut lzma_stream,
     filters: *const lzma_filter,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::filter_encoder::lzma_filters_update(strm.cast(), filters.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::filter_encoder::lzma_filters_update(strm, filters.cast())
 }
 
 /* `lzma/filter.h`: raw buffer */
@@ -615,7 +735,7 @@ pub unsafe extern "C" fn lzma_properties_size(
     size: *mut u32,
     filter: *const lzma_filter,
 ) -> lzma_ret {
-    xz_core::common::filter_encoder::lzma_properties_size(size, filter.cast())
+    xz_core::common::filter_encoder::lzma_properties_size(c_mut(size), c_ref(filter.cast()))
 }
 
 #[unsafe(no_mangle)]
@@ -623,7 +743,18 @@ pub unsafe extern "C" fn lzma_properties_encode(
     filter: *const lzma_filter,
     props: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::filter_encoder::lzma_properties_encode(filter.cast(), props)
+    // C gives `props` no length; the caller is required to have sized it with
+    // lzma_properties_size, so that is what reconstructs the slice here.
+    let filter = c_ref(filter.cast());
+    let mut props_size: u32 = 0;
+    let ret = xz_core::common::filter_encoder::lzma_properties_size(&mut props_size, filter);
+    if ret != LZMA_OK {
+        return ret;
+    }
+    xz_core::common::filter_encoder::lzma_properties_encode(
+        filter,
+        c_slice_mut(props, props_size as size_t),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -634,10 +765,9 @@ pub unsafe extern "C" fn lzma_properties_decode(
     props_size: size_t,
 ) -> lzma_ret {
     xz_core::common::filter_decoder::lzma_properties_decode(
-        filter.cast(),
+        c_mut(filter.cast()),
         normalize_c_allocator(allocator).cast(),
-        props,
-        props_size,
+        c_slice(props, props_size),
     )
 }
 
@@ -653,7 +783,7 @@ pub unsafe extern "C" fn lzma_lzma_preset(
     options: *mut lzma_options_lzma,
     preset: u32,
 ) -> lzma_bool {
-    xz_core::lzma::lzma_encoder_presets::lzma_lzma_preset(options.cast(), preset)
+    xz_core::lzma::lzma_encoder_presets::lzma_lzma_preset(c_mut(options.cast()), preset)
 }
 
 #[unsafe(no_mangle)]
@@ -729,11 +859,17 @@ pub unsafe extern "C" fn lzma_bcj_x86_decode(
 /* `lzma/stream_flags.h` */
 
 #[unsafe(no_mangle)]
+// The four Stream Header/Footer entry points read or write exactly
+// LZMA_STREAM_HEADER_SIZE bytes. xz-core states that in the type; at this ABI
+// boundary it is the caller's promise, as it is in C.
 pub unsafe extern "C" fn lzma_stream_header_encode(
     options: *const lzma_stream_flags,
     out: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_encoder::lzma_stream_header_encode(options.cast(), out)
+    xz_core::common::stream_flags_encoder::lzma_stream_header_encode(
+        c_ref(options.cast()),
+        c_mut(out.cast()),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -741,7 +877,10 @@ pub unsafe extern "C" fn lzma_stream_footer_encode(
     options: *const lzma_stream_flags,
     out: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_encoder::lzma_stream_footer_encode(options.cast(), out)
+    xz_core::common::stream_flags_encoder::lzma_stream_footer_encode(
+        c_ref(options.cast()),
+        c_mut(out.cast()),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -749,7 +888,10 @@ pub unsafe extern "C" fn lzma_stream_header_decode(
     options: *mut lzma_stream_flags,
     input: *const u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_decoder::lzma_stream_header_decode(options.cast(), input)
+    xz_core::common::stream_flags_decoder::lzma_stream_header_decode(
+        c_mut(options.cast()),
+        c_ref(input.cast()),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -757,7 +899,10 @@ pub unsafe extern "C" fn lzma_stream_footer_decode(
     options: *mut lzma_stream_flags,
     input: *const u8,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_decoder::lzma_stream_footer_decode(options.cast(), input)
+    xz_core::common::stream_flags_decoder::lzma_stream_footer_decode(
+        c_mut(options.cast()),
+        c_ref(input.cast()),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -765,7 +910,10 @@ pub unsafe extern "C" fn lzma_stream_flags_compare(
     a: *const lzma_stream_flags,
     b: *const lzma_stream_flags,
 ) -> lzma_ret {
-    xz_core::common::stream_flags_common::lzma_stream_flags_compare(a.cast(), b.cast())
+    xz_core::common::stream_flags_common::lzma_stream_flags_compare(
+        c_ref(a.cast()),
+        c_ref(b.cast()),
+    )
 }
 
 /* `lzma/hardware.h` */
@@ -803,7 +951,7 @@ pub unsafe extern "C" fn lzma_index_buffer_decode(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_uncompressed_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_uncompressed_size(i.cast())
+    xz_core::common::index::lzma_index_uncompressed_size(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
@@ -815,7 +963,7 @@ pub unsafe extern "C" fn lzma_index_end(i: *mut lzma_index, allocator: *const lz
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_block_header_size(block: *mut lzma_block) -> lzma_ret {
-    xz_core::common::block_header_encoder::lzma_block_header_size(block.cast())
+    xz_core::common::block_header_encoder::lzma_block_header_size(c_mut(block.cast()))
 }
 
 #[unsafe(no_mangle)]
@@ -823,7 +971,12 @@ pub unsafe extern "C" fn lzma_block_header_encode(
     block: *const lzma_block,
     out: *mut u8,
 ) -> lzma_ret {
-    xz_core::common::block_header_encoder::lzma_block_header_encode(block.cast(), out)
+    // C gives `out` no length; the Block Header is header_size bytes.
+    let block: &xz_core::types::lzma_block = c_ref(block.cast());
+    xz_core::common::block_header_encoder::lzma_block_header_encode(
+        block,
+        c_slice_mut(out, block.header_size as size_t),
+    )
 }
 
 #[unsafe(no_mangle)]
@@ -832,10 +985,17 @@ pub unsafe extern "C" fn lzma_block_header_decode(
     allocator: *const lzma_allocator,
     input: *const u8,
 ) -> lzma_ret {
+    // C gives `input` no length; the Block Header is header_size bytes. The
+    // null tests stay here because a C caller can still pass NULL.
+    if block.is_null() || input.is_null() {
+        return LZMA_PROG_ERROR;
+    }
+    let block: &mut xz_core::types::lzma_block = c_mut(block.cast());
+    let header_size = block.header_size as size_t;
     xz_core::common::block_header_decoder::lzma_block_header_decode(
-        block.cast(),
+        block,
         normalize_c_allocator(allocator).cast(),
-        input,
+        c_slice(input, header_size),
     )
 }
 
@@ -862,8 +1022,10 @@ pub unsafe extern "C" fn lzma_block_encoder(
     strm: *mut lzma_stream,
     block: *mut lzma_block,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::block_encoder::lzma_block_encoder(strm.cast(), block.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::block_encoder::lzma_block_encoder(strm, block.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -871,8 +1033,10 @@ pub unsafe extern "C" fn lzma_block_decoder(
     strm: *mut lzma_stream,
     block: *mut lzma_block,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::block_decoder::lzma_block_decoder(strm.cast(), block.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::block_decoder::lzma_block_decoder(strm, block.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -951,8 +1115,8 @@ pub extern "C" fn lzma_index_memusage(streams: lzma_vli, blocks: lzma_vli) -> u6
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
-    xz_core::common::index::lzma_index_memused(i.cast())
+pub unsafe extern "C" fn lzma_index_memused(i: *const lzma_index) -> u64 {
+    xz_core::common::index::lzma_index_memused(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
@@ -985,7 +1149,7 @@ pub unsafe extern "C" fn lzma_index_stream_flags(
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_checks(i: *const lzma_index) -> u32 {
-    xz_core::common::index::lzma_index_checks(i.cast())
+    xz_core::common::index::lzma_index_checks(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
@@ -997,43 +1161,43 @@ pub unsafe extern "C" fn lzma_index_stream_padding(
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_stream_count(i.cast())
+pub unsafe extern "C" fn lzma_index_stream_count(i: *const lzma_index) -> lzma_vli {
+    xz_core::common::index::lzma_index_stream_count(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_block_count(i.cast())
+pub unsafe extern "C" fn lzma_index_block_count(i: *const lzma_index) -> lzma_vli {
+    xz_core::common::index::lzma_index_block_count(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_size(i.cast())
+pub unsafe extern "C" fn lzma_index_size(i: *const lzma_index) -> lzma_vli {
+    xz_core::common::index::lzma_index_size(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_stream_size(i.cast())
+pub unsafe extern "C" fn lzma_index_stream_size(i: *const lzma_index) -> lzma_vli {
+    xz_core::common::index::lzma_index_stream_size(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_total_size(i.cast())
+pub unsafe extern "C" fn lzma_index_total_size(i: *const lzma_index) -> lzma_vli {
+    xz_core::common::index::lzma_index_total_size(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_file_size(i: *const lzma_index) -> lzma_vli {
-    xz_core::common::index::lzma_index_file_size(i.cast())
+    xz_core::common::index::lzma_index_file_size(c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_iter_init(iter: *mut lzma_index_iter, i: *const lzma_index) {
-    xz_core::common::index::lzma_index_iter_init(iter.cast(), i.cast())
+    xz_core::common::index::lzma_index_iter_init(c_mut(iter.cast()), c_ref(i.cast()))
 }
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn lzma_index_iter_rewind(iter: *mut lzma_index_iter) {
-    xz_core::common::index::lzma_index_iter_rewind(iter.cast())
+    xz_core::common::index::lzma_index_iter_rewind(c_mut(iter.cast()))
 }
 
 #[unsafe(no_mangle)]
@@ -1041,7 +1205,7 @@ pub unsafe extern "C" fn lzma_index_iter_next(
     iter: *mut lzma_index_iter,
     mode: lzma_index_iter_mode,
 ) -> lzma_bool {
-    xz_core::common::index::lzma_index_iter_next(iter.cast(), mode)
+    xz_core::common::index::lzma_index_iter_next(c_mut(iter.cast()), mode)
 }
 
 #[unsafe(no_mangle)]
@@ -1049,7 +1213,7 @@ pub unsafe extern "C" fn lzma_index_iter_locate(
     iter: *mut lzma_index_iter,
     target: lzma_vli,
 ) -> lzma_bool {
-    xz_core::common::index::lzma_index_iter_locate(iter.cast(), target)
+    xz_core::common::index::lzma_index_iter_locate(c_mut(iter.cast()), target)
 }
 
 #[unsafe(no_mangle)]
@@ -1078,8 +1242,10 @@ pub unsafe extern "C" fn lzma_index_encoder(
     strm: *mut lzma_stream,
     i: *const lzma_index,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::index_encoder::lzma_index_encoder(strm.cast(), i.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::index_encoder::lzma_index_encoder(strm, i.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -1088,8 +1254,16 @@ pub unsafe extern "C" fn lzma_index_decoder(
     i: *mut *mut lzma_index,
     memlimit: u64,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::index_decoder::lzma_index_decoder(strm.cast(), i.cast(), memlimit)
+    let Some(strm) = c_stream(strm) else {
+        // The API docs promise `*i` is initialised whenever this fails, and a
+        // NULL `strm` is one of the ways it fails. xz-core does the same store
+        // for the failures it can see, but it never sees this one.
+        if !i.is_null() {
+            *i = core::ptr::null_mut();
+        }
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::index_decoder::lzma_index_decoder(strm, i.cast(), memlimit)
 }
 
 #[unsafe(no_mangle)]
@@ -1151,8 +1325,8 @@ pub unsafe extern "C" fn lzma_index_hash_decode(
 }
 
 #[unsafe(no_mangle)]
-pub extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
-    xz_core::common::index_hash::lzma_index_hash_size(index_hash.cast())
+pub unsafe extern "C" fn lzma_index_hash_size(index_hash: *const lzma_index_hash) -> lzma_vli {
+    xz_core::common::index_hash::lzma_index_hash_size(c_ref(index_hash.cast()))
 }
 
 /* `lzma/filter.h`: filter flags / string conversion */
@@ -1162,7 +1336,7 @@ pub unsafe extern "C" fn lzma_filter_flags_size(
     size: *mut u32,
     filter: *const lzma_filter,
 ) -> lzma_ret {
-    xz_core::common::filter_flags_encoder::lzma_filter_flags_size(size, filter.cast())
+    xz_core::common::filter_flags_encoder::lzma_filter_flags_size(c_mut(size), c_ref(filter.cast()))
 }
 
 #[unsafe(no_mangle)]
@@ -1173,10 +1347,9 @@ pub unsafe extern "C" fn lzma_filter_flags_encode(
     out_size: size_t,
 ) -> lzma_ret {
     xz_core::common::filter_flags_encoder::lzma_filter_flags_encode(
-        filter.cast(),
-        out,
-        out_pos,
-        out_size,
+        c_ref(filter.cast()),
+        c_slice_mut(out, out_size),
+        c_mut(out_pos),
     )
 }
 
@@ -1189,11 +1362,10 @@ pub unsafe extern "C" fn lzma_filter_flags_decode(
     in_size: size_t,
 ) -> lzma_ret {
     xz_core::common::filter_flags_decoder::lzma_filter_flags_decode(
-        filter.cast(),
+        c_mut(filter.cast()),
         normalize_c_allocator(allocator).cast(),
-        input,
-        in_pos,
-        in_size,
+        c_slice(input, in_size),
+        c_mut(in_pos),
     )
 }
 
@@ -1262,8 +1434,10 @@ pub unsafe extern "C" fn lzma_microlzma_encoder(
     strm: *mut lzma_stream,
     options: *const lzma_options_lzma,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::microlzma_encoder::lzma_microlzma_encoder(strm.cast(), options.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::microlzma_encoder::lzma_microlzma_encoder(strm, options.cast())
 }
 
 #[unsafe(no_mangle)]
@@ -1274,9 +1448,11 @@ pub unsafe extern "C" fn lzma_microlzma_decoder(
     uncomp_size_is_exact: lzma_bool,
     dict_size: u32,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
     xz_core::common::microlzma_decoder::lzma_microlzma_decoder(
-        strm.cast(),
+        strm,
         comp_size,
         uncomp_size,
         uncomp_size_is_exact,
@@ -1291,8 +1467,10 @@ pub unsafe extern "C" fn lzma_file_info_decoder(
     memlimit: u64,
     file_size: u64,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::file_info::lzma_file_info_decoder(strm.cast(), i.cast(), memlimit, file_size)
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::file_info::lzma_file_info_decoder(strm, i.cast(), memlimit, file_size)
 }
 
 /*********************
@@ -1307,8 +1485,10 @@ pub unsafe extern "C" fn lzma_stream_encoder_mt(
     strm: *mut lzma_stream,
     options: *const lzma_mt,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::stream_mt::lzma_stream_encoder_mt(strm.cast(), options.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::stream_mt::lzma_stream_encoder_mt(strm, options.cast())
 }
 
 #[cfg(feature = "parallel")]
@@ -1317,8 +1497,10 @@ pub unsafe extern "C" fn lzma_stream_decoder_mt(
     strm: *mut lzma_stream,
     options: *const lzma_mt,
 ) -> lzma_ret {
-    normalize_c_stream_allocator(strm);
-    xz_core::common::stream_mt::lzma_stream_decoder_mt(strm.cast(), options.cast())
+    let Some(strm) = c_stream(strm) else {
+        return LZMA_PROG_ERROR;
+    };
+    xz_core::common::stream_mt::lzma_stream_decoder_mt(strm, options.cast())
 }
 
 #[cfg(feature = "parallel")]

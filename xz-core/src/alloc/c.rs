@@ -91,7 +91,11 @@ unsafe fn c_free(ptr: *mut c_void) {
     unsafe { dealloc(base, layout) };
 }
 
-pub unsafe fn lzma_c_alloc(_opaque: *mut c_void, nmemb: size_t, size: size_t) -> *mut c_void {
+pub unsafe extern "C" fn lzma_c_alloc(
+    _opaque: *mut c_void,
+    nmemb: size_t,
+    size: size_t,
+) -> *mut c_void {
     let Some(size) = (nmemb as usize).checked_mul(size as usize) else {
         return core::ptr::null_mut();
     };
@@ -99,7 +103,7 @@ pub unsafe fn lzma_c_alloc(_opaque: *mut c_void, nmemb: size_t, size: size_t) ->
     unsafe { c_malloc(size as size_t) }
 }
 
-pub unsafe fn lzma_c_free(_opaque: *mut c_void, ptr: *mut c_void) {
+pub unsafe extern "C" fn lzma_c_free(_opaque: *mut c_void, ptr: *mut c_void) {
     unsafe { c_free(ptr) };
 }
 
