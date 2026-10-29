@@ -5,6 +5,10 @@ edition = "2024"
 license = "MIT OR Apache-2.0"
 description = "Pure Rust implementation of liblzma (transpiled from C via c2rust)"
 
+[[test]]
+name = "option"
+path = "test/option.rs"
+
 [features]
 default = []
 custom_allocator = []
