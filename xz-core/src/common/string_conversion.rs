@@ -296,15 +296,8 @@ static lzma12_mf_map: [name_value_map; 6] = [
         value: 0,
     },
 ];
-static mut lzma12_optmap: [option_map; 9] = [option_map {
-    name: [0; 12],
-    option_type: 0,
-    flags: 0,
-    offset: 0,
-    u: option_value {
-        map: core::ptr::null(),
-    },
-}; 9];
+// Initialize before linking: ASan redzones cannot live in Mach-O initializer tables.
+static mut lzma12_optmap: [option_map; 9] = lzma12_options();
 unsafe fn parse_lzma12(
     str: *mut *const c_char,
     str_end: *const c_char,
@@ -1171,8 +1164,8 @@ pub unsafe fn lzma_str_list_filters(
     }
     str_finish(output_str, ::core::ptr::addr_of_mut!(dest), allocator)
 }
-unsafe extern "C" fn run_static_initializers() {
-    lzma12_optmap = [
+const fn lzma12_options() -> [option_map; 9] {
+    [
         option_map {
             name: c_chars(*b"preset\0\0\0\0\0\0"),
             option_type: OPTMAP_TYPE_LZMA_PRESET,
@@ -1269,10 +1262,5 @@ unsafe extern "C" fn run_static_initializers() {
                 },
             },
         },
-    ];
+    ]
 }
-#[used]
-#[cfg_attr(target_os = "linux", unsafe(link_section = ".init_array"))]
-#[cfg_attr(target_os = "windows", unsafe(link_section = ".CRT$XIB"))]
-#[cfg_attr(target_os = "macos", unsafe(link_section = "__DATA,__mod_init_func"))]
-static INIT_ARRAY: [unsafe extern "C" fn(); 1] = [run_static_initializers];

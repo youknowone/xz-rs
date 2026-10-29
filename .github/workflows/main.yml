@@ -2,6 +2,23 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  macos-asan:
+    name: Rust core / macOS AddressSanitizer
+    runs-on: macos-latest
+    timeout-minutes: 10
+    env:
+      RUSTFLAGS: -Zsanitizer=address
+      ASAN_OPTIONS: detect_leaks=1:detect_stack_use_after_return=1
+    steps:
+    - uses: actions/checkout@v7
+    - name: Install nightly Rust
+      run: rustup toolchain install nightly --profile minimal
+    - name: Check core initialization and option parsing
+      run: |
+        target="$(rustc +nightly -vV | sed -n 's/^host: //p')"
+        cargo +nightly test -p xz-core --target "$target"
+        cargo +nightly test -p xz-core --features custom_allocator --target "$target"
+
   test:
     name: Test
     runs-on: ${{ matrix.os }}
