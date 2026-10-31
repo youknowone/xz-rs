@@ -96,11 +96,10 @@ unsafe fn hc_find_func(
     *son.offset(cyclic_pos as isize) = cur_match;
     loop {
         let delta: u32 = pos.wrapping_sub(cur_match);
-        let old_depth = depth;
-        depth -= 1;
-        if old_depth == 0 || delta >= cyclic_size {
+        if depth == 0 || delta >= cyclic_size {
             return matches;
         }
+        depth -= 1;
         let pb: *const u8 = cur.offset(-(delta as isize));
         cur_match = *son.offset(
             cyclic_pos
@@ -711,6 +710,44 @@ pub(crate) unsafe fn lzma_mf_bt4_skip(mf: *mut lzma_mf, mut amount: u32) {
         amount -= 1;
         if amount == 0 {
             break;
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{hc_find_func, lzma_match};
+
+    #[test]
+    fn hc_find_stops_at_depth_and_dictionary_limits() {
+        // Both candidate byte comparisons and the chain link are in bounds.
+        // The mismatching bytes prevent entry into the longer-match scan.
+        let input = [0_u8, 1, 2];
+        for (depth, pos) in [(0, 1), (1, 1), (1, 2)] {
+            let mut son = [0_u32; 2];
+            let mut output = lzma_match { len: 17, dist: 23 };
+            let output_ptr = &mut output as *mut lzma_match;
+            // SAFETY: son[1] is writable. For pos == 1, the candidate starts
+            // at input[0], both compared bytes are within input, and son[0]
+            // is readable. For pos == 2, the dictionary guard returns before
+            // forming a candidate pointer. No case writes or advances output.
+            let end = unsafe {
+                hc_find_func(
+                    2,
+                    pos,
+                    input.as_ptr().add(1),
+                    0,
+                    depth,
+                    son.as_mut_ptr(),
+                    1,
+                    2,
+                    output_ptr,
+                    1,
+                )
+            };
+            assert_eq!(end, output_ptr);
+            assert_eq!((output.len, output.dist), (17, 23));
+            assert_eq!(son, [0, 0]);
         }
     }
 }
